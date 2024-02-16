@@ -35,5 +35,26 @@ namespace LunacidAP.Data
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
             "Destroying Angel Mushroom"
         };
+
+        public static readonly List<string> DontUpper = new(){
+            "Health Vial", "Mana Vial"
+        };
+
+        public static readonly Dictionary<string, int> MaterialNames = new(){
+            { "OBSIDIAN", 10 },
+            { "ASHES", 20 },
+            { "OCEAN BONE SHARD", 4},
+            { "ONYX", 8},
+
+        };
+
+        public static string ToUpperIfNeeded(string Name)
+        {
+            if (DontUpper.Contains(Name))
+            {
+                return Name;
+            }
+            return Name.ToUpper();
+        }
     }
 }
