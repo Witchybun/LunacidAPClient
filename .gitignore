@@ -42,3 +42,17 @@ obj/Release/netstandard2.0/LunacidAP.AssemblyInfoInputs.cache
 obj/Release/netstandard2.0/LunacidAP.assets.cache
 obj/Release/netstandard2.0/LunacidAP.csproj.AssemblyReference.cache
 obj/Release/netstandard2.0/LunacidAP.GeneratedMSBuildEditorConfig.editorconfig
+bin/Debug/netstandard2.0/Archipelago.MultiClient.Net.dll
+bin/Debug/netstandard2.0/Newtonsoft.Json.dll
+bin/Debug/netstandard2.0/System.Collections.NonGeneric.dll
+bin/Debug/netstandard2.0/System.Collections.Specialized.dll
+bin/Debug/netstandard2.0/System.ComponentModel.dll
+bin/Debug/netstandard2.0/System.ComponentModel.Primitives.dll
+bin/Debug/netstandard2.0/System.ComponentModel.TypeConverter.dll
+bin/Debug/netstandard2.0/System.IO.FileSystem.Primitives.dll
+bin/Debug/netstandard2.0/System.Linq.dll
+bin/Debug/netstandard2.0/System.Reflection.Emit.dll
+bin/Debug/netstandard2.0/System.Reflection.Emit.ILGeneration.dll
+bin/Debug/netstandard2.0/System.Reflection.Emit.Lightweight.dll
+bin/Debug/netstandard2.0/System.Reflection.TypeExtensions.dll
+bin/Debug/netstandard2.0/System.Threading.dll
