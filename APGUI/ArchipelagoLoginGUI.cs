@@ -1,7 +1,4 @@
-using HarmonyLib;
 using UnityEngine;
-using System.Reflection;
-using LunacidAP.Data;
 using BepInEx.Logging;
 
 namespace LunacidAP.APGUI
@@ -109,7 +106,13 @@ namespace LunacidAP.APGUI
 
             if (GUI.Button(new Rect(17, 110, 100, 30), "Connect"))
                 {
-                    _archipelago.Connect(userName, serverUrl, password, out var _);
+                    _archipelago.Connect(userName, serverUrl, password, out var isSuccessful);
+                    var isVerified = _archipelago.VerifySeed();
+                    if (isSuccessful && isVerified)
+                    {
+                        _archipelago.ReceiveAllItems();
+                        _archipelago.CollectLocationsFromSave();
+                    }
                 }
 
             if (!ContinueWithoutArchipelago && GUI.Button(new Rect(145, 110, 195, 30), "Continue Without Archipelago"))

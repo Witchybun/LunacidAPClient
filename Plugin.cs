@@ -1,7 +1,5 @@
 ﻿
 using System.Collections;
-using System.Collections.Generic;
-using Archipelago.MultiClient.Net;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.APGUI;
@@ -16,7 +14,6 @@ namespace LunacidAP
     {
         public ArchipelagoClient Archipelago { get; set; }
         public ManualLogSource Log { get; set; }
-        public static string PreviousScene = "MainMenu";
 
         private void Awake()
         {
@@ -57,7 +54,6 @@ namespace LunacidAP
             {
                 StartCoroutine(AutoConnect());
             }
-            PreviousScene = sceneName;
             
 
         }
@@ -71,17 +67,21 @@ namespace LunacidAP
         private IEnumerator AutoConnect()
         {
             yield return new WaitForSeconds(2f);
-            while (!ArchipelagoClient.Authenticated)
+            var timer = 0;
+            while (!ArchipelagoClient.Authenticated && timer < 20)
             {
                 if (ArchipelagoClient.IsInGame)
                 {
-                    if (PreviousScene == "CHAR_CREATE")
-                    {
-                        ConnectionData.WriteConnectionData(); // Initialize this data on load.
-                    }
                     Archipelago.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Password, out var isSuccessful);
+                    var isVerified = Archipelago.VerifySeed();
+                    if (isSuccessful && isVerified)
+                    {
+                        Archipelago.ReceiveAllItems();
+                        Archipelago.CollectLocationsFromSave();
+                    }
                     
                 }
+                timer += 1;
             }
 
         }

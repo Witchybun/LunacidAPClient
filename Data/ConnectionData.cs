@@ -6,21 +6,18 @@ namespace LunacidAP.Data
     {
         public static string HostName {get; set;} = "localhost:38281";
         public static string SlotName {get; set;} = "Player1";
+        public static string Seed {get; set;} = "";
         public static string Password {get; set;} = "";
-        public static int ItemIndex {get; set;} = 1;
-        public static List<long> ReceivedItems {get; set;} = new List<long>(){};
+        public static List<ReceivedItem> ReceivedItems {get; set;} = new List<ReceivedItem>(){};
         public static List<string> CompletedLocations {get; set;} = new List<string>(){};
 
         public static void WriteConnectionData(string hostName, string slotName, string password, 
-        int itemIndex = 0, List<long> receivedItems = null, List<string> completedLocations = null)
+        string gameHash = "", List<ReceivedItem> receivedItems = null, List<string> completedLocations = null)
         {
             HostName = hostName;
             SlotName = slotName;
             Password = password;
-            if (itemIndex > 0)
-            {
-                ItemIndex = itemIndex;
-            }
+            Seed = gameHash;
             if (receivedItems is not null)
             {
                 ReceivedItems = receivedItems;
@@ -36,8 +33,8 @@ namespace LunacidAP.Data
             HostName = "localhost:38281";
             SlotName = "Player1";
             Password = "";
-            ItemIndex = 1;
-            ReceivedItems = new List<long>(){};
+            Seed = "";
+            ReceivedItems = new List<ReceivedItem>(){};
             CompletedLocations = new List<string>(){};
 
         }

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using HarmonyLib;
-using BepInEx;
 using Newtonsoft.Json;
 using UnityEngine;
 using System.Collections.Generic;
@@ -38,68 +37,83 @@ namespace LunacidAP
         }
 
         [HarmonyPatch(typeof(Save), "LOAD_FILE")]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         private static void Load_LoadArchipelagoData(int Save_Slot)
         {
-            var dir = Application.absoluteURL + "ArchSaves/";
-            if (ArchipelagoClient.ScenesNotInGame.Contains(SceneManager.GetActiveScene().name))
+            try
             {
-                return;
+                if (!ArchipelagoClient.Authenticated)
+                {
+                    ReadSave(Save_Slot);
+                }
             }
-            if (!Directory.Exists(dir))
+            catch (Exception ex)
             {
-                Directory.CreateDirectory(dir);
-            }
-            var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
-            if (File.Exists(savePath))
-            {
-                ReadSave(Save_Slot, savePath);
-                _log.LogInfo("Save loaded.  Contents:");
-                _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
-                return;
+                _log.LogError($"Failure in {nameof(Load_LoadArchipelagoData)}");
+                _log.LogError($"Reason: {ex.Message}");
             }
 
-            _log.LogError("SAVE not found");
-            return;
         }
 
         private static void SaveData(int Save_Slot)
         {
             var dir = Application.absoluteURL + "ArchSaves/";
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
+            _log.LogInfo($"Saving to {savePath}...");
+            if (!File.Exists(savePath))
+            {
+
+            }
+
+            var newAPSaveData = new APSaveData()
+            {
+                SlotName = ConnectionData.SlotName,
+                HostName = ConnectionData.HostName,
+                Password = ConnectionData.Password,
+                ObtainedItems = ConnectionData.ReceivedItems,
+                CheckedLocations = ConnectionData.CompletedLocations
+            };
+            if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == "" || ConnectionData.Seed is null))
+            {
+                newAPSaveData.Seed = _archipelago.SlotData[ArchipelagoClient.SEED_KEY].ToString();
+            }
+            string json = JsonConvert.SerializeObject(newAPSaveData);
+            File.WriteAllText(savePath, json);
+            _log.LogInfo("Save complete!");
+        }
+
+        private static void ReadSave(int Save_Slot)
+        {
+            try
+            {
+                var dir = Application.absoluteURL + "ArchSaves/";
+                if (ArchipelagoClient.ScenesNotInGame.Contains(SceneManager.GetActiveScene().name))
+                {
+                    return;
+                }
                 if (!Directory.Exists(dir))
                 {
                     Directory.CreateDirectory(dir);
                 }
                 var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
-                _log.LogInfo($"Saving to {savePath}...");
-                if (!File.Exists(savePath))
+                if (File.Exists(savePath))
                 {
-
+                    _log.LogInfo($"Loading save for slot '{Save_Slot}'...");
+                    using StreamReader reader = new StreamReader(savePath);
+                    string text = reader.ReadToEnd();
+                    var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
+                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.SlotName, loadedSave.Password,
+                    loadedSave.Seed, loadedSave.ObtainedItems, loadedSave.CheckedLocations);
+                    _log.LogInfo("Save loaded.  Contents:");
+                    _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
+                    return;
                 }
-                var newAPSaveData = new APSaveData()
-                {
-                    SlotName = ConnectionData.SlotName,
-                    HostName = ConnectionData.HostName,
-                    Password = ConnectionData.Password,
-                    ItemIndex = ConnectionData.ItemIndex,
-                    ObtainedItems = ConnectionData.ReceivedItems,
-                    CheckedLocations = ConnectionData.CompletedLocations
-                };
-                string json = JsonConvert.SerializeObject(newAPSaveData);
-                File.WriteAllText(savePath, json);
-                _log.LogInfo("Save complete!");
-        }
 
-        private static void ReadSave(int Save_Slot, string savePath)
-        {
-            try
-            {
-                _log.LogInfo($"Loading save for slot '{Save_Slot}'...");
-                using StreamReader reader = new StreamReader(savePath);
-                string text = reader.ReadToEnd();
-                var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
-                ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.SlotName, loadedSave.Password, 
-                loadedSave.ItemIndex, loadedSave.ObtainedItems, loadedSave.CheckedLocations);
+                _log.LogError("SAVE not found");
 
             }
             catch
@@ -115,8 +129,8 @@ namespace LunacidAP
         public string SlotName;
         public string HostName;
         public string Password;
-        public int ItemIndex;
-        public List<long> ObtainedItems;
+        public string Seed;
+        public List<ReceivedItem> ObtainedItems;
         public List<string> CheckedLocations;
     }
 }

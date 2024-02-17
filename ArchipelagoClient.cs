@@ -1,19 +1,15 @@
 namespace LunacidAP
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
     using Archipelago.MultiClient.Net;
     using Archipelago.MultiClient.Net.Enums;
     using Archipelago.MultiClient.Net.Helpers;
     using Archipelago.MultiClient.Net.Packets;
     using BepInEx.Logging;
-    using HarmonyLib;
     using LunacidAP.Data;
     using UnityEngine;
-    using UnityEngine.Rendering;
     using UnityEngine.SceneManagement;
 
     public class ArchipelagoClient
@@ -26,7 +22,10 @@ namespace LunacidAP
         public static bool Authenticated;
         public static bool IsInGame = false;
         public static bool HasReceivedItems = false;
-        public static readonly List<string> ScenesNotInGame = new(){"MainMenu", "CHAR_CREATE", "Gameover"}; 
+        public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
+        public const string SEED_KEY = "seed";
+        public Dictionary<string, object> SlotData;
+
 
         public ArchipelagoClient(ManualLogSource log)
         {
@@ -49,11 +48,7 @@ namespace LunacidAP
             var hostNameContents = hostName.Split(':');
             var isPort = int.TryParse(hostNameContents[1], out int hostPort);
             Session = ArchipelagoSessionFactory.CreateSession(hostNameContents[0], hostPort);
-            Session.Socket.ErrorReceived += Session_ErrorReceived;
-            Session.Socket.SocketClosed += Session_SocketClosed;
-            Session.Items.ItemReceived += Session_ItemRecieved;
 
-            _log.LogInfo(Session.ToString());
             var minimumVersion = new Version(0, 4, 4);
             var tags = new[] { "AP" };
             LoginResult result = Session.TryConnectAndLogin(GAME_NAME, slotName, ItemsHandlingFlags.AllItems, minimumVersion, tags, null, password);
@@ -63,6 +58,10 @@ namespace LunacidAP
             if (result is LoginSuccessful loginSuccess)
             {
                 Authenticated = true;
+                SlotData = loginSuccess.SlotData;
+                Session.Socket.ErrorReceived += Session_ErrorReceived;
+                Session.Socket.SocketClosed += Session_SocketClosed;
+                Session.Items.ItemReceived += Session_ItemRecieved;
                 _log.LogInfo("Successfully connected to server!");
             }
             else if (result is LoginFailure loginFailure)
@@ -74,6 +73,21 @@ namespace LunacidAP
             }
             isSuccessful = result.Successful;
             return result.Successful;
+        }
+
+        public bool VerifySeed()
+        {
+
+            var seed = SlotData[SEED_KEY].ToString();
+            if (ConnectionData.Seed != "" && ConnectionData.Seed != seed)
+            {
+                Authenticated = false;
+                Popup.POP("Wrong save loaded with connection!", 1f, 0);
+                Session.Socket.DisconnectAsync();
+                Session = null;
+                return false;
+            }
+            return true;
         }
 
         private void Session_SocketClosed(string reason)
@@ -106,34 +120,100 @@ namespace LunacidAP
 
         public void Session_ItemRecieved(ReceivedItemsHelper helper)
         {
-            if (helper.Index! > ConnectionData.ItemIndex)
-            {
-                var itemID = helper.PeekItem().Item;
-                string player = Session.Players.GetPlayerName(helper.PeekItem().Player);
-                bool self = false;
-
-                if (player == ConnectionData.SlotName) self = true;
-                GiveLunacidItem(itemID, player, self);
-                ConnectionData.ItemIndex++;
-            }
-            helper.DequeueItem();
+            ReceiveAllItems();
         }
 
-        public IEnumerator ReceiveMissingItems()
+        public List<string> GetAllCheckedLocations()
         {
-            yield return new WaitForSecondsRealtime(2f);
-            while (ConnectionData.ItemIndex < Session.Items.Index)
+            if (!Authenticated)
             {
-                var item = Session.Items.AllItemsReceived[Convert.ToInt32(ConnectionData.ItemIndex)];
-                long itemID = item.Item;
-                string player = Session.Players.GetPlayerName(item.Player);
-                bool self = false;
-
-                if (ConnectionData.SlotName == player) self = true;
-
-                GiveLunacidItem(itemID, player, self);
-                ConnectionData.ItemIndex++;
+                return new List<string>();
             }
+
+            var allLocationsCheckedIds = Session.Locations.AllLocationsChecked;
+            var allLocationsChecked = new List<string>();
+            foreach (var id in allLocationsCheckedIds)
+            {
+                allLocationsChecked.Add(Session.Locations.GetLocationNameFromId(id));
+            }
+            return allLocationsChecked;
+        }
+
+        public void CollectLocationsFromSave()
+        {
+            var allLocations = GetAllCheckedLocations();
+            foreach (var location in ConnectionData.CompletedLocations)
+            {
+                if (!allLocations.Contains(location))
+                {
+                    var locationID = Session.Locations.GetLocationIdFromName(GAME_NAME, location);
+                    Session.Locations.CompleteLocationChecks(locationID);
+                }
+                
+            }
+            ConnectionData.CompletedLocations = ConnectionData.CompletedLocations.Union(allLocations).ToList();
+        }
+
+        public List<ReceivedItem> GetAllReceivedItems()
+        {
+            if (!Authenticated)
+            {
+                return new List<ReceivedItem>();
+            }
+
+            var allReceivedItems = new List<ReceivedItem>();
+            var apItems = Session.Items.AllItemsReceived.ToArray();
+            for (var itemIndex = 0; itemIndex < apItems.Length; itemIndex++)
+            {
+                var apItem = apItems[itemIndex];
+                var itemName = Session.Items.GetItemName(apItem.Item);
+                var playerName = Session.Players.GetPlayerName(apItem.Player);
+                var locationName = Session.Locations.GetLocationNameFromId(apItem.Location) ?? "The Great Well";
+
+                var receivedItem = new ReceivedItem(locationName, itemName, playerName, apItem.Location, apItem.Item,
+                    apItem.Player, itemIndex);
+
+                allReceivedItems.Add(receivedItem);
+            }
+
+            return allReceivedItems;
+        }
+
+        public void ReceiveAllItems()
+        {
+            var allReceivedItems = GetAllReceivedItems();
+            int maxIndex = 0;
+            var self = false;
+
+            foreach (var receivedItem in allReceivedItems)
+            {
+                if (IsItemInSave(receivedItem)) continue;
+                if (receivedItem.PlayerName == ConnectionData.SlotName) self = true;
+                GiveLunacidItem(receivedItem, self);
+                maxIndex = Math.Max(maxIndex, receivedItem.UniqueId);
+
+            }
+        }
+
+        private bool IsItemInSave(ReceivedItem receivedItem)
+        {
+            foreach (var saveItem in ConnectionData.ReceivedItems)
+            {
+                var verifier = true;
+                if (saveItem.UniqueId != receivedItem.UniqueId)
+                {
+                    verifier = false;
+                }
+                if (saveItem.LocationName != receivedItem.LocationName)
+                {
+                    verifier = false;
+                }
+                if (verifier == true)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public LocationInfoPacket ScoutLocation(long locationId, bool createAsHint)
@@ -186,7 +266,12 @@ namespace LunacidAP
                         break;
                     }
             }
-            ConnectionData.ReceivedItems.AddItem(itemID);
+        }
+
+        private void GiveLunacidItem(ReceivedItem receivedItem, bool self)
+        {
+            GiveLunacidItem(receivedItem.ItemId, receivedItem.PlayerName, self);
+            ConnectionData.ReceivedItems.Add(receivedItem);
         }
 
         private void PopupCommand(int sprite, string Name, string player, bool self)
@@ -204,30 +289,19 @@ namespace LunacidAP
             try
             {
                 PopupCommand(1, Name, player, self);
-                /*var weaponList = Control.CURRENT_PL_DATA.WEPS.ToList() ?? new List<string>() { };
-                var weaponLength = weaponList.Count();
-                if (weaponLength != 0 && weaponList.Any(x => x.Contains(Name)))
-                {
-                    _log.LogInfo($"Weapon list already has {Name}; returning.");
-                    return;
-                }
-                else
-                {
-                    weaponList.Add(Name);
-                }
-                Control.CURRENT_PL_DATA.WEPS = weaponList.ToArray();*/
                 for (int j = 0; j < 128; j++)
-			{
-				if (Control.CURRENT_PL_DATA.WEPS[j] == "" || Control.CURRENT_PL_DATA.WEPS[j] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.WEPS[j]) == Name)
-				{
-					Control.CURRENT_PL_DATA.WEPS[j] = Name;
-					j = 999;
-				}
-			}
+                {
+                    if (Control.CURRENT_PL_DATA.WEPS[j] == "" || Control.CURRENT_PL_DATA.WEPS[j] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.WEPS[j]) == Name)
+                    {
+                        Control.CURRENT_PL_DATA.WEPS[j] = Name;
+                        j = 999;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 _log.LogInfo($"Method {nameof(GiveWeapon)} failed.");
+                _log.LogInfo($"Reason: {ex.Message}");
             }
 
 
@@ -239,18 +313,6 @@ namespace LunacidAP
             try
             {
                 PopupCommand(2, Name, player, self);
-                /*var spellList = Control.CURRENT_PL_DATA.SPELLS.ToList() ?? new List<string>(){};
-                var isEmpty = spellList.Any();
-                if (!isEmpty && spellList.Any(x => x.Contains(Name)))
-                {
-                    _log.LogInfo($"Spell list already has {Name}; returning.");
-                    return;
-                }
-                else
-                {
-                    spellList.Add(Name);
-                }
-                Control.CURRENT_PL_DATA.SPELLS = spellList.ToArray();*/
                 for (int k = 0; k < 128; k++)
                 {
                     if (Control.CURRENT_PL_DATA.SPELLS[k] == "" || Control.CURRENT_PL_DATA.SPELLS[k] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.SPELLS[k]) == Name)
@@ -264,6 +326,7 @@ namespace LunacidAP
             catch (Exception ex)
             {
                 _log.LogInfo($"Failure in {nameof(GiveSpell)}.");
+                _log.LogInfo($"Reason: {ex.Message}");
             }
 
         }
@@ -295,48 +358,6 @@ namespace LunacidAP
                 useable_Item.CON.SendMessage("OnNextITEM");
                 return;
             }
-            /*var itemList = Control.CURRENT_PL_DATA.ITEMS.ToList() ??  new List<string>(){};
-            var itemCount = itemList.Count();
-
-            bool hasItem = false;
-            string heldItem = "";
-            int itemHeldCount = 0;
-            if (itemCount != 0 && itemList.Any(x => x.Contains(Name)))
-            {
-                hasItem = true;
-                heldItem = itemList.First(x => x.Contains(Name));
-                itemHeldCount = int.Parse(heldItem.Substring(heldItem.Length - 2, 2));
-                _log.LogInfo($"Noting that play already has {itemHeldCount} {Name}(s).");
-
-            }
-            if (itemCount == 0 || !hasItem)
-            {
-                itemList.Add(Name + "01");
-                _log.LogInfo($"Given first instance of {Name}");
-            }
-            else if (hasItem)
-            {
-                var newCount = itemHeldCount + 1;
-                if (newCount > 98)
-                {
-                    return; // Don't add the item.
-                }
-                var indexPosition = itemList.IndexOf(heldItem);
-                var newItem = StaticFuncs.REMOVE_NUMS(heldItem);
-                if (newCount < 10)
-                {
-                    newItem += "0" + newCount.ToString();
-                }
-                else
-                {
-                    newItem += newCount.ToString();
-                }
-                itemList[indexPosition] = newItem;
-                _log.LogInfo($"Updated count for {Name}; appended {newItem} to list");
-
-
-            }
-            Control.CURRENT_PL_DATA.ITEMS = itemList.ToArray();*/
             for (int m = 0; m < 128; m++)
             {
                 if (Control.CURRENT_PL_DATA.ITEMS[m] == "" || Control.CURRENT_PL_DATA.ITEMS[m] == null)
@@ -379,45 +400,6 @@ namespace LunacidAP
             }
             var actualName = LunacidItems.MaterialNames[Name].ToString();
             PopupCommand(3, Name, player, self);
-            // Normally this utilizes arrays, but I find trying to direct work with it causes errors.
-            // Since to me it screams "use lists", relying on them instead.
-            /*var materList = Control.CURRENT_PL_DATA.MATER.ToList() ??  new List<string>(){};
-            var isEmpty = materList.Any();
-            bool hasMater = false;
-            string heldMater = "";
-            int heldMaterCount = 0;
-            if (!isEmpty && materList.Any(x => x.Substring(0, x.Length - 2) == actualName))
-            {
-                hasMater = true;
-                heldMater = materList.First(x => x.Substring(0, x.Length - 2) == actualName);
-                heldMaterCount = int.Parse(heldMater.Substring(heldMater.Length - 2, 2));
-
-            }
-            if (isEmpty || !hasMater)
-            {
-                materList.Add(actualName + "01");
-            }
-            else if (hasMater)
-            {
-                var newCount = heldMaterCount + 1;
-                if (newCount > 98)
-                {
-                    return; // Don't add the item.
-                }
-                var indexPosition = materList.IndexOf(heldMater);
-                if (newCount < 10)
-                {
-                    heldMater += "0" + newCount.ToString();
-                }
-                else
-                {
-                    heldMater += newCount.ToString();
-                }
-                materList[indexPosition] = heldMater;
-
-
-            }
-            Control.CURRENT_PL_DATA.ITEMS = materList.ToArray();*/
             for (int i = 0; i < 128; i++)
             {
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
