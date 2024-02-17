@@ -36,25 +36,17 @@ namespace LunacidAP.Data
             "Destroying Angel Mushroom"
         };
 
-        public static readonly List<string> DontUpper = new(){
-            "Health Vial", "Mana Vial"
-        };
-
         public static readonly Dictionary<string, int> MaterialNames = new(){
             { "OBSIDIAN", 10 },
             { "ASHES", 20 },
-            { "OCEAN BONE SHARD", 4},
+            { "OCEAN_BONE_SHARD", 4},
             { "ONYX", 8},
+            { "YELLOW_MOREL", 14 },
 
         };
 
-        public static string ToUpperIfNeeded(string Name)
-        {
-            if (DontUpper.Contains(Name))
-            {
-                return Name;
-            }
-            return Name.ToUpper();
-        }
+        public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
+            "COIN_PICKUP", "ENKEY_PICKUP"
+        };
     }
 }

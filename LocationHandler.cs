@@ -1,10 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using Archipelago.MultiClient.Net;
-using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -41,12 +34,11 @@ namespace LunacidAP
                 __instance.GetComponent<SphereCollider>().enabled = false;
                 __instance.StartCoroutine("Delay");
             }
-
-            var apLocation = DetermineAPLocation(__instance.gameObject.scene.name, __instance.Name, __instance.gameObject.transform.position, __instance.type);
-            _log.LogInfo($"This location with {objectName} at {__instance.gameObject.transform.position} gives {apLocation}.");
+            var apLocation = DetermineAPLocation(__instance.gameObject.scene.name, __instance.gameObject.name, __instance.gameObject.transform.position, __instance.type);
             if (apLocation != "" && _archipelago.IsLocationChecked(apLocation))
             {
-                Object.Destroy(__instance.gameObject);
+                _log.LogInfo($"Deleting {objectName} due to already collected location {apLocation}");
+                __instance.gameObject.SetActive(false);
             }
             
             /* The rest of this is vanilla code; for future use as drops needs to be handled differently
@@ -115,12 +107,8 @@ namespace LunacidAP
         private static bool CollectLocation(Item_Pickup_scr instance)
         {
             var objectName = instance.gameObject.name;
-            if (objectName.Contains("(Clone)"))
-            {
-                return true; //This will change later for mob and shops, but good to throw these examples out.
-            }
             var sceneName = instance.gameObject.scene.name;
-            var objectLocation = instance.gameObject.transform.localPosition;
+            var objectLocation = instance.gameObject.transform.position;
             if (!LunacidLocations.APLocationData.ContainsKey(sceneName))
             {
                 _log.LogInfo($"Scene {sceneName} not implemented yet!");
@@ -133,20 +121,23 @@ namespace LunacidAP
             var apLocation = DetermineAPLocation(sceneName, objectName, objectLocation, instance.type);
             if (apLocation != "")
             {
+                _log.LogInfo("Location is valid");
                 var locationID = _archipelago.GetLocationIDFromName(apLocation);
+                _log.LogInfo("Scouting...");
                 var locationInfo = _archipelago.ScoutLocation(locationID, false);
                 var slotNameofItemOwner = _archipelago.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
                 _archipelago.Session.Locations.CompleteLocationChecks(locationID);
                 ConnectionData.CompletedLocations.Add(apLocation);
                 if (ConnectionData.SlotName == slotNameofItemOwner)
                 {
-                    Object.Destroy(instance.gameObject); //It was already collected and this exists in error, remove it.
+                    _log.LogInfo($"New location from {objectName} collected: {apLocation}");
+                    instance.gameObject.SetActive(false); // Its the player's own item, offer an alternative presentation
                     return false;
                 }
                 else
                 {
                     _popup.POP($"Found Archipelago Item ({apLocation})", 1f, 0);
-                    Object.Destroy(instance.gameObject);
+                    instance.gameObject.SetActive(false); // Its someone else's item so it will only message once.
                     return false;
                 }
             }
@@ -161,18 +152,41 @@ namespace LunacidAP
         {
             var currentLocationData = LunacidLocations.APLocationData[sceneName];
             var IsWeaponOrSpell = type == 0 || type == 1; //If its unique and there's error, its fine.
+            string locationOfShortestDistance = "";
+            Vector3 positionOfShortestDistance = new Vector3(6969.0f, 6969.0f, 6969.0f);
+            float shortestDistance = 696969f;
+            if (objectName.Contains("Clone"))
+            {
+                var newName = objectName.Replace("(Clone)", "");
+                if (LunacidLocations.DropLocations.ContainsKey(newName))
+                {
+                    return LunacidLocations.DropLocations[newName];
+                }
+                return "";
+            }
             foreach (var group in currentLocationData)
             {
-                if (Vector3.Distance(objectPosition, group.Position) < 2f)
+                if (objectName == group.GameObjectName)
                 {
-                    return group.APLocationName; // The position is almost always useful.
-                }
-                else if (!group.GameObjectName.Contains("(Clone)") && IsWeaponOrSpell && group.GameObjectName == objectName)
-                {
-                    return group.APLocationName;  // Worst case, attempt to pull it by its name.
+                    if (IsWeaponOrSpell || LunacidItems.UniqueItems.Contains(objectName))
+                    {
+                        return group.APLocationName; //They're unique.  The location is unimportant in this case.
+                    }
+                    if (Vector3.Distance(group.Position, objectPosition) < Vector3.Distance(objectPosition, positionOfShortestDistance))
+                    {
+                        locationOfShortestDistance = group.APLocationName;
+                        positionOfShortestDistance = group.Position;
+                        shortestDistance = Vector3.Distance(group.Position, objectPosition);
+                    }
                 }
             }
-            return "";
+            if (shortestDistance > 10f)
+            {
+                _log.LogInfo($"Closest location for {objectName} at {objectPosition} was too far away: {locationOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
+                return ""; //Failsafe for new positions
+            }
+            _log.LogInfo($"Found Position for location [{locationOfShortestDistance}]");
+            return locationOfShortestDistance;
         }
 
         /*[HarmonyPatch(typeof(AREA_SAVED_ITEM), "Load")]
@@ -188,7 +202,7 @@ namespace LunacidAP
         private static void Save_PrintData(AREA_SAVED_ITEM __instance)
         {
             _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
-            _log.LogInfo($"{__instance.current_string}");
+            _log.LogInfo($"Slot {__instance.Slot} was incremented with/to {__instance.value}");
         }
     }
 }
