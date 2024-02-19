@@ -77,9 +77,9 @@ namespace LunacidAP
                 ObtainedItems = ConnectionData.ReceivedItems,
                 CheckedLocations = ConnectionData.CompletedLocations
             };
-            if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == "" || ConnectionData.Seed is null))
+            if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == 0))
             {
-                newAPSaveData.Seed = _archipelago.SlotData[ArchipelagoClient.SEED_KEY].ToString();
+                newAPSaveData.Seed = SlotData.Seed;
             }
             string json = JsonConvert.SerializeObject(newAPSaveData);
             File.WriteAllText(savePath, json);
@@ -129,7 +129,7 @@ namespace LunacidAP
         public string SlotName;
         public string HostName;
         public string Password;
-        public string Seed;
+        public int Seed;
         public List<ReceivedItem> ObtainedItems;
         public List<string> CheckedLocations;
     }
