@@ -19,12 +19,12 @@ namespace LunacidAP
         private CONTROL Control;
         private POP_text_scr Popup;
         public ArchipelagoSession Session;
+        public SlotData SlotData {get; private set;}
         public static bool Authenticated;
         public static bool IsInGame = false;
         public static bool HasReceivedItems = false;
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
-        public const string SEED_KEY = "seed";
-        public Dictionary<string, object> SlotData;
+        
 
 
         public ArchipelagoClient(ManualLogSource log)
@@ -58,7 +58,7 @@ namespace LunacidAP
             if (result is LoginSuccessful loginSuccess)
             {
                 Authenticated = true;
-                SlotData = loginSuccess.SlotData;
+                SlotData = new SlotData(loginSuccess.SlotData, _log);
                 Session.Socket.ErrorReceived += Session_ErrorReceived;
                 Session.Socket.SocketClosed += Session_SocketClosed;
                 Session.Items.ItemReceived += Session_ItemRecieved;
@@ -78,8 +78,8 @@ namespace LunacidAP
         public bool VerifySeed()
         {
 
-            var seed = SlotData[SEED_KEY].ToString();
-            if (ConnectionData.Seed != "" && ConnectionData.Seed != seed)
+            var seed = SlotData.Seed;
+            if (ConnectionData.Seed != 0 && ConnectionData.Seed != seed)
             {
                 Authenticated = false;
                 Popup.POP("Wrong save loaded with connection!", 1f, 0);
@@ -232,7 +232,10 @@ namespace LunacidAP
         {
             string Name = Session.Items.GetItemName(itemID);
             var type = IdentifyItemGetType(Name);
-            Name = Name.ToUpper();
+            if (type == 1 || type == 2)
+            {
+                Name = Name.ToUpper();
+            }
             switch (type)
             {
                 case 1:
@@ -258,11 +261,6 @@ namespace LunacidAP
                 case 3:
                     {
                         GiveMaterial(Name, player, self);
-                        break;
-                    }
-                case -1:
-                    {
-                        GiveSwitch(Name, player, self);
                         break;
                     }
             }
@@ -341,6 +339,15 @@ namespace LunacidAP
         private void GiveItem(string Name, string player = "", bool self = false)
         {
             PopupCommand(4, Name, player, self);
+            var bundleSize = SlotData.Fillerbundle;
+            if (Name == "Strange Coin")
+            {
+                bundleSize = SlotData.Coinbundle;
+            }
+            if (Name == "Fractured Life" || Name == "Fractured Death")
+            {
+                bundleSize = 1;
+            }
             Useable_Item[] eQ_ITEMS = Control.EQ_ITEMS;
             foreach (Useable_Item useable_Item in eQ_ITEMS)
             {
@@ -348,11 +355,11 @@ namespace LunacidAP
                 {
                     continue;
                 }
-                if (useable_Item.Count > 98)
+                if (useable_Item.Count > 100 - bundleSize)
                 {
                     return;
                 }
-                useable_Item.Count += 2;
+                useable_Item.Count += 1 + bundleSize;
                 useable_Item.TakeOne();
                 useable_Item.CON.ITM_SLOT--;
                 useable_Item.CON.SendMessage("OnNextITEM");
@@ -362,7 +369,7 @@ namespace LunacidAP
             {
                 if (Control.CURRENT_PL_DATA.ITEMS[m] == "" || Control.CURRENT_PL_DATA.ITEMS[m] == null)
                 {
-                    Control.CURRENT_PL_DATA.ITEMS[m] = Name + "01";
+                    Control.CURRENT_PL_DATA.ITEMS[m] = Name + ValueSuffix(bundleSize);
                     m = 999;
                 }
                 else
@@ -372,8 +379,8 @@ namespace LunacidAP
                         continue;
                     }
                     int num2 = int.Parse(Control.CURRENT_PL_DATA.ITEMS[m].Substring(Control.CURRENT_PL_DATA.ITEMS[m].Length - 2, 2));
-                    num2++;
-                    if (num2 > 98)
+                    num2 += bundleSize;
+                    if (num2 > 100 - bundleSize)
                     {
                         m = 999;
                         continue;
@@ -398,13 +405,14 @@ namespace LunacidAP
                 _log.LogInfo($"MaterialNames has no definition for {Name}; cannot give it!");
                 return;
             }
+            var bundleSize = SlotData.Fillerbundle;
             var actualName = LunacidItems.MaterialNames[Name].ToString();
             PopupCommand(3, Name, player, self);
             for (int i = 0; i < 128; i++)
             {
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
                 {
-                    Control.CURRENT_PL_DATA.MATER[i] = actualName + "01";  // Used Alt_Name previously
+                    Control.CURRENT_PL_DATA.MATER[i] = actualName + ValueSuffix(bundleSize);  // Used Alt_Name previously
                     i = 999;
                 }
                 else
@@ -414,8 +422,8 @@ namespace LunacidAP
                         continue;
                     }
                     int num = int.Parse(Control.CURRENT_PL_DATA.MATER[i].Substring(Control.CURRENT_PL_DATA.MATER[i].Length - 2, 2));
-                    num++;
-                    if (num > 99)
+                    num += bundleSize;
+                    if (num > 100 - bundleSize)
                     {
                         i = 999;
                         continue;
@@ -433,9 +441,13 @@ namespace LunacidAP
             }
         }
 
-        private void GiveSwitch(string Name, string player = "", bool self = false)
+        private string ValueSuffix(int value)
         {
-            // Not yet implemented
+            if (value > 9)
+            {
+                return value.ToString();
+            }
+            return "0" + value.ToString();
         }
 
         public long GetLocationIDFromName(string locationName)
