@@ -4,6 +4,10 @@ namespace LunacidAP.Data
 {
     public class LunacidItems
     {
+        public static readonly List<string> APItems = new(){
+            "Progressive Vampiric Symbol"
+        };
+        
         public static readonly List<string> Weapons = new(){
            "Axe of Harming", "Battle Axe", "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Broken Lance",
             "Corrupted Dagger", "Dark Rapier", "Elfen Bow", "Elfen Sword", "Fishing Spear", "Flail", "Halberd", "Iron Claw",
@@ -37,11 +41,17 @@ namespace LunacidAP.Data
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){
-            { "OBSIDIAN", 10 },
-            { "ASHES", 20 },
-            { "OCEAN_BONE_SHARD", 4},
-            { "ONYX", 8},
-            { "YELLOW_MOREL", 14 },
+            { "Obsidian", 10 },
+            { "Ashes", 20 },
+            { "Ocean Bone Shard", 4},
+            { "Onyx", 8},
+            { "Yellow Morel", 14 },
+            { "Bones", 36 },
+            { "Ectoplasm", 30 },
+            { "Ikurr'ilb Root", 32 },
+            { "Snowflake Obsidian", 12 },
+            { "Fool's Gold", 42},
+
 
         };
 

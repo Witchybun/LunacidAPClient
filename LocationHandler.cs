@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -10,6 +11,7 @@ namespace LunacidAP
         private static POP_text_scr _popup;
         private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
+        private static int _currentFloor = 0;
 
         public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
         {
@@ -40,56 +42,6 @@ namespace LunacidAP
                 _log.LogInfo($"Deleting {objectName} due to already collected location {apLocation}");
                 __instance.gameObject.SetActive(false);
             }
-            
-            /* The rest of this is vanilla code; for future use as drops needs to be handled differently
-            switch (__instance.type)
-            {
-                case 0:
-                    {
-                        string[] sPELLS = __instance.CON.CURRENT_PL_DATA.WEPS;
-                        foreach (string check in sPELLS)
-                        {
-                            if (!StaticFuncs.IS_NULL(check))
-                            {
-                                if (StaticFuncs.REMOVE_NUMS(check).ToUpper().Replace(" ", "") == __instance.Name.ToUpper().Replace(" ", ""))
-                                {
-                                    Object.Destroy(__instance.gameObject);
-                                }
-                                else if (StaticFuncs.REMOVE_NUMS(check).ToUpper().Replace(" ", "") == __instance.Alt_Name.ToUpper().Replace(" ", ""))
-                                {
-                                    Object.Destroy(__instance.gameObject);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                case 1:
-                    {
-                        string[] sPELLS = __instance.CON.CURRENT_PL_DATA.SPELLS;
-                        for (int i = 0; i < sPELLS.Length; i++)
-                        {
-                            if (sPELLS[i] == __instance.Name)
-                            {
-                                Object.Destroy(__instance.gameObject);
-                            }
-                        }
-                        break;
-                    }
-                case 4:
-                    {
-                        StreamReader streamReader = new StreamReader(Application.dataPath + "/Resources/TXT/" + PlayerPrefs.GetString("LANG", "ENG") + "/MATERIALS.txt");
-                        string text = streamReader.ReadToEnd();
-                        streamReader.Close();
-                        string[] array = text.Split("|"[0]);
-                        __instance.Name = array[int.Parse(__instance.Alt_Name)];
-                        __instance.Name = __instance.Name.Replace("\n", "");
-                        break;
-                    }
-                case 2:
-                case 3:
-                    break;
-            }
-            */
             return false;
         }
 
@@ -121,9 +73,7 @@ namespace LunacidAP
             var apLocation = DetermineAPLocation(sceneName, objectName, objectLocation, instance.type);
             if (apLocation != "")
             {
-                _log.LogInfo("Location is valid");
                 var locationID = _archipelago.GetLocationIDFromName(apLocation);
-                _log.LogInfo("Scouting...");
                 var locationInfo = _archipelago.ScoutLocation(locationID, false);
                 var slotNameofItemOwner = _archipelago.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
                 _archipelago.Session.Locations.CompleteLocationChecks(locationID);
@@ -150,20 +100,20 @@ namespace LunacidAP
 
         private static string DetermineAPLocation(string sceneName, string objectName, Vector3 objectPosition, int type)
         {
+            if (objectName.Contains("Clone"))
+            {
+                var isNameHandled = CloneHandler(sceneName, objectName, objectPosition, out var locationName);
+                if (isNameHandled)
+                {
+                    _log.LogInfo($"Found Position for location [{locationName}]");
+                    return locationName;
+                }
+            }
             var currentLocationData = LunacidLocations.APLocationData[sceneName];
             var IsWeaponOrSpell = type == 0 || type == 1; //If its unique and there's error, its fine.
             string locationOfShortestDistance = "";
             Vector3 positionOfShortestDistance = new Vector3(6969.0f, 6969.0f, 6969.0f);
             float shortestDistance = 696969f;
-            if (objectName.Contains("Clone"))
-            {
-                var newName = objectName.Replace("(Clone)", "");
-                if (LunacidLocations.DropLocations.ContainsKey(newName))
-                {
-                    return LunacidLocations.DropLocations[newName];
-                }
-                return "";
-            }
             foreach (var group in currentLocationData)
             {
                 if (objectName == group.GameObjectName)
@@ -189,20 +139,81 @@ namespace LunacidAP
             return locationOfShortestDistance;
         }
 
-        /*[HarmonyPatch(typeof(AREA_SAVED_ITEM), "Load")]
-        [HarmonyPostfix]
-        private static void Load_PrintData(AREA_SAVED_ITEM __instance)
+        private static bool CloneHandler(string sceneName, string objectName, Vector3 objectPosition, out string locationName)
         {
-            _log.LogInfo($"Loaded Data in Zone {__instance.Zone}:");
-            _log.LogInfo($"{__instance.current_string}");
-        }*/
+            objectName = objectName.Replace("(Clone)", "");
+            if (sceneName != "TOWER")
+            {
+                if (LunacidLocations.DropLocations.ContainsKey(objectName))
+                {
+                    locationName = LunacidLocations.DropLocations[objectName];
+                    return true;
+                }
+                if (LunacidLocations.ShopLocations.ContainsKey(objectName))
+                {
+                    locationName = LunacidLocations.ShopLocations[objectName];
+                    if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
+                    {
+                        locationName += " (Patchouli)";
+                    }
+                    else
+                    {
+                        locationName += " (Sheryl)";
+                    }
+                    return true;
+                }
+                locationName = "";
+                return true;
+            }
+            if (objectName == "CANDLE_PICKUP")
+            {
+                if (_currentFloor == 20)
+                {
+                    locationName = "TA: Floor 20 Chest";
+                }
+                else
+                {
+                    locationName = "TA: Floor 40 Chest";
+                }
+                return true;
+            }
+            if (Vector3.Distance(new Vector3(60.2f, -10.0f, -168.7f), objectPosition) < 1f)
+            {
+                locationName = $"TA: Floor {_currentFloor} Health Refill";
+                return true;
+            }
+            if (Vector3.Distance(new Vector3(59.9f, -10.0f, -174.9f), objectPosition) < 1f)
+            {
+                locationName = $"TA: Floor {_currentFloor} Crystal Refill";
+                return true;
+            }
+            locationName = "";
+            return false;
+        }
 
         [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
-        [HarmonyPostfix]
-        private static void Save_PrintData(AREA_SAVED_ITEM __instance)
+        [HarmonyPrefix]
+        private static bool Save_LogAndDenySave(AREA_SAVED_ITEM __instance)
         {
             _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
-            _log.LogInfo($"Slot {__instance.Slot} was incremented with/to {__instance.value}");
+            _log.LogInfo($"Slot {__instance.Slot} is trying to increment to {__instance.value}");
+            foreach (var location in LunacidFlags.ItemToFlag)
+            {
+                if (__instance.Zone == location.Value[0] && __instance.Slot == location.Value[1])
+                {
+                    _log.LogInfo($"Denying {__instance.gameObject.name} from changing data.");
+                    return false;
+                }
+            }
+            _log.LogInfo($"Allowing {__instance.gameObject.name} from changing data.");
+            return true;
+        }
+
+        [HarmonyPatch(typeof(ShadowTower_CON), "Door")]
+        [HarmonyPostfix]
+        private static void Door_StealFloorValue(ShadowTower_CON __instance)
+        {
+            _currentFloor = __instance.floor;
         }
     }
 }
