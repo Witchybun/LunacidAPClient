@@ -7,6 +7,12 @@ namespace LunacidAP.Data
         public static readonly List<string> APItems = new(){
             "Progressive Vampiric Symbol"
         };
+
+        public static readonly List<string> OneCountItems = new(){
+            "VHS Tape", "White VHS Tape", "Corrupted Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
+            "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
+            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)"
+        };
         
         public static readonly List<string> Weapons = new(){
            "Axe of Harming", "Battle Axe", "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Broken Lance",
@@ -41,17 +47,29 @@ namespace LunacidAP.Data
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){
-            { "Obsidian", 10 },
-            { "Ashes", 20 },
+            { "Fire Opal", 2 },
             { "Ocean Bone Shard", 4},
+            { "Ocean Bone Shell", 6 },
             { "Onyx", 8},
+            { "Obsidian", 10 },
+            { "Snowflake Obsidian", 12 },
             { "Yellow Morel", 14 },
-            { "Bones", 36 },
+            { "Lotus Seed Pod", 18 },
+            { "Ashes", 20 },
             { "Ectoplasm", 30 },
             { "Ikurr'ilb Root", 32 },
-            { "Snowflake Obsidian", 12 },
-            { "Fool's Gold", 42},
-
+            { "Vampiric Ashes", 34 },
+            { "Bones", 36 },
+            { "Moon Petal", 40 },
+            { "Fool's Gold", 42 },
+            // { "Opal", 0 },
+            // { "Destroying Angel", 0 },
+            // { "Bloodweed", 0 },
+            // { "Fire Coral", 0 },
+            // { "Fiddlehead", 0 },
+            // { "Fractured Life", 0 },
+            // { "Fractured Death", 0 },
+            // { "Broken Sword", 0, },
 
         };
 

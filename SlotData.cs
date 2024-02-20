@@ -6,12 +6,11 @@ namespace LunacidAP
 {
     public class SlotData
     {
-        private ArchipelagoClient _archipelago;
         private ManualLogSource _log;
         private const string SEED_KEY = "seed";
         private const string EXP_KEY = "experience";
-        private const string SWITCH_KEY = "switchlock";
-        private const string COIN_KEY = "coinbundle";
+        private const string SWITCH_KEY = "switchlocks";
+        private const string COIN_KEY = "strangecoinbundle";
         private const string FILLER_KEY = "fillerbundle";
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
@@ -44,12 +43,12 @@ namespace LunacidAP
 
         private Goal GetSlotSetting(string key, Goal defaultValue)
         {
-            return _slotDataFields.ContainsKey(key) ? (Goal)_slotDataFields[key] : GetSlotDefaultValue(key, defaultValue);
+            return (Goal)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Goal), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private StrangeCoin GetSlotSetting(string key, StrangeCoin defaultValue)
         {
-            return _slotDataFields.ContainsKey(key) ? (StrangeCoin)_slotDataFields[key] : GetSlotDefaultValue(key, defaultValue);
+            return (StrangeCoin)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(StrangeCoin), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private string GetSlotSetting(string key, string defaultValue)

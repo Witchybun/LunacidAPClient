@@ -21,12 +21,23 @@ namespace LunacidAP.Data
 
         public static readonly Dictionary< string, string> DropLocations = new(){
             { "SICKLE_PICKUP", "Milk Snail: Ice Sickle Drop" },
-            { "SUMMON_SNAIL", "Snail: Summon Snail" },
-            { "OCEAN_ELIXIR_PICKUP", "SS: Demon's Drop" },
+            { "RUSTED_SWORD_PICKUP", "Mummy: Rusted Sword Drop" },
+            { "SUMMON_SNAIL", "Snail: Summon Snail Drop" },
+            // { "", "Skeleton: Skeleton Axe Drop" },
+            // { "", "Phantom: Cursed Blade Drop" },
+            // { "", "Kodama: Summon Kodama Drop" },
+            // { "", "Chimera: Quick Stride Drop" },
+            // { "", "Malformed Horse: Brittle Arming Sword Drop" },
+            // { "", "Obsidian Skeleton: Obsidian Cursebrand Drop" },
+            // { "", "Obsidian Skeleton: Obsidian Poisonguard Drop" },
+            { "OCEAN_ELIXIR_PICKUP", "Abyssal Demon: Ocean Elixir Drop" },
+            // { "", "Anpu: Golden Kopesh Drop" },
             { "GOLDEN_SICKLE_PICKUP", "Anpu: Golden Sickle Drop"},
+            // { "", "Jailor: Jailor's Candle Drop" },
             { "VP_SWORD_PICKUP", "Vampire Page: Lyrian Longsword Drop"},
             { "DARK_SKULL_PICKUP", "Skeleton: Dark Skull Drop" },
             { "SUS_SPEAR_PICKUP", "Sucsarian: Sucsarian Spear"},
+            { "SUS_DAGGER_PICKUP", "Sucsarian: Sucsarian Dagger Drop" },
             { "TORNADO_PICKUP(Clone)", "Cetea: Tornado Drop" },
             
         };
@@ -35,6 +46,11 @@ namespace LunacidAP.Data
             { "RAPIER_PICKUP", "Buy Rapier" },
             { "OCEAN_ELIXIR_PICKUP", "Buy Ocean Elixir" }, // Later, the additional string will be appended based on scene
             { "STEELNEEDLE_PICKUP", "Buy Steel Needle" },
+            // { "", "Buy Crossbow" },
+            // { "", "Buy Oil Lantern" },
+            // { "", "Buy Privateer Musket" },
+            // { "", "Buy Jotunn Slayer" },
+
         };
 
         public static readonly Dictionary<string, List<LocationData>> APLocationData = new(){
@@ -99,7 +115,7 @@ namespace LunacidAP.Data
                     new LocationData( "FbA: Short Wall Near Trees", "HEALTH_VIAL_PICKUP", new Vector3(-110.9f, -20.0f, 46.0f) ),
                     new LocationData( "FbA: Snail Lectern (Near)", "LIGHT_REVEAL", new Vector3(-28.0f, 9.5f, 52.0f) ),
                     new LocationData( "FbA: Snail Lectern (Far)", "BLOOD_DRAIN", new Vector3(-28.0f, 9.5f, 45.0f) ),
-                    new LocationData( "FbA: Rug On Balcony", "MANA_VIAL_PICKUP", new Vector3(-41.4f, 8.0f, -59.3f) ),
+                    new LocationData( "FbA: Rug on Balcony", "MANA_VIAL_PICKUP", new Vector3(-41.4f, 8.0f, -59.3f) ),
                     new LocationData( "FbA: Rooftops", "EARTH_ELIXIR_PICKUP", new Vector3(3.6f, 6.5f, -2.1f) ),
                     new LocationData( "FbA: Hidden Room Upper Floor", "WOLFRAM_PICKUP", new Vector3(-112.1f, 8.5f, -22.4f) ),
                     new LocationData( "FbA: Hidden Room Lower Floor", "CRYSTAL_SHARD_PICKUP", new Vector3(-57.9f, -19.9f, 38.5f) ),
@@ -150,7 +166,7 @@ namespace LunacidAP.Data
                     new LocationData( "FM: Jellisha's Quest Reward", "SLIME_ORB_PICKUP", new Vector3(83.6f, -27.0f, -305.9f) ),
                     new LocationData( "FM: Path to Sanguine Sea (Left)", "AXE_PICKUP", new Vector3(116.1f, -27.5f, -533.9f)),
                     new LocationData( "FM: Path to Sanguine Sea (Right)", "HEALTH_VIAL_PICKUP", new Vector3(73.9f, -26.7f, -537.1f)),
-                    new LocationData( "FM: Hidden Chest Near Underworks", "EARTH_ELIXIR_PICKUP", new Vector3(24.2f, -26.8f, 421.9f) ),
+                    new LocationData( "FM: Hidden Chest Near Underworks", "EARTH_ELIXIR_PICKUP", new Vector3(24.2f, -26.8f, -421.9f) ),
                     new LocationData( "FM: Rubble Near Illusory Wall", "FLAME_FLARE", new Vector3(18.1f, -27.3f, -443.3f) ),
                     new LocationData( "FM: Underwater Pipe", "P_THROWING_KNIFE_PICKUP", new Vector3(64.9f, -31.6f, -279.5f) ),
                     new LocationData( "FM: Underworks Waterfall", "ANTIDOTE_PICKUP", new Vector3(-9.6f, -28.0f, -260.5f) ),

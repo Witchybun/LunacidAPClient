@@ -156,7 +156,7 @@ namespace LunacidAP
                     {
                         locationName += " (Patchouli)";
                     }
-                    else
+                    else if (objectName == "OCEAN_ELIXIR_PICKUP")
                     {
                         locationName += " (Sheryl)";
                     }

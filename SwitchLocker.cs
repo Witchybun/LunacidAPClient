@@ -1,3 +1,4 @@
+using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -28,12 +29,17 @@ namespace LunacidAP
             }
             var switchPosition = __instance.gameObject.transform.position;
             var sceneName = __instance.gameObject.scene.name;
-            var itemName = DetermineSwitchName(sceneName, switchPosition);
-            var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            if (control is null)
+            if (!LunacidSwitches.SwitchLocations.Keys.Contains(sceneName))
             {
-                _log.LogInfo("Control is null btw");
+                return true; // Location isn't relevant to switches
             }
+            var itemName = DetermineSwitchName(sceneName, switchPosition);
+            if (itemName == "")
+            {
+                _log.LogInfo($"Switch cannot be found for position {switchPosition}");
+                return true; // Its not any relevant switch, so it shouldn't stop the player.
+            }
+            var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             _popup = control.PAPPY;
             foreach (var receivedItem in ConnectionData.ReceivedItems)
             {
@@ -67,8 +73,8 @@ namespace LunacidAP
                 _log.LogInfo($"Closest location for Switch at {objectPosition} was too far away: {switchOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
                 return ""; //Failsafe for new positions
             }
-            _log.LogInfo($"Found Position for location [{switchOfShortestDistance}]");
-            return switchOfShortestDistance;
+            _log.LogInfo($"Found Position for switch [{switchOfShortestDistance}]");
+            return switchOfShortestDistance.Replace(" [Top]", "").Replace(" [Bottom]","");
         }
     }
 }
