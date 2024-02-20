@@ -19,12 +19,12 @@ namespace LunacidAP
         private CONTROL Control;
         private POP_text_scr Popup;
         public ArchipelagoSession Session;
-        public SlotData SlotData {get; private set;}
+        public SlotData SlotData { get; private set; }
         public static bool Authenticated;
         public static bool IsInGame = false;
         public static bool HasReceivedItems = false;
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
-        
+
 
 
         public ArchipelagoClient(ManualLogSource log)
@@ -149,7 +149,7 @@ namespace LunacidAP
                     var locationID = Session.Locations.GetLocationIdFromName(GAME_NAME, location);
                     Session.Locations.CompleteLocationChecks(locationID);
                 }
-                
+
             }
             ConnectionData.CompletedLocations = ConnectionData.CompletedLocations.Union(allLocations).ToList();
         }
@@ -231,6 +231,14 @@ namespace LunacidAP
         private void GiveLunacidItem(long itemID, string player = "", bool self = false)
         {
             string Name = Session.Items.GetItemName(itemID);
+            if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
+            {
+                ApplyFlag(Name);
+                if (Name == "Progressive Vampiric Symbol")
+                {
+                    Name = ProgressiveSymbolHandler(Name);
+                }
+            }
             var type = IdentifyItemGetType(Name);
             if (type == 1 || type == 2)
             {
@@ -263,6 +271,10 @@ namespace LunacidAP
                         GiveMaterial(Name, player, self);
                         break;
                     }
+            }
+            if (Name.Contains(" Switch") || Name.Contains("Lightning Gate"))
+            {
+                GiveSwitch(Name, player, self);
             }
         }
 
@@ -344,7 +356,7 @@ namespace LunacidAP
             {
                 bundleSize = SlotData.Coinbundle;
             }
-            if (Name == "Fractured Life" || Name == "Fractured Death")
+            if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
             }
@@ -406,6 +418,10 @@ namespace LunacidAP
                 return;
             }
             var bundleSize = SlotData.Fillerbundle;
+            if (LunacidItems.OneCountItems.Contains(Name))
+            {
+                bundleSize = 1;
+            }
             var actualName = LunacidItems.MaterialNames[Name].ToString();
             PopupCommand(3, Name, player, self);
             for (int i = 0; i < 128; i++)
@@ -441,6 +457,11 @@ namespace LunacidAP
             }
         }
 
+        private void GiveSwitch(string Name, string player = "", bool self = false)
+        {
+            PopupCommand(4, Name, player, self);
+        }
+
         private string ValueSuffix(int value)
         {
             if (value > 9)
@@ -448,6 +469,31 @@ namespace LunacidAP
                 return value.ToString();
             }
             return "0" + value.ToString();
+        }
+
+        private void ApplyFlag(string Name)
+        {
+            var flagData = LunacidFlags.ItemToFlag[Name];
+            if (Name == "Progressive Vampiric Symbol")
+            {
+                var receivedCount = ConnectionData.ReceivedItems.Count(x => x.ItemName == "Progressive Vampiric Symbol");
+                FlagHandler.ModifyFlag(flagData[0], flagData[1], Math.Min(3, receivedCount));
+                return;
+            }
+            FlagHandler.ModifyFlag(flagData[0], flagData[1], flagData[2]);
+        }
+
+        private string ProgressiveSymbolHandler(string Name)
+        {
+            if (Control.CURRENT_PL_DATA.ITEMS.Contains("Vampiric Symbol (W)"))
+            {
+                if (Control.CURRENT_PL_DATA.ITEMS.Contains("Vampiric Symbol (A)"))
+                {
+                    return "Vampiric Symbol (E)";
+                }
+                return "Vampiric Symbol (A)";
+            }
+            return "Vampiric Symbol (W)";
         }
 
         public long GetLocationIDFromName(string locationName)
