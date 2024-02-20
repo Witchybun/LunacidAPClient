@@ -28,6 +28,7 @@ namespace LunacidAP
                 LocationHandler.Awake(Archipelago, Log);
                 SaveHandler.Awake(Archipelago, Log);
                 SwitchLocker.Awake(Archipelago, Log);
+                ExpHandler.Awake();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch
