@@ -9,9 +9,9 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> OneCountItems = new(){
-            "VHS Tape", "White VHS Tape", "Corrupted Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
+            "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
-            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)"
+            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir"
         };
         
         public static readonly List<string> Weapons = new(){
@@ -21,7 +21,7 @@ namespace LunacidAP.Data
             "Steel Spear", "Stone Club", "Torch", "Twisted Staff", "Vampire Hunter Sword", "Wand of Power", "Wolfram Greatsword",
             "Wooden Shield", "Crossbow", "Steel Needle", "Hammer of Cruelty", "Lucid Blade", "Jotunn Slayer", "Rapier", "Privateer Musket",
             "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
-            "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword"
+            "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword",
         };
 
         public static readonly List<string> Spells = new(){
@@ -36,7 +36,7 @@ namespace LunacidAP.Data
             "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris", 
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife", 
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
-            "VHS Tape", "Corrupted Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
+            "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin"
         };
 
@@ -47,6 +47,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){
+            { "Opal", 0 },
             { "Fire Opal", 2 },
             { "Ocean Bone Shard", 4},
             { "Ocean Bone Shell", 6 },
@@ -54,23 +55,21 @@ namespace LunacidAP.Data
             { "Obsidian", 10 },
             { "Snowflake Obsidian", 12 },
             { "Yellow Morel", 14 },
+            { "Destroying Angel", 16 },
             { "Lotus Seed Pod", 18 },
             { "Ashes", 20 },
             { "Ectoplasm", 30 },
             { "Ikurr'ilb Root", 32 },
             { "Vampiric Ashes", 34 },
             { "Bones", 36 },
+            { "Bloodweed", 38 },
             { "Moon Petal", 40 },
             { "Fool's Gold", 42 },
-            // { "Opal", 0 },
-            // { "Destroying Angel", 0 },
-            // { "Bloodweed", 0 },
-            // { "Fire Coral", 0 },
-            // { "Fiddlehead", 0 },
-            // { "Fractured Life", 0 },
-            // { "Fractured Death", 0 },
-            // { "Broken Sword", 0, },
-
+            { "Fire Coral", 44 },
+            { "Fiddlehead", 46 },
+            { "Fractured Death", 48 },
+            { "Fractured Life", 50 },
+            { "Broken Sword", 52 },
         };
 
         public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
