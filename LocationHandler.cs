@@ -1,8 +1,10 @@
+using System.Reflection;
 using System.Runtime.InteropServices;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace LunacidAP
 {
@@ -12,6 +14,10 @@ namespace LunacidAP
         private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
         private static int _currentFloor = 0;
+        private static string[] _kept {get; set; }
+
+
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
         public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
         {
@@ -61,10 +67,6 @@ namespace LunacidAP
             var objectName = instance.gameObject.name;
             var sceneName = instance.gameObject.scene.name;
             var objectLocation = instance.gameObject.transform.position;
-            if (!LunacidLocations.APLocationData.ContainsKey(sceneName))
-            {
-                _log.LogInfo($"Scene {sceneName} not implemented yet!");
-            }
             if (!ArchipelagoClient.Authenticated)
             {
                 _popup.POP($"Restart the game and login first!", 1f, 0);
@@ -91,7 +93,7 @@ namespace LunacidAP
                     return false;
                 }
             }
-            
+
             _log.LogInfo("Found unaccounted for Location");
             _log.LogInfo($"Scene: {sceneName}, Object: {objectName}, Position: {objectLocation}");
             _log.LogInfo($"Name {instance.Name}, Alt Name {instance.Alt_Name}");
@@ -102,7 +104,7 @@ namespace LunacidAP
         {
             if (objectName.Contains("Clone"))
             {
-                var isNameHandled = CloneHandler(sceneName, objectName, objectPosition, out var locationName);
+                var isNameHandled = CloneHandler(sceneName, objectName, objectPosition, type, out var locationName);
                 if (isNameHandled)
                 {
                     _log.LogInfo($"Found Position for location [{locationName}]");
@@ -139,17 +141,22 @@ namespace LunacidAP
             return locationOfShortestDistance;
         }
 
-        private static bool CloneHandler(string sceneName, string objectName, Vector3 objectPosition, out string locationName)
+        public static string DetermineAPLocation(GameObject gameObject, int type)
+        {
+            return DetermineAPLocation(gameObject.scene.name, gameObject.name, gameObject.transform.position, type);
+        }
+
+        private static bool CloneHandler(string sceneName, string objectName, Vector3 objectPosition, int type, out string locationName)
         {
             objectName = objectName.Replace("(Clone)", "");
             if (sceneName != "TOWER")
             {
-                if (LunacidLocations.DropLocations.ContainsKey(objectName))
+                if (objectName == "BOOK_PICKUP")
                 {
-                    locationName = LunacidLocations.DropLocations[objectName];
+                    locationName = "AHB: Sngula Umbra's Remains";
                     return true;
                 }
-                if (LunacidLocations.ShopLocations.ContainsKey(objectName))
+                if ((sceneName == "HUB_01" || sceneName == "FOREST_A1") && LunacidLocations.ShopLocations.ContainsKey(objectName))
                 {
                     locationName = LunacidLocations.ShopLocations[objectName];
                     if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
@@ -162,29 +169,18 @@ namespace LunacidAP
                     }
                     return true;
                 }
+                if (LunacidLocations.DropLocations.ContainsKey(objectName))
+                {
+                    locationName = LunacidLocations.DropLocations[objectName];
+                    return true;
+                }
                 locationName = "";
                 return true;
             }
-            if (objectName == "CANDLE_PICKUP")
+            else if (sceneName == "TOWER" && Vector3.Distance(objectPosition, new Vector3(68.0f, -9.5f, -172.0f)) < 2f)
             {
-                if (_currentFloor == 20)
-                {
-                    locationName = "TA: Floor 20 Chest";
-                }
-                else
-                {
-                    locationName = "TA: Floor 40 Chest";
-                }
-                return true;
-            }
-            if (Vector3.Distance(new Vector3(60.2f, -10.0f, -168.7f), objectPosition) < 1f)
-            {
-                locationName = $"TA: Floor {_currentFloor} Health Refill";
-                return true;
-            }
-            if (Vector3.Distance(new Vector3(59.9f, -10.0f, -174.9f), objectPosition) < 1f)
-            {
-                locationName = $"TA: Floor {_currentFloor} Crystal Refill";
+                var towerLocation = "TA: Floor {0} Chest";
+                locationName = string.Format(towerLocation, _currentFloor.ToString());
                 return true;
             }
             locationName = "";
@@ -197,15 +193,23 @@ namespace LunacidAP
         {
             _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
             _log.LogInfo($"Slot {__instance.Slot} is trying to increment to {__instance.value}");
+            if (__instance.Zone == 6 && __instance.Slot == 15)
+            {
+                if (__instance.value == 6 )
+                {
+                    __instance.value = 3;  // This just lets the player loop the quest in case they missed the first gift, for Patchouli.
+                }
+                return true;  // let this quest just transition normally otherwise.
+            }
             foreach (var location in LunacidFlags.ItemToFlag)
             {
-                if (__instance.Zone == location.Value[0] && __instance.Slot == location.Value[1])
+                if (__instance.Zone == location.Value[0] && __instance.Slot == location.Value[1] & __instance.value == location.Value[2])
                 {
                     _log.LogInfo($"Denying {__instance.gameObject.name} from changing data.");
                     return false;
                 }
             }
-            _log.LogInfo($"Allowing {__instance.gameObject.name} from changing data.");
+            _log.LogInfo($"Allowing {__instance.gameObject.name} to change data.");
             return true;
         }
 
@@ -213,7 +217,87 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void Door_StealFloorValue(ShadowTower_CON __instance)
         {
-            _currentFloor = __instance.floor;
+            _currentFloor = __instance.floor * 5 + __instance.room; // Its wrong until its right basically.
         }
+
+        [HarmonyPatch(typeof(Spawn_if_moon), "OnEnable")]
+        [HarmonyPostfix]
+        private static void OnEnable_AllowBrokenSword(Spawn_if_moon __instance)
+        {
+            if (__instance.gameObject.scene.name != "ARENA")
+            {
+                return;
+            }
+            foreach (var target in __instance.TARGETS)
+            {
+                if (target.name == "SW")
+                {
+                    target.SetActive(value: true); // always let this show up
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Boss), "Start")]
+        [HarmonyPrefix]
+        private static bool Start_SendLucidCheck(Boss __instance)
+        {
+            __instance.GetType().GetField("START_POS", Flags).SetValue(__instance, __instance.transform.position);
+            var KEEP = new string[10];
+            KEEP[0] = __instance.CON.CURRENT_PL_DATA.WEP1;
+            KEEP[1] = __instance.CON.CURRENT_PL_DATA.WEP2;
+            KEEP[2] = __instance.CON.CURRENT_PL_DATA.ITEM1;
+            KEEP[3] = __instance.CON.CURRENT_PL_DATA.ITEM2;
+            KEEP[4] = __instance.CON.CURRENT_PL_DATA.ITEM3;
+            KEEP[5] = __instance.CON.CURRENT_PL_DATA.ITEM4;
+            KEEP[6] = __instance.CON.CURRENT_PL_DATA.ITEM5;
+            KEEP[7] = __instance.CON.CURRENT_PL_DATA.MAG1;
+            KEEP[8] = __instance.CON.CURRENT_PL_DATA.MAG2;
+            __instance.GetType().GetField("KEEP", Flags).SetValue(__instance, KEEP);
+            _kept = KEEP;
+            __instance.CON.CURRENT_PL_DATA.WEP1 = "LUCID BLADE";
+            __instance.CON.CURRENT_PL_DATA.WEP2 = "LUCID BLADE";
+            __instance.CON.CURRENT_PL_DATA.ITEM1 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM2 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM3 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM4 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM5 = null;
+            __instance.CON.CURRENT_PL_DATA.MAG1 = null;
+            __instance.CON.CURRENT_PL_DATA.MAG2 = null;
+            __instance.CON.PL.GOD = true;
+            __instance.CON.Current_Gameplay_State = 1;
+            __instance.CON.OpenMenu();
+            __instance.CON.EQITEMS();
+            __instance.CON.EQMagic();
+            var ANIM = __instance.transform.GetChild(0).GetComponent<Animation>();
+            __instance.GetType().GetField("ANIM", Flags).SetValue(__instance, ANIM);
+            __instance.StartCoroutine("Regen");
+            var lucidID = _archipelago.GetLocationIDFromName("LA: The Weapon to Kill an Immortal");
+            _archipelago.Session.Locations.CompleteLocationChecks(lucidID);
+            return false;
+        }
+
+        [HarmonyPatch(typeof(Boss), "End")]
+        [HarmonyPrefix]
+        private static bool End_ReturnWithoutLucid(Boss __instance)
+        {
+            Debug.Log("END");
+            __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
+            __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
+            __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];
+            __instance.CON.CURRENT_PL_DATA.ITEM2 = _kept[3];
+            __instance.CON.CURRENT_PL_DATA.ITEM3 = _kept[4];
+            __instance.CON.CURRENT_PL_DATA.ITEM4 = _kept[5];
+            __instance.CON.CURRENT_PL_DATA.ITEM5 = _kept[6];
+            __instance.CON.CURRENT_PL_DATA.MAG1 = _kept[7];
+            __instance.CON.CURRENT_PL_DATA.MAG2 = _kept[8];
+            __instance.CON.CURRENT_PL_DATA.PLAYER_H = Mathf.Max(__instance.CON.CURRENT_PL_DATA.PLAYER_H, 20f);
+            __instance.CON.PL.Poison.POISON_DUR = 0.01f;
+            __instance.CON.CURRENT_PL_DATA.PLAYER_B = __instance.CON.CURRENT_PL_DATA.PLAYER_H;
+            __instance.CON.EQITEMS();
+            __instance.CON.EQMagic();
+            return false;
+        }
+
+
     }
 }

@@ -36,7 +36,6 @@ namespace LunacidAP
             var itemName = DetermineSwitchName(sceneName, switchPosition);
             if (itemName == "")
             {
-                _log.LogInfo($"Switch cannot be found for position {switchPosition}");
                 return true; // Its not any relevant switch, so it shouldn't stop the player.
             }
             var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -70,7 +69,6 @@ namespace LunacidAP
             }
             if (shortestDistance > 10f)
             {
-                _log.LogInfo($"Closest location for Switch at {objectPosition} was too far away: {switchOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
                 return ""; //Failsafe for new positions
             }
             _log.LogInfo($"Found Position for switch [{switchOfShortestDistance}]");
