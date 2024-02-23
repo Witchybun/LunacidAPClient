@@ -9,6 +9,7 @@ namespace LunacidAP
         private ManualLogSource _log;
         private const string SEED_KEY = "seed";
         private const string EXP_KEY = "experience";
+        private const string WEXP_KEY = "weaponexperience";
         private const string SWITCH_KEY = "switchlocks";
         private const string COIN_KEY = "strangecoinbundle";
         private const string FILLER_KEY = "fillerbundle";
@@ -22,6 +23,7 @@ namespace LunacidAP
         public static bool Shopsanity {get; private set;}
         public static bool Switchlock {get; private set;}
         public static float ExperienceMultiplier {get; private set;}
+        public static float WExperienceMultiplier {get; private set;}
         public static int Coinbundle {get; private set;}
         public static int Fillerbundle {get; private set;}
 
@@ -36,6 +38,7 @@ namespace LunacidAP
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
             ExperienceMultiplier = (float) GetSlotSetting(EXP_KEY, 100)/100;
+            WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
             Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
             Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
 
