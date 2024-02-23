@@ -41,7 +41,6 @@ namespace LunacidAP
             WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
             Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
             Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
-
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)

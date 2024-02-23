@@ -62,6 +62,7 @@ namespace LunacidAP
                 Session.Socket.ErrorReceived += Session_ErrorReceived;
                 Session.Socket.SocketClosed += Session_SocketClosed;
                 Session.Items.ItemReceived += Session_ItemRecieved;
+                CommunionHint.DetermineHints(SlotData.Seed);
                 _log.LogInfo("Successfully connected to server!");
             }
             else if (result is LoginFailure loginFailure)
@@ -235,6 +236,11 @@ namespace LunacidAP
         public long GetLocationIDFromName(string locationName)
         {
             return Session.Locations.GetLocationIdFromName(GAME_NAME, locationName);
+        }
+
+        public string GetItemNameFromID(long itemID)
+        {
+            return Session.Items.GetItemName(itemID);
         }
 
         public bool WasItemReceived(string itemName)
