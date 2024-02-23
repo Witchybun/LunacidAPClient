@@ -1,5 +1,8 @@
 ﻿
 using System.Collections;
+using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.APGUI;
@@ -26,9 +29,11 @@ namespace LunacidAP
                 GameLog.Awake(Archipelago, Log);
                 ArchipelagoLoginGUI.Awake(Archipelago, Log);
                 LocationHandler.Awake(Archipelago, Log);
+                ItemHandler.Awake(Archipelago, Log);
                 SaveHandler.Awake(Archipelago, Log);
                 SwitchLocker.Awake(Archipelago, Log);
                 ExpHandler.Awake();
+                FlagHandler.Awake(Archipelago, Log);
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch
@@ -55,6 +60,14 @@ namespace LunacidAP
             if (ArchipelagoClient.IsInGame)
             {
                 StartCoroutine(AutoConnect());
+                CheckForVictory(sceneName);
+                
+            }
+            if (sceneName == "PITT_A1")
+            {
+                var pittObjects = GameObject.Find("THE_PIT_A1");
+                var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
+                woodenGate.SetActive(false);
             }
             
 
@@ -86,6 +99,23 @@ namespace LunacidAP
                 timer += 1;
             }
 
+        }
+
+        private void CheckForVictory(string sceneName)
+        {
+            if (!ArchipelagoClient.Authenticated)
+            {
+                return;
+            }
+            if (sceneName == "END_E" && Archipelago.HasGoal(Goal.EndingE) || 
+            sceneName == "END_B" && Archipelago.HasGoal(Goal.EndingB) ||
+            sceneName == "END_A" && Archipelago.HasGoal(Goal.EndingA) ||
+            sceneName == "WhatWillBeAtTheEnd" && Archipelago.HasGoal(Goal.EndingCD))
+            {
+                var statusUpdatePacket = new StatusUpdatePacket();
+            statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
+            Archipelago.Session.Socket.SendPacket(statusUpdatePacket);
+            }
         }
 
     }
