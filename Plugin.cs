@@ -64,12 +64,6 @@ namespace LunacidAP
                 CheckForVictory(sceneName);
                 
             }
-            if (sceneName == "PITT_A1")
-            {
-                var pittObjects = GameObject.Find("THE_PIT_A1");
-                var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
-                woodenGate.SetActive(false);
-            }
             
 
         }
@@ -84,7 +78,7 @@ namespace LunacidAP
         {
             yield return new WaitForSeconds(2f);
             var timer = 0;
-            while (!ArchipelagoClient.Authenticated && timer < 20)
+            while (!ArchipelagoClient.Authenticated && timer < 10)
             {
                 if (ArchipelagoClient.IsInGame)
                 {

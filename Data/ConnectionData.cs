@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
 {
@@ -10,9 +11,11 @@ namespace LunacidAP.Data
         public static string Password {get; set;} = "";
         public static List<ReceivedItem> ReceivedItems {get; set;} = new List<ReceivedItem>(){};
         public static List<string> CompletedLocations {get; set;} = new List<string>(){};
+        public static Dictionary<string, CommunionHint.HintData> CommunionHints {get; set;} = new Dictionary<string, CommunionHint.HintData>(){};
 
         public static void WriteConnectionData(string hostName, string slotName, string password, 
-        int seed = 0, List<ReceivedItem> receivedItems = null, List<string> completedLocations = null)
+        int seed = 0, List<ReceivedItem> receivedItems = null, List<string> completedLocations = null, 
+        Dictionary<string, CommunionHint.HintData> communionHints = null)
         {
             HostName = hostName;
             SlotName = slotName;
@@ -26,6 +29,10 @@ namespace LunacidAP.Data
             {
                 CompletedLocations = completedLocations;
             }
+            if (communionHints is not null)
+            {
+                CommunionHints = communionHints;
+            }
         }
 
         public static void WriteConnectionData()
@@ -36,6 +43,7 @@ namespace LunacidAP.Data
             Seed = 0;
             ReceivedItems = new List<ReceivedItem>(){};
             CompletedLocations = new List<string>(){};
+            CommunionHints = new Dictionary<string, CommunionHint.HintData>(){};
 
         }
 

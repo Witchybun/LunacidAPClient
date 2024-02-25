@@ -75,7 +75,8 @@ namespace LunacidAP
                 HostName = ConnectionData.HostName,
                 Password = ConnectionData.Password,
                 ObtainedItems = ConnectionData.ReceivedItems,
-                CheckedLocations = ConnectionData.CompletedLocations
+                CheckedLocations = ConnectionData.CompletedLocations,
+                CommunionHints = ConnectionData.CommunionHints
             };
             if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == 0))
             {
@@ -107,7 +108,7 @@ namespace LunacidAP
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.SlotName, loadedSave.Password,
-                    loadedSave.Seed, loadedSave.ObtainedItems, loadedSave.CheckedLocations);
+                    loadedSave.Seed, loadedSave.ObtainedItems, loadedSave.CheckedLocations, loadedSave.CommunionHints);
                     _log.LogInfo("Save loaded.  Contents:");
                     _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
                     return;
@@ -132,5 +133,6 @@ namespace LunacidAP
         public int Seed;
         public List<ReceivedItem> ObtainedItems;
         public List<string> CheckedLocations;
+        public Dictionary<string, CommunionHint.HintData> CommunionHints;
     }
 }

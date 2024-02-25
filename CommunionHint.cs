@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Data;
 using UnityEngine;
 
 namespace LunacidAP
@@ -16,7 +18,7 @@ namespace LunacidAP
         private static CONTROL CON;
 
         private static readonly char[] alphabet = new[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-        private static readonly char[] symbols = new[] { '.', ':', '(', ')', '?', '!', '[', ']', ' ', '{', '}', '#', '$'};
+        private static readonly char[] symbols = new[] { '.', ':', '(', ')', '?', '!', '[', ']', ' ', '{', '}', '#', '$' };
         private static Dictionary<string, string> CreatureToHint = new(){
             { "ABYSSALDEMON", "Upon {0} lies {1}.  And you will die before reaching it!" },
             { "CENTAUR", "Dead flesh.  Cannot reach {0}.  For {1} is salvation." },
@@ -52,7 +54,7 @@ namespace LunacidAP
             { "TILLANDSIA", "The wind blows so well at {0}.  Not even {1} stops it blowing past me.  It feels like home..." },
         };
 
-        private static Dictionary<string, long> CreatureToPossibleLocations {get; set;}
+        private static Dictionary<string, HintData> CreatureHints { get; set; }
 
         public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
         {
@@ -91,41 +93,75 @@ namespace LunacidAP
             {
                 return true; // just let the original code handle it.
             }
+            if (other.gameObject.GetComponent<OBJ_HEALTH>() == null || other.gameObject.GetComponent<OBJ_HEALTH>().MOM == null || !(other.gameObject.GetComponent<OBJ_HEALTH>().MOM.GetComponent<AI_simple>() != null))
+            {
+                return false;
+            }
+            __instance.NPC_NAME = other.GetComponent<OBJ_HEALTH>().MOM.gameObject.name.ToUpper().Replace(" ", "");
             if (!CreatureToHint.Keys.Contains(__instance.NPC_NAME))
             {
                 return true; // For now just use the old code.
             }
-            try{
-            CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            PAPPY = CON.PAPPY;
-            __instance.NPC_NAME = other.GetComponent<OBJ_HEALTH>().MOM.gameObject.name.ToUpper().Replace(" ", "");
-            string text = "";
-            var location = _archipelago.Session.Locations.GetLocationNameFromId(CreatureToPossibleLocations[__instance.NPC_NAME]).Substring(0, 20);
-            var itemID = _archipelago.ScoutLocation(CreatureToPossibleLocations[__instance.NPC_NAME], false).Locations[0].Item;
-            var item = _archipelago.GetItemNameFromID(itemID).Substring(0,20);
-            _log.LogInfo(string.Format(CreatureToHint[__instance.NPC_NAME], location, item)); // Keep for players
-            text = Encrypt(string.Format(CreatureToHint[__instance.NPC_NAME], location, item));
-            PAPPY.POP(text, 1f, 13);
-            Debug.Log(__instance.NPC_NAME);
-            Debug.Log(text);
-            __instance.transform.GetChild(0).gameObject.SetActive(value: true);
-            UnityEngine.Object.Destroy(__instance.gameObject);
-            return false;
+            try
+            {
+                CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                PAPPY = CON.PAPPY;
+                var hintData = ConnectionData.CommunionHints[__instance.NPC_NAME];
+                var text = hintData.LocationDialogue;
+                _log.LogInfo(text);
+                var isProgression = hintData.Progression;
+                var locationID = hintData.LocationID;
+                if (!hintData.AlreadyHinted)
+                {
+                    _archipelago.ScoutLocation(locationID, isProgression);
+                }
+                ConnectionData.CommunionHints[__instance.NPC_NAME].AlreadyHinted = true;
+                text = Encrypt(text);
+                PAPPY.POP(text, 1f, 13);
+                __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+                UnityEngine.Object.Destroy(__instance.gameObject);
+                return false;
             }
             catch (Exception ex)
             {
+                if (other.GetComponent<OBJ_HEALTH>() is null)
+                {
+                    _log.LogError($"OBJ_HEALTH is null");
+                }
                 if (other.GetComponent<OBJ_HEALTH>().MOM is null)
                 {
                     _log.LogError("MOM is null");
+                }
+                if (__instance.transform.GetChild(0) is null)
+                {
+                    _log.LogError("Child is null");
+                }
+                if (__instance.transform.GetChild(0).gameObject is null)
+                {
+                    _log.LogError("Child GameObject is null");
                 }
                 _log.LogError(ex.Message);
                 return true;
             }
         }
 
+        private static string GetSuitableStringLength(string phrase, int size)
+        {
+            var length = phrase.Length;
+            if (length > size)
+            {
+                return phrase.Substring(0, size);
+            }
+            return phrase;
+        }
+
         public static void DetermineHints(int seed)
         {
-            CreatureToPossibleLocations = new(){};
+            if (ConnectionData.CommunionHints is not null && ConnectionData.CommunionHints.Count() > 1)
+            {
+                return; // already genned probably
+            }
+            CreatureHints = new() { };
             var random = new System.Random(seed);
             var locationList = _archipelago.Session.Locations.AllLocations;
             var locationCount = locationList.Count();
@@ -133,8 +169,44 @@ namespace LunacidAP
             {
                 var chosenLocationPosition = random.Next(0, locationCount - 1);
                 var chosenLocation = locationList[chosenLocationPosition];
-                CreatureToPossibleLocations[creature.Key] = chosenLocation;
+                var location = _archipelago.Session.Locations.GetLocationNameFromId(chosenLocation);
+                location = GetSuitableStringLength(location, 30);
+                var isProgression = IsLocationProgression(chosenLocation);
+                var itemID = _archipelago.ScoutLocation(chosenLocation, false).Locations[0].Item;
+                var item = _archipelago.GetItemNameFromID(itemID);
+                item = GetSuitableStringLength(item, 20);
+                var text = string.Format(creature.Value, location, item);
+                CreatureHints[creature.Key] = new HintData(text, chosenLocation, isProgression, false);
+            }
+            ConnectionData.CommunionHints = CreatureHints;
+        }
+
+        private static bool IsLocationProgression(long location)
+        {
+            var progressionFlag = _archipelago.ScoutLocation(location, false).Locations[0].Flags;
+            if (progressionFlag.HasFlag(ItemFlags.Advancement))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public class HintData
+        {
+            public string LocationDialogue { get; set; }
+            public long LocationID { get; set; }
+            public bool Progression { get; set; }
+            public bool AlreadyHinted { get; set; }
+
+            public HintData(string locationDialogue, long locationID, bool progression, bool alreadyHinted)
+            {
+                LocationDialogue = locationDialogue;
+                LocationID = locationID;
+                Progression = progression;
+                AlreadyHinted = alreadyHinted;
             }
         }
     }
+
+
 }
