@@ -13,7 +13,7 @@ namespace LunacidAP
         private static ArchipelagoClient _archipelago;
         private static CONTROL CON;
         private static ManualLogSource _log;
-        private static string[] errorData {get; set;}
+        private static string[] errorData { get; set; }
 
         public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
         {
@@ -98,100 +98,108 @@ namespace LunacidAP
         {
             try
             {
-            errorData = new string[3]{"", "", ""};
-            errorData[0] = __instance.name;
-            CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            var sceneName = __instance.gameObject.scene.name;
-            if (sceneName != "CAS_1" && sceneName != "PRISON" && sceneName != "ARENA" && sceneName != "PITT_A1" && sceneName != "FOREST_A1")
-            {
-                return true;  // Don't waste computation on maps that don't need it.
-            }
-            __instance.current_string = ZoneDataPicker(__instance.Zone);
-            __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
-            var stateController = __instance.name;
-            GameObject[] sTATES = __instance.STATES;
-            for (int i = 0; i < sTATES.Length; i++)
-            {
-                errorData[1] = i.ToString();
-                errorData[2] = sTATES[i].name;
-                if (sTATES[i] is null)
+                errorData = new string[5] { "", "", "", "", "" };
+                errorData[0] = __instance.name;
+                errorData[3] = __instance.STATES.Count().ToString();
+                errorData[4] = __instance.value.ToString();
+                CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                var sceneName = __instance.gameObject.scene.name;
+                __instance.current_string = ZoneDataPicker(__instance.Zone);
+                __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
+                var stateController = __instance.name;
+                GameObject[] sTATES = __instance.STATES;
+                if (sceneName == "FOREST_A1" && stateController == "PATCHI")
                 {
-                    continue;
-                }
-                
-                if (sceneName == "CAS_1" && stateController == "SAVE_0")
-                {
-                    if (!sTATES[i].activeSelf)
+                    if (_archipelago.WasItemReceived("Skull of Josiah") && _archipelago.IsLocationChecked("YF: Patchouli's Canopy Offer"))
                     {
-                        sTATES[i].SetActive(value: true);  // Ensures locations can be collected.
+                        if (__instance.value <= 5)
+                        {
+                            __instance.value = 5;
+                        }
+                    }
+                    if (__instance.value > 6)
+                    {
+                        __instance.value = 6; // try to stop it from incrementing too high.
                     }
                 }
-                else if (sceneName == "ARENA" && (stateController == "CHEST3" || stateController == "CHEST4"))
+                for (int i = 0; i < sTATES.Length; i++)
                 {
-                    if (!sTATES[i].activeSelf)
+                    errorData[1] = i.ToString();
+                    errorData[2] = sTATES[i].name;
+                    if (sceneName == "FOREST_B1" && stateController == "save2" && sTATES[i].name == "SKULL_PICKUP")
                     {
-                        sTATES[i].SetActive(value: true);  // Ensures locations can be collected.
+                        __instance.STATES[i].SetActive(value: true);  //turn this spot on.
+                    }
+                    else
+                    {
+                        sTATES[i].SetActive(value: false);
                     }
                 }
-                else if (sceneName == "PRISON")
+                errorData[1] = "Out of loop";
+                errorData[2] = "Out of loop";
+                __instance.STATES[__instance.value].SetActive(value: true);
+                if (sceneName == "PRISON")
                 {
-                    if (stateController == "JAIL_DOORS")
+                    var prisonKey = GameObject.Find("PRISON").transform.GetChild(4).GetChild(6).gameObject;
+                    if (!prisonKey.activeSelf)
                     {
-                        if (i == 0)
-                        {
-                            _log.LogInfo("Make key active even if you have it.");
-                            sTATES[i].SetActive(value: true);
-
-                        }
-                        else if (i == 1)
-                        {
-                            var receivedKey = DoesPlayerHaveItem("Terminus Prison Key");
-                            sTATES[i].SetActive(value: receivedKey);
-                        }
-                        else
-                        {
-                            sTATES[i].SetActive(value: false);
-                        }
+                        prisonKey.SetActive(value: true);
+                    }
+                    var hammerPickup = GameObject.Find("PRISON").transform.GetChild(7).GetChild(3).gameObject;
+                    if (!hammerPickup.activeSelf)
+                    {
+                        hammerPickup.SetActive(value: true);
                     }
                 }
                 else if (sceneName == "PITT_A1")
                 {
+                    var pittObjects = GameObject.Find("THE_PIT_A1");
+                    var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
+                    if (woodenGate.activeSelf)
+                    {
+                        woodenGate.SetActive(value: false);
+                    }
                     if (stateController == "META")
                     {
-                        if (!new List<int>() { 1, 2, 3 }.Contains(i))
-                        {
-                            sTATES[i].SetActive(value: false);
-                        }
-                        sTATES[i].SetActive(value: true);
+                        sTATES[1].SetActive(value: true);
+                        sTATES[2].SetActive(value: true);
+                        sTATES[3].SetActive(value: true);
                     }
                 }
-                else if (sceneName == "FOREST_B1" && stateController == "save2" && sTATES[i].name == "SKULL_PICKUP")
+                else if (sceneName == "CAS_1" && stateController == "SAVE_0")
                 {
-                        __instance.STATES[i].SetActive(value: true);  //turn this spot on.
+                    sTATES[0].SetActive(value: true);
+                    sTATES[1].SetActive(value: true);
+                    sTATES[2].SetActive(value: true);
                 }
-                else
+                else if (sceneName == "ARENA" && (stateController == "CHEST3" || stateController == "CHEST4"))
                 {
-                    sTATES[i].SetActive(value: false);
+                    sTATES[0].SetActive(value: true); // always force the chest in a waiting state.
+                    sTATES[1].SetActive(value: false);
                 }
-            }
-            __instance.STATES[__instance.value].SetActive(value: true);
-            return false;
+                return false;
             }
             catch (Exception ex)
             {
                 _log.LogError($"Method {nameof(Load_RetainItemPickups)} has failed:");
                 _log.LogError($"Name: {errorData[0]}, Iteration: {errorData[1]}, State Name: {errorData[2]}");
+                _log.LogError($"State Count: {errorData[3]}, Value: {errorData[4]}");
                 _log.LogError($"{ex.Message}");
 
                 return false;
             }
         }
 
-        private static bool DoesPlayerHaveItem(string itemName)
+        public static bool DoesPlayerHaveItem(string itemName)
         {
+            CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             var playerInventory = CON.CURRENT_PL_DATA.ITEMS;
             for (var i = 0; i < 128; i++)
             {
+                if (playerInventory[i] == "" || playerInventory[i] == null )
+                {
+                    return false;
+                }
                 if (StaticFuncs.REMOVE_NUMS(playerInventory[i]) == itemName)
                 {
                     return true;
