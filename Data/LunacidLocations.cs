@@ -102,7 +102,7 @@ namespace LunacidAP.Data
             {
                 "WALL_01", // Laetus Wall
                 new(){
-                    new LocationData( "LC: Hidden Chest", "ICE_TEAR_PICKUP", new Vector3(-50.1f, 36.7f, 5.4f)),
+                    new LocationData( "LC: Hidden Room", "ICE_TEAR_PICKUP", new Vector3(-50.1f, 36.7f, 5.4f)),
                     new LocationData( "LC: Invisible Path to Cliffside", "SWORD_PICKUP", new Vector3(8.3f, 65.0f, -62.7f))
                 }
             },
@@ -121,9 +121,7 @@ namespace LunacidAP.Data
                     new LocationData( "FbA: Hidden Room Lower Floor", "CRYSTAL_SHARD_PICKUP", new Vector3(-57.9f, -19.9f, 38.5f) ),
                     new LocationData( "FbA: Near Twisty Tree", "FAIRY_MOSS_PICKUP", new Vector3(-7.1f, -19.6f, 44.2f) ),
                     new LocationData( "FbA: uwu", "WEPON", new Vector3(-2.1f, -18.2f, 32.1f) ),
-                    new LocationData( "FbA: Daedalus Knowledge (First)", "RING", new Vector3(-3.2f, -19.3f, -45.9f)),
-                    new LocationData( "FbA: Daedalus Knowledge (Second)", "BESTIAL_COMMUNION", new Vector3()),
-                    new LocationData( "FbA: Daedalus Knowledge (Third)", "MOON_BEAM", new Vector3()),
+                    new LocationData( "FbA: Daedalus Knowledge", "RING", new Vector3(-3.2f, -19.3f, -45.9f)),
                     new LocationData( "FbA: Corner Near Daedalus", "HEALTH_VIAL_PICKUP", new Vector3(-43.6f, -20.0f, -29.6f))
                 }
             },
@@ -328,7 +326,7 @@ namespace LunacidAP.Data
                     new LocationData( "FlA: Temple of Water Room Near Water", "FAIRY_MOSS_PICKUP", new Vector3(-169.5f, 8.0f, -117.0f) ),
                     new LocationData( "FlA: Temple of Water Corner Near Water", "ANTIDOTE_PICKUP", new Vector3(-198.6f, 8.3f, -123.4f) ),
                     new LocationData( "FlA: Temple of Water Collapsed End Near Balcony", "HEALTH_VIAL_PICKUP", new Vector3(-99.0f, 16.0f, -198.7f) ),
-                    new LocationData( "FlA: Temple of Water Hidden Basement (Left)", "ANTIDOTE_PICKUP (2)", new Vector3(-119.3f, 8.0f, -159.6f) ),
+                    new LocationData( "FlA: Temple of Water Hidden Basement (Left)", "ANTIDOTE_PICKUP (2)", new Vector3(-119.3f, -8.0f, -159.6f) ),
                     new LocationData( "FlA: Temple of Water Hidden Basement (Right)", "ANTIDOTE_PICKUP (2)", new Vector3(-119.2f, -8.0f, -158.3f) ),
                     new LocationData( "FlA: Temple of Water Hidden Laser Room", "OBS_SWORD_PICKUP", new Vector3(-116.0f, -8.0f, -137.6f) ),
                     new LocationData( "FlA: Temple of Water Hidden Alcove Before Stairs", "HEALTH_VIAL_PICKUP", new Vector3(-19.4f, -8.0f, -140.3f) ),

@@ -89,7 +89,7 @@ namespace LunacidAP
             try
             {
                 PopupCommand(1, Name, player, self);
-                Name = Name.Replace("JAILOR'S","JAILORS");
+                Name = Name.Replace("JAILOR'S", "JAILORS");
                 for (int j = 0; j < 128; j++)
                 {
                     if (Control.CURRENT_PL_DATA.WEPS[j] == "" || Control.CURRENT_PL_DATA.WEPS[j] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.WEPS[j]) == Name)
@@ -282,7 +282,10 @@ namespace LunacidAP
                 FlagHandler.ModifyFlag(flagData[0], flagData[1], Math.Min(3, receivedCount));
                 return;
             }
-            FlagHandler.ModifyFlag(flagData[0], flagData[1], flagData[2]);
+            if (!FlagHandler.DoesPlayerHaveItem(Name))
+            {
+                FlagHandler.ModifyFlag(flagData[0], flagData[1], flagData[2]);
+            }
         }
 
         private static string ProgressiveSymbolHandler(string Name)

@@ -14,7 +14,7 @@ namespace LunacidAP
         private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
         private static int _currentFloor = 0;
-        private static string[] _kept {get; set; }
+        private static string[] _kept { get; set; }
 
 
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -73,22 +73,31 @@ namespace LunacidAP
                 return false;
             }
             var apLocation = DetermineAPLocation(sceneName, objectName, objectLocation, instance.type);
+            if (apLocation == "FbA: Daedalus Knowledge")
+            {
+                apLocation = TheDaedalusConundrum(instance);
+            }
             if (apLocation != "")
             {
                 var locationID = _archipelago.GetLocationIDFromName(apLocation);
                 var locationInfo = _archipelago.ScoutLocation(locationID, false);
+                var itemInfo = _archipelago.Session.Items.GetItemName(locationInfo.Locations[0].Item);
                 var slotNameofItemOwner = _archipelago.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
                 _archipelago.Session.Locations.CompleteLocationChecks(locationID);
+                if (apLocation == "YF: Patchouli's Reward")
+                {
+                    var patchouliCanopy = _archipelago.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
+                    _archipelago.Session.Locations.CompleteLocationChecks(patchouliCanopy);  // Ensures its done.
+                }
                 ConnectionData.CompletedLocations.Add(apLocation);
                 if (ConnectionData.SlotName == slotNameofItemOwner)
                 {
-                    _log.LogInfo($"New location from {objectName} collected: {apLocation}");
                     instance.gameObject.SetActive(false); // Its the player's own item, offer an alternative presentation
                     return false;
                 }
                 else
                 {
-                    _popup.POP($"Found Archipelago Item ({apLocation})", 1f, 0);
+                    _popup.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
                     instance.gameObject.SetActive(false); // Its someone else's item so it will only message once.
                     return false;
                 }
@@ -107,7 +116,6 @@ namespace LunacidAP
                 var isNameHandled = CloneHandler(sceneName, objectName, objectPosition, type, out var locationName);
                 if (isNameHandled)
                 {
-                    _log.LogInfo($"Found Position for location [{locationName}]");
                     return locationName;
                 }
             }
@@ -158,6 +166,12 @@ namespace LunacidAP
                 }
                 if ((sceneName == "HUB_01" || sceneName == "FOREST_A1") && LunacidLocations.ShopLocations.ContainsKey(objectName))
                 {
+                    if (!SlotData.Shopsanity)
+                    {
+                        locationName = "";
+                        return true;
+                    }
+
                     locationName = LunacidLocations.ShopLocations[objectName];
                     if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
                     {
@@ -171,6 +185,11 @@ namespace LunacidAP
                 }
                 if (LunacidLocations.DropLocations.ContainsKey(objectName))
                 {
+                    if (!SlotData.Dropsanity)
+                    {
+                        locationName = "";
+                        return true;
+                    }
                     locationName = LunacidLocations.DropLocations[objectName];
                     return true;
                 }
@@ -187,20 +206,30 @@ namespace LunacidAP
             return false;
         }
 
+        private static string TheDaedalusConundrum(Item_Pickup_scr instance)
+        {
+            _log.LogInfo($"{instance.Name}");
+            if (instance.Name == "FIRE WORM")
+            {
+                return "FbA: Daedalus Knowledge (First)";
+            }
+            else if (instance.Name == "BESTIAL COMMUNION")
+            {
+                return "FbA: Daedalus Knowledge (Second)";
+            }
+            else if (instance.Name == "MOON BEAM")
+            {
+                return "FbA: Daedalus Knowledge (Third)";
+            }
+            return "";
+        }
+
         [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
         [HarmonyPrefix]
         private static bool Save_LogAndDenySave(AREA_SAVED_ITEM __instance)
         {
             _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
             _log.LogInfo($"Slot {__instance.Slot} is trying to increment to {__instance.value}");
-            if (__instance.Zone == 6 && __instance.Slot == 15)
-            {
-                if (__instance.value == 6 )
-                {
-                    __instance.value = 3;  // This just lets the player loop the quest in case they missed the first gift, for Patchouli.
-                }
-                return true;  // let this quest just transition normally otherwise.
-            }
             foreach (var location in LunacidFlags.ItemToFlag)
             {
                 if (__instance.Zone == location.Value[0] && __instance.Slot == location.Value[1] & __instance.value == location.Value[2])
@@ -238,42 +267,12 @@ namespace LunacidAP
         }
 
         [HarmonyPatch(typeof(Boss), "Start")]
-        [HarmonyPrefix]
-        private static bool Start_SendLucidCheck(Boss __instance)
+        [HarmonyPostfix]
+        private static void Start_SendLucidCheck(Boss __instance)
         {
-            __instance.GetType().GetField("START_POS", Flags).SetValue(__instance, __instance.transform.position);
-            var KEEP = new string[10];
-            KEEP[0] = __instance.CON.CURRENT_PL_DATA.WEP1;
-            KEEP[1] = __instance.CON.CURRENT_PL_DATA.WEP2;
-            KEEP[2] = __instance.CON.CURRENT_PL_DATA.ITEM1;
-            KEEP[3] = __instance.CON.CURRENT_PL_DATA.ITEM2;
-            KEEP[4] = __instance.CON.CURRENT_PL_DATA.ITEM3;
-            KEEP[5] = __instance.CON.CURRENT_PL_DATA.ITEM4;
-            KEEP[6] = __instance.CON.CURRENT_PL_DATA.ITEM5;
-            KEEP[7] = __instance.CON.CURRENT_PL_DATA.MAG1;
-            KEEP[8] = __instance.CON.CURRENT_PL_DATA.MAG2;
-            __instance.GetType().GetField("KEEP", Flags).SetValue(__instance, KEEP);
-            _kept = KEEP;
-            __instance.CON.CURRENT_PL_DATA.WEP1 = "LUCID BLADE";
-            __instance.CON.CURRENT_PL_DATA.WEP2 = "LUCID BLADE";
-            __instance.CON.CURRENT_PL_DATA.ITEM1 = null;
-            __instance.CON.CURRENT_PL_DATA.ITEM2 = null;
-            __instance.CON.CURRENT_PL_DATA.ITEM3 = null;
-            __instance.CON.CURRENT_PL_DATA.ITEM4 = null;
-            __instance.CON.CURRENT_PL_DATA.ITEM5 = null;
-            __instance.CON.CURRENT_PL_DATA.MAG1 = null;
-            __instance.CON.CURRENT_PL_DATA.MAG2 = null;
-            __instance.CON.PL.GOD = true;
-            __instance.CON.Current_Gameplay_State = 1;
-            __instance.CON.OpenMenu();
-            __instance.CON.EQITEMS();
-            __instance.CON.EQMagic();
-            var ANIM = __instance.transform.GetChild(0).GetComponent<Animation>();
-            __instance.GetType().GetField("ANIM", Flags).SetValue(__instance, ANIM);
-            __instance.StartCoroutine("Regen");
             var lucidID = _archipelago.GetLocationIDFromName("LA: The Weapon to Kill an Immortal");
             _archipelago.Session.Locations.CompleteLocationChecks(lucidID);
-            return false;
+            return;
         }
 
         [HarmonyPatch(typeof(Boss), "End")]
@@ -281,6 +280,8 @@ namespace LunacidAP
         private static bool End_ReturnWithoutLucid(Boss __instance)
         {
             Debug.Log("END");
+            string[] KEEP = (string[])__instance.GetType().GetField("KEEP", Flags).GetValue(__instance);
+            _kept = KEEP;
             __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
             __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
             __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];
