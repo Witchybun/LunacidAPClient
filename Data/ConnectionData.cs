@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
 {

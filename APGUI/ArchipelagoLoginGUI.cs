@@ -5,7 +5,6 @@ namespace LunacidAP.APGUI
 {
     public static class ArchipelagoLoginGUI
     {
-        public static bool ContinueWithoutArchipelago = false;
 
         public static bool Unlocked = false;
         private static bool ReachedTitleScreen = false;
@@ -30,12 +29,8 @@ namespace LunacidAP.APGUI
 
         public static void Update()
         {
-            if (GameLog.DisableArchipelagoLogin)
-            {
-                ContinueWithoutArchipelago = true;
-            }
 
-            if (ArchipelagoClient.Authenticated || ContinueWithoutArchipelago)
+            if (ArchipelagoClient.Authenticated)
             {
                 Unlocked = true;
             }
@@ -56,24 +51,17 @@ namespace LunacidAP.APGUI
         public static void UpdateGUI()
         {
             StatusText = "Archipelago Status: ";
-            if (ContinueWithoutArchipelago)
-            {
-                StatusText += "Skipped";
-            }
-            else
-            {
-                StatusText += $"Connected ";
-            }
+            StatusText += $"Connected ";
         }
 
         public static void OnGUI()
         {
-            if (GameLog.isHidden || GameLog.DisableArchipelagoLogin)
+            if (GameLog.isHidden)
             {
                 return;
             }
 
-            if (ArchipelagoClient.Authenticated || ContinueWithoutArchipelago)
+            if (ArchipelagoClient.Authenticated)
             {
                 GUI.Box(bgRectMini, "");
                 GUI.Box(bgRectMini, "");
@@ -114,12 +102,6 @@ namespace LunacidAP.APGUI
                         _archipelago.CollectLocationsFromSave();
                     }
                 }
-
-            if (!ContinueWithoutArchipelago && GUI.Button(new Rect(145, 110, 195, 30), "Continue Without Archipelago"))
-            {
-                ContinueWithoutArchipelago = true;               
-                GameLog.isHidden = true;
-            }
         }
     }
 }

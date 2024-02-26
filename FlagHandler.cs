@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
-using LunacidAP.Data;
 using UnityEngine;
 
 namespace LunacidAP
@@ -154,10 +152,15 @@ namespace LunacidAP
                 else if (sceneName == "PITT_A1")
                 {
                     var pittObjects = GameObject.Find("THE_PIT_A1");
+                    var vhsTape = pittObjects.transform.GetChild(1).GetChild(22).gameObject;
                     var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
                     if (woodenGate.activeSelf)
                     {
                         woodenGate.SetActive(value: false);
+                    }
+                    if (!_archipelago.IsLocationChecked("HB: Temple Hidden Room In Sewer"))
+                    {
+                        vhsTape.SetActive(value: true);
                     }
                     if (stateController == "META")
                     {

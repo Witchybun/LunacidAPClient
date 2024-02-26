@@ -1,6 +1,5 @@
 ﻿
 using System.Collections;
-using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
