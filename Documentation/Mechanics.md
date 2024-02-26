@@ -12,6 +12,7 @@ Base Spells - Flame Spear, Ice Spear, Wind Slicer, Slime Orb, Earth Strike
 Shop Weapons - Crossbow, Rapier, Steel Needle
 
 Drop Weapons - Skeleton Axe, Rusted Sword, Ice Sickle
+
 Drop Spells - Dark Skull
 
 Do note that the shop/drop weapon/spells are only given options if shopsanity/dropsanity are turned on, respectively.
