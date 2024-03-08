@@ -271,6 +271,12 @@ namespace LunacidAP
             PopupCommand(4, Name, player, self);
         }
 
+        private static void GiveTrap(string Name, string player = "", bool self = false)
+        {
+            PopupCommand(4, Name, player, self);
+            Control.PL.Poison.Harm(LunacidItems.TrapToHarm[Name], 10.0f);
+        }
+
         private static string ValueSuffix(int value)
         {
             if (value > 9)

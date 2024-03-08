@@ -72,6 +72,17 @@ namespace LunacidAP.Data
             { "Broken Sword", 52 },
         };
 
+        public static readonly Dictionary<string, int> TrapToHarm = new(){
+            {"Bleed Trap", 0},
+            {"Poison Trap", 1},
+            {"Curse Trap", 2},
+            {"Slowness Trap", 4},
+            {"Blindness Trap", 5},
+            {"Mana Drain Trap", 6},
+            {"XP Drain Trap", 7}
+        };
+
+
         public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
             "COIN_PICKUP", "ENKEY_PICKUP"
         };
