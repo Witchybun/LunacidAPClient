@@ -7,6 +7,7 @@ namespace LunacidAP
     using Archipelago.MultiClient.Net.Enums;
     using Archipelago.MultiClient.Net.Helpers;
     using Archipelago.MultiClient.Net.Packets;
+    using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
     using BepInEx.Logging;
     using LunacidAP.Data;
     using UnityEngine;
@@ -21,6 +22,9 @@ namespace LunacidAP
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
         public static bool Authenticated;
+        private DeathLinkService _deathLinkService;
+        public bool IsCurrentlyDeathLinked = false;
+        public string[] CurrentDLData = new string[2]{"", ""};
         public static bool IsInGame = false;
         public static bool HasReceivedItems = false;
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
@@ -63,6 +67,11 @@ namespace LunacidAP
                 Session.Socket.SocketClosed += Session_SocketClosed;
                 Session.Items.ItemReceived += Session_ItemRecieved;
                 CommunionHint.DetermineHints(SlotData.Seed);
+                if (loginSuccess.SlotData["death_link"].ToString() == "1")
+                {
+                    ConnectionData.DeathLink = true;
+                    InitializeDeathLink();
+                }
                 _log.LogInfo("Successfully connected to server!");
             }
             else if (result is LoginFailure loginFailure)
@@ -124,6 +133,56 @@ namespace LunacidAP
         public void Session_ItemRecieved(ReceivedItemsHelper helper)
         {
             ReceiveAllItems();
+        }
+
+        public void InitializeDeathLink()
+        {
+            if (_deathLinkService == null)
+            {
+                _deathLinkService = Session.CreateDeathLinkService();
+                _deathLinkService.OnDeathLinkReceived += DeathLinkReceieved;
+            }
+            if (ConnectionData.DeathLink)
+            {
+                _deathLinkService.EnableDeathLink();
+            }
+            else
+            {
+                _deathLinkService.DisableDeathLink();
+            }
+        }
+
+        private void DeathLinkReceieved(DeathLink deathLink)
+        {
+            IsCurrentlyDeathLinked = true;
+            CurrentDLData[0] = deathLink.Source;
+            CurrentDLData[1] = deathLink.Cause;
+
+        }
+
+        public void SendDeathLink()
+        {
+            if (IsCurrentlyDeathLinked)
+            {
+                IsCurrentlyDeathLinked = false;
+                return;
+            }
+            var deathLink = new DeathLink(ConnectionData.SlotName, "perished in the Great Well");
+            _deathLinkService.SendDeathLink(deathLink);
+        }
+
+        public IEnumerator UnleashGhosts(string source, string reason)
+        {
+            yield return new WaitForSeconds(2f);
+            var ghost = GameObject.Find("UNDETH").transform.GetChild(0).gameObject;
+            if (!ghost.activeSelf)
+            {
+                GameObject.Find("MUSE").GetComponent<MUSE_scr>().Undeth();
+                ghost.SetActive(true);
+            }
+            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            Control.PAPPY.POP($"The death of {source} by {reason} causes the ghosts to stir...", 1f, 11);
+            IsCurrentlyDeathLinked = false;
         }
 
         public List<string> GetAllCheckedLocations()
