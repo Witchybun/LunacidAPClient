@@ -8,6 +8,8 @@ namespace LunacidAP.Data
         public static string SlotName {get; set;} = "Player1";
         public static int Seed {get; set;} = 0;
         public static string Password {get; set;} = "";
+        public static int Symbols {get; set;} = 0;
+        public static bool DeathLink {get; set;} = false;
         public static List<ReceivedItem> ReceivedItems {get; set;} = new List<ReceivedItem>(){};
         public static List<string> CompletedLocations {get; set;} = new List<string>(){};
         public static Dictionary<string, CommunionHint.HintData> CommunionHints {get; set;} = new Dictionary<string, CommunionHint.HintData>(){};

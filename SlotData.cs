@@ -16,6 +16,7 @@ namespace LunacidAP
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
+        private const string DL_KEY = "death_link";
         private Dictionary<string, object> _slotDataFields;
         public static int Seed {get; private set;}
         public static Goal Ending {get; private set;}
@@ -26,6 +27,7 @@ namespace LunacidAP
         public static float WExperienceMultiplier {get; private set;}
         public static int Coinbundle {get; private set;}
         public static int Fillerbundle {get; private set;}
+        public static bool DeathLink {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -41,6 +43,7 @@ namespace LunacidAP
             WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
             Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
             Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
+            DeathLink = GetSlotSetting(DL_KEY, false);
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)
