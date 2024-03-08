@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>LunacidAP</AssemblyName>
     <Description>Randomizer for Archipelago</Description>
-    <Version>1.0.0</Version>
+    <Version>0.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
@@ -27,6 +27,12 @@
 	  <Reference Include="Assembly-CSharp">
 		  <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Assembly-CSharp.dll</HintPath>
 	  </Reference>
+    <Reference Include = "Unity.TextMeshPro">
+      <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include = "UnityEngine.UI">
+      <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>  
 
 </Project>

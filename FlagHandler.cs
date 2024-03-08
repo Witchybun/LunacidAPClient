@@ -124,18 +124,18 @@ namespace LunacidAP
                 {
                     errorData[1] = i.ToString();
                     errorData[2] = sTATES[i].name;
-                    if (sceneName == "FOREST_B1" && stateController == "save2" && sTATES[i].name == "SKULL_PICKUP")
+                    sTATES[i].SetActive(value: false);
+                }
+                errorData[2] = sTATES[__instance.value].name;
+                __instance.STATES[__instance.value].SetActive(value: true);
+                if (sceneName == "FOREST_B1")
+                {
+                    var skull = GameObject.Find("FOREST_B1").transform.GetChild(1).GetChild(2).GetChild(1).gameObject;
+                    if (!skull.activeSelf)
                     {
-                        __instance.STATES[i].SetActive(value: true);  //turn this spot on.
-                    }
-                    else
-                    {
-                        sTATES[i].SetActive(value: false);
+                        skull.SetActive(value: true);
                     }
                 }
-                errorData[1] = "Out of loop";
-                errorData[2] = "Out of loop";
-                __instance.STATES[__instance.value].SetActive(value: true);
                 if (sceneName == "PRISON")
                 {
                     var prisonKey = GameObject.Find("PRISON").transform.GetChild(4).GetChild(6).gameObject;
@@ -161,12 +161,6 @@ namespace LunacidAP
                     if (!_archipelago.IsLocationChecked("HB: Temple Hidden Room In Sewer"))
                     {
                         vhsTape.SetActive(value: true);
-                    }
-                    if (stateController == "META")
-                    {
-                        sTATES[1].SetActive(value: true);
-                        sTATES[2].SetActive(value: true);
-                        sTATES[3].SetActive(value: true);
                     }
                 }
                 else if (sceneName == "CAS_1" && stateController == "SAVE_0")
@@ -199,7 +193,7 @@ namespace LunacidAP
             var playerInventory = CON.CURRENT_PL_DATA.ITEMS;
             for (var i = 0; i < 128; i++)
             {
-                if (playerInventory[i] == "" || playerInventory[i] == null )
+                if (playerInventory[i] == "" || playerInventory[i] == null)
                 {
                     return false;
                 }
