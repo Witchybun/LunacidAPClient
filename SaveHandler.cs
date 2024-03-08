@@ -74,9 +74,12 @@ namespace LunacidAP
                 SlotName = ConnectionData.SlotName,
                 HostName = ConnectionData.HostName,
                 Password = ConnectionData.Password,
+                Symbols = ConnectionData.Symbols,
+                DeathLink = ConnectionData.DeathLink,
                 ObtainedItems = ConnectionData.ReceivedItems,
                 CheckedLocations = ConnectionData.CompletedLocations,
-                CommunionHints = ConnectionData.CommunionHints
+                CommunionHints = ConnectionData.CommunionHints,
+                Elements = ConnectionData.Elements
             };
             if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == 0))
             {
@@ -108,7 +111,7 @@ namespace LunacidAP
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.SlotName, loadedSave.Password,
-                    loadedSave.Seed, loadedSave.ObtainedItems, loadedSave.CheckedLocations, loadedSave.CommunionHints);
+                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, loadedSave.CommunionHints, loadedSave.Elements);
                     _log.LogInfo("Save loaded.  Contents:");
                     _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
                     return;
@@ -131,8 +134,11 @@ namespace LunacidAP
         public string HostName;
         public string Password;
         public int Seed;
+        public int Symbols;
+        public bool DeathLink;
         public List<ReceivedItem> ObtainedItems;
         public List<string> CheckedLocations;
         public Dictionary<string, CommunionHint.HintData> CommunionHints;
+        public Dictionary<string, string> Elements;
     }
 }

@@ -12,6 +12,7 @@ namespace LunacidAP
     using LunacidAP.Data;
     using UnityEngine;
     using UnityEngine.SceneManagement;
+    using System.Collections;
 
     public class ArchipelagoClient
     {
@@ -220,9 +221,9 @@ namespace LunacidAP
         {
             if (!Authenticated)
             {
+                _log.LogInfo($"You're not connected; returning empty list");
                 return new List<ReceivedItem>();
             }
-
             var allReceivedItems = new List<ReceivedItem>();
             var apItems = Session.Items.AllItemsReceived.ToArray();
             for (var itemIndex = 0; itemIndex < apItems.Length; itemIndex++)
@@ -234,7 +235,7 @@ namespace LunacidAP
 
                 var receivedItem = new ReceivedItem(locationName, itemName, playerName, apItem.Location, apItem.Item,
                     apItem.Player, itemIndex);
-
+                _log.LogInfo($"Appending {itemName} to Received Items List");
                 allReceivedItems.Add(receivedItem);
             }
 
@@ -278,6 +279,14 @@ namespace LunacidAP
             return false;
         }
 
+        public static readonly Dictionary<ItemFlags, string> ProgressionFlagToString = new()
+        {
+          {ItemFlags.Advancement, "Progression"},
+          {ItemFlags.NeverExclude, "Useful"},
+          {ItemFlags.None, "Filler"},
+          {ItemFlags.Trap, "Trap"}  
+        };
+
         public LocationInfoPacket ScoutLocation(long locationId, bool createAsHint)
         {
             var scoutTask = Session.Locations.ScoutLocationsAsync(createAsHint, locationId);
@@ -289,8 +298,6 @@ namespace LunacidAP
         {
             return ConnectionData.CompletedLocations.Contains(locationName);
         }
-
-
 
         public long GetLocationIDFromName(string locationName)
         {
@@ -317,15 +324,6 @@ namespace LunacidAP
         public bool HasGoal(Goal goal)
         {
             return SlotData.Ending.HasFlag(goal) || SlotData.Ending.HasFlag(Goal.AnyEnding);
-        }
-
-
-        private bool ActuallyConnected
-        {
-            get
-            {
-                return Session?.Socket?.Connected ?? false;
-            }
         }
     }
 }

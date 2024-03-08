@@ -74,5 +74,20 @@ namespace LunacidAP
             _log.LogInfo($"Found Position for switch [{switchOfShortestDistance}]");
             return switchOfShortestDistance.Replace(" [Top]", "").Replace(" [Bottom]","");
         }
+
+        [HarmonyPatch(typeof(False_Wall_scr), "ACT")]
+        [HarmonyPrefix]
+        private static bool ACT_BlockIfNoOrb()
+        {
+            if (SlotData.FalseWalls == true && !_archipelago.WasItemReceived("Dusty Crystal Orb"))
+            {
+                var control =  GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                var popup = control.PAPPY;
+                popup.POP("Cannot open without the Dusty Crystal Orb.", 1f, 1);
+                return false;
+            }
+            return true;
+        }
+
     }
 }

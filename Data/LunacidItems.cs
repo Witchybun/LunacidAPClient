@@ -4,14 +4,11 @@ namespace LunacidAP.Data
 {
     public class LunacidItems
     {
-        public static readonly List<string> APItems = new(){
-            "Progressive Vampiric Symbol"
-        };
-
         public static readonly List<string> OneCountItems = new(){
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
-            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir"
+            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat", 
+            "Skeleton Rattle"
         };
         
         public static readonly List<string> Weapons = new(){
@@ -21,15 +18,23 @@ namespace LunacidAP.Data
             "Steel Spear", "Stone Club", "Torch", "Twisted Staff", "Vampire Hunter Sword", "Wand of Power", "Wolfram Greatsword",
             "Wooden Shield", "Crossbow", "Steel Needle", "Hammer of Cruelty", "Lucid Blade", "Jotunn Slayer", "Rapier", "Privateer Musket",
             "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
-            "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword",
+            "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
+            "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
+            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch"
+        };
+
+        public static readonly List<string> WeaponsWithDefaultElement = new(){
+            "LUCID BLADE", "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION", 
+            "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST", 
+            "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
 
         public static readonly List<string> Spells = new(){
             "Barrier", "Bestial Communion", "Blood Drain", "Blood Strike", "Blue Flame Arc", "Coffin", "Corpse Transformation", "Earth Strike",
             "Earth Thorn", "Fire Worm", "Flame Flare", "Flame Spear", "Ghost Light", "Holy Warmth", "Icarian Flight", "Ice Spear", "Ice Tear",
-            "Ignis Calor", "Lava Chasm", "Light Reveal", "Lightning", "Lithomancy", "Moon Beam", "Poison Mist", "Rock Bridge", "Slime Orb",
+            "Ignis Calor", "Lava Chasm", "Light Reveal", "Lightning", "Lithomancy", "Moon Beam", "Rock Bridge", "Slime Orb",
             "Spirit Warp", "Summon Fairy", "Summon Ice Sword", "Wind Dash", "Wind Slicer", "Summon Snail", "Summon Kodama", "Tornado", "Dark Skull",
-            "Quick Stride"
+            "Quick Stride", "Jingle Bells", "Poison Mist"
         };
 
         public static readonly List<string> Items = new(){
@@ -37,7 +42,8 @@ namespace LunacidAP.Data
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife", 
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
-            "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin"
+            "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb", 
+            "Skeleton Egg", "Dried Rat", "Skeleton Rattle"
         };
 
         public static readonly List<string> Materials = new(){
@@ -82,9 +88,32 @@ namespace LunacidAP.Data
             {"XP Drain Trap", 7}
         };
 
+        public static readonly Dictionary<string, int> ElementToID = new(){
+            {"Normal", 0},
+            {"Fire", 1},
+            {"Ice", 2},
+            {"Poison", 3},
+            {"Light", 4},
+            {"Dark", 5},
+            {"Dark and Light", 8},
+            {"Normal and Fire", 9},
+            {"Ice and Poison", 10},
+            {"Dark and Fire", 11}
+        };
 
         public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
             "COIN_PICKUP", "ENKEY_PICKUP"
+        };
+
+        public static Dictionary<string, string> ArrowToWeapon = new(){
+            {"ARROW_CAST", "ELFEN BOW"},
+            {"TWISTED_STAFF_CAST", "TWISTED STAFF"},
+            {"BOLT_CAST", "CROSSBOW"},
+            {"BOLT_CAST2", "DOUBLE CROSSBOW"},
+            {"HOOK_CAST", "FISHING SPEAR"},
+            {"MOONLIGHT_CAST", "MOONLIGHT"},
+            {"BULLET_CAST", "PRIVATEER MUSKET"},
+            {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
         };
     }
 }

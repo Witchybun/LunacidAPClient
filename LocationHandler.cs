@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -29,6 +30,8 @@ namespace LunacidAP
         private static bool Start_MoveItemDeletionToCheckedLocations(Item_Pickup_scr __instance)
         {
             var objectName = __instance.gameObject.name;
+            var sceneName = __instance.gameObject.scene.name;
+            var itemType = __instance.type;
             if (objectName.Contains("(Clone)"))
             {
                 return true; //This will change later for mob and shops, but good to throw these examples out.
@@ -40,7 +43,7 @@ namespace LunacidAP
                 __instance.GetComponent<SphereCollider>().enabled = false;
                 __instance.StartCoroutine("Delay");
             }
-            var apLocation = DetermineAPLocation(__instance.gameObject.scene.name, __instance.gameObject.name, __instance.gameObject.transform.position, __instance.type);
+            var apLocation = DetermineAPLocation(sceneName, objectName, __instance.gameObject.transform.position, itemType);
             if (apLocation != "" && _archipelago.IsLocationChecked(apLocation))
             {
                 _log.LogInfo($"Deleting {objectName} due to already collected location {apLocation}");
@@ -53,8 +56,8 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Pickup_SendLocation(Item_Pickup_scr __instance)
         {
-            if (__instance.SAVED is not null)
-                _log.LogInfo($"This flag is in Zone {__instance.SAVED.Zone}, with Slot {__instance.SAVED.Slot}.");
+            // if (__instance.SAVED is not null)
+            //_log.LogInfo($"This flag is in Zone {__instance.SAVED.Zone}, with Slot {__instance.SAVED.Slot}.");
             _popup = __instance.CON.PAPPY;
 
             return CollectLocation(__instance);
@@ -143,7 +146,7 @@ namespace LunacidAP
                 _log.LogInfo($"Closest location for {objectName} at {objectPosition} was too far away: {locationOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
                 return ""; //Failsafe for new positions
             }
-            _log.LogInfo($"Found Position for location [{locationOfShortestDistance}]");
+            // _log.LogInfo($"Found Position for location [{locationOfShortestDistance}]");
             return locationOfShortestDistance;
         }
 
@@ -226,17 +229,17 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Save_LogAndDenySave(AREA_SAVED_ITEM __instance)
         {
-            _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
-            _log.LogInfo($"Slot {__instance.Slot} is trying to increment to {__instance.value}");
+            //  _log.LogInfo($"Data after Saving in Zone {__instance.Zone}:");
+            // _log.LogInfo($"Slot {__instance.Slot} is trying to increment to {__instance.value}");
             foreach (var location in LunacidFlags.ItemToFlag)
             {
                 if (__instance.Zone == location.Value[0] && __instance.Slot == location.Value[1] & __instance.value == location.Value[2])
                 {
-                    _log.LogInfo($"Denying {__instance.gameObject.name} from changing data.");
+                    // _log.LogInfo($"Denying {__instance.gameObject.name} from changing data.");
                     return false;
                 }
             }
-            _log.LogInfo($"Allowing {__instance.gameObject.name} to change data.");
+            // _log.LogInfo($"Allowing {__instance.gameObject.name} to change data.");
             return true;
         }
 
@@ -268,8 +271,17 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void Start_SendLucidCheck(Boss __instance)
         {
-            var lucidID = _archipelago.GetLocationIDFromName("LA: The Weapon to Kill an Immortal");
+            var lucidID = _archipelago.GetLocationIDFromName("CF: Calamis' Weapon of Choice");
+            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            _popup = __instance.CON.PAPPY;
+            var locationInfo = _archipelago.ScoutLocation(lucidID, false);
+            var itemInfo = _archipelago.Session.Items.GetItemName(locationInfo.Locations[0].Item);
+            var slotNameofItemOwner = _archipelago.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
             _archipelago.Session.Locations.CompleteLocationChecks(lucidID);
+            if (ConnectionData.SlotName != slotNameofItemOwner)
+            {
+                _popup.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
+            }
             return;
         }
 
@@ -297,6 +309,12 @@ namespace LunacidAP
             return false;
         }
 
-
+        [HarmonyPatch(typeof(WaitAMonth), "Start")]
+        [HarmonyPrefix]
+        private static bool Start_WaitInstantly(WaitAMonth __instance)
+        {
+            __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+            return false;
+        }
     }
 }

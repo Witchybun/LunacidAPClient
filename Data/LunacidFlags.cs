@@ -6,7 +6,6 @@ namespace LunacidAP.Data
     {
         public static readonly Dictionary<string, int[]> ItemToFlag = new(){
             { "VHS Tape", new int[3]{4, 16, 1} },
-            { "Corrupt Key", new int[3]{4, 16, 3} },
             { "Progressive Vampiric Symbol", new int[3]{7, 6, 1} }, // Make these progressive clearly.
             { "Skull of Josiah", new int[3]{6, 15, 5} },
             { "White VHS Tape", new int[3]{4, 16, 4} },

@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
+using LunacidAP.Data;
+using Newtonsoft.Json;
 
 namespace LunacidAP
 {
@@ -9,14 +12,17 @@ namespace LunacidAP
         private ManualLogSource _log;
         private const string SEED_KEY = "seed";
         private const string EXP_KEY = "experience";
-        private const string WEXP_KEY = "weaponexperience";
-        private const string SWITCH_KEY = "switchlocks";
-        private const string COIN_KEY = "strangecoinbundle";
-        private const string FILLER_KEY = "fillerbundle";
+        private const string WEXP_KEY = "weapon_experience";
+        private const string SWITCH_KEY = "switch_locks";
+        private const string COIN_KEY = "strange_coin_bundle";
+        private const string FILLER_KEY = "filler_bundle";
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
         private const string DL_KEY = "death_link";
+        private const string RANDOM_ELE_KEY = "random_elements";
+        private const string ELE_DICT_KEY = "elements";
+        private const string WALL_KEY = "secret_door_lock";
         private Dictionary<string, object> _slotDataFields;
         public static int Seed {get; private set;}
         public static Goal Ending {get; private set;}
@@ -28,12 +34,13 @@ namespace LunacidAP
         public static int Coinbundle {get; private set;}
         public static int Fillerbundle {get; private set;}
         public static bool DeathLink {get; private set;}
+        public static bool RandomElements {get; private set;}
+        public static bool FalseWalls {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
             _log = log;
             _slotDataFields = slotDataFields;
-
             Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
             Seed = GetSlotSetting(SEED_KEY, 0);
             Dropsanity = GetSlotSetting(DROP_KEY, false);
@@ -44,6 +51,18 @@ namespace LunacidAP
             Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
             Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
             DeathLink = GetSlotSetting(DL_KEY, false);
+            RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
+            var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
+            FalseWalls = GetSlotSetting(WALL_KEY, false);
+            foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
+            {
+                var newKey = data.Key.ToUpper().Replace("'", "");
+                if (!ConnectionData.Elements.ContainsKey(newKey))
+                {
+                    ConnectionData.Elements.Add(newKey, data.Value);
+                    _log.LogInfo($"Added {newKey} to element dict with value {data.Value}");
+                }
+            }
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)

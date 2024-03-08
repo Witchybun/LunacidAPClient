@@ -48,8 +48,8 @@ namespace LunacidAP.Data
             { "STEELNEEDLE_PICKUP", "Buy Steel Needle" },
             { "CROSSBOW_PICKUP", "Buy Crossbow" },
             { "LANT_PICKUP", "Buy Oil Lantern" },
-            // { "", "Buy Privateer Musket" },
-            // { "", "Buy Jotunn Slayer" },
+            { "MUSKET_PICKUP", "Buy Privateer Musket" },
+            { "SLAYER_PICKUP", "Buy Jotunn Slayer" },
 
         };
 
@@ -58,8 +58,9 @@ namespace LunacidAP.Data
                 "HUB_01", // Wing's Rest
                 new(){
             new LocationData( "WR: Bench", "CRYSTAL_SHARD_PICKUP", new Vector3(2.6f, 0.8f, -22.2f)),
-            new LocationData( "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3(14.5f, 1.3f, -1.9f)),
-            new LocationData( "WR: Rafters", "OCEAN_ELIXIR_PICKUP", new Vector3(-1.4f, 8.5f, 16.4f))
+            new LocationData( "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3()),
+            new LocationData( "WR: Rafters", "OCEAN_ELIXIR_PICKUP", new Vector3(-1.4f, 8.5f, 16.4f)),
+            new LocationData("WR: Demi's Victory Gift", "VHS_PICKUP", new Vector3()),
 
         }
             },
@@ -308,10 +309,11 @@ namespace LunacidAP.Data
                     new LocationData( "TP: Fourth Floor Maledictus Secret", "BLUE_FLAME_PICKUP", new Vector3(36.0f, 23.9f, 63.9f) ),
                     new LocationData( "TP: Fourth Floor Hidden Jailer Sleeping Spot", "HOLY_WATER_PICKUP", new Vector3(51.5f, 23.2f, 67.7f) ),
                     new LocationData( "TP: Fourth Floor Jailer Break Room", "MANA_VIAL_PICKUP", new Vector3(74.2f, 24.0f, 95.4f) ),
-                    new LocationData( "TP: Fourth Floor Monk Room 1", "ECTOPLASM", new Vector3(31.1f, 24.3f, -17.0f) ),
-                    new LocationData( "TP: Fourth Floor Monk Room 2", "SNOWFLAKE_OBSIDIAN", new Vector3(31.0f, 24.3f, -16.0f) ),
-                    new LocationData( "TP: Fourth Floor Monk Room 3", "MOONPETAL", new Vector3(31.2f, 24.3f, -14.9f) ),
+                    new LocationData( "TP: Etna's Resting Place Item 1", "ECTOPLASM", new Vector3(31.1f, 24.3f, -17.0f) ),
+                    new LocationData( "TP: Etna's Resting Place Item 2", "SNOWFLAKE_OBSIDIAN", new Vector3(31.0f, 24.3f, -16.0f) ),
+                    new LocationData( "TP: Etna's Resting Place Item 3", "MOONPETAL", new Vector3(31.2f, 24.3f, -14.9f) ),
                     new LocationData( "TP: Fourth Floor Collapsed Tunnel", "HAMMER_PICKUP", new Vector3(41.3f, 24.3f, -37.5f) ),
+                    new LocationData( "TP: Egg's Resting Place", "RATTLE_PICKUP", new Vector3(72.4f, -48.0f, -19.9f))
                 }
             },
             {

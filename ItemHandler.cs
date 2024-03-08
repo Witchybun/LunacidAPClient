@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
@@ -305,41 +306,26 @@ namespace LunacidAP
         {
             try
             {
-                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                var items = Control.CURRENT_PL_DATA.ITEMS;
-                var previousSymbol = "";
-                for (int m = 0; m < 128; m++)
+                if (ConnectionData.Symbols > 2)
                 {
-                    if (Control.CURRENT_PL_DATA.ITEMS[m] == "" || Control.CURRENT_PL_DATA.ITEMS[m] == null)
+                    return "";
+                }
+                switch(ConnectionData.Symbols)
+                {
+                    case 0:
                     {
-                        if (previousSymbol == "")
-                        {
-                            return "Vampiric Symbol (W)";
-                        }
-                        else if (previousSymbol == "Vampiric Symbol (E)")
-                        {
-                            return "";
-                        }
-                        else if (previousSymbol == "Vampiric Symbol (A)")
-                        {
-                            return "Vampiric Symbol (E)";
-                        }
-                        else if (previousSymbol == "Vampiric Symbol (W)")
-                        {
-                            return "Vampiric Symbol (A)";
-                        }
+                        ConnectionData.Symbols += 1;
+                        return "Vampiric Symbol (W)";
                     }
-                    else if (StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) == "Vampiric Symbol (W)")
+                    case 1:
                     {
-                        previousSymbol = "Vampiric Symbol (W)";
+                        ConnectionData.Symbols += 1;
+                        return "Vampiric Symbol (A)";
                     }
-                    else if (StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) == "Vampiric Symbol (A)")
+                    case 2:
                     {
-                        previousSymbol = "Vampiric Symbol (A)";
-                    }
-                    else if (StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) == "Vampiric Symbol (E)")
-                    {
-                        previousSymbol = "Vampiric Symbol (E)";
+                        ConnectionData.Symbols +=1;
+                        return "Vampiric Symbol (E)";
                     }
                 }
                 return "";
@@ -355,7 +341,7 @@ namespace LunacidAP
                     _log.LogError("Items list is null.");
                 }
                 _log.LogError($"{ex.Message}");
-                return "Vampiric Symbol (W)"; // A potion for your troubles.
+                return "";
             }
         }
 
