@@ -111,10 +111,10 @@ namespace LunacidAP
                 _log.LogInfo(text);
                 var isProgression = hintData.Progression;
                 var locationID = hintData.LocationID;
-                if (!hintData.AlreadyHinted)
+                /*if (!hintData.AlreadyHinted) // Lets turn off automatic hinting for now, for flair's sake.
                 {
                     _archipelago.ScoutLocation(locationID, isProgression);
-                }
+                }*/
                 ConnectionData.CommunionHints[__instance.NPC_NAME].AlreadyHinted = true;
                 text = Encrypt(text);
                 PAPPY.POP(text, 1f, 13);
