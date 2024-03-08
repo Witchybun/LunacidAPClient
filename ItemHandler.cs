@@ -39,12 +39,12 @@ namespace LunacidAP
                 case 1:
                     {
                         GiveWeapon(Name, player, self);
-                        break;
+                        return;
                     }
                 case 2:
                     {
                         GiveSpell(Name, player, self);
-                        break;
+                        return;
                     }
                 case 0:
                     {
@@ -54,18 +54,25 @@ namespace LunacidAP
                 case 4:
                     {
                         GiveItem(Name, player, self);
-                        break;
+                        return;
                     }
                 case 3:
                     {
                         GiveMaterial(Name, player, self);
-                        break;
+                        return;
                     }
             }
             if (Name.Contains(" Switch") || Name.Contains("Lightning Gate"))
             {
                 GiveSwitch(Name, player, self);
+                return;
             }
+            if (Name.Contains(" Trap"))
+            {
+                GiveTrap(Name, player, self);
+                return;
+            }
+            _log.LogError($"Supplied item {Name} was not caught by any of the given cases");
         }
 
         public static void GiveLunacidItem(ReceivedItem receivedItem, bool self)
