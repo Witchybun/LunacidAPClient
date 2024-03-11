@@ -13,104 +13,158 @@ namespace LunacidAP
     using UnityEngine;
     using UnityEngine.SceneManagement;
     using System.Collections;
+    using System.Threading.Tasks;
+    using static LunacidAP.Data.LunacidLocations;
 
-    public class ArchipelagoClient
+    public class ArchipelagoClient : MonoBehaviour
     {
         public const string GAME_NAME = "Lunacid";
         private static ManualLogSource _log;
+        public static ArchipelagoClient AP;
+        private static GameObject Obj;
+        public int SlotID;
+        private int Stack;
+        public const long LOCATION_INIT_ID = 771111110;
         private CONTROL Control;
         private POP_text_scr Popup;
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
-        public static bool Authenticated;
+
+        private bool _connected;
+        public bool Authenticated
+        {
+            get { return _connected; }
+            set
+            {
+                _connected = value;
+            }
+        }
         private DeathLinkService _deathLinkService;
         public bool IsCurrentlyDeathLinked = false;
-        public string[] CurrentDLData = new string[2]{"", ""};
+        public string[] CurrentDLData = new string[2] { "", "" };
         public static bool IsInGame = false;
         public static bool HasReceivedItems = false;
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
+        public readonly SortedDictionary<long, ArchipelagoItem> LocationTable = new() { };
 
-
-
-        public ArchipelagoClient(ManualLogSource log)
+        public static void Setup(ManualLogSource log)
         {
             _log = log;
+            Obj = new();
+            DontDestroyOnLoad(Obj);
+            AP = Obj.AddComponent<ArchipelagoClient>();
         }
 
-        public bool Connect(string slotName, string hostName, string password, out bool isSuccessful)
+        public IEnumerator Connect(string slotName, string hostName, int port, string password, bool reconnect = false)
+        {
+            Authenticated = false;
+            var minimumVersion = new Version(0, 4, 4);
+            Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
+            var connectTask = Task.Run(Session.ConnectAsync);
+            yield return new WaitUntil(() => connectTask.IsCompleted);
+            if (!connectTask.Status.HasFlag(TaskStatus.RanToCompletion))
+            {
+                _log.LogError($"Failed to connect to Archipelago server at {hostName}:{port}.");
+                yield break;
+            }
+            var loginTask = Task.Run(async () => await Session.LoginAsync(GAME_NAME, slotName, ItemsHandlingFlags.AllItems, minimumVersion, password: password));
+            yield return new WaitUntil(() => loginTask.IsCompleted);
+            if (loginTask.IsFaulted)
+            {
+                _log.LogError(loginTask.Exception.GetBaseException().Message);
+                yield break;
+            }
+            LoginResult result = loginTask.Result;
+            if (!result.Successful)
+            {
+                LoginFailure failure = (LoginFailure)result;
+                _log.LogError(string.Join("\n", failure.Errors));
+                yield break;
+            }
+
+            LoginSuccessful login = (LoginSuccessful)result;
+            SlotID = login.Slot;
+            SlotData = new SlotData(login.SlotData, _log);
+            int seed = SlotData.GetSlotSetting("seed", 0);
+            if (ConnectionData.Seed != 0 && ConnectionData.Seed != seed)
+            {
+                _log.LogError("The server's seed does not match the save file's seed.  Make sure you're connecting with the right save file");
+                Disconnect();
+                yield break;
+            }
+
+            ConnectionData.Seed = seed;
+            if (!reconnect)
+            {
+                BuildLocationTable();
+                CommunionHint.DetermineHints(SlotData.Seed);
+
+                // Scout unchecked locations
+                var uncheckedLocationIDs = from locationID in LocationTable.Keys where !IsLocationChecked(locationID) select locationID;
+                Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
+                yield return new WaitUntil(() => locationInfoTask.IsCompleted);
+                if (locationInfoTask.IsFaulted)
+                {
+                    _log.LogError(locationInfoTask.Exception.GetBaseException().Message);
+                    yield break;
+                }
+                var locationInfo = locationInfoTask.Result;
+
+                foreach (var item in locationInfo.Locations)
+                {
+                    int locationID = (int)item.Location;
+                    LocationTable[locationID] = new ArchipelagoItem(item, false);
+                }
+            }
+            // Sync checked locations
+            var checkedLocationIDs = from locationID in LocationTable.Keys where IsLocationChecked(locationID) select locationID;
+            var locationCheckTask = Task.Run(async () => await Session.Locations.CompleteLocationChecksAsync(checkedLocationIDs.ToArray()));
+            yield return new WaitUntil(() => locationCheckTask.IsCompleted);
+            if (locationCheckTask.IsFaulted)
+            {
+                _log.LogError("Locating Syncing has failed.");
+                _log.LogError(locationCheckTask.Exception.GetBaseException().Message);
+                yield break;
+            }
+            // Sync collected locations
+            foreach (long locationID in Session.Locations.AllLocationsChecked)
+            {
+                if (!ConnectionData.CompletedLocations.Contains(locationID))
+                {
+                    ConnectionData.CompletedLocations.Add(locationID);
+                }
+            }
+
+            // Connection successful
+            Authenticated = true;
+            ConnectionData.WriteConnectionData(hostName, port, slotName, password);
+            Session.Socket.ErrorReceived += Session_ErrorReceived;
+            Session.Socket.SocketClosed += Session_SocketClosed;
+            if (login.SlotData["death_link"].ToString() == "1")
+            {
+                ConnectionData.DeathLink = true;
+                InitializeDeathLink();
+            }
+
+            _log.LogInfo("Successfully connected to server!");
+        }
+
+        private void Session_SocketClosed(string _)
         {
             if (Authenticated)
             {
-                isSuccessful = true;
-                return true;
-            }
-            if (!IsInGame)
-            {
-                _log.LogWarning("Please load a save before attempting to connect.");
-                isSuccessful = false;
-                return false;
-            }
-            var hostNameContents = hostName.Split(':');
-            var isPort = int.TryParse(hostNameContents[1], out int hostPort);
-            Session = ArchipelagoSessionFactory.CreateSession(hostNameContents[0], hostPort);
-
-            var minimumVersion = new Version(0, 4, 4);
-            var tags = new[] { "AP" };
-            LoginResult result = Session.TryConnectAndLogin(GAME_NAME, slotName, ItemsHandlingFlags.AllItems, minimumVersion, tags, null, password);
-            ConnectionData.WriteConnectionData(hostName, slotName, password);
-
-            _log.LogInfo(Session.ToString());
-            if (result is LoginSuccessful loginSuccess)
-            {
-                Authenticated = true;
-                SlotData = new SlotData(loginSuccess.SlotData, _log);
-                Session.Socket.ErrorReceived += Session_ErrorReceived;
-                Session.Socket.SocketClosed += Session_SocketClosed;
-                Session.Items.ItemReceived += Session_ItemRecieved;
-                CommunionHint.DetermineHints(SlotData.Seed);
-                if (loginSuccess.SlotData["death_link"].ToString() == "1")
-                {
-                    ConnectionData.DeathLink = true;
-                    InitializeDeathLink();
-                }
-                _log.LogInfo("Successfully connected to server!");
-            }
-            else if (result is LoginFailure loginFailure)
-            {
                 Authenticated = false;
-                _log.LogError("Connection Error: " + String.Join("\n", loginFailure.Errors));
-                Session.Socket.DisconnectAsync();
-                Session = null;
+                StartCoroutine(TryReconnect());
             }
-            isSuccessful = result.Successful;
-            return result.Successful;
         }
 
-        public bool VerifySeed()
+        private IEnumerator TryReconnect()
         {
-
-            var seed = SlotData.Seed;
-            if (ConnectionData.Seed != 0 && ConnectionData.Seed != seed)
+            while (!Authenticated && IsInGame)
             {
-                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                Popup = Control.PAPPY;
-                Authenticated = false;
-                Popup.POP("Wrong save loaded with connection!", 1f, 0);
-                Session.Socket.DisconnectAsync();
-                Session = null;
-                return false;
+                yield return new WaitForSeconds(60);
+                yield return Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, true);
             }
-            return true;
-        }
-
-        private void Session_SocketClosed(string reason)
-        {
-            if (SceneManager.GetActiveScene().name == "Gameover")
-            {
-                reason = "Reason: Player has died.";
-            }
-            _log.LogError("Lost connection to Archipelago server. " + reason);
-            Disconnect();
         }
 
         public void Session_ErrorReceived(Exception e, string message)
@@ -131,9 +185,18 @@ namespace LunacidAP
             HasReceivedItems = false;
         }
 
-        public void Session_ItemRecieved(ReceivedItemsHelper helper)
+        private void Update()
         {
-            ReceiveAllItems();
+            if (Session is not null && Session.Items.Any() && IsInGame)
+            {
+                var item = Session.Items.DequeueItem();
+                if (!ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location))
+                {
+                    var receivedItem = new ReceivedItem(item);
+                    ConnectionData.ReceivedItems.Add(receivedItem);
+                    StartCoroutine(ReceiveItem(receivedItem));
+                }
+            }
         }
 
         public void InitializeDeathLink()
@@ -186,97 +249,51 @@ namespace LunacidAP
             IsCurrentlyDeathLinked = false;
         }
 
-        public List<string> GetAllCheckedLocations()
+        private void BuildLocationTable()
         {
-            if (!Authenticated)
+            List<int> locations = new();
+            foreach (var region in LunacidLocations.APLocationData)
             {
-                return new List<string>();
-            }
-
-            var allLocationsCheckedIds = Session.Locations.AllLocationsChecked;
-            var allLocationsChecked = new List<string>();
-            foreach (var id in allLocationsCheckedIds)
-            {
-                allLocationsChecked.Add(Session.Locations.GetLocationNameFromId(id));
-            }
-            return allLocationsChecked;
-        }
-
-        public void CollectLocationsFromSave()
-        {
-            var allLocations = GetAllCheckedLocations();
-            foreach (var location in ConnectionData.CompletedLocations)
-            {
-                if (!allLocations.Contains(location))
+                foreach (var location in region.Value)
                 {
-                    var locationID = Session.Locations.GetLocationIdFromName(GAME_NAME, location);
-                    Session.Locations.CompleteLocationChecks(locationID);
+                    locations.Add((int)location.APLocationID);
                 }
-
             }
-            ConnectionData.CompletedLocations = ConnectionData.CompletedLocations.Union(allLocations).ToList();
+            if (SlotData.Shopsanity)
+            {
+                foreach (var location in LunacidLocations.ShopLocations)
+                {
+                    locations.Add((int)location.APLocationID);
+                }
+            }
+            if (SlotData.Dropsanity)
+            {
+                foreach (var location in LunacidLocations.DropLocations)
+                {
+                    locations.Add((int)location.APLocationID);
+                }
+            }
+
+            foreach (var id in locations)
+            {
+                LocationTable[id] = null;
+            }
         }
 
-        public List<ReceivedItem> GetAllReceivedItems()
+        private IEnumerator ReceiveItem(ReceivedItem item)
         {
-            if (!Authenticated)
+            var instanceStack = Stack + 1;
+            Stack++;
+            var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
+            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            while (isInEnding || GameObject.Find("PLAYER") is null || instanceStack < Stack)
             {
-                _log.LogInfo($"You're not connected; returning empty list");
-                return new List<ReceivedItem>();
+                yield return new WaitForSeconds(1f);
             }
-            var allReceivedItems = new List<ReceivedItem>();
-            var apItems = Session.Items.AllItemsReceived.ToArray();
-            for (var itemIndex = 0; itemIndex < apItems.Length; itemIndex++)
-            {
-                var apItem = apItems[itemIndex];
-                var itemName = Session.Items.GetItemName(apItem.Item);
-                var playerName = Session.Players.GetPlayerName(apItem.Player);
-                var locationName = Session.Locations.GetLocationNameFromId(apItem.Location) ?? "The Great Well";
-
-                var receivedItem = new ReceivedItem(locationName, itemName, playerName, apItem.Location, apItem.Item,
-                    apItem.Player, itemIndex);
-                _log.LogInfo($"Appending {itemName} to Received Items List");
-                allReceivedItems.Add(receivedItem);
-            }
-
-            return allReceivedItems;
-        }
-
-        public void ReceiveAllItems()
-        {
-            var allReceivedItems = GetAllReceivedItems();
-            int maxIndex = 0;
             var self = false;
-
-            foreach (var receivedItem in allReceivedItems)
-            {
-                if (IsItemInSave(receivedItem)) continue;
-                if (receivedItem.PlayerName == ConnectionData.SlotName) self = true;
-                ItemHandler.GiveLunacidItem(receivedItem, self);
-                maxIndex = Math.Max(maxIndex, receivedItem.UniqueId);
-
-            }
-        }
-
-        private bool IsItemInSave(ReceivedItem receivedItem)
-        {
-            foreach (var saveItem in ConnectionData.ReceivedItems)
-            {
-                var verifier = true;
-                if (saveItem.UniqueId != receivedItem.UniqueId)
-                {
-                    verifier = false;
-                }
-                if (saveItem.LocationName != receivedItem.LocationName)
-                {
-                    verifier = false;
-                }
-                if (verifier == true)
-                {
-                    return true;
-                }
-            }
-            return false;
+            if (item.PlayerName == ConnectionData.SlotName) self = true;
+            ItemHandler.GiveLunacidItem(item, self);
+            Stack--;
         }
 
         public static readonly Dictionary<ItemFlags, string> ProgressionFlagToString = new()
@@ -284,7 +301,7 @@ namespace LunacidAP
           {ItemFlags.Advancement, "Progression"},
           {ItemFlags.NeverExclude, "Useful"},
           {ItemFlags.None, "Filler"},
-          {ItemFlags.Trap, "Trap"}  
+          {ItemFlags.Trap, "Trap"}
         };
 
         public LocationInfoPacket ScoutLocation(long locationId, bool createAsHint)
@@ -294,9 +311,14 @@ namespace LunacidAP
             return scoutTask.Result;
         }
 
-        public bool IsLocationChecked(string locationName)
+        public bool IsLocationChecked(long location)
         {
-            return ConnectionData.CompletedLocations.Contains(locationName);
+            return ConnectionData.CompletedLocations.Contains(location);
+        }
+
+        public bool IsLocationChecked(LocationData location)
+        {
+            return ConnectionData.CompletedLocations.Contains(location.APLocationID);
         }
 
         public long GetLocationIDFromName(string locationName)
@@ -304,9 +326,19 @@ namespace LunacidAP
             return Session.Locations.GetLocationIdFromName(GAME_NAME, locationName);
         }
 
+        public string GetLocationNameFromID(long location)
+        {
+            return Session.Locations.GetLocationNameFromId(location);
+        }
+
         public string GetItemNameFromID(long itemID)
         {
             return Session.Items.GetItemName(itemID);
+        }
+
+        public string GetPlayerNameFromSlot(int slot)
+        {
+            return Session.Players.GetPlayerName(slot);
         }
 
         public bool WasItemReceived(string itemName)
