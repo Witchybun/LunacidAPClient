@@ -1,10 +1,10 @@
 ﻿
+using System;
 using System.Collections;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
 using BepInEx.Logging;
-using LunacidAP.APGUI;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,9 +14,9 @@ namespace LunacidAP
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        public ArchipelagoClient Archipelago { get; set; }
         public ManualLogSource Log { get; set; }
-
+        public static ManualLogSource LOG {get; set;}
+        public NewGameUI UI {get; set;}
         private void Awake()
         {
             try
@@ -24,18 +24,18 @@ namespace LunacidAP
                 // Plugin startup logic
                 Log = new ManualLogSource("LunacidAP");
                 BepInEx.Logging.Logger.Sources.Add(Log);
-                Archipelago = new ArchipelagoClient(Log);
-                GameLog.Awake(Archipelago, Log);
-                ArchipelagoLoginGUI.Awake(Archipelago, Log);
-                LocationHandler.Awake(Archipelago, Log);
-                ItemHandler.Awake(Archipelago, Log);
-                SaveHandler.Awake(Archipelago, Log);
-                SwitchLocker.Awake(Archipelago, Log);
+                ArchipelagoClient.Setup(Log);
+                LOG = Log;
+                LocationHandler.Awake(Log);
+                ItemHandler.Awake(Log);
+                SaveHandler.Awake(Log);
+                SwitchLocker.Awake(Log);
                 ExpHandler.Awake();
-                FlagHandler.Awake(Archipelago, Log);
-                CommunionHint.Awake(Archipelago, Log);
-                WeaponHandler.Awake(Archipelago, Log);
-                ShopHandler.Awake(Archipelago, Log);
+                FlagHandler.Awake(Log);
+                CommunionHint.Awake(Log);
+                WeaponHandler.Awake(Log);
+                ShopHandler.Awake(Log);
+                UI = new NewGameUI(Log);
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch
@@ -54,87 +54,77 @@ namespace LunacidAP
         {
             var sceneName = scene.name;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
-            if (!ArchipelagoClient.IsInGame && Archipelago.Session is not null)
+            if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {
-                Archipelago.Disconnect();
+                ArchipelagoClient.AP.Disconnect();
                 ConnectionData.WriteConnectionData();
             }
             if (ArchipelagoClient.IsInGame)
             {
-                StartCoroutine(AutoConnect());
+                // StartCoroutine(AutoConnect());
                 CheckForVictory(sceneName);
                 CheckForDeath(sceneName);
+            }
+            if (sceneName == "CHAR_CREATE")
+            {
+                UI.ModifyCharCreateForArchipelago();
             }
             
 
         }
 
-        private void OnGUI()
-        {
-            GameLog.OnGUI();
-            ArchipelagoLoginGUI.OnGUI();
-        }
-
-        private IEnumerator AutoConnect()
+        /*private IEnumerator AutoConnect()
         {
             yield return new WaitForSeconds(2f);
             var timer = 0;
-            while (!ArchipelagoClient.Authenticated && timer < 1)
+            while (!Archipelago.Authenticated && timer < 1)
             {
                 if (ArchipelagoClient.IsInGame && ConnectionData.HostName != "")
                 {
-                    Archipelago.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Password, out var isSuccessful);
-                    var isVerified = Archipelago.VerifySeed();
-                    if (isSuccessful && isVerified)
-                    {
-                        Archipelago.ReceiveAllItems();
-                        Archipelago.CollectLocationsFromSave();
-                    }
-                    
+                    StartCoroutine(Archipelago.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Password));
                 }
                 timer += 1;
             }
-
-        }
+        }*/
 
         private void CheckForVictory(string sceneName)
         {
-            if (!ArchipelagoClient.Authenticated)
+            if (!ArchipelagoClient.AP.Authenticated)
             {
                 return;
             }
-            if (sceneName == "END_E" && Archipelago.HasGoal(Goal.EndingE) || 
-            sceneName == "END_B" && Archipelago.HasGoal(Goal.EndingB) ||
-            sceneName == "END_A" && Archipelago.HasGoal(Goal.EndingA) ||
-            sceneName == "WhatWillBeAtTheEnd" && Archipelago.HasGoal(Goal.EndingCD))
+            if (sceneName == "END_E" && ArchipelagoClient.AP.HasGoal(Goal.EndingE) || 
+            sceneName == "END_B" && ArchipelagoClient.AP.HasGoal(Goal.EndingB) ||
+            sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA) ||
+            sceneName == "WhatWillBeAtTheEnd" && ArchipelagoClient.AP.HasGoal(Goal.EndingCD))
             {
                 var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
-            Archipelago.Session.Socket.SendPacket(statusUpdatePacket);
+            ArchipelagoClient.AP.Session.Socket.SendPacket(statusUpdatePacket);
             }
         }
 
         private void CheckForDeath(string sceneName)
         {
-            if (!ArchipelagoClient.Authenticated || !ConnectionData.DeathLink)
+            if (!ArchipelagoClient.AP.Authenticated || !ConnectionData.DeathLink)
             {
                 return;
             }
             if (sceneName == "GAME_OVER")
             {
-                Archipelago.SendDeathLink();
+                ArchipelagoClient.AP.SendDeathLink();
             }
-            else if (ArchipelagoClient.IsInGame && Archipelago.IsCurrentlyDeathLinked)
+            else if (ArchipelagoClient.IsInGame && ArchipelagoClient.AP.IsCurrentlyDeathLinked)
             {
-                Archipelago.IsCurrentlyDeathLinked = false;
+                ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
             }
         }
 
         private void Update()
         {
-            if (ArchipelagoClient.Authenticated && Archipelago.IsCurrentlyDeathLinked)
+            if (ArchipelagoClient.AP.Authenticated && ArchipelagoClient.AP.IsCurrentlyDeathLinked)
             {
-                StartCoroutine(Archipelago.UnleashGhosts(Archipelago.CurrentDLData[0], Archipelago.CurrentDLData[1]));
+                StartCoroutine(ArchipelagoClient.AP.UnleashGhosts(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
             }
         }
 

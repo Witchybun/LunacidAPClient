@@ -65,6 +65,10 @@ namespace LunacidAP.Data
             {"Little Witch Nobeta", "Doll-shaped"},
             {"Ender Lilies", "Corrupted"},
             {"Pseudoregalia", "Sun"},
+            {"Old School Runescape", "Rune"},
+            {"Mario & Luigi Superstar Saga", "Bean"},
+            {"Ultrakill", "Bloody"},
+            {"Resident Evil 2 Remake", "Umbrella"},
         };
 
         public static readonly Dictionary<string, string> GameToProtagonist = new(){
@@ -129,6 +133,10 @@ namespace LunacidAP.Data
             {"Little Witch Nobeta", "a little girl"},
             {"Ender Lilies", "a little girl"},
             {"Pseudoregalia", "a goat-rabbit woman"},
+            {"Old School Runescape", "an quirky adventurer"},
+            {"Mario & Luigi Superstar Saga", "two dynamic brothers"},
+            {"Ultrakill", "a lifeless being, desperate for blood,"},
+            {"Resident Evil 2 Remake", "two souls desperate for answers"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -191,8 +199,11 @@ namespace LunacidAP.Data
             {"Wind Waker", "a great blue sea above long destroyed kingdom."},
             {"Little Witch Nobeta", "a long lost lab she inevitably returns to."},
             {"Ender Lilies", "the kingdom of Land's End."},
-            {"Pseudoregalia", "deep within a dilapidated dungeon."}
-
+            {"Pseudoregalia", "deep within a dilapidated dungeon."},
+            {"Old School Runescape", "the town of Lumbridge."},
+            {"Mario & Luigi Superstar Saga", "the kingdom of Beans, though they were only visiting."},
+            {"Ultrakill", "the depths of hell."},
+            {"Resident Evil 2 Remake", "the remains of the city of Raccoon."}
         };
     }
 }

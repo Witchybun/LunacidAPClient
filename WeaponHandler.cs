@@ -11,14 +11,12 @@ namespace LunacidAP
 {
     public class WeaponHandler
     {
-        private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
         private static string CurrentCastChild { get; set; } = "";
         private static int CurrentElement { get; set; } = 0;
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
-            _archipelago = archipelago;
             _log = log;
             Harmony.CreateAndPatchAll(typeof(WeaponHandler));
         }
@@ -39,7 +37,6 @@ namespace LunacidAP
             }
             if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
             {
-                _log.LogInfo($"Changing element to {elementName}");
                 __instance.WEP_ELEMENT = element;
             }
             return true;
@@ -62,7 +59,6 @@ namespace LunacidAP
             CurrentCastChild = __instance.MAG_CHILD;
             if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
             {
-                _log.LogInfo($"Changing element to {elementName}");
                 CurrentElement = element;
             }
             return true;
@@ -72,7 +68,6 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Hurt_WhatElementIsIt(Damage_Trigger __instance)
         {
-            _log.LogInfo($"Comparing {__instance.name} and {CurrentCastChild}");
             var castName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
             if (castName == CurrentCastChild)
             {
@@ -81,10 +76,6 @@ namespace LunacidAP
             else if (LunacidItems.ArrowToWeapon.TryGetValue(castName, out string weapon))
             {
                 __instance.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
-            }
-            else
-            {
-                _log.LogInfo($"Ignoring as its not the recent cast");
             }
             return true;
         }

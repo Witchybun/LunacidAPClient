@@ -7,16 +7,15 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
 {
     public class ShopHandler
     {
-        private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
-            _archipelago = archipelago;
             _log = log;
             Harmony.CreateAndPatchAll(typeof(ShopHandler));
         }
@@ -30,18 +29,7 @@ namespace LunacidAP
             for (int i = 0; i < __instance.INV.Length; i++)
             {
                 var objectName = __instance.INV[i].OBJ.name;
-                if (LunacidLocations.ShopLocations.TryGetValue(objectName, out string locationName))
-                {
-                    if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
-                    {
-                        locationName += " (Patchouli)";
-                    }
-                    else if (objectName == "OCEAN_ELIXIR_PICKUP")
-                    {
-                        locationName += " (Sheryl)";
-                    }
-                    _log.LogInfo($"Got location {locationName}");
-                }
+                var shopLocation = DetermineShopLocation(sceneName, objectName);
                 if (__instance.INV[i].saved_slot != -1)
                 {
                     __instance.INV[i].count = int.Parse(__instance.CON.CURRENT_PL_DATA.ZONE_1.Substring(__instance.INV[i].saved_slot - 1, 1));
@@ -86,7 +74,7 @@ namespace LunacidAP
                 }
                 else if (__instance.INV[i].type == 0 || __instance.INV[i].type == 2)
                 {
-                    if (_archipelago.IsLocationChecked(locationName))
+                    if (ArchipelagoClient.AP.IsLocationChecked(shopLocation))
                     {
                         RemoveElement(ref __instance.INV, i);
                         i--;
@@ -118,22 +106,22 @@ namespace LunacidAP
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
         {
-            if (SlotData.Shopsanity == true && LunacidLocations.ShopLocations.ContainsKey(__instance.INV[which].OBJ.name) &&
+            if (SlotData.Shopsanity == true && LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
             __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
             {
-                var apLocation = LunacidLocations.ShopLocations[__instance.INV[which].OBJ.name];
+                var objectName = __instance.INV[which].OBJ.name;
                 var sceneName = __instance.gameObject.scene.name;
-                apLocation = ThePatchouliConundrum(apLocation, sceneName);
-                var location = _archipelago.GetLocationIDFromName(apLocation);
-                var locationInfo = _archipelago.ScoutLocation(location, false);
-                var slotNameofItemOwner = _archipelago.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
+                var apLocation = DetermineShopLocation(sceneName, objectName);
+                var location =  + apLocation.APLocationID;
+                var locationInfo = ArchipelagoClient.AP.ScoutLocation(location, false);
+                var slotNameofItemOwner = ArchipelagoClient.AP.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
                 if (ConnectionData.SlotName != slotNameofItemOwner)
                 {
-                    var itemInfo = _archipelago.Session.Items.GetItemName(locationInfo.Locations[0].Item);
+                    var itemInfo = ArchipelagoClient.AP.Session.Items.GetItemName(locationInfo.Locations[0].Item);
                     __instance.CON.PAPPY.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
                 }
-                _archipelago.Session.Locations.CompleteLocationChecks(location);
-                ConnectionData.CompletedLocations.Add(apLocation);
+                ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
+                ConnectionData.CompletedLocations.Add(location);
             }
             return true;
         }
@@ -147,19 +135,21 @@ namespace LunacidAP
                 var sceneName = __instance.gameObject.scene.name;
                 var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
                 int EQ_SEL = (int)eqSelField.GetValue(__instance);
-                if (!LunacidLocations.ShopLocations.TryGetValue(__instance.SHOP.INV[EQ_SEL].OBJ.name, out string apLocation))
+                var objectName = __instance.SHOP.INV[EQ_SEL].OBJ.name;
+                if (!ShopLocations.Any(x => x.GameObjectName == objectName))
                 {
                     return;
                 }
-                apLocation = ThePatchouliConundrum(apLocation, sceneName);
-                var location = _archipelago.GetLocationIDFromName(apLocation);
-                var locationInfo = _archipelago.ScoutLocation(location, false);
+                var apLocation = DetermineShopLocation(sceneName, objectName);
+                var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID, false);
                 var netItem = locationInfo.Locations[0];
-                var itemName = _archipelago.GetItemNameFromID(netItem.Item).Replace("Progressive ","");
+                var itemName = ArchipelagoClient.AP.GetItemNameFromID(netItem.Item).Replace("Progressive ", "");
                 var itemNameLength = itemName.Length;
-                itemName = itemName.Substring(0, Math.Min(itemNameLength, 15));
-                var gameName = _archipelago.Session.Players.Players[_archipelago.Session.ConnectionInfo.Team][netItem.Player].Game;
-                var progression = ArchipelagoClient.ProgressionFlagToString[GetShopProgression(location)];
+                itemName = itemName.Substring(0, Math.Min(itemNameLength, 25));
+                var gameName = ArchipelagoClient.AP.Session.Players.Players[ArchipelagoClient.AP.Session.ConnectionInfo.Team][netItem.Player].Game;
+                var gameNameLength = gameName.Length;
+                gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
+                var progression = ArchipelagoClient.ProgressionFlagToString[GetShopProgression(apLocation.APLocationID)];
                 if (!ArchipelagoGames.GameToProtagonist.TryGetValue(gameName, out string protag))
                 {
                     protag = "an unknown entity";
@@ -172,26 +162,45 @@ namespace LunacidAP
                 {
                     item = "Archipelago";
                 }
-                var totalBlurb = $"A curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(GetShopProgression(location));
+                var totalBlurb = $"A curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(GetShopProgression(apLocation.APLocationID));
                 __instance.TXT[56].text = item + " Artifact";
                 __instance.TXT[50].text = totalBlurb;
-                __instance.TXT[51].text = "NAME: \nGAME: \nFLAG: ";
-                __instance.TXT[52].text = $"{itemName.ToUpper()}\n{gameName.ToUpper()}\n{progression.ToUpper()}";
+                __instance.TXT[51].text = $"NAME: {itemName.ToUpper()}\nGAME: {gameName.ToUpper()}\nFLAG: {progression.ToUpper()}";
+                __instance.TXT[52].text = "";
                 __instance.TXT[53].text = "";
                 __instance.TXT[54].text = "";
             }
         }
 
+        private static LocationData DetermineShopLocation(string sceneName, string objectName)
+        {
+            if (new List<string>() { "HUB_01", "FOREST_A1", "CAVE" }.Contains(sceneName))
+            {
+                var nameHelper = "";
+                if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
+                {
+                    nameHelper = " (Patchouli)";
+                }
+                else if (objectName == "OCEAN_ELIXIR_PICKUP")
+                {
+                    nameHelper = " (Sheryl)";
+                }
+                return ShopLocations.FirstOrDefault(x => x.GameObjectName == objectName &&
+                x.APLocationName.Contains(nameHelper)) ?? new LocationData();
+            }
+            return new LocationData();
+        }
+
         private static string ThePatchouliConundrum(string apLocation, string sceneName)
         {
             if (sceneName == "FOREST_A1" && apLocation == "Buy Ocean Elixir")
-                {
-                    apLocation += " (Patchouli)";
-                }
-                else if (apLocation == "Buy Ocean Elixir")
-                {
-                    apLocation += " (Sheryl)";
-                }
+            {
+                apLocation += " (Patchouli)";
+            }
+            else if (apLocation == "Buy Ocean Elixir")
+            {
+                apLocation += " (Sheryl)";
+            }
             return apLocation;
         }
 
@@ -218,7 +227,7 @@ namespace LunacidAP
 
         private static ItemFlags GetShopProgression(long location)
         {
-            return _archipelago.ScoutLocation(location, false).Locations[0].Flags;
+            return ArchipelagoClient.AP.ScoutLocation(location, false).Locations[0].Flags;
         }
     }
 }

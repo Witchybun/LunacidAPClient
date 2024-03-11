@@ -8,14 +8,12 @@ namespace LunacidAP
 {
     public class FlagHandler
     {
-        private static ArchipelagoClient _archipelago;
         private static CONTROL CON;
         private static ManualLogSource _log;
         private static string[] errorData { get; set; }
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
-            _archipelago = archipelago;
             _log = log;
             Harmony.CreateAndPatchAll(typeof(FlagHandler));
         }
@@ -108,7 +106,8 @@ namespace LunacidAP
                 GameObject[] sTATES = __instance.STATES;
                 if (sceneName == "FOREST_A1" && stateController == "PATCHI")
                 {
-                    if (_archipelago.WasItemReceived("Skull of Josiah") && _archipelago.IsLocationChecked("YF: Patchouli's Canopy Offer"))
+                    var canopyID = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
+                    if (ArchipelagoClient.AP.WasItemReceived("Skull of Josiah") && ArchipelagoClient.AP.IsLocationChecked(canopyID))
                     {
                         if (__instance.value <= 5)
                         {
@@ -158,9 +157,13 @@ namespace LunacidAP
                     {
                         woodenGate.SetActive(value: false);
                     }
-                    if (!_archipelago.IsLocationChecked("HB: Temple Hidden Room In Sewer"))
+                    if (stateController == "META")
                     {
-                        vhsTape.SetActive(value: true);
+                        var secretID = ArchipelagoClient.AP.GetLocationIDFromName("HB: Temple Hidden Room In Sewer");
+                        if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
+                        {
+                            vhsTape.SetActive(value: true);
+                        }
                     }
                 }
                 else if (sceneName == "CAS_1" && stateController == "SAVE_0")
@@ -181,9 +184,9 @@ namespace LunacidAP
                 _log.LogError($"Method {nameof(Load_RetainItemPickups)} has failed:");
                 _log.LogError($"Name: {errorData[0]}, Iteration: {errorData[1]}, State Name: {errorData[2]}");
                 _log.LogError($"State Count: {errorData[3]}, Value: {errorData[4]}");
-                _log.LogError($"{ex.Message}");
+                _log.LogError($"{ex}");
 
-                return false;
+                return true;
             }
         }
 

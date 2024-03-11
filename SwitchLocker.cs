@@ -9,13 +9,11 @@ namespace LunacidAP
     public class SwitchLocker
     {
         private static ManualLogSource _log;
-        private static ArchipelagoClient _archipelago;
         private static POP_text_scr _popup;
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
             _log = log;
-            _archipelago = archipelago;
             Harmony.CreateAndPatchAll(typeof(SwitchLocker));
         }
 
@@ -79,7 +77,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_BlockIfNoOrb()
         {
-            if (SlotData.FalseWalls == true && !_archipelago.WasItemReceived("Dusty Crystal Orb"))
+            if (SlotData.FalseWalls == true && !ArchipelagoClient.AP.WasItemReceived("Dusty Crystal Orb"))
             {
                 var control =  GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 var popup = control.PAPPY;

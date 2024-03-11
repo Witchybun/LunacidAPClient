@@ -80,7 +80,7 @@ namespace LunacidAP
             return _slotDataFields.ContainsKey(key) ? _slotDataFields[key].ToString() : GetSlotDefaultValue(key, defaultValue);
         }
 
-        private int GetSlotSetting(string key, int defaultValue)
+        public int GetSlotSetting(string key, int defaultValue)
         {
             return _slotDataFields.ContainsKey(key) ? (int)(long)_slotDataFields[key] : GetSlotDefaultValue(key, defaultValue);
         }

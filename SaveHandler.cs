@@ -13,12 +13,10 @@ namespace LunacidAP
     public class SaveHandler
     {
         private static ManualLogSource _log;
-        private static ArchipelagoClient _archipelago;
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
             _log = log;
-            _archipelago = archipelago;
             Harmony.CreateAndPatchAll(typeof(SaveHandler));
         }
 
@@ -42,7 +40,7 @@ namespace LunacidAP
         {
             try
             {
-                if (!ArchipelagoClient.Authenticated)
+                if (!ArchipelagoClient.AP.Authenticated)
                 {
                     ReadSave(Save_Slot);
                 }
@@ -55,7 +53,7 @@ namespace LunacidAP
 
         }
 
-        private static void SaveData(int Save_Slot)
+        public static void SaveData(int Save_Slot)
         {
             var dir = Application.absoluteURL + "ArchSaves/";
             if (!Directory.Exists(dir))
@@ -73,6 +71,7 @@ namespace LunacidAP
             {
                 SlotName = ConnectionData.SlotName,
                 HostName = ConnectionData.HostName,
+                Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
                 Symbols = ConnectionData.Symbols,
                 DeathLink = ConnectionData.DeathLink,
@@ -81,7 +80,7 @@ namespace LunacidAP
                 CommunionHints = ConnectionData.CommunionHints,
                 Elements = ConnectionData.Elements
             };
-            if (ArchipelagoClient.Authenticated && (ConnectionData.Seed == 0))
+            if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
                 newAPSaveData.Seed = SlotData.Seed;
             }
@@ -90,15 +89,11 @@ namespace LunacidAP
             _log.LogInfo("Save complete!");
         }
 
-        private static void ReadSave(int Save_Slot)
+        public static void ReadSave(int Save_Slot)
         {
             try
             {
                 var dir = Application.absoluteURL + "ArchSaves/";
-                if (ArchipelagoClient.ScenesNotInGame.Contains(SceneManager.GetActiveScene().name))
-                {
-                    return;
-                }
                 if (!Directory.Exists(dir))
                 {
                     Directory.CreateDirectory(dir);
@@ -110,8 +105,9 @@ namespace LunacidAP
                     using StreamReader reader = new StreamReader(savePath);
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
-                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.SlotName, loadedSave.Password,
-                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, loadedSave.CommunionHints, loadedSave.Elements);
+                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
+                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
+                    loadedSave.CommunionHints, loadedSave.Elements);
                     _log.LogInfo("Save loaded.  Contents:");
                     _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
                     return;
@@ -132,12 +128,13 @@ namespace LunacidAP
     {
         public string SlotName;
         public string HostName;
+        public int Port;
         public string Password;
         public int Seed;
         public int Symbols;
         public bool DeathLink;
         public List<ReceivedItem> ObtainedItems;
-        public List<string> CheckedLocations;
+        public List<long> CheckedLocations;
         public Dictionary<string, CommunionHint.HintData> CommunionHints;
         public Dictionary<string, string> Elements;
     }

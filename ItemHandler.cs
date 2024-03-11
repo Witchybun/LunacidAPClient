@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using BepInEx.Logging;
+using HarmonyLib;
 using LunacidAP.Data;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LunacidAP
 {
@@ -12,16 +16,15 @@ namespace LunacidAP
         private static CONTROL Control;
         private static POP_text_scr Popup;
         private static ManualLogSource _log;
-        private static ArchipelagoClient _archipelago;
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
-            _archipelago = archipelago;
             _log = log;
+            Harmony.CreateAndPatchAll(typeof(ItemHandler));
         }
         public static void GiveLunacidItem(long itemID, string player = "", bool self = false)
         {
-            string Name = _archipelago.Session.Items.GetItemName(itemID);
+            string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
             if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
             {
                 ApplyFlag(Name);
@@ -50,7 +53,7 @@ namespace LunacidAP
                 case 0:
                     {
                         GiveSilver(Name, player, self);
-                        break;
+                        return;
                     }
                 case 4:
                     {
@@ -278,6 +281,44 @@ namespace LunacidAP
             Control.PL.Poison.Harm(LunacidItems.TrapToHarm[Name], 10.0f);
         }
 
+        // This is a temporary patch to fix a vanilla bug.
+        [HarmonyPatch(typeof(Player_Poison), "Harm")]
+        [HarmonyPrefix]
+        private static bool Harm_FixSlownessBug(int type, float duration, Player_Poison __instance)
+        {
+            __instance.IMG.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = Camera.main.aspect;
+            if (type == 4)
+            {
+                var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                var poisonType = __instance.GetType();
+                var plField = poisonType.GetField("PL", BindingFlags.Instance | BindingFlags.NonPublic);
+                GameObject PL = (GameObject)plField.GetValue(__instance);
+                if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP != null)
+                {
+                    if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP.special != 18) return false;
+                    return true;
+                }
+                else
+                {
+                    if (__instance.SLOW_DUR == 0f)
+                    {
+                        var audioMethod = poisonType.GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
+                        __instance.Active_Effects++;
+                        audioMethod.Invoke(__instance, new object[]{2});
+                        var SLOW_slotField = poisonType.GetField("SLOW_slot", BindingFlags.Instance | BindingFlags.NonPublic);
+                        SLOW_slotField.SetValue(__instance, __instance.Active_Effects - 1);
+                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().text = "slowed";
+                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().color = Color.grey;
+                    }
+                    var steps = duration;
+                    steps *= Mathf.LerpUnclamped(1.25f, 0.2f, (float)CON.CURRENT_PL_DATA.PLAYER_RES / 100f);
+                    __instance.SLOW_DUR = Time.time + steps;
+                }
+                return false;
+            }
+            return true;
+        }
+
         private static string ValueSuffix(int value)
         {
             if (value > 9)
@@ -292,7 +333,7 @@ namespace LunacidAP
             var flagData = LunacidFlags.ItemToFlag[Name];
             if (Name == "Progressive Vampiric Symbol")
             {
-                var receivedCount = _archipelago.Session.Items.AllItemsReceived.Count(x => _archipelago.Session.Items.GetItemName(x.Item) == "Progressive Vampiric Symbol");
+                var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.Item) == "Progressive Vampiric Symbol");
                 FlagHandler.ModifyFlag(flagData[0], flagData[1], Math.Min(3, receivedCount));
                 return;
             }
@@ -310,23 +351,23 @@ namespace LunacidAP
                 {
                     return "";
                 }
-                switch(ConnectionData.Symbols)
+                switch (ConnectionData.Symbols)
                 {
                     case 0:
-                    {
-                        ConnectionData.Symbols += 1;
-                        return "Vampiric Symbol (W)";
-                    }
+                        {
+                            ConnectionData.Symbols += 1;
+                            return "Vampiric Symbol (W)";
+                        }
                     case 1:
-                    {
-                        ConnectionData.Symbols += 1;
-                        return "Vampiric Symbol (A)";
-                    }
+                        {
+                            ConnectionData.Symbols += 1;
+                            return "Vampiric Symbol (A)";
+                        }
                     case 2:
-                    {
-                        ConnectionData.Symbols +=1;
-                        return "Vampiric Symbol (E)";
-                    }
+                        {
+                            ConnectionData.Symbols += 1;
+                            return "Vampiric Symbol (E)";
+                        }
                 }
                 return "";
             }

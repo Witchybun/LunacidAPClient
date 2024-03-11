@@ -1,16 +1,40 @@
+using System;
 using System.Collections.Generic;
+using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
 {
     public class LunacidItems
     {
+        public class ItemData
+        {
+            public long ItemID { get; set; }
+            public string ItemName { get; set; }
+            public string GameObjectName { get; set; }
+            public ItemType Type {get; set;}
+            public bool OneCount {get; set;}
+            public int CountMult {get; set;}
+            public string Element {get; set;}
+
+            public ItemData(long itemID, string itemName, string gameObject, ItemType type, bool oneCount = true, int countMult = 1, string element = "NA")
+            {
+                ItemID = itemID;
+                ItemName = ItemName;
+                GameObjectName = gameObject;
+                Type = type;
+                OneCount = oneCount;
+                CountMult = countMult;
+                Element = element;
+            }
+        }
+
         public static readonly List<string> OneCountItems = new(){
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
-            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat", 
+            "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
             "Skeleton Rattle"
         };
-        
+
         public static readonly List<string> Weapons = new(){
            "Axe of Harming", "Battle Axe", "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Broken Lance",
             "Corrupted Dagger", "Dark Rapier", "Elfen Bow", "Elfen Sword", "Fishing Spear", "Flail", "Halberd", "Iron Claw",
@@ -24,8 +48,8 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
-            "LUCID BLADE", "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION", 
-            "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST", 
+            "LUCID BLADE", "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
+            "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
             "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
 
@@ -38,16 +62,16 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> Items = new(){
-            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris", 
-            "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife", 
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
-            "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb", 
-            "Skeleton Egg", "Dried Rat", "Skeleton Rattle"
+            "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
+            "Skeleton Egg", "Dried Rat", "Skeleton Rattle", "Coal"
         };
 
         public static readonly List<string> Materials = new(){
-            "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes", 
+            "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes",
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
             "Destroying Angel Mushroom"
         };
@@ -115,5 +139,17 @@ namespace LunacidAP.Data
             {"BULLET_CAST", "PRIVATEER MUSKET"},
             {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
         };
+
+        public enum ItemType
+        {
+            Weapon = 0,
+            Spell = 1,
+            Gold = 2,
+            Item = 3,
+            Material = 4,
+            Switch = 10,
+            Trap = 11,
+        }
     }
+
 }

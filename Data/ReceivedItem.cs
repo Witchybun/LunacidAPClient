@@ -1,3 +1,5 @@
+using Archipelago.MultiClient.Net.Models;
+
 namespace LunacidAP.Data
 { 
     public class ReceivedItem
@@ -8,10 +10,9 @@ namespace LunacidAP.Data
         public long LocationId { get; }
         public long ItemId { get; }
         public long PlayerId { get; }
-        public int UniqueId { get; }
 
         public ReceivedItem(string locationName, string itemName, string playerName, long locationId, long itemId,
-            long playerId, int uniqueId)
+            long playerId)
         {
             LocationName = locationName;
             ItemName = itemName;
@@ -19,7 +20,19 @@ namespace LunacidAP.Data
             LocationId = locationId;
             ItemId = itemId;
             PlayerId = playerId;
-            UniqueId = uniqueId;
+        }
+
+        public ReceivedItem(NetworkItem item)
+        {
+            var locationName = ArchipelagoClient.AP.GetLocationNameFromID(item.Location);
+            var itemName = ArchipelagoClient.AP.GetItemNameFromID(item.Item);
+            var playerName = ArchipelagoClient.AP.GetPlayerNameFromSlot(item.Player);
+            LocationName = locationName;
+            ItemName = itemName;
+            PlayerName = playerName;
+            LocationId = item.Location;
+            ItemId = item.Item;
+            PlayerId = item.Player;
         }
     }
 }

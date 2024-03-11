@@ -11,7 +11,6 @@ namespace LunacidAP
 {
     public class CommunionHint
     {
-        private static ArchipelagoClient _archipelago;
         private static ManualLogSource _log;
         private static POP_text_scr PAPPY;
 
@@ -56,9 +55,8 @@ namespace LunacidAP
 
         private static Dictionary<string, HintData> CreatureHints { get; set; }
 
-        public static void Awake(ArchipelagoClient archipelago, ManualLogSource log)
+        public static void Awake(ManualLogSource log)
         {
-            _archipelago = archipelago;
             _log = log;
             Harmony.CreateAndPatchAll(typeof(CommunionHint));
         }
@@ -113,7 +111,7 @@ namespace LunacidAP
                 var locationID = hintData.LocationID;
                 /*if (!hintData.AlreadyHinted) // Lets turn off automatic hinting for now, for flair's sake.
                 {
-                    _archipelago.ScoutLocation(locationID, isProgression);
+                    ArchipelagoClient.AP.ScoutLocation(locationID, isProgression);
                 }*/
                 ConnectionData.CommunionHints[__instance.NPC_NAME].AlreadyHinted = true;
                 text = Encrypt(text);
@@ -163,17 +161,17 @@ namespace LunacidAP
             }
             CreatureHints = new() { };
             var random = new System.Random(seed);
-            var locationList = _archipelago.Session.Locations.AllLocations;
+            var locationList = ArchipelagoClient.AP.LocationTable.Keys.ToList();
             var locationCount = locationList.Count();
             foreach (var creature in CreatureToHint)
             {
                 var chosenLocationPosition = random.Next(0, locationCount - 1);
                 var chosenLocation = locationList[chosenLocationPosition];
-                var location = _archipelago.Session.Locations.GetLocationNameFromId(chosenLocation);
+                var location = ArchipelagoClient.AP.Session.Locations.GetLocationNameFromId(chosenLocation);
                 location = GetSuitableStringLength(location, 30);
-                var isProgression = IsLocationProgression(chosenLocation);
-                var itemID = _archipelago.ScoutLocation(chosenLocation, false).Locations[0].Item;
-                var item = _archipelago.GetItemNameFromID(itemID);
+                var itemData = ArchipelagoClient.AP.LocationTable[chosenLocation];
+                var isProgression = itemData.Classification.HasFlag(ItemFlags.Advancement);
+                var item = itemData.Name;
                 item = GetSuitableStringLength(item, 20);
                 var text = string.Format(creature.Value, location, item);
                 CreatureHints[creature.Key] = new HintData(text, chosenLocation, isProgression, false);
@@ -183,7 +181,7 @@ namespace LunacidAP
 
         private static bool IsLocationProgression(long location)
         {
-            var progressionFlag = _archipelago.ScoutLocation(location, false).Locations[0].Flags;
+            var progressionFlag = ArchipelagoClient.AP.ScoutLocation(location, false).Locations[0].Flags;
             if (progressionFlag.HasFlag(ItemFlags.Advancement))
             {
                 return true;
