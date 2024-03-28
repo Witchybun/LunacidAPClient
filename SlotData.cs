@@ -60,7 +60,6 @@ namespace LunacidAP
                 if (!ConnectionData.Elements.ContainsKey(newKey))
                 {
                     ConnectionData.Elements.Add(newKey, data.Value);
-                    _log.LogInfo($"Added {newKey} to element dict with value {data.Value}");
                 }
             }
         }

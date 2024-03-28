@@ -106,7 +106,6 @@ namespace LunacidAP
                 PAPPY = CON.PAPPY;
                 var hintData = ConnectionData.CommunionHints[__instance.NPC_NAME];
                 var text = hintData.LocationDialogue;
-                _log.LogInfo(text);
                 var isProgression = hintData.Progression;
                 var locationID = hintData.LocationID;
                 /*if (!hintData.AlreadyHinted) // Lets turn off automatic hinting for now, for flair's sake.
@@ -163,11 +162,17 @@ namespace LunacidAP
             var random = new System.Random(seed);
             var locationList = ArchipelagoClient.AP.LocationTable.Keys.ToList();
             var locationCount = locationList.Count();
+            var chosenLocations = new List<int>(){};
             foreach (var creature in CreatureToHint)
             {
                 var chosenLocationPosition = random.Next(0, locationCount - 1);
+                while (chosenLocations.Contains(chosenLocationPosition))
+                {
+                    chosenLocationPosition = random.Next(0, locationCount - 1);
+                }
+                chosenLocations.Add(chosenLocationPosition);
                 var chosenLocation = locationList[chosenLocationPosition];
-                var location = ArchipelagoClient.AP.Session.Locations.GetLocationNameFromId(chosenLocation);
+                var location = ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation);
                 location = GetSuitableStringLength(location, 30);
                 var itemData = ArchipelagoClient.AP.LocationTable[chosenLocation];
                 var isProgression = itemData.Classification.HasFlag(ItemFlags.Advancement);
@@ -177,16 +182,6 @@ namespace LunacidAP
                 CreatureHints[creature.Key] = new HintData(text, chosenLocation, isProgression, false);
             }
             ConnectionData.CommunionHints = CreatureHints;
-        }
-
-        private static bool IsLocationProgression(long location)
-        {
-            var progressionFlag = ArchipelagoClient.AP.ScoutLocation(location, false).Locations[0].Flags;
-            if (progressionFlag.HasFlag(ItemFlags.Advancement))
-            {
-                return true;
-            }
-            return false;
         }
 
         public class HintData

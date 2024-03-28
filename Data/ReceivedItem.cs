@@ -1,4 +1,5 @@
 using Archipelago.MultiClient.Net.Models;
+using Newtonsoft.Json;
 
 namespace LunacidAP.Data
 { 
@@ -11,6 +12,7 @@ namespace LunacidAP.Data
         public long ItemId { get; }
         public long PlayerId { get; }
 
+        [JsonConstructor]
         public ReceivedItem(string locationName, string itemName, string playerName, long locationId, long itemId,
             long playerId)
         {

@@ -205,5 +205,30 @@ namespace LunacidAP.Data
             {"Ultrakill", "the depths of hell."},
             {"Resident Evil 2 Remake", "the remains of the city of Raccoon."}
         };
+
+        public static readonly Dictionary<string, string[]> GameToCliveLore = new(){
+            {"", new string[4]{"Truth be told, I don't quite remember most of the details.",
+                               "Not for a lack of trying mind you!  Perhaps I just never heard the story in particular before.",
+                               "But there is one thing I do remember at least.  I hope that much will do you some good.",
+                               "Not much, but its enough."}
+            },
+            {"Adventure", new string[4]{"While this story has some holes, its certainly a curious tale.  It surrounds the machinations of an evil magician.",
+                                        "They had desires to ruin the kingdom.  For what purpose was lost to time, but the method was known: stealing the Golden Chalice.",
+                                        "The kingdom sent their strongest, and the magician, three beasts: Rhindle, Grundle, and Yorgle.  A long journey fell before the hero.",
+                                        "Using all sorts of trickery and cunning, they did all they could to avoid destruction, to return the chalice to the Golden Castle."
+                                        }
+            },
+            {"Lunacid", new string[4]{"This story, I can't quite recall if it was in this place, or another similar to this one.",
+                                     "After the deep fog had consumed the land, a certain individual was placed on a cart, to be discarded here.",
+                                     "Cast into the Great Well, they found a sign: to find a path to a slumbering creature, for they were the only exit.",
+                                     "A dreamwoven tale to be sure.  Though I have the foggiest of all the details yet.  I could've sworn it was recently.",
+                                     }
+            },
+            {"Stardew Valley", new string[4]{"A story of a much gentler time, in the Ferngill Republic before its ruin.",
+                                            "The grandchild of a farmer was given the deed to a farm upon his passing, to tend as they see fit.",
+                                            "And so they did, forging bonds with the local people, and even the very spirits of the land.",
+                                            "Bringing everyone together, they were able to bring joy and merriment to that place."}
+            },
+        };
     }
 }

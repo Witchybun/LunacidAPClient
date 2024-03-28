@@ -40,10 +40,7 @@ namespace LunacidAP
         {
             try
             {
-                if (!ArchipelagoClient.AP.Authenticated)
-                {
-                    ReadSave(Save_Slot);
-                }
+                ReadSave(Save_Slot);
             }
             catch (Exception ex)
             {
@@ -93,6 +90,10 @@ namespace LunacidAP
         {
             try
             {
+                if (ArchipelagoClient.IsInGame)
+                {
+                    return; // Don't keep spam loading in situations it isn't relevant; causes data loss.
+                }
                 var dir = Application.absoluteURL + "ArchSaves/";
                 if (!Directory.Exists(dir))
                 {
@@ -101,10 +102,10 @@ namespace LunacidAP
                 var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
                 if (File.Exists(savePath))
                 {
-                    _log.LogInfo($"Loading save for slot '{Save_Slot}'...");
                     using StreamReader reader = new StreamReader(savePath);
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
+                    _log.LogInfo($"Loaded save has {loadedSave.HostName}:{loadedSave.Port}");
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements);
@@ -116,9 +117,10 @@ namespace LunacidAP
                 _log.LogError("SAVE not found");
 
             }
-            catch
+            catch (Exception ex)
             {
-                _log.LogWarning($"Failed to parse json for save {Save_Slot}");
+                _log.LogError($"Failed to parse json for save {Save_Slot}");
+                _log.LogError($"{ex}");
             }
         }
 

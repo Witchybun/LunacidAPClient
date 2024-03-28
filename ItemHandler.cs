@@ -25,13 +25,10 @@ namespace LunacidAP
         public static void GiveLunacidItem(long itemID, string player = "", bool self = false)
         {
             string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
+            Name = ProgressiveSymbolHandler(Name);
             if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
             {
-                ApplyFlag(Name);
-                if (Name == "Progressive Vampiric Symbol")
-                {
-                    Name = ProgressiveSymbolHandler(Name);
-                }
+                FlagHandler.HandleFlagGivenItemName(Name);
             }
             var type = IdentifyItemGetType(Name);
             if (type == 1 || type == 2)
@@ -328,61 +325,51 @@ namespace LunacidAP
             return "0" + value.ToString();
         }
 
-        private static void ApplyFlag(string Name)
-        {
-            var flagData = LunacidFlags.ItemToFlag[Name];
-            if (Name == "Progressive Vampiric Symbol")
-            {
-                var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.Item) == "Progressive Vampiric Symbol");
-                FlagHandler.ModifyFlag(flagData[0], flagData[1], Math.Min(3, receivedCount));
-                return;
-            }
-            if (!FlagHandler.DoesPlayerHaveItem(Name))
-            {
-                FlagHandler.ModifyFlag(flagData[0], flagData[1], flagData[2]);
-            }
-        }
-
         private static string ProgressiveSymbolHandler(string Name)
         {
             try
             {
-                if (ConnectionData.Symbols > 2)
+                if (Name != "Progressive Vampiric Symbol")
                 {
-                    return "";
+                    return Name;
                 }
-                switch (ConnectionData.Symbols)
+                if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (W)"))
                 {
-                    case 0:
-                        {
-                            ConnectionData.Symbols += 1;
-                            return "Vampiric Symbol (W)";
-                        }
-                    case 1:
-                        {
-                            ConnectionData.Symbols += 1;
-                            return "Vampiric Symbol (A)";
-                        }
-                    case 2:
-                        {
-                            ConnectionData.Symbols += 1;
-                            return "Vampiric Symbol (E)";
-                        }
+                    /*if (ConnectionData.Symbols == 0)
+                    {
+                        ConnectionData.Symbols += 1;
+                        return "Vampiric Symbol (W)";
+                    }
+                    else
+                    {
+                        _log.LogError($"Don't have first symbol, but Symbols > 0.");
+                    }*/
+                    return "Vampiric Symbol (W)";
+
                 }
-                return "";
+                else if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (A)"))
+                {
+                    /*if (ConnectionData.Symbols == 1)
+                    {
+                        ConnectionData.Symbols += 1;
+                        return "Vampiric Symbol (A)";
+                    }
+                    else
+                    {
+                        _log.LogError($"Don't have second symbol, but Symbols != 1.");
+                    }*/
+                    return "Vampiric Symbol (A)";
+                }
+                else if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (E)"))
+                {
+                    return "Vampiric Symbol (E)";
+                }
+                return Name;
             }
             catch (Exception ex)
             {
-                if (Control is null)
-                {
-                    _log.LogError("CON is null.");
-                }
-                if (Control.CURRENT_PL_DATA.ITEMS is null)
-                {
-                    _log.LogError("Items list is null.");
-                }
                 _log.LogError($"{ex.Message}");
-                return "";
+                return Name;
             }
         }
 

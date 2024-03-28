@@ -26,7 +26,6 @@ namespace LunacidAP
         private int Stack;
         public const long LOCATION_INIT_ID = 771111110;
         private CONTROL Control;
-        private POP_text_scr Popup;
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
 
@@ -55,8 +54,10 @@ namespace LunacidAP
             AP = Obj.AddComponent<ArchipelagoClient>();
         }
 
-        public IEnumerator Connect(string slotName, string hostName, int port, string password, bool reconnect = false)
+        public IEnumerator Connect(string slotName, string hostName, int port, string password, bool reconnect = false, int slotID = -1)
         {
+            
+            _log.LogInfo($"Connecting: {slotName}, {hostName}, {port}");
             Authenticated = false;
             var minimumVersion = new Version(0, 4, 4);
             Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
@@ -97,7 +98,6 @@ namespace LunacidAP
             if (!reconnect)
             {
                 BuildLocationTable();
-                CommunionHint.DetermineHints(SlotData.Seed);
 
                 // Scout unchecked locations
                 var uncheckedLocationIDs = from locationID in LocationTable.Keys where !IsLocationChecked(locationID) select locationID;
@@ -115,6 +115,8 @@ namespace LunacidAP
                     int locationID = (int)item.Location;
                     LocationTable[locationID] = new ArchipelagoItem(item, false);
                 }
+
+                CommunionHint.DetermineHints(SlotData.Seed);
             }
             // Sync checked locations
             var checkedLocationIDs = from locationID in LocationTable.Keys where IsLocationChecked(locationID) select locationID;
@@ -127,6 +129,7 @@ namespace LunacidAP
                 yield break;
             }
             // Sync collected locations
+            _log.LogInfo("About to append completed locations");
             foreach (long locationID in Session.Locations.AllLocationsChecked)
             {
                 if (!ConnectionData.CompletedLocations.Contains(locationID))
@@ -138,6 +141,10 @@ namespace LunacidAP
             // Connection successful
             Authenticated = true;
             ConnectionData.WriteConnectionData(hostName, port, slotName, password);
+            if (slotID > -1)
+            {
+                SaveHandler.SaveData(slotID); // to ensure the updated information isn't lost at load.
+            }
             Session.Socket.ErrorReceived += Session_ErrorReceived;
             Session.Socket.SocketClosed += Session_SocketClosed;
             if (login.SlotData["death_link"].ToString() == "1")
@@ -190,7 +197,7 @@ namespace LunacidAP
             if (Session is not null && Session.Items.Any() && IsInGame)
             {
                 var item = Session.Items.DequeueItem();
-                if (!ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location))
+                if (item.Location < 0 || !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location && item.Item == x.ItemId))
                 {
                     var receivedItem = new ReceivedItem(item);
                     ConnectionData.ReceivedItems.Add(receivedItem);
@@ -256,6 +263,10 @@ namespace LunacidAP
             {
                 foreach (var location in region.Value)
                 {
+                    if (location.IgnoreLocationHandler == true && (region.Key != "TOWER" || region.Key != "ARENA2"))
+                    {
+                        continue;
+                    }
                     locations.Add((int)location.APLocationID);
                 }
             }
@@ -263,6 +274,10 @@ namespace LunacidAP
             {
                 foreach (var location in LunacidLocations.ShopLocations)
                 {
+                    if (location.IgnoreLocationHandler == true)
+                    {
+                        continue;
+                    }
                     locations.Add((int)location.APLocationID);
                 }
             }
@@ -270,6 +285,10 @@ namespace LunacidAP
             {
                 foreach (var location in LunacidLocations.DropLocations)
                 {
+                    if (location.IgnoreLocationHandler == true)
+                    {
+                        continue;
+                    }
                     locations.Add((int)location.APLocationID);
                 }
             }
@@ -286,7 +305,7 @@ namespace LunacidAP
             Stack++;
             var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
             Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            while (isInEnding || GameObject.Find("PLAYER") is null || instanceStack < Stack)
+            while (!Control.LOADED || isInEnding || GameObject.Find("PLAYER") is null || instanceStack < Stack)
             {
                 yield return new WaitForSeconds(1f);
             }
@@ -304,16 +323,20 @@ namespace LunacidAP
           {ItemFlags.Trap, "Trap"}
         };
 
-        public LocationInfoPacket ScoutLocation(long locationId, bool createAsHint)
+        public ArchipelagoItem ScoutLocation(long locationId)
         {
-            var scoutTask = Session.Locations.ScoutLocationsAsync(createAsHint, locationId);
-            scoutTask.Wait();
-            return scoutTask.Result;
+            return LocationTable[locationId];
         }
 
         public bool IsLocationChecked(long location)
         {
             return ConnectionData.CompletedLocations.Contains(location);
+        }
+
+        public bool IsLocationChecked(string location)
+        {
+            var locationID = GetLocationIDFromName(location);
+            return ConnectionData.CompletedLocations.Contains(locationID);
         }
 
         public bool IsLocationChecked(LocationData location)

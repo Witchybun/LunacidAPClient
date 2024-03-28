@@ -30,9 +30,9 @@ namespace LunacidAP
                 return true;
             }
             var weaponName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
-            if (!ConnectionData.Elements.TryGetValue(weaponName, out string elementName) || LunacidItems.WeaponsWithDefaultElement.Contains(weaponName))
+            if (!ConnectionData.Elements.TryGetValue(weaponName, out string elementName))
             {
-                _log.LogInfo($"{weaponName} not in list for elements.  This may or may not be an error.  Returning.");
+                _log.LogError($"{weaponName} not in list for elements.");
                 return true;
             }
             if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
@@ -51,7 +51,7 @@ namespace LunacidAP
                 return true;
             }
             var spellName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
-            if (!ConnectionData.Elements.TryGetValue(spellName, out string elementName) || LunacidItems.WeaponsWithDefaultElement.Contains(spellName))
+            if (!ConnectionData.Elements.TryGetValue(spellName, out string elementName))
             {
                 _log.LogInfo($"{spellName} not in list for elements.  This may or may not be an error.  Returning.");
                 return true;
@@ -130,6 +130,10 @@ namespace LunacidAP
                         Magic_scr component = gameObject.GetComponent<Magic_scr>();
                         Sprite elementSprite;
                         var nameWithoutClone = component.name.Replace("(Clone)", "");
+                        if (nameWithoutClone == "BLOOD STRIKE")
+                        {
+                            break; // To keep the original flavor of this spell which denotes it as blood
+                        }
                         if (IsElementShuffled(nameWithoutClone, out var element))
                         {
                             elementSprite = __instance.ELEM[element];
@@ -154,7 +158,6 @@ namespace LunacidAP
                     element = -1;
                     return false;
                 }
-                _log.LogInfo($"Found {givenElement} for weapon {weaponName}");
                 element = LunacidItems.ElementToID[givenElement];
                 return true;
             }

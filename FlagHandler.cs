@@ -2,7 +2,9 @@ using System;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace LunacidAP
 {
@@ -18,20 +20,51 @@ namespace LunacidAP
             Harmony.CreateAndPatchAll(typeof(FlagHandler));
         }
 
+        public static void HandleFlagGivenItemName(string Name)
+        {
+            var sceneName = SceneManager.GetActiveScene().name;
+            var itemData = LunacidFlags.ItemToFlag[Name];
+            ApplyFlag(Name);
+            if (sceneName == itemData.Scene)
+            {
+                RefreshSceneEntities(Name);
+            }
+        }
+
+        private static void ApplyFlag(string Name)
+        {
+            var flagData = LunacidFlags.ItemToFlag[Name].Flag;
+            if (Name == "Progressive Vampiric Symbol")
+            {
+                ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Symbols));
+                return;
+            }
+            if (!DoesPlayerHaveItem(Name))
+            {
+                ModifyFlag(flagData[0], flagData[1], flagData[2]);
+            }
+        }
+
         public static string LoadFlag(int Zone)
         {
             CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             var current_string = ZoneDataPicker(Zone);
-            _log.LogInfo($"Giving the following ({Zone}): {current_string}");
             return current_string;
+        }
+
+        public static int ReadFlagValue(int Zone, int Slot)
+        {
+            var flag = LoadFlag(Zone);
+            char value = flag[Slot];
+            return value;
+
         }
 
         public static void ModifyFlag(int Zone, int Slot, int Value)
         {
             var current_string = LoadFlag(Zone);
-            _log.LogInfo($"Before ({Zone}): {current_string}");
             current_string = current_string.Substring(0, Slot - 1) + Value + current_string.Substring(Slot, current_string.Length - Slot);
-            _log.LogInfo($"After ({Zone}): {current_string}");
+
             switch (Zone)
             {
                 case 0:
@@ -127,55 +160,160 @@ namespace LunacidAP
                 }
                 errorData[2] = sTATES[__instance.value].name;
                 __instance.STATES[__instance.value].SetActive(value: true);
-                if (sceneName == "FOREST_B1")
+
+                switch (sceneName)
                 {
-                    var skull = GameObject.Find("FOREST_B1").transform.GetChild(1).GetChild(2).GetChild(1).gameObject;
-                    if (!skull.activeSelf)
-                    {
-                        skull.SetActive(value: true);
-                    }
-                }
-                if (sceneName == "PRISON")
-                {
-                    var prisonKey = GameObject.Find("PRISON").transform.GetChild(4).GetChild(6).gameObject;
-                    if (!prisonKey.activeSelf)
-                    {
-                        prisonKey.SetActive(value: true);
-                    }
-                    var hammerPickup = GameObject.Find("PRISON").transform.GetChild(7).GetChild(3).gameObject;
-                    if (!hammerPickup.activeSelf)
-                    {
-                        hammerPickup.SetActive(value: true);
-                    }
-                }
-                else if (sceneName == "PITT_A1")
-                {
-                    var pittObjects = GameObject.Find("THE_PIT_A1");
-                    var vhsTape = pittObjects.transform.GetChild(1).GetChild(22).gameObject;
-                    var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
-                    if (woodenGate.activeSelf)
-                    {
-                        woodenGate.SetActive(value: false);
-                    }
-                    if (stateController == "META")
-                    {
-                        var secretID = ArchipelagoClient.AP.GetLocationIDFromName("HB: Temple Hidden Room In Sewer");
-                        if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
+                    case "FOREST_A1":
                         {
-                            vhsTape.SetActive(value: true);
+                            if (stateController == "PATCHI" && DoesPlayerHaveItem("Skull of Josiah") && !ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward"))
+                            {
+                                __instance.transform.GetChild(2).gameObject.SetActive(value: false);
+                                __instance.transform.GetChild(3).gameObject.SetActive(value: false);
+                                __instance.transform.GetChild(4).gameObject.SetActive(value: false);
+                                __instance.transform.GetChild(5).gameObject.SetActive(value: true);
+                                __instance.transform.GetChild(6).gameObject.SetActive(value: false);
+                            }
+                            break;
                         }
-                    }
-                }
-                else if (sceneName == "CAS_1" && stateController == "SAVE_0")
-                {
-                    sTATES[0].SetActive(value: true);
-                    sTATES[1].SetActive(value: true);
-                    sTATES[2].SetActive(value: true);
-                }
-                else if (sceneName == "ARENA" && (stateController == "CHEST3" || stateController == "CHEST4"))
-                {
-                    sTATES[0].SetActive(value: true); // always force the chest in a waiting state.
-                    sTATES[1].SetActive(value: false);
+                    case "FOREST_B1":
+                        {
+                            if (stateController == "save2")
+                            {
+                                var skull = __instance.transform.GetChild(1).gameObject;
+                                if (!skull.activeSelf)
+                                {
+                                    skull.SetActive(value: true);
+                                }
+
+                            }
+                            break;
+                        }
+                    case "PRISON":
+                        {
+                            if (stateController == "GARRAT") // Not super necessary; its just so this doesn't trigger a million times.
+                            {
+                                var prison = GameObject.Find("PRISON").transform;
+                                var prisonKey = prison.GetChild(4).GetChild(6).gameObject;
+                                if (!prisonKey.activeSelf)
+                                {
+                                    prisonKey.SetActive(value: true);
+                                }
+                                var hammerPickup = prison.GetChild(7).GetChild(3).gameObject;
+                                if (!hammerPickup.activeSelf)
+                                {
+                                    hammerPickup.SetActive(value: true);
+                                }
+                            }
+                            break;
+                        }
+                    case "PITT_A1":
+                        {
+                            var pittObjects = GameObject.Find("THE_PIT_A1");
+                            var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
+                            if (woodenGate.activeSelf)
+                            {
+                                woodenGate.SetActive(value: false);
+                            }
+                            if (stateController == "META")
+                            {
+                                var vhsTape = pittObjects.transform.GetChild(1).GetChild(22).gameObject;
+                                var secretID = ArchipelagoClient.AP.GetLocationIDFromName("HB: Temple Hidden Room In Sewer");
+                                if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
+                                {
+                                    vhsTape.SetActive(value: true);
+                                }
+                            }
+                            break;
+                        }
+                    case "CAS_1":
+                        {
+                            if (stateController == "SAVE_0")
+                            {
+                                sTATES[0].SetActive(value: true);
+                                sTATES[1].SetActive(value: true);
+                                sTATES[2].SetActive(value: true);
+                            }
+                            else if (stateController == "CAS_DOOR")
+                            {
+                                var playerClass = GameObject.Find("CONTROL").GetComponent<CONTROL>().CURRENT_PL_DATA.PLAYER_CLASS;
+                                _log.LogInfo($"{playerClass}");
+                                if (playerClass == "Vampire")
+                                {
+                                    sTATES[1].SetActive(value: true);
+                                }
+                                else
+                                {
+                                    sTATES[3].SetActive(value: true);
+                                }
+                            }
+                            break;
+                        }
+                    case "ARENA":
+                        {
+                            if (stateController == "CHEST3" || stateController == "CHEST4")
+                            {
+                                sTATES[0].SetActive(value: true); // always force the chest in a waiting state.
+                                sTATES[1].SetActive(value: false);
+                            }
+                            break;
+                        }
+                    case "HAUNT":
+                        {
+                            if (stateController == "META")
+                            {
+                                var corrupt = ArchipelagoClient.AP.GetLocationIDFromName("AT: Corrupted Room");
+                                if (!ArchipelagoClient.AP.WasItemReceived("Corrupt Key"))
+                                {
+                                    sTATES[0].SetActive(value: true);
+                                }
+                                else if (ArchipelagoClient.AP.WasItemReceived("Corrupt Key") && !DoesPlayerHaveItem("Corrupt Key"))
+                                {
+                                    sTATES[0].SetActive(value: false);
+                                }
+                            }
+                            else if (stateController == "TV")
+                            {
+                                if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
+                                {
+                                    sTATES[0].SetActive(value: true);
+                                    sTATES[1].SetActive(value: true);
+                                    sTATES[2].SetActive(value: false);
+                                    sTATES[3].SetActive(value: false);
+                                }
+                            }
+                            break;
+                        }
+                    case "HUB_01":
+                        {
+                            var book = GameObject.Find("LEVEL").transform.GetChild(9).GetChild(1);
+                            if (!book.gameObject.activeSelf)
+                            {
+                                book.gameObject.SetActive(value: true);
+                            }
+                            break;
+                        }
+                        case "ARCHIVES":
+                            {
+                                if (stateController == "FINAL_STAGES")
+                                {
+                                    var hasBook3 = __instance.transform.parent.GetChild(8).GetChild(9).gameObject;
+                                    if (hasBook3.activeSelf)
+                                    {
+                                        __instance.transform.GetChild(1).gameObject.SetActive(value: true);
+                                        hasBook3.SetActive(value: false);
+                                    }
+                                }
+                                else if (stateController == "STAGES")
+                                {
+                                    var giveBook3 = __instance.transform.parent.GetChild(7).GetChild(1).gameObject;
+                                    if (giveBook3.activeSelf)
+                                    {
+                                        __instance.transform.GetChild(9).gameObject.SetActive(value: false);
+                                        giveBook3.SetActive(value: true);
+                                    }
+                                }
+                                break;
+                            }
                 }
                 return false;
             }
@@ -187,6 +325,92 @@ namespace LunacidAP
                 _log.LogError($"{ex}");
 
                 return true;
+            }
+        }
+
+        public static void RefreshSceneEntities(string itemName)
+        {
+            var sceneName = SceneManager.GetActiveScene().name;
+            switch (itemName)
+            {
+                case "Progressive Vampiric Symbol":
+                    {
+                        var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.Item) == "Progressive Vampiric Symbol");
+                        Transform map = GameObject.Find(sceneName).transform;
+                        if (sceneName == "ARCHIVES")
+                        {
+                            map.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
+                            break;
+                        }
+                        switch (receivedCount)
+                        {
+                            case 1:
+                                {
+                                    var casDoor = map.GetChild(7).GetChild(10);
+                                    casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
+                                    casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    var casDoor2 = map.GetChild(7).GetChild(13);
+                                    foreach (Transform child in casDoor2)
+                                    {
+                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
+                                    }
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    var casDoor2 = map.GetChild(7).GetChild(13);
+                                    foreach (Transform child in casDoor2)
+                                    {
+                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
+                                    }
+                                    break;
+                                }
+                        }
+                        break;
+                    }
+                case "VHS Tape":
+                    {
+                        // The effect really isn't felt in the same map anyway.
+                        break;
+                    }
+                case "White VHS Tape":
+                    {
+                        // The effect really isn't felt in the same map anyway.
+                        break;
+                    }
+                case "Skull of Josiah":
+                    {
+                        // The effect really isn't felt in the same map anyway.
+                        break;
+                    }
+                case "Hammer of Cruelty":
+                    {
+                        var hammerPickup = GameObject.Find("PRISON").transform.GetChild(7).GetChild(4);
+                        hammerPickup.GetComponent<AREA_SAVED_ITEM>().Load();
+                        break;
+                    }
+                case "Terminus Prison Key":
+                    {
+                        var jailDoors = GameObject.Find("PRISON").transform.GetChild(4).GetChild(7);
+                        jailDoors.GetComponent<AREA_SAVED_ITEM>().Load();
+                        break;
+                    }
+                case "Water Talisman":
+                    {
+                        var talisman = GameObject.Find("ARENA").transform.GetChild(4).GetChild(13).GetChild(1);
+                        talisman.GetComponent<AREA_SAVED_ITEM>().Load();
+                        break;
+                    }
+                case "Earth Talisman":
+                    {
+                        var talisman = GameObject.Find("ARENA").transform.GetChild(4).GetChild(13);
+                        talisman.GetComponent<AREA_SAVED_ITEM>().Load();
+                        break;
+                    }
             }
         }
 

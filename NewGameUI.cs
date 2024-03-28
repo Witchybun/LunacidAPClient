@@ -37,10 +37,10 @@ namespace LunacidAP
 
             HostEntry = GameObject.Instantiate(textField);
             HostEntry.name = "Host";
-            var hostInputComponent = PortEntry.GetComponent<TMP_InputField>();
+            var hostInputComponent = HostEntry.GetComponent<TMP_InputField>();
             hostInputComponent.placeholder.GetComponent<TMP_Text>().text = "input hostname";
             hostInputComponent.characterLimit = 30;
-            HostEntry.transform.position = new Vector3(62.0523f, 14f, -66.08f);
+            HostEntry.transform.position = new Vector3(62.0523f, 14.18f, -66.08f);
             HostEntry.transform.SetParent(create);
             HostEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
             
@@ -49,7 +49,7 @@ namespace LunacidAP
             var portInputComponent = PortEntry.GetComponent<TMP_InputField>();
             portInputComponent.placeholder.GetComponent<TMP_Text>().text = "input port";
             portInputComponent.characterLimit = 30;
-            PortEntry.transform.position = new Vector3(62.0523f, 14.08f, -66.08f);
+            PortEntry.transform.position = new Vector3(62.0523f, 14.081f, -66.08f);
             PortEntry.transform.SetParent(create);
             PortEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
 
@@ -67,15 +67,21 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Click_GatherData(int which, Menus __instance)
         {
-            _log.LogInfo($"Calling click {which}");
-            _log.LogInfo($"Current Query: {__instance.current_query}");
+            /*_log.LogInfo($"Calling click {which}");
+            _log.LogInfo($"Current Query: {__instance.current_query}");*/
             var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
             var EQ_SLOT = (int)eqSlotField.GetValue(__instance);
-            if (which == 28 && __instance.current_query == 6)
+            var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT);
+            if ((which == 28 && __instance.current_query == 6) || (which == 55 && __instance.current_query == 0))
             {
-                SaveHandler.ReadSave(PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT));
-                __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false));
+                SaveHandler.ReadSave(saveSlot);
+                __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot));
                 return true;
+            }
+            if (which == 28 && __instance.current_query == 5) // Query for deleting save data
+            {
+                ConnectionData.WriteConnectionData();
+                SaveHandler.SaveData(saveSlot);
             }
             if (which == 37)
             {
@@ -85,14 +91,13 @@ namespace LunacidAP
                 var portName = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(28).gameObject.GetComponent<TMP_InputField>().text;
                 var port = int.Parse(portName);
                 var password = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(29).gameObject.GetComponent<TMP_InputField>().text;
-                if (StaticFuncs.IS_NULL(slotName) || !hostName.Contains(":"))
+                if (StaticFuncs.IS_NULL(slotName) || StaticFuncs.IS_NULL(hostName) || StaticFuncs.IS_NULL(portName))
                 {
                     audioMethod.Invoke(__instance, new object[] { 5 });
                     return false;
                 }
                 if (!ArchipelagoClient.AP.Authenticated)
                 {
-                    ConnectionData.WriteConnectionData(hostName, port, slotName, password);
                     __instance.StartCoroutine(ArchipelagoClient.AP.Connect(slotName, hostName, port, password, false));
                     return false;
                 }
@@ -102,7 +107,11 @@ namespace LunacidAP
                 __instance.current_query = 1;
                 EventSystem.current.SetSelectedGameObject(__instance.ITEMS[10]);
                 audioMethod.Invoke(__instance, new object[] { 8 });
-                SaveHandler.SaveData(PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT));
+                SaveHandler.SaveData(saveSlot);
+            }
+            if (which == 41)
+            {
+                ShopHandler.EnsureEnchantedKey();
             }
             return true;
         }

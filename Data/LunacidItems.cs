@@ -32,7 +32,7 @@ namespace LunacidAP.Data
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
-            "Skeleton Rattle"
+            "Skeletal Rattle", "Dusty Crystal Orb"
         };
 
         public static readonly List<string> Weapons = new(){
@@ -67,7 +67,7 @@ namespace LunacidAP.Data
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
-            "Skeleton Egg", "Dried Rat", "Skeleton Rattle", "Coal"
+            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal"
         };
 
         public static readonly List<string> Materials = new(){

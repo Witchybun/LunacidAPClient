@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
@@ -18,6 +20,76 @@ namespace LunacidAP
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(ShopHandler));
+        }
+
+        public static void EnsureEnchantedKey()
+        {
+            if (!SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked("Buy Enchanted Key"))
+            {
+
+                return;
+            }
+            var sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName == "FOREST_A1")
+            {
+                return;
+            }
+            if (sceneName == "HUB_01")
+            {
+                var sheryls = GameObject.Find("LEVEL").transform.GetChild(8).GetChild(0);
+                if (sheryls.GetChild(0).gameObject.activeSelf)
+                {
+
+                    return;
+                }
+                var keyItem = sheryls.GetChild(0).GetChild(4).GetChild(0).GetComponent<Shop_Inventory>().INV[0];
+                if (sheryls.GetChild(1).gameObject.activeSelf)
+                {
+                    var shop = sheryls.GetChild(1).GetChild(4);
+
+                    if (shop.gameObject.activeSelf && shop.GetChild(0).GetComponent<Shop_Inventory>().INV[0].item != "Enchanted Key")
+                    {
+
+
+                        Shop_Inventory.INV_ITEMS[] oldShopItems = shop.GetChild(0).GetComponent<Shop_Inventory>().INV;
+                        var newShopItems = new List<Shop_Inventory.INV_ITEMS>
+                        {
+                            keyItem
+                        };
+                        for (var i = 0; i < oldShopItems.Length; i++)
+                        {
+
+                            newShopItems.Add(oldShopItems[i]);
+                        }
+
+                        shop.GetChild(0).GetComponent<Shop_Inventory>().INV = newShopItems.ToArray();
+                    }
+                    return;
+                }
+                if (sheryls.GetChild(2).gameObject.activeSelf)
+                {
+                    var shop = sheryls.GetChild(2).GetChild(4);
+                    if (shop.gameObject.activeSelf && shop.GetChild(0).GetComponent<Shop_Inventory>().INV[0].item != "Enchanted Key")
+                    {
+                        Shop_Inventory.INV_ITEMS[] oldShopItems = shop.GetChild(0).GetComponent<Shop_Inventory>().INV;
+                        var newShopItems = new List<Shop_Inventory.INV_ITEMS>
+                        {
+                            keyItem
+                        };
+
+
+                        for (var i = 0; i < oldShopItems.Length; i++)
+                        {
+
+                            newShopItems.Add(oldShopItems[i]);
+                        }
+
+                        shop.GetChild(0).GetComponent<Shop_Inventory>().INV = newShopItems.ToArray();
+                    }
+                    return;
+                }
+                _log.LogError("Could not place the Enchanted Key.");
+            }
         }
 
         [HarmonyPatch(typeof(Shop_Inventory), "Load")]
@@ -112,13 +184,13 @@ namespace LunacidAP
                 var objectName = __instance.INV[which].OBJ.name;
                 var sceneName = __instance.gameObject.scene.name;
                 var apLocation = DetermineShopLocation(sceneName, objectName);
-                var location =  + apLocation.APLocationID;
-                var locationInfo = ArchipelagoClient.AP.ScoutLocation(location, false);
-                var slotNameofItemOwner = ArchipelagoClient.AP.Session.Players.GetPlayerName(locationInfo.Locations[0].Player);
+                var location = +apLocation.APLocationID;
+                var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
+                var slotNameofItemOwner = locationInfo.SlotName;
                 if (ConnectionData.SlotName != slotNameofItemOwner)
                 {
-                    var itemInfo = ArchipelagoClient.AP.Session.Items.GetItemName(locationInfo.Locations[0].Item);
-                    __instance.CON.PAPPY.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
+                    var itemName = locationInfo.Name;
+                    __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
                 }
                 ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
                 ConnectionData.CompletedLocations.Add(location);
@@ -141,15 +213,14 @@ namespace LunacidAP
                     return;
                 }
                 var apLocation = DetermineShopLocation(sceneName, objectName);
-                var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID, false);
-                var netItem = locationInfo.Locations[0];
-                var itemName = ArchipelagoClient.AP.GetItemNameFromID(netItem.Item).Replace("Progressive ", "");
+                var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
+                var itemName = locationInfo.Name.Replace("Progressive ", "");
                 var itemNameLength = itemName.Length;
                 itemName = itemName.Substring(0, Math.Min(itemNameLength, 25));
-                var gameName = ArchipelagoClient.AP.Session.Players.Players[ArchipelagoClient.AP.Session.ConnectionInfo.Team][netItem.Player].Game;
+                var gameName = locationInfo.Game;
                 var gameNameLength = gameName.Length;
                 gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
-                var progression = ArchipelagoClient.ProgressionFlagToString[GetShopProgression(apLocation.APLocationID)];
+                var progression = ArchipelagoClient.ProgressionFlagToString[locationInfo.Classification];
                 if (!ArchipelagoGames.GameToProtagonist.TryGetValue(gameName, out string protag))
                 {
                     protag = "an unknown entity";
@@ -162,7 +233,7 @@ namespace LunacidAP
                 {
                     item = "Archipelago";
                 }
-                var totalBlurb = $"A curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(GetShopProgression(apLocation.APLocationID));
+                var totalBlurb = $"A curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
                 __instance.TXT[56].text = item + " Artifact";
                 __instance.TXT[50].text = totalBlurb;
                 __instance.TXT[51].text = $"NAME: {itemName.ToUpper()}\nGAME: {gameName.ToUpper()}\nFLAG: {progression.ToUpper()}";
@@ -223,11 +294,6 @@ namespace LunacidAP
                 return "It tempted many in its time, cursing all those would eventually carry it.";
             }
             return "It was an item found in a lost archipelago.  Never to be noted.";
-        }
-
-        private static ItemFlags GetShopProgression(long location)
-        {
-            return ArchipelagoClient.AP.ScoutLocation(location, false).Locations[0].Flags;
         }
     }
 }
