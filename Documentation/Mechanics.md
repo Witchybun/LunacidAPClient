@@ -44,9 +44,10 @@ Note later that Barrier will likely be included in this logic.
 
 The Bestial Communion spell has been modified to instead give players hints about random locations in the game, given some flair and obfuscated using the game's cipher and elf runes.  If an item is progression, it will auto-hint for you so you can see it in the tracker, but otherwise you will have to parse it on your own.
 
-## Shop Locations (Prices)
+## Shop Locations
 
-Any shop location outside of the Enchanted Key assumes you can at least reach The Sanguine Sea, in order to give you more access to means of collecting funds to purchase them.
+- All shop locations have their descriptions changed to reflect what the item is, with flair related to the game they spawn from.  If the game isn't handled it will default to a generic description.
+- Any shop location outside of the Enchanted Key assumes you can at least reach The Sanguine Sea, in order to give you more access to means of collecting funds to purchase them.
 
 ## Dying
 
@@ -58,3 +59,21 @@ The setting "Switch Locks" goes to almost all switch locations in the game, and 
 
 - **Forbidden Archives (1F -2F) being non-progression**: The elevator starts in a position where you can get on it, and if it was left at the bottom floor it is trivial to reach the bottom without dying.  Its moreso annoying.
 - **Terminus Prison Back Alley Switch being progression**: You may not have an alternative way to get back to the starting floor (such as lack of Icarius Flight).
+
+## Progression
+
+The following is a list of what is progression, and why:
+
+- **Icarian Flight, Rock Bridge, Barrier, Coffin, Summon Snail**: Used for logic for reaching high places.  Depends on how high it is.  If its low enough, Coffin is used.  This can apply to reaching the first and third floor of Forbidden Archives on Switch Locks.
+
+- **Weapons or Spells with Light, Fire, Poison, Dark Elements**: Used to open doors associated with striking them with an appropriate element.  These include the gates in Accursed Tomb, the window in Castle Le Fanu, the frozen wall in Castle Le Fanu.
+
+- **Any Ranged Weapon or Spell**: Used to retrieve the weapon in the tree in Yosei Forest.
+
+- **Weapons, Spells, or Items with a Glow Effect**: Used to access areas of the game where it is too dark to traverse.  These items are Torch, Oil Lantern, Crystal Lantern, Twisted Staff, Moonlight, Broken Hilt (as it turns into Fire Sword), Flame Flare, Ghost Light.
+
+- **Blood Strike, Blood Drain**: Used to access Cattle Cells, and remove the blood plants in Yosei Forest.
+
+- **Dusty Crystal Orb**: Used to unlock hidden walls if on that setting.
+
+- **Switches from Switch Locks**: Unlocks paths normally inaccessible otherwise.  These include Temple of Silence Switch, Forbidden Archives elevators for any elevator to the third floor, the two fire switches to get into Sand Temple, Prison Shortcut Switch and the Forlorn Arena Gate Switch.

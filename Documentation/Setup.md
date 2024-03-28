@@ -21,18 +21,16 @@ Hosting a game locally is simply taking the Lunacid.yaml file, editing it to sui
 
 ## In-game setup
 
-- Upon starting, **do not login yet**.  The system already instakicks you if you try to, as there is no slot data to work with.
-- Create a new save and a new character and wait until you are loaded into Hollow Basin.
-- Top left corner of the screen, click "Show", put in your hostname, username, password, hit connect.
+- Create a new save.  The first part of character creation is to login.  After a successful connect, you'll be allowed to make a new character. 
 - If successful, all data is saved to a file, found in the base game's folder under ArchSaves.
 - Enjoy playing!
 
 ## Troubleshooting
 
 * Q: My server's port changed and I can't connect.  How do I fix this?*
-**A: Follow the guide for connecting, but use the new host name and port.  This should save appropriately.**
+**A: Open the .json file for your related save, and change the port in the save directly.**
 
 *Q: I was sent a key to open a door, but it won't open.*
-**A: Currently, the way I modify flag states is very direct, as the base system requires a lot of game object data that might not be present.  Simply reload the area to force a Load call for now.**
+**A: This is now bug report worthy, but short-term, walk to where the item exists, then leave the same area, or reload the area.**
 
 If more stuff comes up I'll add it here.  Probably will, you know how it is.
