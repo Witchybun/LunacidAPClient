@@ -35,6 +35,8 @@ namespace LunacidAP
                 CommunionHint.Awake(Log);
                 WeaponHandler.Awake(Log);
                 ShopHandler.Awake(Log);
+                ReadDialogueHelper.Awake(Log);
+                TeleportHandler.Awake(Log);
                 UI = new NewGameUI(Log);
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
@@ -69,6 +71,7 @@ namespace LunacidAP
             {
                 UI.ModifyCharCreateForArchipelago();
             }
+            ReadDialogueHelper.InstantiateSignsForHints(sceneName);
             
 
         }
