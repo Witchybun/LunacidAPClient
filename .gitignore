@@ -85,3 +85,4 @@ obj/Release/netstandard2.0/LunacidAP.csproj.FileListAbsolute.txt
 obj/Release/netstandard2.0/LunacidAP.dll
 obj/Release/netstandard2.0/LunacidAP.pdb
 obj/Release/netstandard2.0/PluginInfo.cs
+bin/Release/netstandard2.0/LunacidAP.dll
