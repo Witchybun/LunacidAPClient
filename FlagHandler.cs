@@ -36,7 +36,7 @@ namespace LunacidAP
             var flagData = LunacidFlags.ItemToFlag[Name].Flag;
             if (Name == "Progressive Vampiric Symbol")
             {
-                ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Symbols));
+                ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Index));
                 return;
             }
             if (!DoesPlayerHaveItem(Name))
@@ -137,19 +137,29 @@ namespace LunacidAP
                 __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
                 var stateController = __instance.name;
                 GameObject[] sTATES = __instance.STATES;
+                var finalValue = __instance.value;
+                foreach (var flag in LunacidFlags.MaximumPlotFlags)
+                {
+                    if (__instance.Zone == flag[0] && __instance.Slot == flag[1])
+                    {
+                        if (__instance.value > flag[2])
+                        {
+                            __instance.value = flag[2];
+                            __instance.Save(); // Fix it from here on.
+                        }
+                        finalValue = Math.Min(flag[2], finalValue);
+                        break;
+                    }
+                }
                 if (sceneName == "FOREST_A1" && stateController == "PATCHI")
                 {
                     var canopyID = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
                     if (ArchipelagoClient.AP.WasItemReceived("Skull of Josiah") && ArchipelagoClient.AP.IsLocationChecked(canopyID))
                     {
-                        if (__instance.value <= 5)
+                        if (finalValue <= 5)
                         {
-                            __instance.value = 5;
+                            finalValue = 5;
                         }
-                    }
-                    if (__instance.value > 6)
-                    {
-                        __instance.value = 6; // try to stop it from incrementing too high.
                     }
                 }
                 for (int i = 0; i < sTATES.Length; i++)
@@ -158,8 +168,9 @@ namespace LunacidAP
                     errorData[2] = sTATES[i].name;
                     sTATES[i].SetActive(value: false);
                 }
-                errorData[2] = sTATES[__instance.value].name;
-                __instance.STATES[__instance.value].SetActive(value: true);
+                
+                errorData[2] = sTATES[finalValue].name;
+                __instance.STATES[finalValue].SetActive(value: true);
 
                 switch (sceneName)
                 {

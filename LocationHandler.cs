@@ -21,7 +21,7 @@ namespace LunacidAP
 
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
-        public static void Awake(ManualLogSource log)
+        public LocationHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(LocationHandler));
@@ -34,9 +34,14 @@ namespace LunacidAP
             var objectName = __instance.gameObject.name;
             var sceneName = __instance.gameObject.scene.name;
             var itemType = __instance.type;
-            if (objectName.Contains("(Clone)"))
+            if (objectName.Contains("(Clone)") && !IsCloneAPLocation(__instance))
             {
-                return true; //This will change later for mob and shops, but good to throw these examples out.
+                return true;
+            }
+            var apLocation = DetermineGeneralPickupLocation(__instance);
+            if (apLocation.APLocationID == -1)
+            {
+                return true;
             }
             __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             _popup = __instance.CON.PAPPY;
@@ -45,23 +50,7 @@ namespace LunacidAP
                 __instance.GetComponent<SphereCollider>().enabled = false;
                 __instance.StartCoroutine("Delay");
             }
-            var apLocation = DeterminePickupLocation(sceneName, objectName, __instance.gameObject.transform.position, itemType);
-            var isItemCollected = ArchipelagoClient.AP.IsLocationChecked(apLocation);
-            var isItemTrulyCollected = ArchipelagoClient.AP.Session.Locations.AllLocationsChecked.Contains(apLocation.APLocationID);
-            if (isItemCollected != isItemTrulyCollected)
-            {
-                _log.LogWarning($"Location {apLocation.APLocationName} has collect state mismatch; {isItemCollected} vs {isItemTrulyCollected}");
-            }
-            /*var trueID = ArchipelagoClient.AP.GetLocationIDFromName(apLocation.APLocationName);
-            if (trueID != apLocation.APLocationID)
-            {
-                _log.LogWarning($"Location {apLocation.APLocationName} has ID mismatch: {apLocation.APLocationID} vs {trueID}");
-            }*/
-            if (apLocation.APLocationID != -1)
-            {
-                __instance.gameObject.SetActive(!isItemCollected);
-            }
-
+            __instance.gameObject.SetActive(!IsLocationCollected(apLocation));
             return false;
         }
 
@@ -69,57 +58,64 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Pickup_SendLocation(Item_Pickup_scr __instance)
         {
-            // if (__instance.SAVED is not null)
-            //_log.LogInfo($"This flag is in Zone {__instance.SAVED.Zone}, with Slot {__instance.SAVED.Slot}.");
             _popup = __instance.CON.PAPPY;
-
-            return CollectLocation(__instance);
+            CollectLocation(__instance, out var keepOriginalDrop);
+            if (keepOriginalDrop)
+            {
+                _log.LogInfo($"Determined the item {__instance.Name} isn't important.");
+            }
+            return keepOriginalDrop;
         }
 
-        private static bool CollectLocation(Item_Pickup_scr instance)
+        private static void CollectLocation(Item_Pickup_scr pickupObject, out bool keepOriginalDrop)
         {
-            var objectName = instance.gameObject.name;
-            var sceneName = instance.gameObject.scene.name;
-            var objectLocation = instance.gameObject.transform.position;
-            var apLocation = DeterminePickupLocation(sceneName, objectName, objectLocation, instance.type);
+            var objectName = pickupObject.gameObject.name;
+            var sceneName = pickupObject.gameObject.scene.name;
+            var objectLocation = pickupObject.gameObject.transform.position;
+            var apLocation = DetermineGeneralPickupLocation(pickupObject);
             if (apLocation.APLocationID == -1)
             {
-                _log.LogInfo("Found unaccounted for Location");
-                _log.LogInfo($"Scene: {sceneName}, Object: {objectName}, Position: {objectLocation}");
-                _log.LogInfo($"Name {instance.Name}, Alt Name {instance.Alt_Name}");
-                return true;
+                keepOriginalDrop = true;
+                return;
+            }
+            keepOriginalDrop = false;
+            if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
+            {
+                var actualName = TheDaedalusConundrum(pickupObject);
+                apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
             }
             if (ArchipelagoClient.AP.IsLocationChecked(apLocation.APLocationID))
             {
-                instance.gameObject.SetActive(false);
-                return false;
+                pickupObject.gameObject.SetActive(false);
+                return;
             }
-            if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
-            {
-                var actualName = TheDaedalusConundrum(instance);
-                apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
-            }
+            _log.LogInfo($"Checking {apLocation.APLocationID}: {apLocation.APLocationName}");
             var item = ArchipelagoClient.AP.LocationTable[apLocation.APLocationID];
             DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
-            instance.gameObject.SetActive(false);
+            pickupObject.gameObject.SetActive(false);
 
-            return false;
+            return;
         }
 
-        private static LocationData DeterminePickupLocation(string sceneName, string objectName, Vector3 objectPosition, int type)
+        private static LocationData DetermineGeneralPickupLocation(Item_Pickup_scr pickupObject)
         {
-            if (objectName.Contains("Clone"))
+            var objectName = pickupObject.gameObject.name;
+            var sceneName = pickupObject.gameObject.scene.name;
+            var objectLocation = pickupObject.transform.position;
+            if (sceneName == "ARCHIVES" && Vector3.Distance(objectLocation, new Vector3(-3.2f, -19.3f, -45.9f)) < 5f)
             {
-                var isNameHandled = CloneHandler(sceneName, objectName, objectPosition, type, out var locationName);
-                if (isNameHandled)
-                {
-                    return locationName;
-                }
-                else
-                {
-                    return new LocationData();
-                }
+                return new LocationData( -2, "FbA: Daedalus Knowledge", "", new Vector3());
             }
+            if (objectName.Contains("(Clone)") && IsCloneAPLocation(pickupObject))
+            {
+                return DetermineClonePickupLocation(sceneName, objectName, objectLocation);
+            }
+            var type = pickupObject.type;
+            return DetermineTypicalPickupLocation(sceneName, objectName, objectLocation, type);
+        }
+
+        private static LocationData DetermineTypicalPickupLocation(string sceneName, string objectName, Vector3 objectPosition, int type)
+        {
             var currentLocationData = APLocationData[sceneName];
             var IsWeaponOrSpell = type == 0 || type == 1; //If its unique and there's error, its fine.
             LocationData locationOfShortestDistance = new();
@@ -143,7 +139,7 @@ namespace LunacidAP
             }
             if (shortestDistance > 10f)
             {
-                _log.LogInfo($"Closest location for {objectName} at {objectPosition} was too far away: {locationOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
+                // _log.LogInfo($"Closest location for {objectName} at {objectPosition} was too far away: {locationOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
                 return locationOfShortestDistance; //Failsafe for new positions
             }
             // _log.LogInfo($"Found Position for location [{locationOfShortestDistance}]");
@@ -152,63 +148,70 @@ namespace LunacidAP
 
         public static LocationData DetermineAPLocation(GameObject gameObject, int type)
         {
-            return DeterminePickupLocation(gameObject.scene.name, gameObject.name, gameObject.transform.position, type);
+            return DetermineTypicalPickupLocation(gameObject.scene.name, gameObject.name, gameObject.transform.position, type);
         }
 
-        private static bool CloneHandler(string sceneName, string objectName, Vector3 objectPosition, int type, out LocationData locationName)
+        private static LocationData DetermineClonePickupLocation(string sceneName, string objectName, Vector3 objectPosition)
         {
-            objectName = objectName.Replace("(Clone)", "");
-            if (sceneName != "TOWER")
+            var cleanedName = objectName.Replace("(Clone)","");
+            switch (sceneName)
             {
-                if (objectName == "BOOK_PICKUP")
+                case "TOWER":
+                    {
+                        if (Vector3.Distance(objectPosition, new Vector3(68.0f, -9.5f, -172.0f)) < 2f)
+                        {
+                            var towerLocation = string.Format("TA: Floor {0} Chest", _currentFloor.ToString());
+                            return APLocationData["TOWER"].First(x => x.APLocationName == towerLocation);
+                        }
+                        return new LocationData();
+                    }
+                case "CAS_PITT":
+                    {
+                        if (cleanedName == "BOOK_PICKUP")
+                        {
+                            return APLocationData["CAS_PITT"][0];
+                        }
+                        return new LocationData();
+                    }
+                case "HUB_01":
+                    {
+                        if (!ArchipelagoClient.AP.SlotData.Shopsanity && IsShopLocation(sceneName, objectName, objectPosition))
+                        {
+                            return new LocationData();
+                        }
+                        var nameHelper = "";
+                        if (cleanedName == "OCEAN_ELIXIR_PICKUP")
+                        {
+                            nameHelper = " (Sheryl)";
+                        }
+                        var foundLocation = ShopLocations.FirstOrDefault(x => x.GameObjectName == cleanedName &&
+                            x.APLocationName.Contains(nameHelper)) ?? new LocationData();
+                        return foundLocation;
+                    }
+            }
+            if (ArchipelagoClient.AP.SlotData.Shopsanity && IsShopLocation(sceneName, objectName, objectPosition))
+            {
+                var nameHelper = "";
+                if (cleanedName == "OCEAN_ELIXIR_PICKUP" && sceneName == "FOREST_A1")
                 {
-                    locationName = APLocationData["CAS_PITT"][0];
-                    return true;
+                    nameHelper = " (Patchouli)";
                 }
-                var isShopsanityLocation = ShopLocations.Any(x => x.GameObjectName == objectName);
-                if (new List<string>() { "HUB_01", "FOREST_A1", "CAVE" }.Contains(sceneName) && isShopsanityLocation)
+                else if (cleanedName == "OCEAN_ELIXIR_PICKUP")
                 {
-                    if (!SlotData.Shopsanity)
-                    {
-                        locationName = new LocationData();
-                        return true;
-                    }
-                    var nameHelper = "";
-                    if (sceneName == "FOREST_A1" && objectName == "OCEAN_ELIXIR_PICKUP")
-                    {
-                        nameHelper = " (Patchouli)";
-                    }
-                    else if (objectName == "OCEAN_ELIXIR_PICKUP")
-                    {
-                        nameHelper = " (Sheryl)";
-                    }
-                    locationName = ShopLocations.FirstOrDefault(x => x.GameObjectName == objectName &&
+                    nameHelper = " (Sheryl)";
+                }
+                var foundLocation = ShopLocations.FirstOrDefault(x => x.GameObjectName == cleanedName &&
                     x.APLocationName.Contains(nameHelper)) ?? new LocationData();
-                    return true;
-                }
-                var isDropsanityLocation = DropLocations.Any(x => x.GameObjectName == objectName);
-                if (isDropsanityLocation)
-                {
-                    if (!SlotData.Dropsanity)
-                    {
-                        locationName = new LocationData();
-                        return true;
-                    }
-                    locationName = DropLocations.FirstOrDefault(x => x.GameObjectName == objectName) ?? new LocationData();
-                    return true;
-                }
-                locationName = new LocationData();
-                return true;
+                return foundLocation;
             }
-            else if (sceneName == "TOWER" && Vector3.Distance(objectPosition, new Vector3(68.0f, -9.5f, -172.0f)) < 2f)
+            else if (ArchipelagoClient.AP.SlotData.Dropsanity && IsDropLocation(sceneName, objectName, objectPosition))
             {
-                var towerLocation = string.Format("TA: Floor {0} Chest", _currentFloor.ToString());
-                locationName = APLocationData["TOWER"].First(x => x.APLocationName == towerLocation);
-                return true;
+                var foundLocation = DropLocations.FirstOrDefault(x => x.GameObjectName == cleanedName) ?? new LocationData();
+                return foundLocation;
             }
-            locationName = new LocationData();
-            return false;
+            return new LocationData();
         }
+
 
         private static string TheDaedalusConundrum(Item_Pickup_scr instance)
         {
@@ -231,7 +234,7 @@ namespace LunacidAP
         {
             if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.
             {
-                var receivedItem = new ReceivedItem(location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID);
+                var receivedItem = new ReceivedItem(location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
                 ConnectionData.ReceivedItems.Add(receivedItem);
                 ItemHandler.GiveLunacidItem(receivedItem, true);
                 var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
@@ -243,7 +246,7 @@ namespace LunacidAP
                 if (location.APLocationName == "YF: Patchouli's Reward" && !ArchipelagoClient.AP.IsLocationChecked(patchouliCanopy))
                 {
                     var patchouliItem = ArchipelagoClient.AP.LocationTable[patchouliCanopy];
-                    var patchouliReceivedItem = new ReceivedItem("YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID);
+                    var patchouliReceivedItem = new ReceivedItem("YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
                     ConnectionData.ReceivedItems.Add(patchouliReceivedItem);
                     ItemHandler.GiveLunacidItem(patchouliReceivedItem, true);
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
@@ -263,7 +266,8 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                _popup.POP($"Found {item.Name} for {item.SlotName}", 1f, 0);
+                var color = ArchipelagoClient.FlagColor(item.Classification);
+                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
 
             }
             else  // Otherwise just save it for syncing later.
@@ -274,7 +278,8 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                _popup.POP($"Found {item.Name} for {item.SlotName}", 1f, 0);
+                var color = ArchipelagoClient.FlagColor(item.Classification);
+                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
             }
             return false;
         }
@@ -289,8 +294,15 @@ namespace LunacidAP
                 {
                     return false;
                 }
+                foreach (var maxFlag in LunacidFlags.MaximumPlotFlags)
+                {
+                    if (__instance.Zone == maxFlag[0] && __instance.Slot == maxFlag[1] && __instance.value > maxFlag[2])
+                    {
+                        _log.LogWarning($"Object {__instance.name} tried to overstep its save data.  Refusing.");
+                        return false;
+                    }
+                }
             }
-            _log.LogInfo($"Allowing {__instance.gameObject.name} to change data: [{__instance.Zone}, {__instance.Slot}, {__instance.value}]");
             return true;
         }
 
@@ -300,6 +312,28 @@ namespace LunacidAP
         {
             _currentFloor = __instance.floor * 5 + __instance.room; // Its wrong until its right basically.
         }
+
+        [HarmonyPatch(typeof(ShadowTower_CON), "Tower")]
+        [HarmonyPostfix]
+        private static void Tower_FixChestItems(ShadowTower_CON __instance)
+        {
+            if (__instance.LAYOUTS[__instance.floor].REWARD != null)
+            {
+                __instance.CHEST.SetActive(value: true);
+                __instance.CHEST.transform.GetChild(0).gameObject.SetActive(value: true);
+                __instance.CHEST.transform.GetChild(1).gameObject.SetActive(value: false);
+                __instance.CHEST.transform.GetChild(2).gameObject.SetActive(value: true);
+                GameObject REWY = (GameObject)__instance.GetType().GetField("REWY", Flags).GetValue(__instance);
+                if (REWY != null)
+                {
+                    UnityEngine.Object.Destroy(REWY);
+                }
+                REWY = UnityEngine.Object.Instantiate(__instance.LAYOUTS[__instance.floor].REWARD, __instance.CHEST.transform.GetChild(1).transform.position + Vector3.up * 0.5f, Quaternion.identity, __instance.CHEST.transform.GetChild(1).transform);
+                REWY.GetComponent<Item_Pickup_scr>().inChest = true;
+                REWY.GetComponent<Item_Pickup_scr>().SAVED = __instance.GetComponent<AREA_SAVED_ITEM>();
+            }
+        }
+
 
         [HarmonyPatch(typeof(Spawn_if_moon), "OnEnable")]
         [HarmonyPostfix]
@@ -346,13 +380,20 @@ namespace LunacidAP
             _kept = KEEP;
             __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
             __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
-            __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];
-            __instance.CON.CURRENT_PL_DATA.ITEM2 = _kept[3];
-            __instance.CON.CURRENT_PL_DATA.ITEM3 = _kept[4];
-            __instance.CON.CURRENT_PL_DATA.ITEM4 = _kept[5];
-            __instance.CON.CURRENT_PL_DATA.ITEM5 = _kept[6];
-            __instance.CON.CURRENT_PL_DATA.MAG1 = _kept[7];
-            __instance.CON.CURRENT_PL_DATA.MAG2 = _kept[8];
+            try
+            {
+                __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];
+                __instance.CON.CURRENT_PL_DATA.ITEM2 = _kept[3];
+                __instance.CON.CURRENT_PL_DATA.ITEM3 = _kept[4];
+                __instance.CON.CURRENT_PL_DATA.ITEM4 = _kept[5];
+                __instance.CON.CURRENT_PL_DATA.ITEM5 = _kept[6];
+                __instance.CON.CURRENT_PL_DATA.MAG1 = _kept[7];
+                __instance.CON.CURRENT_PL_DATA.MAG2 = _kept[8];
+            }
+            catch
+            {
+                _log.LogError($"There was an error re-adding items.  Might be vanilla bug.");
+            }
             __instance.CON.CURRENT_PL_DATA.PLAYER_H = Mathf.Max(__instance.CON.CURRENT_PL_DATA.PLAYER_H, 20f);
             __instance.CON.PL.Poison.POISON_DUR = 0.01f;
             __instance.CON.CURRENT_PL_DATA.PLAYER_B = __instance.CON.CURRENT_PL_DATA.PLAYER_H;
@@ -373,14 +414,166 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool OnEnable_FixIfOwnHarmingAxe(Wam_scr __instance)
         {
-            var axeLoc = ArchipelagoClient.AP.IsLocationChecked("FbA: uwu");
-            if (axeLoc)
-            {
-                GameObject.Destroy(__instance.gameObject);
-            }
             var reelWait = __instance.GetType().GetField("reel_wait", Flags);
             reelWait.SetValue(__instance, __instance.wait);
             return false;
+        }
+
+        private static bool IsLocationCollected(LocationData apLocation)
+        {
+            var isItemCollected = ArchipelagoClient.AP.IsLocationChecked(apLocation);
+            var isItemTrulyCollected = ArchipelagoClient.AP.Session.Locations.AllLocationsChecked.Contains(apLocation.APLocationID);
+            if (isItemCollected != isItemTrulyCollected)
+            {
+                _log.LogWarning($"Location {apLocation.APLocationName} has collect state mismatch; {isItemCollected} vs {isItemTrulyCollected}");
+            }
+            return isItemCollected;
+        }
+
+        private static bool IsDropLocation(string sceneName, string objectName, Vector3 position)
+        {
+            var isObjectInDropList = false;
+            foreach (var location in LunacidLocations.DropLocations)
+            {
+                if (objectName.Contains(location.GameObjectName))
+                {
+                    isObjectInDropList = true;
+                    break;
+                }
+            }
+            if (!isObjectInDropList)
+            {
+                return false;
+            }
+            if (objectName.Contains("OCEAN_ELIXIR_PICKUP"))
+            {
+                return true;
+            }
+            var allowedScenesForElixir = new List<string>() { "LAKE", "HAUNT" };
+            if (allowedScenesForElixir.Contains(sceneName))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsDropLocation(Item_Pickup_scr pickupItem)
+        {
+            return IsDropLocation(pickupItem.gameObject.scene.name, pickupItem.name, pickupItem.transform.position);
+        }
+
+        private static bool IsShopLocation(string sceneName, string objectName, Vector3 position)
+        {
+            var shopScenes = new List<string>() { "HUB_01", "CAVE", "FOREST_A1" };
+            if (!shopScenes.Contains(sceneName))
+            {
+                return false;
+            }
+            var isObjectInShopList = false;
+            foreach (var location in LunacidLocations.ShopLocations)
+            {
+                if (objectName.Contains(location.GameObjectName))
+                {
+                    isObjectInShopList = true;
+                    break;
+                }
+            }
+            if (!isObjectInShopList)
+            {
+                return false;
+            }
+            switch (sceneName)
+            {
+                case "HUB_01":
+                    {
+                        if (Vector3.Distance(position, new Vector3(-8.81f, 1.737f, 5.79f)) < 10f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "CAVE":
+                    {
+                        if (Vector3.Distance(position, new Vector3(-94.9098f, 9.637f, -176.063f)) < 10f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "FOREST_A1":
+                    {
+                        if (Vector3.Distance(position, new Vector3(-57.9117f, -15.4167f, -115.2767f)) < 10f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+            }
+            return false;
+        }
+
+        private static bool IsShopLocation(Item_Pickup_scr pickupItem)
+        {
+            return IsShopLocation(pickupItem.gameObject.scene.name, pickupItem.name, pickupItem.transform.position);
+        }
+
+        private static bool IsOtherCloneObjectAPRelated(Item_Pickup_scr pickupItem)
+        {
+            var sceneName = pickupItem.gameObject.scene.name;
+            var position = pickupItem.transform.position;
+            var usedName = pickupItem.Name;
+            switch (sceneName)
+            {
+                case "CAS_PITT":
+                    {
+                        if (usedName.Contains("Black Book"))
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "TOWER":
+                    {
+                        if (Vector3.Distance(position, new Vector3(68f, -9.5f, -172f)) < 1f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "HUB_01":
+                    {
+                        var allowedNames = new List<string>() { "Enchanted Key", "Oil Lantern", "Ocean Elixir" };
+                        if (allowedNames.Contains(usedName))
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "CAVE":
+                    {
+                        var allowedNames = new List<string>() { "Oil Lantern", "Ocean Elixir" };
+                        if (allowedNames.Contains(usedName))
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+                case "FOREST_A1":
+                    {
+                        var allowedNames = new List<string>() { "Ocean Elixir" };
+                        if (allowedNames.Contains(usedName))
+                        {
+                            return true;
+                        }
+                        return false;
+                    }
+            }
+            return false;
+        }
+
+        private static bool IsCloneAPLocation(Item_Pickup_scr pickupObject)
+        {
+            return IsDropLocation(pickupObject) || IsShopLocation(pickupObject) || IsOtherCloneObjectAPRelated(pickupObject);
         }
     }
 }

@@ -45,17 +45,19 @@ namespace LunacidAP.Data
             {"Castle Le Fanu Blue Area to Boiling Grotto", new WarpData("CAVE", new Vector3(-20f, 16f, -1f), 90)},
             {"Boiling Grotto to Castle Le Fanu Blue Area", new WarpData("CAS_1", new Vector3(40f, -8f, -229f), 0)},
             {"Boiling Grotto to Tower of Abyss", new WarpData("TOWER", new Vector3(88f, -31f, 104f), 180)},
-            // Add a reverse for the above!
+            {"Tower of Abyss to Boiling Grotto", new WarpData("CAVE", new Vector3(-72.505f, 9f, -142.2955f), 215)},
             {"Throne Chamber to Terminus Prison", new WarpData("PRISON", new Vector3(56f, 18f, -66f), 0)},
             {"Terminus Prison to Throne Chamber", new WarpData("CAS_2", new Vector3(66f, 7f, -135f), 270)},
             {"Terminus Prison Dark Areas to Forlorn Arena", new WarpData("ARENA", new Vector3(64f, 4f, 0f), 270)},
             {"Forlorn Arena to Terminus Prison Dark Areas", new WarpData("PRISON", new Vector3(-8f, -16f, 60f), 180)},
             {"Terminus Prison Dark Areas to Labyrinth of Ash", new WarpData("VOID", new Vector3(46f, 16f, 68f), 270)},
-            {"Labyrinth of Ash to Terminus Prison Dark Areas", new WarpData("PRISON", new Vector3(156f, -56f, -58f), 270)},
-            {"Castle Le Fanu to A Holy Battleground", new WarpData("CAS_PITT", new Vector3(149f, 1f, -79f), 0)},
+            {"Labyrinth of Ash to Terminus Prison Dark Areas", new WarpData("PRISON", new Vector3(156f, -52f, -58f), 270)},
+            {"Castle Le Fanu to A Holy Battleground", new WarpData("CAS_PITT", new Vector3(1f, 16f, 5f), 0)},
             {"A Holy Battleground to Castle Le Fanu", new WarpData("CAS_1", new Vector3(84f, 5f, -87f), 270)},
             {"Castle Le Fanu White Area to Throne Chamber", new WarpData("CAS_2", new Vector3(0.1f, 7f, -21f), 180)},
             {"Throne Chamber to Castle Le Fanu White Area", new WarpData("CAS_1", new Vector3(-40f, 24f, -178f), 0)},
+            {"Hollow Basin to Great Well Surface", new WarpData("PITT_B1", new Vector3(-3.7f, 0.73f, 19f), 180)},
+            {"Great Well Surface to Hollow Basin", new WarpData("PITT_A1", new Vector3(70.36f, 37.5f, -16.5f), 0)},
         };
 
         // Fix warps to be either more consistent or not kill you.

@@ -11,7 +11,7 @@ namespace LunacidAP
         private static ManualLogSource _log;
         private static POP_text_scr _popup;
 
-        public static void Awake(ManualLogSource log)
+        public SwitchLocker(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(SwitchLocker));
@@ -21,7 +21,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_LockSwitchWithoutKey(Act_Button_scr __instance)
         {
-            if (SlotData.Switchlock == false)
+            if (ArchipelagoClient.AP.SlotData.Switchlock == false)
             {
                 return true;
             }
@@ -58,26 +58,30 @@ namespace LunacidAP
             float shortestDistance = 696969f;
             foreach (var button in currentLocationData)
             {
-                if (Vector3.Distance(button.Value, objectPosition) < Vector3.Distance(objectPosition, positionOfShortestDistance))
+                foreach (var keySpot in button.Value)
+                {
+                    if (Vector3.Distance(keySpot, objectPosition) < Vector3.Distance(objectPosition, positionOfShortestDistance))
                     {
                         switchOfShortestDistance = button.Key;
-                        positionOfShortestDistance = button.Value;
-                        shortestDistance = Vector3.Distance(button.Value, objectPosition);
+                        positionOfShortestDistance = keySpot;
+                        shortestDistance = Vector3.Distance(keySpot, objectPosition);
                     }
+                }
+                
             }
-            if (shortestDistance > 10f)
+            if (shortestDistance > 4f)
             {
                 return ""; //Failsafe for new positions
             }
             _log.LogInfo($"Found Position for switch [{switchOfShortestDistance}]");
-            return switchOfShortestDistance.Replace(" [Top]", "").Replace(" [Bottom]","");
+            return switchOfShortestDistance;
         }
 
         [HarmonyPatch(typeof(False_Wall_scr), "ACT")]
         [HarmonyPrefix]
         private static bool ACT_BlockIfNoOrb()
         {
-            if (SlotData.FalseWalls == true && !ArchipelagoClient.AP.WasItemReceived("Dusty Crystal Orb"))
+            if (ArchipelagoClient.AP.SlotData.FalseWalls == true && !ArchipelagoClient.AP.WasItemReceived("Dusty Crystal Orb"))
             {
                 var control =  GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 var popup = control.PAPPY;

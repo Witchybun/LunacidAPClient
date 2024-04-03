@@ -14,7 +14,7 @@ namespace LunacidAP
     {
         private static ManualLogSource _log;
 
-        public static void Awake(ManualLogSource log)
+        public SaveHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(SaveHandler));
@@ -70,16 +70,17 @@ namespace LunacidAP
                 HostName = ConnectionData.HostName,
                 Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
-                Symbols = ConnectionData.Symbols,
+                Symbols = ConnectionData.Index,
                 DeathLink = ConnectionData.DeathLink,
                 ObtainedItems = ConnectionData.ReceivedItems,
                 CheckedLocations = ConnectionData.CompletedLocations,
                 CommunionHints = ConnectionData.CommunionHints,
-                Elements = ConnectionData.Elements
+                Elements = ConnectionData.Elements,
+                Entrances = ConnectionData.Entrances
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
-                newAPSaveData.Seed = SlotData.Seed;
+                newAPSaveData.Seed = ArchipelagoClient.AP.SlotData.Seed;
             }
             string json = JsonConvert.SerializeObject(newAPSaveData);
             File.WriteAllText(savePath, json);
@@ -108,7 +109,7 @@ namespace LunacidAP
                     _log.LogInfo($"Loaded save has {loadedSave.HostName}:{loadedSave.Port}");
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements);
+                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances);
                     _log.LogInfo("Save loaded.  Contents:");
                     _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
                     return;
@@ -139,5 +140,6 @@ namespace LunacidAP
         public List<long> CheckedLocations;
         public Dictionary<string, CommunionHint.HintData> CommunionHints;
         public Dictionary<string, string> Elements;
+        public Dictionary<string, string> Entrances;
     }
 }

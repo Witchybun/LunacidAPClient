@@ -17,6 +17,10 @@ namespace LunacidAP.Data
             { "Water Talisman", new LunacidItemFlags(new int[3]{14, 16, 1}, "ARENA") },
         };
 
+        public static readonly List<int[]> MaximumPlotFlags = new(){
+          new int[3]{15, 1, 1}, new int[3]{14, 16, 1}, new int[3]{6, 15, 6}, new int[3]{12, 2, 1}  
+        };
+
         public class LunacidItemFlags
         {
             public int[] Flag;

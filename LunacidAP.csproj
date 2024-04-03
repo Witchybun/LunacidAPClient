@@ -4,13 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>LunacidAP</AssemblyName>
     <Description>Randomizer for Archipelago</Description>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Archipelago.Gifting.Net" Version="0.2.5" />
     <PackageReference Include="Archipelago.MultiClient.Net" Version="5.0.6" />
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
@@ -27,10 +28,10 @@
 	  <Reference Include="Assembly-CSharp">
 		  <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Assembly-CSharp.dll</HintPath>
 	  </Reference>
-    <Reference Include = "Unity.TextMeshPro">
+    <Reference Include="Unity.TextMeshPro">
       <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include = "UnityEngine.UI">
+    <Reference Include="UnityEngine.UI">
       <HintPath>/mnt/Games and Media Collection/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>  

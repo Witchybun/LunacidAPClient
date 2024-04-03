@@ -56,10 +56,10 @@ namespace LunacidAP
 
         public IEnumerator Connect(string slotName, string hostName, int port, string password, bool reconnect = false, int slotID = -1)
         {
-            
+
             _log.LogInfo($"Connecting: {slotName}, {hostName}, {port}");
             Authenticated = false;
-            var minimumVersion = new Version(0, 4, 4);
+            var minimumVersion = new Version(0, 4, 5);
             Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
             var connectTask = Task.Run(Session.ConnectAsync);
             yield return new WaitUntil(() => connectTask.IsCompleted);
@@ -93,7 +93,11 @@ namespace LunacidAP
                 Disconnect();
                 yield break;
             }
-
+            if (PluginInfo.PLUGIN_VERSION != SlotData.ClientVersion)
+            {
+                _log.LogError($"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.");
+                yield break;
+            }
             ConnectionData.Seed = seed;
             if (!reconnect)
             {
@@ -139,8 +143,8 @@ namespace LunacidAP
             }
 
             // Connection successful
-            Authenticated = true;
             ConnectionData.WriteConnectionData(hostName, port, slotName, password);
+            Authenticated = true;
             if (slotID > -1)
             {
                 SaveHandler.SaveData(slotID); // to ensure the updated information isn't lost at load.
@@ -152,7 +156,6 @@ namespace LunacidAP
                 ConnectionData.DeathLink = true;
                 InitializeDeathLink();
             }
-
             _log.LogInfo("Successfully connected to server!");
         }
 
@@ -186,6 +189,7 @@ namespace LunacidAP
             if (Session != null && Session.Socket != null)
             {
                 Session.Socket.DisconnectAsync();
+                _log.LogInfo($"Disconnecting.");
             }
             Session = null;
             Authenticated = false;
@@ -203,6 +207,18 @@ namespace LunacidAP
                     ConnectionData.ReceivedItems.Add(receivedItem);
                     StartCoroutine(ReceiveItem(receivedItem));
                 }
+            }
+        }
+
+        private void AppendItemToReceived(ReceivedItem receivedItem)
+        {
+            foreach (var item in ConnectionData.ReceivedItems)
+            {
+                if (item.ItemId == receivedItem.ItemId && item.LocationId == item.LocationId && item.PlayerId == receivedItem.PlayerId)
+                {
+                    return;
+                }
+                ConnectionData.ReceivedItems.Add(receivedItem);
             }
         }
 
@@ -263,7 +279,8 @@ namespace LunacidAP
             {
                 foreach (var location in region.Value)
                 {
-                    if (location.IgnoreLocationHandler == true && (region.Key != "TOWER" || region.Key != "ARENA2"))
+                    var allowedList = new List<string>() { "TOWER", "ARENA2" };
+                    if (location.IgnoreLocationHandler == true && !allowedList.Contains(region.Key))
                     {
                         continue;
                     }
@@ -323,6 +340,28 @@ namespace LunacidAP
           {ItemFlags.Trap, "Trap"}
         };
 
+        public static string FlagColor(ItemFlags itemFlag)
+        {
+            if (itemFlag.HasFlag(ItemFlags.Advancement))
+            {
+                return "#AF99EF";
+            }
+            else if (itemFlag.HasFlag(ItemFlags.NeverExclude))
+            {
+                return "#6D8BE8";
+            }
+            else if (itemFlag.HasFlag(ItemFlags.Trap))
+            {
+                return "#FA8072";
+            }
+            else if (itemFlag.HasFlag(ItemFlags.None))
+            {
+
+                return "#00EEEE";
+            }
+            return "#FFFFFF";
+        }
+
         public ArchipelagoItem ScoutLocation(long locationId)
         {
             return LocationTable[locationId];
@@ -374,6 +413,23 @@ namespace LunacidAP
                 }
             }
             return false;
+        }
+
+        public bool WasItemCountReceived(string itemName, int count)
+        {
+            var foundCount = 0;
+            foreach (var receivedItem in ConnectionData.ReceivedItems)
+            {
+                if (receivedItem.ItemName == itemName)
+                {
+                    foundCount += 1;
+                }
+            }
+            if (itemName == "Black Book")
+            {
+                _log.LogInfo($"Black Book count: {count} vs {foundCount}");
+            }
+            return count <= foundCount;
         }
 
         public bool HasGoal(Goal goal)

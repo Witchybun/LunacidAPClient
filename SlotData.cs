@@ -11,9 +11,12 @@ namespace LunacidAP
     {
         private ManualLogSource _log;
         private const string SEED_KEY = "seed";
+        private const string VERSION = "client_version";
+        private const string ER_KEY = "entrance_randomization";
         private const string EXP_KEY = "experience";
         private const string WEXP_KEY = "weapon_experience";
         private const string SWITCH_KEY = "switch_locks";
+        private const string DOOR_KEY = "door_locks";
         private const string COIN_KEY = "strange_coin_bundle";
         private const string FILLER_KEY = "filler_bundle";
         private const string ENDING_KEY = "ending";
@@ -23,29 +26,36 @@ namespace LunacidAP
         private const string RANDOM_ELE_KEY = "random_elements";
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
+        private const string ENT_KEY = "entrances";
         private Dictionary<string, object> _slotDataFields;
-        public static int Seed {get; private set;}
-        public static Goal Ending {get; private set;}
-        public static bool Dropsanity {get; private set;}
-        public static bool Shopsanity {get; private set;}
-        public static bool Switchlock {get; private set;}
-        public static float ExperienceMultiplier {get; private set;}
-        public static float WExperienceMultiplier {get; private set;}
-        public static int Coinbundle {get; private set;}
-        public static int Fillerbundle {get; private set;}
-        public static bool DeathLink {get; private set;}
-        public static bool RandomElements {get; private set;}
-        public static bool FalseWalls {get; private set;}
+        public int Seed {get; private set;}
+        public Goal Ending {get; private set;}
+        public bool EntranceRandomizer {get; private set;}
+        public string ClientVersion {get; private set;}
+        public bool Dropsanity {get; private set;}
+        public bool Shopsanity {get; private set;}
+        public bool Switchlock {get; private set;}
+        public bool Doorlock {get; private set;}
+        public float ExperienceMultiplier {get; private set;}
+        public float WExperienceMultiplier {get; private set;}
+        public int Coinbundle {get; private set;}
+        public int Fillerbundle {get; private set;}
+        public bool DeathLink {get; private set;}
+        public bool RandomElements {get; private set;}
+        public bool FalseWalls {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
             _log = log;
             _slotDataFields = slotDataFields;
             Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
+            EntranceRandomizer = GetSlotSetting(ER_KEY, false);
             Seed = GetSlotSetting(SEED_KEY, 0);
+            ClientVersion = GetSlotSetting(VERSION, "0.0.0");
             Dropsanity = GetSlotSetting(DROP_KEY, false);
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
+            Doorlock = GetSlotSetting(DOOR_KEY, false);
             ExperienceMultiplier = (float) GetSlotSetting(EXP_KEY, 100)/100;
             WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
             Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
@@ -60,6 +70,14 @@ namespace LunacidAP
                 if (!ConnectionData.Elements.ContainsKey(newKey))
                 {
                     ConnectionData.Elements.Add(newKey, data.Value);
+                }
+            }
+            var entranceData = GetSlotSetting(ENT_KEY, "");
+            foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(entranceData))
+            {
+                if (!ConnectionData.Entrances.ContainsKey(data.Key))
+                {
+                    ConnectionData.Entrances.Add(data.Key, data.Value);
                 }
             }
         }
@@ -84,7 +102,7 @@ namespace LunacidAP
             return _slotDataFields.ContainsKey(key) ? (int)(long)_slotDataFields[key] : GetSlotDefaultValue(key, defaultValue);
         }
 
-        private bool GetSlotSetting(string key, bool defaultValue)
+        public bool GetSlotSetting(string key, bool defaultValue)
         {
             if (_slotDataFields.ContainsKey(key) && _slotDataFields[key] != null && _slotDataFields[key] is bool boolValue)
             {

@@ -14,29 +14,43 @@ namespace LunacidAP
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        public ManualLogSource Log { get; set; }
-        public static ManualLogSource LOG {get; set;}
-        public NewGameUI UI {get; set;}
+        public ManualLogSource Log { get; private set; }
+        public ArchipelagoClient Archipelago {get; private set;}
+        public LogicHelper LunacidLogic {get; private set;}
+        public static ManualLogSource LOG {get; private set;}
+        public LocationHandler LocationHandler {get; private set;}
+        public ItemHandler ItemHandler {get; private set;}
+        public SwitchLocker SwitchLocker {get; private set;}
+        public DoorHandler DoorHandler {get; private set;}
+        public TeleportHandler TeleportHandler {get; private set;}
+        public ShopHandler ShopHandler {get; private set;}
+        public WeaponHandler WeaponHandler {get; private set;}
+        public SaveHandler SaveHandler {get; private set;}
+        public ExpHandler ExpHandler {get; private set;}
+        public NewGameUI UI {get; private set;}
         private void Awake()
         {
             try
             {
                 // Plugin startup logic
                 Log = new ManualLogSource("LunacidAP");
-                BepInEx.Logging.Logger.Sources.Add(Log);
-                ArchipelagoClient.Setup(Log);
                 LOG = Log;
-                LocationHandler.Awake(Log);
-                ItemHandler.Awake(Log);
-                SaveHandler.Awake(Log);
-                SwitchLocker.Awake(Log);
-                ExpHandler.Awake();
+                BepInEx.Logging.Logger.Sources.Add(Log);
+                Archipelago = new ArchipelagoClient();
+                ArchipelagoClient.Setup(Log);
+                LocationHandler = new LocationHandler(Log);
+                LunacidLogic = new LogicHelper(Log);
+                ItemHandler = new ItemHandler(LunacidLogic, Log);
+                SwitchLocker = new SwitchLocker(Log);
+                DoorHandler = new DoorHandler(Log);
+                SaveHandler = new SaveHandler(Log);
+                ExpHandler = new ExpHandler(Log);
+                WeaponHandler = new WeaponHandler(Log);
+                ShopHandler = new ShopHandler(Log);
+                TeleportHandler = new TeleportHandler(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
-                WeaponHandler.Awake(Log);
-                ShopHandler.Awake(Log);
                 ReadDialogueHelper.Awake(Log);
-                TeleportHandler.Awake(Log);
                 UI = new NewGameUI(Log);
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
@@ -63,7 +77,6 @@ namespace LunacidAP
             }
             if (ArchipelagoClient.IsInGame)
             {
-                // StartCoroutine(AutoConnect());
                 CheckForVictory(sceneName);
                 CheckForDeath(sceneName);
             }
@@ -71,24 +84,9 @@ namespace LunacidAP
             {
                 UI.ModifyCharCreateForArchipelago();
             }
-            ReadDialogueHelper.InstantiateSignsForHints(sceneName);
             
 
         }
-
-        /*private IEnumerator AutoConnect()
-        {
-            yield return new WaitForSeconds(2f);
-            var timer = 0;
-            while (!Archipelago.Authenticated && timer < 1)
-            {
-                if (ArchipelagoClient.IsInGame && ConnectionData.HostName != "")
-                {
-                    StartCoroutine(Archipelago.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Password));
-                }
-                timer += 1;
-            }
-        }*/
 
         private void CheckForVictory(string sceneName)
         {

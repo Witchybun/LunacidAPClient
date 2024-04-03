@@ -48,7 +48,7 @@ namespace LunacidAP.Data
             {"Starcraft 2 Wings of Liberty", "Keystone"},
             {"Subnautica", "Deep Sea"},
             {"Super Mario 64", "Star"},
-            {"Super Mario World", "Egg"},
+            {"Super Mario World", "Mushroom-shaped"},
             {"Terraria", "Strange"},
             {"Timespinner", "Time"},
             {"Undertale", "Amusing"},
@@ -56,9 +56,12 @@ namespace LunacidAP.Data
             {"Wargroove", "Old"},
             {"The Witness", "Puzzling"},
             {"Zillion", "Nohza"},
+            {"A Short Hike", "Feathery"},
+            {"Celeste 64", "Mountanous"},
+            {"Yoshi's Island", "Egg-shaped"},
+            {"Zork Grand Inquisitor", "Totem"},
             // Unsupported
             {"Lunacid", "Great Well"},
-            {"A Short Hike", "Feathery"},
             {"Wario Land 4", "Pyramid"},
             {"A Hat in Time", "Time Piece"},
             {"Wind Waker", "Great Sea"},
@@ -69,6 +72,8 @@ namespace LunacidAP.Data
             {"Mario & Luigi Superstar Saga", "Bean"},
             {"Ultrakill", "Bloody"},
             {"Resident Evil 2 Remake", "Umbrella"},
+            {"Night of 100 Frights", "Scooby Snack"},
+            {"Duke Nukem 3D", "Atomic Bubble Gum"},
         };
 
         public static readonly Dictionary<string, string> GameToProtagonist = new(){
@@ -124,9 +129,12 @@ namespace LunacidAP.Data
             {"Wargroove", "a group of soldiers"},
             {"The Witness", "a non-descript individual"},
             {"Zillion", "a group of peacekeepers"},
+            {"A Short Hike", "a simple blue bird"},
+            {"Celeste 64", "a short, bouncy girl"},
+            {"Yoshi's Island", "a group of dinosaurs and a small child"},
+            {"Zork Grand Inquisitor", "a bumbling salesperson of an old electric company"},
             // Unsupported
             {"Lunacid", "an outcast"},
-            {"A Short Hike", "a simple blue bird"},
             {"Wario Land 4", "a plump, greedy man"},
             {"A Hat in Time", "a rambunctious girl"},
             {"Wind Waker", "the Hero of Winds"},
@@ -137,6 +145,8 @@ namespace LunacidAP.Data
             {"Mario & Luigi Superstar Saga", "two dynamic brothers"},
             {"Ultrakill", "a lifeless being, desperate for blood,"},
             {"Resident Evil 2 Remake", "two souls desperate for answers"},
+            {"Night of 100 Frights", "a group of sleuthing teenagers and their dog"},
+            {"Duke Nukem 3D", "a total badass in search for a holiday but found ass to kick"}
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -191,9 +201,12 @@ namespace LunacidAP.Data
             {"Wargroove", "the lands of Aurania."},
             {"The Witness", "a land of puzzles, lines, and mystery."},
             {"Zillion", "a distant base upon a distant land."},
+            {"A Short Hike", "a simple vacation island."},
+            {"Celeste 64", "the tall peaks of Celeste Mountain."},
+            {"Yoshi's Island", "the vast lands of Yoshi's Island."},
+            {"Zork Grand Inquisitor", "the oppressed lands of the kingdom of Quendor."},
             // Unsupported
             {"Lunacid", "a world, similar to this one, yet different."},
-            {"A Short Hike", "a simple vacation island."},
             {"Wario Land 4", "deep within an ancient pyramid."},
             {"A Hat in Time", "a distant planet oppressed by the mafia."},
             {"Wind Waker", "a great blue sea above long destroyed kingdom."},
@@ -203,7 +216,9 @@ namespace LunacidAP.Data
             {"Old School Runescape", "the town of Lumbridge."},
             {"Mario & Luigi Superstar Saga", "the kingdom of Beans, though they were only visiting."},
             {"Ultrakill", "the depths of hell."},
-            {"Resident Evil 2 Remake", "the remains of the city of Raccoon."}
+            {"Resident Evil 2 Remake", "the remains of the city of Raccoon."},
+            {"Night of 100 Frights", "an old, spooky mansion."},
+            {"Duke Nukem 3D", "the city of Los Angeles."},
         };
 
         public static readonly Dictionary<string, string[]> GameToCliveLore = new(){

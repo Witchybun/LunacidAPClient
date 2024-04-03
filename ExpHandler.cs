@@ -1,3 +1,4 @@
+using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
@@ -5,8 +6,10 @@ namespace LunacidAP
 {
     public class ExpHandler
     {
-        public static void Awake()
+        private static ManualLogSource _log;
+        public ExpHandler(ManualLogSource log)
         {
+            _log = log;
             Harmony.CreateAndPatchAll(typeof(ExpHandler));
         }
 
@@ -15,7 +18,7 @@ namespace LunacidAP
         private static bool GiveXP_MultiplyIncomingXP(CONTROL __instance, int LEVELED_XP)
         {
             var givenXP = LEVELED_XP;
-            givenXP = Mathf.RoundToInt(givenXP * SlotData.ExperienceMultiplier);
+            givenXP = Mathf.RoundToInt(givenXP * ArchipelagoClient.AP.SlotData.ExperienceMultiplier);
             if (__instance.ST)
             {
                 givenXP = Mathf.RoundToInt((float)givenXP * 0.3f);
@@ -38,7 +41,7 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void Attack_TryToBuffExp(Weapon_scr __instance)
         {
-            var additionalExp = SlotData.WExperienceMultiplier - 1; // the "damage" was already done, so this is the remainder
+            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier - 1; // the "damage" was already done, so this is the remainder
             if (__instance.type == 0)
             {
                 if (__instance.special == 6)

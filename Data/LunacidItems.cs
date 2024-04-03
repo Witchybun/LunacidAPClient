@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Archipelago.Gifting.Net.Giftboxes;
+using Archipelago.Gifting.Net.Traits;
 using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
@@ -32,7 +34,7 @@ namespace LunacidAP.Data
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
-            "Skeletal Rattle", "Dusty Crystal Orb"
+            "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago"
         };
 
         public static readonly List<string> Weapons = new(){
@@ -74,6 +76,22 @@ namespace LunacidAP.Data
             "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes",
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
             "Destroying Angel Mushroom"
+        };
+
+        public static readonly List<string> Switches = new(){
+            "Hollow Basin Switch Key", "Temple of Silence Switch Key", "Fetid Mire Switch Key", "Accursed Tomb Switch Keyring",
+            "Prometheus Fire Switch Keyring", "Forbidden Archives Shortcut Switch Key", "Archive Elevator Switch Keyring", 
+            "Sealed Ballroom Switch Key", "Grotto Fire Switch Keyring", "Sand Temple Switches Keyring",
+            "Terminus Prison Back Alley Switch Key", "Forlorn Arena Gate Switch Key", "Temple of Water Switch Key",
+            "Temple of Earth Switch Key", "Labyrinth of Ash Switch Key"
+        };
+
+        public static readonly List<string> Keys = new(){
+            "Broken Steps Door Key", "Lower Rickety Bridge Door Key", "Sewers Door Key", "Treetop Door Key", "Tomb Secret Door Key",
+            "Sewers Sea Door Key", "Accursed Door Key", "Castle Doors Key", "Library Exit Door Key", "Surface Door Key",
+            "Light Accursed Door Key", "Queen's Throne Door Key", "Prison Main Door Key", "Secondary Lock Key",
+            "Burning Hot Key", "Forbidden Door Key", "Sucsarian Key", "Dreamer Key", "Ballroom Side Rooms Keyring",
+            "Tower of Abyss Keyring"
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){

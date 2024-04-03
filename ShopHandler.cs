@@ -16,7 +16,7 @@ namespace LunacidAP
     public class ShopHandler
     {
         private static ManualLogSource _log;
-        public static void Awake(ManualLogSource log)
+        public ShopHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(ShopHandler));
@@ -24,13 +24,12 @@ namespace LunacidAP
 
         public static void EnsureEnchantedKey()
         {
-            if (!SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked("Buy Enchanted Key"))
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked("Buy Enchanted Key"))
             {
-
                 return;
             }
             var sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName == "FOREST_A1")
+            if (sceneName == "FOREST_A1" || sceneName == "CAVE")
             {
                 return;
             }
@@ -138,6 +137,14 @@ namespace LunacidAP
                             }
                         }
                     }
+                    else if (objectName == "ENKEY_PICKUP")
+                    {
+                        if (ArchipelagoClient.AP.IsLocationChecked(shopLocation))
+                        {
+                            RemoveElement(ref __instance.INV, i);
+                            i--;
+                        }
+                    }
                     else
                     {
                         RemoveElement(ref __instance.INV, i);
@@ -178,7 +185,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
         {
-            if (SlotData.Shopsanity == true && LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
+            if (ArchipelagoClient.AP.SlotData.Shopsanity == true && LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
             __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
             {
                 var objectName = __instance.INV[which].OBJ.name;
@@ -202,6 +209,10 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void ItemLoad_ChangeDisplayNameToApItem(Menus __instance)
         {
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
+            {
+                return;
+            }
             if (__instance.sub_menu == 14)
             {
                 var sceneName = __instance.gameObject.scene.name;

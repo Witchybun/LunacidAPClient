@@ -1,13 +1,17 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LunacidAP
 {
@@ -15,16 +19,112 @@ namespace LunacidAP
     {
         private static CONTROL Control;
         private static POP_text_scr Popup;
+        private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
 
-        public static void Awake(ManualLogSource log)
+        public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
         {
             _log = log;
+            _lunacidLogic = lunacidLogic;
             Harmony.CreateAndPatchAll(typeof(ItemHandler));
         }
-        public static void GiveLunacidItem(long itemID, string player = "", bool self = false)
+
+        [HarmonyPatch(typeof(Menus), "ItemLoad")]
+        [HarmonyPrefix]
+        private static bool ItemLoad_CreateFakeKeys(Menus __instance)
         {
+            if (__instance.sub_menu != 6)
+            {
+                return true;
+            }
+            var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
+            int EQ_SEL = (int)eqSelField.GetValue(__instance);
+            __instance.TXT[9].GetComponent<Animation>().Play();
+            __instance.TXT[10].GetComponent<Animation>().Play();
+            __instance.TXT[11].GetComponent<Animation>().Play();
+            int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
+            if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.ITEMS[num]))
+            {
+                return true;
+            }
+            var keyItems = new List<string>() { "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago" };
+            if (!keyItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
+            {
+                return true;
+            }
+            int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
+            string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
+            _log.LogInfo($"Looking at {itemName}");
+            if (itemName == "Great Well Doors Keyring")
+            {
+                CreateDoorKeyInInventory(__instance, num3);
+            }
+            else if (itemName == "Great Well Switches Keyring")
+            {
+                CreateSwitchKeyInInventory(__instance, num3);
+            }
+            else if (itemName == "Orb of a Lost Archipelago")
+            {
+                CreateOrbInInventory(__instance, num3);
+            }
+            return false;
+        }
+
+        // This is a temporary patch to fix a vanilla bug.
+        [HarmonyPatch(typeof(Player_Poison), "Harm")]
+        [HarmonyPrefix]
+        private static bool Harm_FixSlownessBug(int type, float duration, Player_Poison __instance)
+        {
+            __instance.IMG.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = Camera.main.aspect;
+            if (type == 4)
+            {
+                var poisonType = __instance.GetType();
+                var plField = poisonType.GetField("PL", BindingFlags.Instance | BindingFlags.NonPublic);
+                GameObject PL = (GameObject)plField.GetValue(__instance);
+                if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP != null)
+                {
+                    return true;
+                }
+                else
+                {
+                    var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                    if (__instance.SLOW_DUR == 0f)
+                    {
+                        var audioMethod = poisonType.GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
+                        __instance.Active_Effects++;
+                        audioMethod.Invoke(__instance, new object[] { 2 });
+                        var SLOW_slotField = poisonType.GetField("SLOW_slot", BindingFlags.Instance | BindingFlags.NonPublic);
+                        SLOW_slotField.SetValue(__instance, __instance.Active_Effects - 1);
+                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().text = "slowed";
+                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().color = Color.grey;
+                    }
+                    var steps = duration;
+                    steps *= Mathf.LerpUnclamped(1.25f, 0.2f, (float)CON.CURRENT_PL_DATA.PLAYER_RES / 100f);
+                    __instance.SLOW_DUR = Time.time + steps;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        private static string ColorText(string phrase, string hex)
+        {
+            return $"<color=${hex}>{phrase}</color>";
+        }
+
+        public static void GiveLunacidItem(long itemID, ItemFlags itemFlag, string player = "", bool self = false)
+        {
+            if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
+            {
+                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                ApplyItemToInventory("Orb of a Lost Archipelago");
+            }
             string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
+            string color = ArchipelagoClient.FlagColor(itemFlag);
+            if (Name.Contains("Key"))
+            {
+                _log.LogInfo($"Hitting up {Name}");
+            }
             Name = ProgressiveSymbolHandler(Name);
             if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
             {
@@ -39,12 +139,12 @@ namespace LunacidAP
             {
                 case 1:
                     {
-                        GiveWeapon(Name, player, self);
+                        GiveWeapon(Name, color, player, self);
                         return;
                     }
                 case 2:
                     {
-                        GiveSpell(Name, player, self);
+                        GiveSpell(Name, color, player, self);
                         return;
                     }
                 case 0:
@@ -54,23 +154,28 @@ namespace LunacidAP
                     }
                 case 4:
                     {
-                        GiveItem(Name, player, self);
+                        GiveItem(Name, color, player, self);
                         return;
                     }
                 case 3:
                     {
-                        GiveMaterial(Name, player, self);
+                        GiveMaterial(Name, color, player, self);
+                        return;
+                    }
+                case -1:
+                    {
+                        GiveSwitch(Name, color, player, self);
+                        return;
+                    }
+                case -2:
+                    {
+                        GiveDoor(Name, color, player, self);
                         return;
                     }
             }
-            if (Name.Contains(" Switch") || Name.Contains("Lightning Gate"))
-            {
-                GiveSwitch(Name, player, self);
-                return;
-            }
             if (Name.Contains(" Trap"))
             {
-                GiveTrap(Name, player, self);
+                GiveTrap(Name, color, player, self);
                 return;
             }
             _log.LogError($"Supplied item {Name} was not caught by any of the given cases");
@@ -78,25 +183,26 @@ namespace LunacidAP
 
         public static void GiveLunacidItem(ReceivedItem receivedItem, bool self)
         {
-            GiveLunacidItem(receivedItem.ItemId, receivedItem.PlayerName, self);
+
+            GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
             ConnectionData.ReceivedItems.Add(receivedItem);
         }
 
-        private static void PopupCommand(int sprite, string Name, string player, bool self)
+        private static void PopupCommand(int sprite, string Name, string color, string player, bool self)
         {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             Popup = Control.PAPPY;
             if (self)
-                Popup?.POP(Name + $"<sprite={sprite}> ACQUIRED", 1f, 0);
+                Popup?.POP($"<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED", 1f, 0);
             else
-                Popup?.POP(Name + $"<sprite={sprite}> RECEIVED FROM {player}", 1f, 0);
+                Popup?.POP($"<color={color}>{Name}</color> <sprite={sprite}> RECEIVED FROM {player}", 1f, 0);
         }
 
-        private static void GiveWeapon(string Name, string player = "", bool self = false)
+        private static void GiveWeapon(string Name, string color, string player = "", bool self = false)
         {
             try
             {
-                PopupCommand(1, Name, player, self);
+                PopupCommand(1, Name, color, player, self);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
                 for (int j = 0; j < 128; j++)
                 {
@@ -117,11 +223,11 @@ namespace LunacidAP
 
         }
 
-        private static void GiveSpell(string Name, string player = "", bool self = false)
+        private static void GiveSpell(string Name, string color, string player = "", bool self = false)
         {
             try
             {
-                PopupCommand(2, Name, player, self);
+                PopupCommand(2, Name, color, player, self);
                 for (int k = 0; k < 128; k++)
                 {
                     if (Control.CURRENT_PL_DATA.SPELLS[k] == "" || Control.CURRENT_PL_DATA.SPELLS[k] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.SPELLS[k]) == Name)
@@ -144,19 +250,32 @@ namespace LunacidAP
         {
 
             var currencyAmount = Name.Split('(', ')')[1];
-            var currencyMultiplier = SlotData.Fillerbundle;
+            var currencyMultiplier = ArchipelagoClient.AP.SlotData.Fillerbundle;
             currencyAmount = (int.Parse(currencyAmount) * currencyMultiplier).ToString();
-            PopupCommand(0, currencyAmount, player, self);
+            PopupCommand(0, currencyAmount, "white", player, self);
             Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
         }
 
-        private static void GiveItem(string Name, string player = "", bool self = false)
+        private static void GiveItem(string Name, string color, string player = "", bool self = false)
         {
-            PopupCommand(4, Name, player, self);
-            var bundleSize = SlotData.Fillerbundle;
+            PopupCommand(4, Name, color, player, self);
+            ApplyItemToInventory(Name);
+        }
+
+        private static void ApplyItemToInventory(string Name)
+        {
+            if (ArchipelagoClient.AP is null)
+            {
+                _log.LogError("Archipelago is null!");
+            }
+            if (ArchipelagoClient.AP.SlotData is null)
+            {
+                _log.LogError("SlotData is null!");
+            }
+            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
             if (Name == "Strange Coin")
             {
-                bundleSize = SlotData.Coinbundle;
+                bundleSize = ArchipelagoClient.AP.SlotData.Coinbundle;
             }
             if (LunacidItems.OneCountItems.Contains(Name))
             {
@@ -220,20 +339,20 @@ namespace LunacidAP
             }
         }
 
-        private static void GiveMaterial(string Name, string player = "", bool self = false)
+        private static void GiveMaterial(string Name, string color, string player = "", bool self = false)
         {
             if (!LunacidItems.MaterialNames.Keys.Contains(Name))
             {
                 _log.LogInfo($"MaterialNames has no definition for {Name}; cannot give it!");
                 return;
             }
-            var bundleSize = SlotData.Fillerbundle;
+            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
             }
             var actualName = LunacidItems.MaterialNames[Name].ToString();
-            PopupCommand(3, Name, player, self);
+            PopupCommand(3, Name, color, player, self);
             for (int i = 0; i < 128; i++)
             {
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
@@ -267,53 +386,202 @@ namespace LunacidAP
             }
         }
 
-        private static void GiveSwitch(string Name, string player = "", bool self = false)
+        private static void GiveSwitch(string Name, string color, string player = "", bool self = false)
         {
-            PopupCommand(4, Name, player, self);
+            PopupCommand(4, Name, color, player, self);
+            if (!FlagHandler.DoesPlayerHaveItem("Great Well Switches Keyring"))
+            {
+                ApplyItemToInventory("Great Well Switches Keyring");
+            }
         }
 
-        private static void GiveTrap(string Name, string player = "", bool self = false)
+        private static void GiveDoor(string Name, string color, string player = "", bool self = false)
         {
-            PopupCommand(4, Name, player, self);
+            PopupCommand(4, Name, color, player, self);
+            if (!FlagHandler.DoesPlayerHaveItem("Great Well Doors Keyring"))
+            {
+                ApplyItemToInventory("Great Well Doors Keyring");
+            }
+        }
+
+        private static void GiveTrap(string Name, string color, string player = "", bool self = false)
+        {
+            PopupCommand(4, Name, color, player, self);
             Control.PL.Poison.Harm(LunacidItems.TrapToHarm[Name], 10.0f);
         }
 
-        // This is a temporary patch to fix a vanilla bug.
-        [HarmonyPatch(typeof(Player_Poison), "Harm")]
-        [HarmonyPrefix]
-        private static bool Harm_FixSlownessBug(int type, float duration, Player_Poison __instance)
+        private static void CreateDoorKeyInInventory(Menus menu, int itemCount)
         {
-            __instance.IMG.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = Camera.main.aspect;
-            if (type == 4)
+            GameObject obj = UnityEngine.Object.Instantiate(Resources.Load("ITEMS/" + "Terminus Prison Key")) as GameObject;
+            Useable_Item component6 = obj.GetComponent<Useable_Item>();
+            var description = "<size=80%>A ring with the following keys on it:</size>\n";
+            var rightKeys = new List<string>() { };
+            var leftKeys = new List<string>() { };
+            var rightSide = "";
+            var leftSide = "";
+            foreach (var key in LunacidItems.Keys)
             {
-                var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                var poisonType = __instance.GetType();
-                var plField = poisonType.GetField("PL", BindingFlags.Instance | BindingFlags.NonPublic);
-                GameObject PL = (GameObject)plField.GetValue(__instance);
-                if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP != null)
+                if (ArchipelagoClient.AP.WasItemReceived(key))
                 {
-                    if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP.special != 18) return false;
-                    return true;
+                    rightKeys.Add(key);
+                }
+            }
+            if (rightKeys.Count > 9)
+            {
+                for (var i = 0; i < 10; i++)
+                {
+                    leftKeys.Add(rightKeys[0]);
+                    rightKeys.RemoveAt(0);
+                }
+            }
+            foreach (var key in rightKeys)
+            {
+                rightSide += $"<size=60%><align=center>{key}</align></size>\n";
+            }
+            if (leftKeys.Count > 0)
+            {
+                foreach (var key in leftKeys)
+                {
+                    leftSide += $"<size=40%><align=center>{key.ToUpper()}</align></size>\n";
+                }
+            }
+            menu.TXT[32].text = "Great Well Doors Keyring";
+            menu.TXT[33].text = itemCount.ToString() + $"\n<size=35%>\n</size>{leftSide}";
+            menu.TXT[34].text = description + rightSide;
+            menu.TXT[32].transform.GetChild(0).gameObject.SetActive(leftKeys.Count == 0);
+            menu.TXT[32].transform.GetChild(1).gameObject.SetActive(leftKeys.Count == 0);
+            if (leftKeys.Count == 0)
+            {
+                menu.TXT[32].transform.GetChild(1).GetComponent<UnityEngine.UI.Image>().sprite = component6.SPR;
+            }
+            UnityEngine.Object.Destroy(obj);
+            var doubleClick = menu.GetType().GetMethod("DoubleClick", BindingFlags.Instance | BindingFlags.NonPublic);
+            if ((bool)doubleClick.Invoke(menu, null))
+            {
+                var click = menu.GetType().GetMethod("Click", BindingFlags.Instance | BindingFlags.NonPublic);
+                click.Invoke(menu, new object[1] { 24 });
+            }
+        }
+
+        private static void CreateSwitchKeyInInventory(Menus menu, int itemCount)
+        {
+            GameObject obj = UnityEngine.Object.Instantiate(Resources.Load("ITEMS/" + "Terminus Prison Key")) as GameObject;
+            Useable_Item component6 = obj.GetComponent<Useable_Item>();
+            var description = "<size=80%>A ring with the following keys on it:</size>\n";
+            foreach (var key in LunacidItems.Switches)
+            {
+                if (ArchipelagoClient.AP.WasItemReceived(key))
+                {
+                    description += $"<size=60%><align=center> {key} </align></size>\n";
+                }
+            }
+            menu.TXT[32].text = "Great Well Switches Keyring";
+            menu.TXT[33].text = itemCount.ToString();
+            menu.TXT[34].text = description;
+            menu.TXT[32].transform.GetChild(0).gameObject.SetActive(value: true);
+            menu.TXT[32].transform.GetChild(1).gameObject.SetActive(value: true);
+            menu.TXT[32].transform.GetChild(1).GetComponent<UnityEngine.UI.Image>().sprite = component6.SPR;
+            UnityEngine.Object.Destroy(obj);
+            var doubleClick = menu.GetType().GetMethod("DoubleClick", BindingFlags.Instance | BindingFlags.NonPublic);
+            if ((bool)doubleClick.Invoke(menu, null))
+            {
+                var click = menu.GetType().GetMethod("Click", BindingFlags.Instance | BindingFlags.NonPublic);
+                click.Invoke(menu, new object[1] { 24 });
+            }
+        }
+
+        private static void CreateOrbInInventory(Menus menu, int itemCount)
+        {
+            GameObject obj = UnityEngine.Object.Instantiate(Resources.Load("ITEMS/" + "Dusty Crystal Orb")) as GameObject;
+            var sceneName = menu.gameObject.scene.name;
+            Useable_Item component6 = obj.GetComponent<Useable_Item>();
+            var description = "<size=80%>An orb with several words floating within, as semblances of colorful smoke.</size>\n";
+            var rightsideLocations = new List<string>() { };
+            if (LunacidLocations.APLocationData.Keys.Contains(sceneName))
+            {
+                foreach (var locationData in LunacidLocations.APLocationData[sceneName])
+                {
+                    if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
+                    {
+                        rightsideLocations.Add(locationData.APLocationName);
+                    }
+                }
+            }
+            if (ArchipelagoClient.AP.SlotData.Dropsanity)
+            {
+                foreach (var locationData in LunacidLocations.DropLocationToScenes)
+                {
+                    if (locationData.Value.Contains(sceneName))
+                    {
+                        rightsideLocations.Add(locationData.Key);
+                    }
+                }
+            }
+            var shopScenes = new List<string>() { "HUB_01", "FOREST_A1" };
+            if (ArchipelagoClient.AP.SlotData.Shopsanity && shopScenes.Contains(sceneName))
+            {
+                if (sceneName == "FOREST_A1")
+                {
+                    rightsideLocations.Add("Buy Ocean Elixir (Patchouli)");
                 }
                 else
                 {
-                    if (__instance.SLOW_DUR == 0f)
+                    foreach (var locationData in LunacidLocations.ShopLocations)
                     {
-                        var audioMethod = poisonType.GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
-                        __instance.Active_Effects++;
-                        audioMethod.Invoke(__instance, new object[]{2});
-                        var SLOW_slotField = poisonType.GetField("SLOW_slot", BindingFlags.Instance | BindingFlags.NonPublic);
-                        SLOW_slotField.SetValue(__instance, __instance.Active_Effects - 1);
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().text = "slowed";
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().color = Color.grey;
+                        if (locationData.APLocationName != "Buy Ocean Elixir (Patchouli)")
+                        {
+                            rightsideLocations.Add(locationData.APLocationName);
+                        }
                     }
-                    var steps = duration;
-                    steps *= Mathf.LerpUnclamped(1.25f, 0.2f, (float)CON.CURRENT_PL_DATA.PLAYER_RES / 100f);
-                    __instance.SLOW_DUR = Time.time + steps;
                 }
-                return false;
+
             }
-            return true;
+            var random = new System.Random(DateTime.Today.Day + DateTime.Today.Hour + DateTime.Today.Minute);
+            rightsideLocations = rightsideLocations.OrderBy(_ => random.Next()).ToList();
+            var leftsideLocations = new List<string>() { };
+
+            if (rightsideLocations.Count() == 0)
+            {
+                description = "<size=80%>A multi-colored orb, clear as glass.  Once, words danced upon its surface, but now nothing can be seen...</size>";
+            }
+            else if (rightsideLocations.Count > 14)
+            {
+                while (rightsideLocations.Count > 14)
+                {
+                    leftsideLocations.Add(rightsideLocations[0]);
+                    rightsideLocations.RemoveAt(0);
+                }
+            }
+            var leftsideText = "";
+            var rightsideText = "";
+            foreach (var location in rightsideLocations)
+            {
+                rightsideText += $"<size=55%><align=center><color={_lunacidLogic.ColorLogicLocation(location)}>{location}</color></align></size>\n";
+            }
+            if (leftsideLocations.Count > 0)
+            {
+                foreach (var location in leftsideLocations)
+                {
+                    leftsideText += $"<size=37%><align=center><color={_lunacidLogic.ColorLogicLocation(location)}>{location.ToUpper()}</color></align></size>\n";
+                }
+            }
+            var inventoryItem = LunacidLocations.sceneToArea.Keys.Contains(sceneName) ? LunacidLocations.sceneToArea[sceneName] : "a Lost Archipelago";
+            menu.TXT[32].text = $"Orb of {inventoryItem}";
+            menu.TXT[33].text = itemCount.ToString() + "\n<size=35%>\n</size>" + leftsideText;
+            menu.TXT[34].text = description + rightsideText;
+            menu.TXT[32].transform.GetChild(0).gameObject.SetActive(leftsideLocations.Count == 0);
+            menu.TXT[32].transform.GetChild(1).gameObject.SetActive(leftsideLocations.Count == 0);
+            if (leftsideLocations.Count == 0)
+            {
+                menu.TXT[32].transform.GetChild(1).GetComponent<UnityEngine.UI.Image>().sprite = component6.SPR;
+            }
+            UnityEngine.Object.Destroy(obj);
+            var doubleClick = menu.GetType().GetMethod("DoubleClick", BindingFlags.Instance | BindingFlags.NonPublic);
+            if ((bool)doubleClick.Invoke(menu, null))
+            {
+                var click = menu.GetType().GetMethod("Click", BindingFlags.Instance | BindingFlags.NonPublic);
+                click.Invoke(menu, new object[1] { 24 });
+            }
         }
 
         private static string ValueSuffix(int value)
@@ -335,29 +603,11 @@ namespace LunacidAP
                 }
                 if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (W)"))
                 {
-                    /*if (ConnectionData.Symbols == 0)
-                    {
-                        ConnectionData.Symbols += 1;
-                        return "Vampiric Symbol (W)";
-                    }
-                    else
-                    {
-                        _log.LogError($"Don't have first symbol, but Symbols > 0.");
-                    }*/
                     return "Vampiric Symbol (W)";
 
                 }
                 else if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (A)"))
                 {
-                    /*if (ConnectionData.Symbols == 1)
-                    {
-                        ConnectionData.Symbols += 1;
-                        return "Vampiric Symbol (A)";
-                    }
-                    else
-                    {
-                        _log.LogError($"Don't have second symbol, but Symbols != 1.");
-                    }*/
                     return "Vampiric Symbol (A)";
                 }
                 else if (!FlagHandler.DoesPlayerHaveItem("Vampiric Symbol (E)"))
@@ -395,11 +645,15 @@ namespace LunacidAP
             {
                 return 0;
             }
-            else if (name.Contains(" Switch"))
+            else if (LunacidItems.Switches.Contains(name))
             {
                 return -1;
             }
-            return -2;
+            else if (LunacidItems.Keys.Contains(name))
+            {
+                return -2;
+            }
+            return -3;
         }
     }
 }

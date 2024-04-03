@@ -43,7 +43,7 @@ namespace LunacidAP
             HostEntry.transform.position = new Vector3(62.0523f, 14.18f, -66.08f);
             HostEntry.transform.SetParent(create);
             HostEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
-            
+
             PortEntry = GameObject.Instantiate(textField);
             PortEntry.name = "Port";
             var portInputComponent = PortEntry.GetComponent<TMP_InputField>();
@@ -67,23 +67,52 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Click_GatherData(int which, Menus __instance)
         {
-            /*_log.LogInfo($"Calling click {which}");
-            _log.LogInfo($"Current Query: {__instance.current_query}");*/
+            _log.LogInfo($"Calling click {which}");
+            _log.LogInfo($"Current Query: {__instance.current_query}");
             var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
             var EQ_SLOT = (int)eqSlotField.GetValue(__instance);
+            var eqSlot2Field = __instance.GetType().GetField("EQ_SLOT2", BindingFlags.Instance | BindingFlags.NonPublic);
+            var EQ_SLOT2 = (int)eqSlot2Field.GetValue(__instance);
+
             var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT);
-            if ((which == 28 && __instance.current_query == 6) || (which == 55 && __instance.current_query == 0))
+            if (which == 51 && (__instance.current_query == 6 || __instance.current_query == 0)) // Loading a save from main menu
             {
-                SaveHandler.ReadSave(saveSlot);
-                __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot));
+                if (EQ_SLOT2 != 10 && !StaticFuncs.IS_NULL(OfferSaveInfo(__instance.CON, saveSlot))) // Some menu instances are similar but not quite
+                {
+                    SaveHandler.ReadSave(saveSlot);
+                    __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot));
+                }
                 return true;
             }
-            if (which == 28 && __instance.current_query == 5) // Query for deleting save data
+            else if (which == 55 && __instance.current_query == 0) // Player has died but wants to resume.  Need some feedback.
+            {
+                if (ArchipelagoClient.AP.Authenticated)
+                {
+                    return true;
+                }
+                else
+                {
+                    __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot));
+                    return false; // don't let the player play.
+                }
+            }
+            else if (which == 28 && __instance.current_query == 5) // Query for deleting save data
             {
                 ConnectionData.WriteConnectionData();
                 SaveHandler.SaveData(saveSlot);
             }
-            if (which == 37)
+            else if (which == 28 && __instance.current_query == 6) // Trying to load save fully but connection isn't made yet
+            {
+                if (!ArchipelagoClient.AP.Authenticated)
+                {
+                    return false;
+                }
+            }
+            /*else if (which == 29 && __instance.current_query == 6)
+            {
+                    ArchipelagoClient.AP.Disconnect();
+            }*/
+            else if (which == 37)
             {
                 var audioMethod = __instance.GetType().GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
                 var slotName = __instance.ITEMS[20].GetComponent<TMP_InputField>().text;
@@ -109,11 +138,26 @@ namespace LunacidAP
                 audioMethod.Invoke(__instance, new object[] { 8 });
                 SaveHandler.SaveData(saveSlot);
             }
-            if (which == 41)
+            else if (which == 41)
             {
                 ShopHandler.EnsureEnchantedKey();
             }
             return true;
+        }
+
+        private static string OfferSaveInfo(CONTROL control, int saveSlot)
+        {
+            switch (saveSlot)
+            {
+                case 0:
+                    return control.CURRENT_SYS_DATA.SAVE0_INFO;
+                case 1:
+                    return control.CURRENT_SYS_DATA.SAVE1_INFO;
+                case 2:
+                    return control.CURRENT_SYS_DATA.SAVE2_INFO;
+            }
+            return control.CURRENT_SYS_DATA.SAVE0_INFO;
+
         }
 
         [HarmonyPatch(typeof(Menus), "Update")]

@@ -54,6 +54,28 @@ namespace LunacidAP.Data
             new LocationData( 427, "Abyssal Demon: Ocean Elixir Drop", "OCEAN_ELIXIR_PICKUP", new Vector3() ),
         };
 
+        public static readonly Dictionary<string, List<string>> DropLocationToScenes = new(){
+            {"Snail: Summon Snail Drop", new List<string>(){"PITT_A1"}},
+            {"Mummy: Rusted Sword Drop", new List<string>(){"PITT_A1"}},
+            {"Kodama: Summon Kodama Drop", new List<string>(){"FOREST_A1"}},
+            {"Chimera: Quick Stride Drop", new List<string>(){"ARCHIVES"}},
+            {"Milk Snail: Ice Sickle Drop", new List<string>(){"PITT_A1", "ARCHIVES"}},
+            {"Skeleton: Skeleton Axe Drop", new List<string>(){"SEWERS_A1", "CAVE", "HAUNT", "PRISON"}},
+            {"Skeleton: Dark Skull Drop", new List<string>(){"SEWERS_A1", "CAVE", "HAUNT", "PRISON"}},
+            {"Phantom: Cursed Blade Drop", new List<string>(){"CAS_1", "CAS_3", "HAUNT"}},
+            {"Obsidian Skeleton: Obsidian Cursebrand Drop", new List<string>(){"CAVE", "PRISON"}},
+            {"Obsidian Skeleton: Obsidian Poisonguard Drop", new List<string>(){"CAVE", "PRISON"}},
+            {"Anpu: Golden Kopesh Drop", new List<string>(){"CAVE"}},
+            {"Anpu: Golden Sickle Drop", new List<string>(){"CAVE"}},
+            {"Malformed Horse: Brittle Arming Sword Drop", new List<string>(){"CAS_3"}},
+            {"Jailor: Jailor's Candle Drop", new List<string>(){"PRISON"}},
+            {"Vampire Page: Lyrian Longsword Drop", new List<string>(){"CAS_1"}},
+            {"Sucsarian: Sucsarian Spear", new List<string>(){"ARENA"}},
+            {"Sucsarian: Sucsarian Dagger Drop", new List<string>(){"ARENA"}},
+            {"Cetea: Tornado Drop", new List<string>(){"VOID"}},
+            {"Abyssal Demon: Ocean Elixir Drop", new List<string>(){"LAKE", "HAUNT"}}
+        };
+
         public static readonly List<LocationData> ShopLocations = new(){
             new LocationData( 360, "Buy Rapier", "RAPIER_PICKUP", new Vector3() ),
             new LocationData( 361, "Buy Crossbow", "CROSSBOW_PICKUP", new Vector3() ),
@@ -87,9 +109,6 @@ namespace LunacidAP.Data
             new LocationData( 13, "HB: Chest Near Demi", "FLAME_SPEAR", new Vector3(39.2f, 11.7f, -161.6f) ),
             new LocationData( 14, "HB: Near Enchanted Door", "HEALTH_VIAL_PICKUP", new Vector3(37.696f, 8.183f, 47.84f) ),
             new LocationData( 15, "HB: Dark Tunnel After Enchanted Door", "TORCH", new Vector3(-16.3f, 2.6f, 45.2f) ),
-
-            new LocationData( -1, "Spacer", "", new Vector3(), true),
-
             new LocationData( 16, "HB: Temple Fountain", "HEALTH_VIAL_PICKUP", new Vector3(43.5f, -24.6f, 114.3f) ),
             new LocationData( 17, "HB: Temple Ritual Table", "RD_PICKUP", new Vector3(65.4f, -19.9f, 94.3f) ),
             new LocationData( 18, "HB: Temple Altar Chest", "LITHO", new Vector3(104.6f, -26.3f, 78.2f) ),
@@ -125,9 +144,6 @@ namespace LunacidAP.Data
                     new LocationData( 47, "FM: Path to Sanguine Sea (Right)", "HEALTH_VIAL_PICKUP", new Vector3(73.9f, -26.7f, -537.1f)),
                     new LocationData( 48, "FM: Hidden Chest Near Underworks", "EARTH_ELIXIR_PICKUP", new Vector3(24.2f, -26.8f, -421.9f) ),
                     new LocationData( 49, "FM: Rubble Near Illusory Wall", "FLAME_FLARE", new Vector3(18.1f, -27.3f, -443.3f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 50, "FM: Underwater Pipe", "P_THROWING_KNIFE_PICKUP", new Vector3(64.9f, -31.6f, -279.5f) ),
                     new LocationData( 51, "FM: Underworks Waterfall", "ANTIDOTE_PICKUP", new Vector3(-9.6f, -28.0f, -260.5f) ),
                     new LocationData( 52, "FM: Underworks Skeleton", "HILT_PICKUP", new Vector3(-60.4f, -28.0f, -172.0f) ),
@@ -152,9 +168,6 @@ namespace LunacidAP.Data
                     new LocationData( 71, "AT: Catacombs Hidden Room", "OCEAN_ELIXIR_PICKUP", new Vector3(79.7f, -24.0f, -57.1f) ),
                     new LocationData( 72, "AT: Deep Coffin Storage", "HALBERD_PICKUP", new Vector3(68.0f, -25.7f, -30.1f) ),
                     new LocationData( 73, "AT: Red Skeleton", "MAGIC_SWORD_PICKUP", new Vector3(86.5f, -24.0f, -37.4f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 74, "AT: Mausoleum Hidden Chest", "PICKUP", new Vector3(104.0f, -24.7f, 191.4f) ),
                     new LocationData( 75, "AT: Mausoleum Upper Alcove Table", "BOOK_PICKUP", new Vector3(163.8f, -17.0f, -104.7f) ),
                     new LocationData( 76, "AT: Mausoleum Maze (Early)", "HOLY_WATER_PICKUP", new Vector3(156.8f, -20.0f, -168.5f) ),
@@ -164,10 +177,7 @@ namespace LunacidAP.Data
                     new LocationData( 80, "AT: Mausoleum Central Room (Back)", "EARTH_ELIXIR_PICKUP", new Vector3(293.9f, -20.0f, -146.1f) ),
                     new LocationData( 81, "AT: Mausoleum Central Room (Left Path)", "HEALTH_VIAL_PICKUP", new Vector3(261.1f, -21.7f, -53.8f) ),
                     new LocationData( 82, "AT: Mausoleum Central Room (Right Path)", "OCEAN_ELIXIR_PICKUP", new Vector3(290.4f, -21.7f, -246.5f) ),
-                    new LocationData( 83, "AT: Kill Death", "COIN_PICKUP", new Vector3() ), // The player has to deal with the scythe, its temp anyway
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
+                    new LocationData( 83, "AT: Kill Death", "COIN_PICKUP", new Vector3() ),
                     new LocationData( 84, "AT: Tomb With Switch", "DUNPEAL_PICKUP", new Vector3(47.9f, -7.1f, -40.8f) ),
                     new LocationData( 85, "AT: Tomb With Sitting Corpse", "BANNER_PICKUP", new Vector3(151.5f, -10.4f, 3.2f) ),
                     new LocationData( 86, "AT: Demi Chest", "LIGHTNING", new Vector3(155.3f, -3.2f, 73.0f) ),
@@ -185,9 +195,6 @@ namespace LunacidAP.Data
                     new LocationData( 97, "YF: Chest Near Tree", "ELF_BOW_PICKUP", new Vector3(-68.2f, 0.5f, -0.2f)),
                     new LocationData( 98, "YF: Blood Plant's Insides", "HEALTH_VIAL_PICKUP", new Vector3(-20.5f, 3.8f, -34.6f)),
                     new LocationData( 99, "YF: Hanging In The Trees", "SWORD_PICKUP", new Vector3(-209.8f, 26.5f, -41.9f)),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 100, "YF: Hidden Chest", "FLAME_FLARE", new Vector3(-259.8f, -20.3f, -176.3f)),
                     new LocationData( 101, "YF: Room Defended by Blood Plant", "EARTH_STRIKE", new Vector3(-274.7f, -32.4f, -176.2f)),
                     new LocationData( 102, "YF: Patchouli's Canopy Offer", "ENKEY_PICKUP", new Vector3(-57.9f, -16.8f, -116.1f)),
@@ -209,17 +216,11 @@ namespace LunacidAP.Data
                 new(){
                     new LocationData( 119, "FbA: Back Room Past Bridge", "OCEAN_ELIXIR_PICKUP", new Vector3(-99.0f, -4.0f, -51.6f) ),
                     new LocationData( 120, "FbA: Strange Corpse", "PICKUP", new Vector3(-85.6f, -2.8f, -5.8f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 123, "FbA: Snail Lectern (Near)", "LIGHT_REVEAL", new Vector3(-28.0f, 9.5f, 52.0f) ),
                     new LocationData( 124, "FbA: Snail Lectern (Far)", "BLOOD_DRAIN", new Vector3(-28.0f, 9.5f, 45.0f) ),
                     new LocationData( 125, "FbA: Rug on Balcony", "MANA_VIAL_PICKUP", new Vector3(-41.4f, 8.0f, -59.3f) ),
                     new LocationData( 126, "FbA: Rooftops", "EARTH_ELIXIR_PICKUP", new Vector3(3.6f, 6.5f, -2.1f) ),
                     new LocationData( 127, "FbA: Hidden Room Upper Floor", "WOLFRAM_PICKUP", new Vector3(-112.1f, 8.5f, -22.4f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 121, "FbA: Against Wall Near Trees", "L_URN_PICKUP", new Vector3(-113.8f, -20.0f, 67.1f) ),
                     new LocationData( 122, "FbA: Short Wall Near Trees", "HEALTH_VIAL_PICKUP", new Vector3(-110.9f, -20.0f, 46.0f) ),
                     new LocationData( 128, "FbA: Hidden Room Lower Floor", "CRYSTAL_SHARD_PICKUP", new Vector3(-57.9f, -19.9f, 38.5f) ),
@@ -240,17 +241,11 @@ namespace LunacidAP.Data
                     new LocationData( 143, "CLF: Cattle Cell (Center)", "ICE_SWORD", new Vector3(90.8f, -5.3f, -178.7f) ),
                     new LocationData( 144, "CLF: Cattle Cell (North)", "KEY1_PICKUP", new Vector3(126.7f, -5.9f, -258.3f) ),
                     new LocationData( 145, "CLF: Hidden Cattle Cell", "WAND_PICKUP", new Vector3(113.8f, -6.0f, -286.0f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 146, "CLF: Hallway Rubble Room", "L_URN_PICKUP", new Vector3(39.9f, 2.0f, -155.9f) ),
                     new LocationData( 147, "CLF: Hallway Dining Room", "BLOOD_WINE_PICKUP", new Vector3(27.6f, 3.2f, -185.8f) ),
                     new LocationData( 148, "CLF: Garrat Resting Room (Fountain)", "HOLY_WATER_PICKUP", new Vector3(-33.4f, 4.0f, -178.0f) ),
                     new LocationData( 149, "CLF: Garrat Resting Room (Wall)", "CROSSBOW_PICKUP", new Vector3(-26.9f, 4.2f, -175.9f) ),
                     new LocationData( 150, "CLF: Hallway Dead End Before Blue Doors", "KEY2_PICKUP", new Vector3(-32.1f, 2.3f, -92.5f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 151, "CLF: Upper Floor Coffin Room (Small Room)", "EARTH_ELIXIR_PICKUP", new Vector3(-8.1f, 26.0f, -239.9f) ),
                     new LocationData( 152, "CLF: Upper Floor Coffin Room (Large Room)", "OCEAN_ELIXIR_PICKUP", new Vector3(-20.6f, 25.4f, -334.6f) ),
                     new LocationData( 153, "CLF: Upper Floor Coffin Room (Double)", "SWORD_PICKUP", new Vector3(-54.0f, 28.4f, -249.0f) ),
@@ -306,9 +301,6 @@ namespace LunacidAP.Data
                     new LocationData( 203, "BG: Triple Hidden Chest", "ASHES", new Vector3(-266.0f, 16.4f, 105.0f) ),
                     new LocationData( 204, "BG: Lava Overseeing Dragon Switch", "ROCK_RING_PICKUP", new Vector3(-254.5f, 11.0f, -11.0f) ),
                     new LocationData( 205, "BG: Through Dragon Switch Tunnel", "MANA_VIAL_PICKUP", new Vector3(-216.0f, 10.0f, -69.7f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 206, "ST: Top Right Sarcophagus", "BANDAGE_PICKUP", new Vector3(-383.1f, 12.1f, -200.2f) ),
                     new LocationData( 207, "ST: Second Floor Snake Room", "HEALTH_VIAL_PICKUP", new Vector3(-332.5f, 20.0f, -80.6f) ),
                     new LocationData( 208, "ST: Basement Snake Pit", "STAFF_PICKUP", new Vector3(-298.3f, 6.0f, -157.0f) ),
@@ -346,28 +338,16 @@ namespace LunacidAP.Data
                     new LocationData( 259, "TP: Third Floor Locked Cell Right", "ASHES", new Vector3(-15.3f, 11.0f, -9.0f) ),
                     new LocationData( 260, "TP: Third Floor Locked Cell South", "LANCE_PICKUP", new Vector3(57.5f, 12.3f, 39.2f) ),
                     new LocationData( 261, "TP: Almost Bottomless Pit", "FLIGHT", new Vector3(-40.0f, -11.0f, 6.0f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 262, "TP: Second Floor Broken Cell", "BANDAGE_PICKUP", new Vector3(0.0f, -1.0f, -8.0f) ),
                     new LocationData( 263, "TP: Second Floor Jailer's Table", "KEY_PICKUP", new Vector3(-56.8f, 1.3f, 3.9f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 264, "TP: First Floor Hidden Cell", "HOLY_WATER_PICKUP", new Vector3(-32.9f, -17.0f, -75.1f) ),
                     new LocationData( 265, "TP: First Floor Hidden Debris Room", "L_URN_PICKUP", new Vector3(-10.6f, -16.8f, -107.5f) ),
                     new LocationData( 266, "TP: First Floor Remains", "CURSED_BLADE_PICKUP", new Vector3(-34.0f, -16.0f, -93.7f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 267, "TP: Green Asylum Guarded Alcove (Left)", "Moon_Vial_PICKUP", new Vector3(55.4f, -48.0f, 8.4f) ),
                     new LocationData( 268, "TP: Green Asylum Guarded Alcove (Right)", "Moon_Vial_PICKUP", new Vector3(54.7f, -48.0f, 8.6f) ),
                     new LocationData( 269, "TP: Green Asylum Long Alcove", "EARTH_ELIXIR_PICKUP", new Vector3(67.6f, -54.0f, -14.2f) ),
                     new LocationData( 270, "TP: Green Asylum Bone Pit", "HEALTH_VIAL_PICKUP", new Vector3(67.6f, -48.9f, -39.3f) ),
                     new LocationData( 279, "TP: Egg's Resting Place", "RATTLE_PICKUP", new Vector3(72.4f, -48.0f, -19.9f)),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 271, "TP: Fourth Floor Cell Hanging Remains", "HEALTH_VIAL_PICKUP", new Vector3(-39.4f, 23.0f, 27.0f) ),
                     new LocationData( 272, "TP: Fourth Floor Maledictus Secret", "BLUE_FLAME_PICKUP", new Vector3(36.0f, 23.9f, 63.9f) ),
                     new LocationData( 273, "TP: Fourth Floor Hidden Jailer Sleeping Spot", "HOLY_WATER_PICKUP", new Vector3(51.5f, 23.2f, 67.7f) ),
@@ -387,9 +367,6 @@ namespace LunacidAP.Data
                     new LocationData( 287, "FlA: Temple of Earth Hidden Room", "EARTH_ELIXIR_PICKUP", new Vector3(-4.2f, 12.0f, 171.1f) ),
                     new LocationData( 288, "FlA: Temple of Earth Fractured Chest", "PICKUP", new Vector3(-28.0f, -7.5f, 327.0f) ),
                     new LocationData( 289, "FlA: Temple of Earth Chest Near Switch", "TAL2_PICKUP", new Vector3(-27.0f, 8.8f, 118.0f) ),
-
-                    new LocationData( -1, "Spacer", "", new Vector3(), true),
-
                     new LocationData( 290, "FlA: Temple of Water Room Near Water", "FAIRY_MOSS_PICKUP", new Vector3(-169.5f, 8.0f, -117.0f) ),
                     new LocationData( 291, "FlA: Temple of Water Corner Near Water", "ANTIDOTE_PICKUP", new Vector3(-198.6f, 8.3f, -123.4f) ),
                     new LocationData( 292, "FlA: Temple of Water Collapsed End Near Balcony", "HEALTH_VIAL_PICKUP", new Vector3(-99.0f, 16.0f, -198.7f) ),
@@ -412,7 +389,7 @@ namespace LunacidAP.Data
                     new LocationData( 309, "LA: Behind Statue", "WISP_HEART_PICKUP", new Vector3(-88.8f, 0.2f, 62.9f) ),
                     new LocationData( 310, "LA: Rocks Near Switch", "LAVA_PICKUP", new Vector3(-34.7f, 0.3f, 2.4f) ),
                     new LocationData( 311, "LA: Forbidden Light Chest", "MAGIC", new Vector3(126.0f, 0.7f, -20.0f) ),
-                    new LocationData( 312, "LA: Hidden Light Chest", "D_URN_PICKUP", new Vector3(173.6f, 0.0f, -25.1f) ),
+                    new LocationData( 312, "LA: Hidden Light Stash", "D_URN_PICKUP", new Vector3(173.6f, 0.0f, -25.1f) ),
                     new LocationData( 313, "LA: NNSNSSNSNN Lost Maze", "FANG_PICKUP", new Vector3(-7.7f, 70.2f, -22.1f) ),
                 }
             },
@@ -422,6 +399,29 @@ namespace LunacidAP.Data
                     new LocationData( 319, "CF: Calamis' Weapon of Choice", "", new Vector3(), true)
                 }
             }
+
+        };
+
+        public static readonly Dictionary<string, string> sceneToArea = new(){
+            {"PITT_A1", "Holow Basin"},
+            {"HUB_01", "Wing's Rest"},
+            {"FOREST_A1", "Yosei Forest"},
+            {"FOREST_B1", "Forest Canopy"},
+            {"SEWERS_A1", "The Fetid Mire"},
+            {"ARCHIVES", "Forbidden Archives"},
+            {"WALL_01", "Laetus Chasm"},
+            {"PITT_B1", "Great Well Surface"},
+            {"HAUNT", "Accursed Tomb"},
+            {"LAKE", "The Sanguine Sea"},
+            {"CAS_1", "Castle Le Fanu"},
+            {"CAVE", "Boiling Grotto"},
+            {"VOID", "Labyrinth of Ash"},
+            {"CAS_2", "Throne Chamber"},
+            {"CAS_3", "Sealed Ballroom"},
+            {"PRISON", "Terminus Prison"},
+            {"TOWER", "Tower of Abyss"},
+            {"ARENA", "Forlorn Arena"},
+            {"ARENA2", "Chamber of Fate"},
 
         };
 

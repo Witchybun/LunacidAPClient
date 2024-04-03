@@ -15,7 +15,7 @@ namespace LunacidAP
         private static string CurrentCastChild { get; set; } = "";
         private static int CurrentElement { get; set; } = 0;
 
-        public static void Awake(ManualLogSource log)
+        public WeaponHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(WeaponHandler));
@@ -25,7 +25,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Attack_ModifyWeaponElement(Weapon_scr __instance)
         {
-            if (!SlotData.RandomElements)
+            if (!ArchipelagoClient.AP.SlotData.RandomElements)
             {
                 return true;
             }
@@ -46,7 +46,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Cast_ModifySpellElement(Magic_scr __instance)
         {
-            if (!SlotData.RandomElements)
+            if (!ArchipelagoClient.AP.SlotData.RandomElements)
             {
                 return true;
             }
