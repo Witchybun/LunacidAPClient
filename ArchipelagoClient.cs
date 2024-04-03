@@ -133,7 +133,6 @@ namespace LunacidAP
                 yield break;
             }
             // Sync collected locations
-            _log.LogInfo("About to append completed locations");
             foreach (long locationID in Session.Locations.AllLocationsChecked)
             {
                 if (!ConnectionData.CompletedLocations.Contains(locationID))
@@ -424,10 +423,6 @@ namespace LunacidAP
                 {
                     foundCount += 1;
                 }
-            }
-            if (itemName == "Black Book")
-            {
-                _log.LogInfo($"Black Book count: {count} vs {foundCount}");
             }
             return count <= foundCount;
         }

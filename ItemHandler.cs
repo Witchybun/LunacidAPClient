@@ -54,7 +54,6 @@ namespace LunacidAP
             }
             int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
             string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
-            _log.LogInfo($"Looking at {itemName}");
             if (itemName == "Great Well Doors Keyring")
             {
                 CreateDoorKeyInInventory(__instance, num3);
@@ -121,10 +120,6 @@ namespace LunacidAP
             }
             string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
             string color = ArchipelagoClient.FlagColor(itemFlag);
-            if (Name.Contains("Key"))
-            {
-                _log.LogInfo($"Hitting up {Name}");
-            }
             Name = ProgressiveSymbolHandler(Name);
             if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
             {
@@ -215,8 +210,8 @@ namespace LunacidAP
             }
             catch (Exception ex)
             {
-                _log.LogInfo($"Method {nameof(GiveWeapon)} failed.");
-                _log.LogInfo($"Reason: {ex.Message}");
+                _log.LogError($"Method {nameof(GiveWeapon)} failed.");
+                _log.LogError($"Reason: {ex.Message}");
             }
 
 

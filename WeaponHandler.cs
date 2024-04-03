@@ -53,7 +53,6 @@ namespace LunacidAP
             var spellName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
             if (!ConnectionData.Elements.TryGetValue(spellName, out string elementName))
             {
-                _log.LogInfo($"{spellName} not in list for elements.  This may or may not be an error.  Returning.");
                 return true;
             }
             CurrentCastChild = __instance.MAG_CHILD;

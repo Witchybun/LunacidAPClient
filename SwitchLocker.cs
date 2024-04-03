@@ -73,7 +73,6 @@ namespace LunacidAP
             {
                 return ""; //Failsafe for new positions
             }
-            _log.LogInfo($"Found Position for switch [{switchOfShortestDistance}]");
             return switchOfShortestDistance;
         }
 

@@ -18,7 +18,6 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_LockDoors(Door_scr __instance)
         {
-            _log.LogInfo($"{ArchipelagoClient.AP.SlotData.Doorlock}");
             if (!ArchipelagoClient.AP.SlotData.Doorlock)
             {
                 return true;
@@ -34,7 +33,6 @@ namespace LunacidAP
             {
                 if (AreDoorsIdentical(doorData.Value, doorPOS))
                 {
-                    _log.LogInfo($"Found door {doorData.Key}");
                     entrance = doorData.Key;
                     break;
                 }

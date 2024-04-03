@@ -247,7 +247,6 @@ namespace LunacidAP
                             else if (stateController == "CAS_DOOR")
                             {
                                 var playerClass = GameObject.Find("CONTROL").GetComponent<CONTROL>().CURRENT_PL_DATA.PLAYER_CLASS;
-                                _log.LogInfo($"{playerClass}");
                                 if (playerClass == "Vampire")
                                 {
                                     sTATES[1].SetActive(value: true);

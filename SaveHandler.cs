@@ -106,12 +106,9 @@ namespace LunacidAP
                     using StreamReader reader = new StreamReader(savePath);
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
-                    _log.LogInfo($"Loaded save has {loadedSave.HostName}:{loadedSave.Port}");
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances);
-                    _log.LogInfo("Save loaded.  Contents:");
-                    _log.LogInfo($"SlotName: {ConnectionData.SlotName}, HostName: {ConnectionData.HostName}");
                     return;
                 }
 

@@ -67,8 +67,6 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Click_GatherData(int which, Menus __instance)
         {
-            _log.LogInfo($"Calling click {which}");
-            _log.LogInfo($"Current Query: {__instance.current_query}");
             var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
             var EQ_SLOT = (int)eqSlotField.GetValue(__instance);
             var eqSlot2Field = __instance.GetType().GetField("EQ_SLOT2", BindingFlags.Instance | BindingFlags.NonPublic);

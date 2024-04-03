@@ -34,11 +34,6 @@ namespace LunacidAP
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
-
-            _log.LogInfo($"Warping to {__instance.LVL}");
-            _log.LogInfo($"[{__instance.POS.x}, {__instance.POS.y}, {__instance.POS.z}]");
-            _log.LogInfo($"Rotation {__instance.ROT}");
-
             return true;
         }
 
@@ -60,13 +55,11 @@ namespace LunacidAP
             {
                 return warpData;
             }
-            _log.LogInfo($"Received warpdata to {warpData.Scene}");
             var entrance = DetermineEntrance(warpData);
             if (entrance == "NULL" || entrance == "")
             {
                 return warpData;
             }
-            _log.LogInfo($"Handling {entrance}");
             if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
                 return WarpDestinations.EntranceToWarp[newEntrance];
@@ -100,7 +93,6 @@ namespace LunacidAP
         {
             try
             {
-                _log.LogInfo($"Looking for {unknownWarp.Scene}, [{unknownWarp.Position.x}, {unknownWarp.Position.y}, {unknownWarp.Position.z}], {unknownWarp.Rotation}");
                 var knownWarp = WarpDestinations.EntranceToWarp.FirstOrDefault(x => AreTwoWarpsIdentical(unknownWarp, x.Value));
                 if (knownWarp.Key == null)
                 {

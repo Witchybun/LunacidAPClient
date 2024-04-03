@@ -60,10 +60,6 @@ namespace LunacidAP
         {
             _popup = __instance.CON.PAPPY;
             CollectLocation(__instance, out var keepOriginalDrop);
-            if (keepOriginalDrop)
-            {
-                _log.LogInfo($"Determined the item {__instance.Name} isn't important.");
-            }
             return keepOriginalDrop;
         }
 
@@ -89,7 +85,6 @@ namespace LunacidAP
                 pickupObject.gameObject.SetActive(false);
                 return;
             }
-            _log.LogInfo($"Checking {apLocation.APLocationID}: {apLocation.APLocationName}");
             var item = ArchipelagoClient.AP.LocationTable[apLocation.APLocationID];
             DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
             pickupObject.gameObject.SetActive(false);
@@ -139,11 +134,9 @@ namespace LunacidAP
             }
             if (shortestDistance > 10f)
             {
-                // _log.LogInfo($"Closest location for {objectName} at {objectPosition} was too far away: {locationOfShortestDistance}, {positionOfShortestDistance} with distance {shortestDistance}");
-                return locationOfShortestDistance; //Failsafe for new positions
+                                return locationOfShortestDistance; //Failsafe for new positions
             }
-            // _log.LogInfo($"Found Position for location [{locationOfShortestDistance}]");
-            return locationOfShortestDistance;
+                        return locationOfShortestDistance;
         }
 
         public static LocationData DetermineAPLocation(GameObject gameObject, int type)
