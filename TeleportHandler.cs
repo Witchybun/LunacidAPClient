@@ -51,6 +51,10 @@ namespace LunacidAP
 
         private static WarpDestinations.WarpData HandleEntranceRandomizer(WarpDestinations.WarpData warpData)
         {
+            if (!ArchipelagoClient.AP.Authenticated)
+            {
+                return warpData;
+            }
             if (!ArchipelagoClient.AP.SlotData.EntranceRandomizer)
             {
                 return warpData;
@@ -60,6 +64,7 @@ namespace LunacidAP
             {
                 return warpData;
             }
+            _log.LogInfo($"Found {entrance}");
             if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
                 return WarpDestinations.EntranceToWarp[newEntrance];

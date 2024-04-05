@@ -22,6 +22,7 @@ namespace LunacidAP
         private static ManualLogSource _log;
         public static ArchipelagoClient AP;
         private static GameObject Obj;
+        public System.Random RandomStatic;
         public int SlotID;
         private int Stack;
         public const long LOCATION_INIT_ID = 771111110;
@@ -99,12 +100,14 @@ namespace LunacidAP
                 yield break;
             }
             ConnectionData.Seed = seed;
+
+            RandomStatic = new System.Random(seed);
             if (!reconnect)
             {
                 BuildLocationTable();
 
                 // Scout unchecked locations
-                var uncheckedLocationIDs = from locationID in LocationTable.Keys where !IsLocationChecked(locationID) select locationID;
+                var uncheckedLocationIDs = from locationID in LocationTable.Keys select locationID;
                 Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
                 yield return new WaitUntil(() => locationInfoTask.IsCompleted);
                 if (locationInfoTask.IsFaulted)

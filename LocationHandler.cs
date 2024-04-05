@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
@@ -43,6 +41,7 @@ namespace LunacidAP
             {
                 return true;
             }
+            SwapperHandler.ReplaceModelWithAppropriateItem(__instance, apLocation);
             __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             _popup = __instance.CON.PAPPY;
             if (__instance.inChest)
@@ -99,7 +98,7 @@ namespace LunacidAP
             var objectLocation = pickupObject.transform.position;
             if (sceneName == "ARCHIVES" && Vector3.Distance(objectLocation, new Vector3(-3.2f, -19.3f, -45.9f)) < 5f)
             {
-                return new LocationData( -2, "FbA: Daedalus Knowledge", "", new Vector3());
+                return new LocationData(-2, "FbA: Daedalus Knowledge", "", new Vector3());
             }
             if (objectName.Contains("(Clone)") && IsCloneAPLocation(pickupObject))
             {
@@ -134,9 +133,9 @@ namespace LunacidAP
             }
             if (shortestDistance > 10f)
             {
-                                return locationOfShortestDistance; //Failsafe for new positions
+                return locationOfShortestDistance; //Failsafe for new positions
             }
-                        return locationOfShortestDistance;
+            return locationOfShortestDistance;
         }
 
         public static LocationData DetermineAPLocation(GameObject gameObject, int type)
@@ -146,7 +145,7 @@ namespace LunacidAP
 
         private static LocationData DetermineClonePickupLocation(string sceneName, string objectName, Vector3 objectPosition)
         {
-            var cleanedName = objectName.Replace("(Clone)","");
+            var cleanedName = objectName.Replace("(Clone)", "");
             switch (sceneName)
             {
                 case "TOWER":

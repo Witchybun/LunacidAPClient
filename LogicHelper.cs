@@ -146,7 +146,7 @@ namespace LunacidAP
                     }
                 case "HB: Alcove on Path to Yosei Forest":
                     {
-                        return CanEnterTemple();
+                        return CanEnterTemple() && HasSwitch("Temple of Silence Switch Key");
 
                     }
                 case "FM: Room Left of Foyer":
@@ -331,7 +331,8 @@ namespace LunacidAP
                     }
                 case "AT: Kill Death":
                     {
-                        return HasLightSource() && HasElement("Light");
+                        return HasLightSource() && HasElement("Light") && WasItemReceived("Broken Sword") && 
+                        WasItemReceived("Fractured Death") && WasItemReceived("Fractured Life");
 
                     }
                 case "AT: Tomb With Switch":
@@ -407,7 +408,7 @@ namespace LunacidAP
                 }
                 case "YF: Patchouli's Reward":
                     {
-                        return CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});
+                        return CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"}) && WasItemReceived("Skull of Josiah");
                 }
                 case "FC: Branch Lower Edge":
                     {
@@ -534,7 +535,7 @@ namespace LunacidAP
                 }
                 case "CLF: Hidden Cattle Cell":
                     {
-                        return WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});
+                        return WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"}) && HasDustyOrb();
                 }
                 case "CLF: Hallway Rubble Room":
                     {
@@ -566,7 +567,7 @@ namespace LunacidAP
                 }
                 case "CLF: Upper Floor Coffin Room (Double)":
                     {
-                        return ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 3);
+                        return ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 3) && HasDustyOrb();
                 }
                 case "CLF:  Upper Floor Coffin Room (Halllway)":
                     {
@@ -1214,6 +1215,10 @@ namespace LunacidAP
 
         private bool HasElement(string element)
         {
+            if (WasItemReceived("Wand of Power"))
+            {
+                return true;
+            }
             foreach (var weapon in ConnectionData.Elements)
             {
                 if (weapon.Value.Contains(element))

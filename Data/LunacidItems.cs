@@ -40,13 +40,47 @@ namespace LunacidAP.Data
         public static readonly List<string> Weapons = new(){
            "Axe of Harming", "Battle Axe", "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Broken Lance",
             "Corrupted Dagger", "Dark Rapier", "Elfen Bow", "Elfen Sword", "Fishing Spear", "Flail", "Halberd", "Iron Claw",
-            "Moonlight", "Obsidian Seal", "Replica Sword", "Ritual Dagger", "Ruested Sword", "Serpent Fang", "Shadow Blade",
+            "Moonlight", "Obsidian Seal", "Replica Sword", "Ritual Dagger", "Rusted Sword", "Serpent Fang", "Shadow Blade",
             "Steel Spear", "Stone Club", "Torch", "Twisted Staff", "Vampire Hunter Sword", "Wand of Power", "Wolfram Greatsword",
             "Wooden Shield", "Crossbow", "Steel Needle", "Hammer of Cruelty", "Lucid Blade", "Jotunn Slayer", "Rapier", "Privateer Musket",
             "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
             "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch"
+        };
+
+        public static readonly List<string> Swords = new(){
+            "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Corrupted Dagger", "Dark Rapier","Elfen Sword",
+            "Moonlight", "Obsidian Seal", "Replica Sword", "Ritual Dagger", "Rusted Sword", "Serpent Fang", "Shadow Blade",
+            "Vampire Hunter Sword", "Wolfram Greatsword", "Steel Needle", "Jotunn Slayer", "Rapier",
+            "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
+            "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
+            "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
+            "Dark Greatsword", "Shining Blade"
+        };
+
+        public static readonly List<string> Axes = new(){
+            "Axe of Harming", "Battle Axe", "Skeleton Axe", 
+        };
+
+        public static readonly List<string> Spears = new(){
+            "Broken Lance", "Steel Spear", "Fishing Spear", "Sucsarian Spear", "Steel Lance", 
+        };
+
+        public static readonly List<string> Shields = new(){
+            "Wooden Shield", "Obsidian Poisonguard",
+        };
+
+        public static readonly List<string> Bows = new(){
+            "Elfen Bow", "Double Crossbow", "Crossbow", "Privateer Musket",
+        };
+
+        public static readonly List<string> Hammers = new(){
+            "Stone Club", "Hammer of Cruelty", "Steel Club", "Iron Club", 
+        };
+
+        public static readonly List<string> Gloves = new(){
+            "Iron Claw", "Steel Claw", "Poison Claw"
         };
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
@@ -158,6 +192,75 @@ namespace LunacidAP.Data
             {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
         };
 
+        public static Dictionary<string, string> ItemToPickup = new(){
+            {"Blood Wine", "BLOOD_WINE_PICKUP"},
+            {"Light Urn", "L_URN_PICKUP"},
+            {"Cloth Bandage", "BANDAGE_PICKUP"},
+            {"Dark Urn", "D_URN_PICKUP"},
+            {"Bomb", "BOMB_PICKUP"},
+            {"Poison Urn", "P_URN_PICKUP"},
+            {"Wisp Heart", "WISP_HEART_PICKUP"},
+            {"Staff of Osiris", "STAFF_PICKUP"},
+            {"Moonlight Vial", "Moon_Vial_PICKUP"},
+            {"Spectral Candle", "CANDLE_PICKUP"},
+            {"Health Vial", "HEALTH_VIAL_PICKUP"},
+            {"Mana Vial", "MANA_VIAL_PICKUP"},
+            {"Fairy Moss", "FAIRY_MOSS_PICKUP"},
+            {"Crystal Shard", "CRYSTAL_SHARD_PICKUP"},
+            {"Poison Throwing Knife", "P_THROWING_KNIFE_PICKUP"},
+            {"Throwing Knife", "THROWING_KNIFE_PICKUP"},
+            {"Holy Water", "HOLY_WATER_PICKUP"},
+            {"Antidote", "ANTIDOTE_PICKUP"},
+            {"White VHS Tape", "VHS_PICKUP"},
+            {"Ocean Elixir", "OCEAN_ELIXIR_PICKUP"},
+            {"Earth Elixir", "EARTH_ELIXIR_PICKUP"},
+            {"Black Book", "BOOK_PICKUP"}, 
+            {"Enchanted Key", "ENKEY_PICKUP"},
+            {"VHS Tape", "VHS_PICKUP"},
+            {"Corrupt Key", "ENKEY_PICKUP"},
+            {"Skull of Josiah", "SKULL_PICKUP"},
+            {"Terminus Prison Key", "ENKEY_PICKUP"},
+            {"Strange Coin", "GOLD_10"}, 
+            {"Health ViaI", "HEALTH_VIAL_PICKUP"},
+        };
+
+        public static ItemType DetermineItemType(string item)
+        {
+            if (Weapons.Contains(item))
+            {
+                return ItemType.Weapon;
+            }
+            else if (Spells.Contains(item))
+            {
+                return ItemType.Spell;
+            }
+            else if (Items.Contains(item))
+            {
+                return ItemType.Item;
+            }
+            else if (Materials.Contains(item))
+            {
+                return ItemType.Material;
+            }
+            else if (Switches.Contains(item))
+            {
+                return ItemType.Switch;
+            }
+            else if (Keys.Contains(item))
+            {
+                return ItemType.Door;
+            }
+            else if (item.Contains("Trap"))
+            {
+                return ItemType.Trap;
+            }
+            else if (item.Contains("Silver"))
+            {
+                return ItemType.Gold;
+            }
+            return ItemType.Unknown;
+        }
+
         public enum ItemType
         {
             Weapon = 0,
@@ -167,6 +270,8 @@ namespace LunacidAP.Data
             Material = 4,
             Switch = 10,
             Trap = 11,
+            Door = 12,
+            Unknown = 20,
         }
     }
 

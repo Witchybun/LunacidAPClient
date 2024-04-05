@@ -11,11 +11,11 @@ namespace LunacidAP.Data
             {"Temple of Silence Interior to The Fetid Mire", "Sewers Door Key"},
             {"Temple of Silence Interior to Yosei Forest", "Lower Rickety Bridge Door Key"},
             {"Yosei Forest to Forest Canopy", "Treetop Door Key"},
-            {"Yosei Forest Lower to Accursed Tomb", "Tomb Secret Door Key"},
+            {"Yosei Forest Lower to Accursed Tomb Upper Lobby", "Tomb Secret Door Key"},
             {"Forbidden Archives 3F to Laetus Chasm", "Library Exit Door Key"},
             {"Laetus Chasm to Great Well Surface", "Surface Door Key"},
             {"The Fetid Mire to The Sanguine Sea", "Sewers Sea Door Key"},
-            {"The Sanguine Sea to Accursed Tomb", "Accursed Door Key"},
+            {"The Sanguine Sea to Accursed Tomb Lobby", "Accursed Door Key"},
             {"The Sanguine Sea to Castle Le Fanu", "Castle Doors Key"},
             {"Castle Le Fanu Blue Area to Sealed Ballroom", "Light Accursed Door Key"},
             {"Throne Chamber to Terminus Prison", "Prison Main Door Key"},
@@ -50,7 +50,7 @@ namespace LunacidAP.Data
         private static readonly Dictionary<string, Vector3> ForestEntranceToDoor = new(){
             {"Yosei Forest to Temple of Silence Interior", new Vector3(35f, 37.5f, -15f)},
             {"Yosei Forest to Forest Canopy", new Vector3(-142.8437f, 50.69f, -19.8452f)},
-            {"Yosei Forest Lower to Accursed Tomb", new Vector3(76.25f, -49f, -153.5f)}
+            {"Yosei Forest Lower to Accursed Tomb Upper Lobby", new Vector3(76.25f, -49f, -153.5f)}
         };
 
         private static readonly Dictionary<string, Vector3> CanopyEntranceToDoor = new(){
@@ -58,8 +58,8 @@ namespace LunacidAP.Data
         };
 
         private static readonly Dictionary<string, Vector3> TombEntranceToDoor = new(){
-            {"Accursed Tomb to The Sanguine Sea", new Vector3(76f, -6.75f, 104.25f)},
-            {"Accursed Tomb to Yosei Forest Lower", new Vector3(0.75f, 1.25f, 1f)}
+            {"Accursed Tomb Lobby to The Sanguine Sea", new Vector3(76f, -6.75f, 104.25f)},
+            {"Accursed Tomb Upper Lobby to Yosei Forest Lower", new Vector3(0.75f, 1.25f, 1f)}
         };
 
         private static readonly Dictionary<string, Vector3> MireEntranceToDoor = new(){
@@ -70,7 +70,7 @@ namespace LunacidAP.Data
         private static readonly Dictionary<string, Vector3> SeaEntranceToDoor = new(){
             {"The Sanguine Sea to The Fetid Mire", new Vector3(266.25f, 11.75f, -77.25f)},
             {"The Sanguine Sea to Castle Le Fanu", new Vector3(1f, 7.25f, 271.5f)},
-            {"The Sanguine Sea to Accursed Tomb", new Vector3(-171.25f, 8.5f, -71f)}
+            {"The Sanguine Sea to Accursed Tomb Lobby", new Vector3(-171.25f, 8.5f, -71f)}
         };
 
         private static readonly Dictionary<string, Vector3> CastleEntranceToDoor = new(){

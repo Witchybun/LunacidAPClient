@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
 {
@@ -220,6 +222,89 @@ namespace LunacidAP.Data
             {"Night of 100 Frights", "an old, spooky mansion."},
             {"Duke Nukem 3D", "the city of Los Angeles."},
         };
+
+        public static string KeywordToItem(ArchipelagoItem archipelagoItem)
+        {
+            var game = archipelagoItem.Game;
+            var itemName = archipelagoItem.Name;
+            var random = new Random(itemName.GetHashCode());
+            switch (game)
+            {
+                case "Muse Dash":
+                {
+                    return "VHS Tape";
+                }
+            }
+            if (itemName.Contains("Key"))
+            {
+                return "Enchanted Key";
+            }
+            else if (itemName.Contains("Rupees") || itemName.Contains("Money") || itemName.Contains("Soul") || 
+                    itemName.Contains("Geo") || itemName.Contains("Bones") || itemName.Contains("Coin"))
+            {
+                return "Silver (10)";
+            }
+            else if (itemName.Contains("Arrows") || itemName.Contains("Ammo"))
+            {
+                return "Staff of Osiris";
+            }
+            else if (itemName.Contains("Sword") || itemName.Contains("Dagger") || itemName.Contains("Blade") || itemName.Contains("Knife"))
+            {
+                return LunacidItems.Swords[random.Next(0, LunacidItems.Swords.Count)];
+            }
+            else if (itemName.Contains("Spear") || itemName.Contains("Lance"))
+            {
+                return LunacidItems.Spears[random.Next(0, LunacidItems.Spears.Count)];
+            }
+            else if (itemName.Contains("Axe"))
+            {
+                return LunacidItems.Axes[random.Next(0, LunacidItems.Axes.Count)];
+            }
+            else if (itemName.Contains("Bow") || itemName.Contains("Crossbow") || 
+            itemName.Contains("Gun") || itemName.Contains("Launcher") || itemName.Contains("Shotgun") || itemName.Contains("gun"))
+            {
+                return LunacidItems.Axes[random.Next(0, LunacidItems.Axes.Count)];
+            }
+            else if (itemName.Contains("Bomb") || itemName.Contains("Grenade") || itemName.Contains("Rocket"))
+            {
+                return "Bomb";
+            }
+            else if (itemName.Contains("Glove") || itemName.Contains("Strength") || itemName.Contains("Bracelet"))
+            {
+                return LunacidItems.Gloves[random.Next(0, LunacidItems.Gloves.Count)];
+            }
+            else if (itemName.Contains("Shield"))
+            {
+                return LunacidItems.Shields[random.Next(0, LunacidItems.Shields.Count)];
+            }
+            else if (itemName.Contains("Staff") || itemName.Contains("Rod") || itemName.Contains("Wand"))
+            {
+                return new List<string>(){"Twisted Staff", "Wand of Power"}[random.Next(2)];
+            }
+            else if (itemName.Contains("Magic Meter") || itemName.Contains("Heart Container") || itemName.Contains("Energy Tank"))
+            {
+                return "Earth Elixir";
+            }
+            else if (itemName.Contains("Magic") || itemName.Contains("Spell") || itemName.Contains("Orb"))
+            {
+                return "Flame Flare";
+            }
+            else if (itemName.Contains("Song") || itemName.Contains("Book") || itemName.Contains("Tome"))
+            {
+                return "Black Book";
+            }
+            else if (itemName.Contains("Bottle") || itemName.Contains("Potion"))
+            {
+                return "Holy Water";
+            }
+            else if (archipelagoItem.Classification.HasFlag(ItemFlags.None))
+            {
+                return "Ashes";
+            }
+            
+            return "NULL";
+
+        }
 
         public static readonly Dictionary<string, string[]> GameToCliveLore = new(){
             {"", new string[4]{"Truth be told, I don't quite remember most of the details.",
