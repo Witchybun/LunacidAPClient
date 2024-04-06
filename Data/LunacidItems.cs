@@ -222,6 +222,7 @@ namespace LunacidAP.Data
             {"Terminus Prison Key", "ENKEY_PICKUP"},
             {"Strange Coin", "GOLD_10"}, 
             {"Health ViaI", "HEALTH_VIAL_PICKUP"},
+            {"Angel Feather", "ANGEL_PICKUP"}
         };
 
         public static ItemType DetermineItemType(string item)

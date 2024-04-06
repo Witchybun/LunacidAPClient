@@ -1,83 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Enums;
+using LunacidAP.Data.ArchipelagoGameItems;
 
 namespace LunacidAP.Data
 {
     public class ArchipelagoGames
     {
-        public static readonly Dictionary<string, string> GameToItem = new(){
-            // Supported
-            {"Ocarina of Time", "Hylian"},
-            {"Link to the Past", "Hylian"},
-            {"Lingo", "Word Puzzle"},
-            {"Muse Dash", "Musical"},
-            {"Stardew Valley", "Junimo"},
-            {"Adventure", "Blocky"},
-            {"Blasphemous", "Sinful"},
-            {"Dark Souls III", "Cindered"},
-            {"DLCQuest", "Downloadable"},
-            {"Donkey Kong Country 3", "Kong"},
-            {"DOOM 1993", "Demonic"},
-            {"DOOM II", "Demonic"},
-            {"Final Fantasy", "Crystal"},
-            {"Final Fantasy Mystic Quest", "Crystal"},
-            {"Super Metroid", "Chozan"},
-            {"Heretic", "Heretical"},
-            {"Hollow Knight", "Grub"},
-            {"Hylics 2", "Burrito"},
-            {"Kingdom Hearts 2", "Key-shaped"},
-            {"Landstalker - The Treasures of King Nole", "Kingly"},
-            {"The Legend of Zelda", "Hylian"},
-            {"Lufia II Ancient Cave", "Sinistralian"},
-            {"MegaMan Battle Network 3", "Virus"},
-            {"Meritous", "PSI"},
-            {"The Messenger", "Ninjutsu"},
-            {"Minecraft", "Block"},
-            {"Noita", "Warlock's"},
-            {"Overcooked! 2", "Chef's"},
-            {"Pokemon Emerald", "Animal"},
-            {"Pokemon Red and Blue", "Animal"},
-            {"Raft", "Adrift"},
-            {"Risk of Rain 2", "Alien"},
-            {"Rogue Legacy", "Familial"},
-            {"Secret of Evermore", "Timeless"},
-            {"Shivers", "Strange"},
-            {"Factorio", "Mechanical"},
-            {"Slay the Spire", "Card"},
-            {"SMZ3", "Chozan-Hylian"},
-            {"Sonic Adventure 2 Battle", "Chao"},
-            {"Starcraft 2 Wings of Liberty", "Keystone"},
-            {"Subnautica", "Deep Sea"},
-            {"Super Mario 64", "Star"},
-            {"Super Mario World", "Mushroom-shaped"},
-            {"Terraria", "Strange"},
-            {"Timespinner", "Time"},
-            {"Undertale", "Amusing"},
-            {"VVVVVV", "Token"},
-            {"Wargroove", "Old"},
-            {"The Witness", "Puzzling"},
-            {"Zillion", "Nohza"},
-            {"A Short Hike", "Feathery"},
-            {"Celeste 64", "Mountanous"},
-            {"Yoshi's Island", "Egg-shaped"},
-            {"Zork Grand Inquisitor", "Totem"},
-            // Unsupported
-            {"Lunacid", "Great Well"},
-            {"Wario Land 4", "Pyramid"},
-            {"A Hat in Time", "Time Piece"},
-            {"Wind Waker", "Great Sea"},
-            {"Little Witch Nobeta", "Doll-shaped"},
-            {"Ender Lilies", "Corrupted"},
-            {"Pseudoregalia", "Sun"},
-            {"Old School Runescape", "Rune"},
-            {"Mario & Luigi Superstar Saga", "Bean"},
-            {"Ultrakill", "Bloody"},
-            {"Resident Evil 2 Remake", "Umbrella"},
-            {"Night of 100 Frights", "Scooby Snack"},
-            {"Duke Nukem 3D", "Atomic Bubble Gum"},
-        };
-
         public static readonly Dictionary<string, string> GameToProtagonist = new(){
             // Supported
             {"Ocarina of Time", "the Hero of Time"},
@@ -234,15 +163,29 @@ namespace LunacidAP.Data
                 {
                     return "VHS Tape";
                 }
+                case "ArchipIDLE":
+                {
+                    return "VHS Tape";
+                }
+
             }
-            if (itemName.Contains("Key"))
+            if (itemName.Contains("Key") || itemName.Contains("Red key") || itemName.Contains("Blue key") || itemName.Contains("Yellow key") ||
+            itemName.Contains("Green key"))
             {
                 return "Enchanted Key";
+            }
+            if (itemName.Contains("Chaos Emerald"))
+            {
+                return "Wisp Heart";
+            }
+            if (itemName.Contains("Feather"))
+            {
+                return "Angel Feather";
             }
             else if (itemName.Contains("Rupees") || itemName.Contains("Money") || itemName.Contains("Soul") || 
                     itemName.Contains("Geo") || itemName.Contains("Bones") || itemName.Contains("Coin"))
             {
-                return "Silver (10)";
+                return "Silver";
             }
             else if (itemName.Contains("Arrows") || itemName.Contains("Ammo"))
             {
@@ -261,9 +204,10 @@ namespace LunacidAP.Data
                 return LunacidItems.Axes[random.Next(0, LunacidItems.Axes.Count)];
             }
             else if (itemName.Contains("Bow") || itemName.Contains("Crossbow") || 
-            itemName.Contains("Gun") || itemName.Contains("Launcher") || itemName.Contains("Shotgun") || itemName.Contains("gun"))
+            itemName.Contains("Gun") || itemName.Contains("Launcher") || itemName.Contains("Shotgun") || itemName.Contains("Chaingun")
+            )
             {
-                return LunacidItems.Axes[random.Next(0, LunacidItems.Axes.Count)];
+                return LunacidItems.Bows[random.Next(0, LunacidItems.Axes.Count)];
             }
             else if (itemName.Contains("Bomb") || itemName.Contains("Grenade") || itemName.Contains("Rocket"))
             {
@@ -285,7 +229,8 @@ namespace LunacidAP.Data
             {
                 return "Earth Elixir";
             }
-            else if (itemName.Contains("Magic") || itemName.Contains("Spell") || itemName.Contains("Orb"))
+            else if (itemName.Contains("Magic") || itemName.Contains("Spell") || itemName.Contains("Orb") || itemName.Contains("TM") ||
+            itemName.Contains("HM"))
             {
                 return "Flame Flare";
             }
@@ -293,7 +238,7 @@ namespace LunacidAP.Data
             {
                 return "Black Book";
             }
-            else if (itemName.Contains("Bottle") || itemName.Contains("Potion"))
+            else if (itemName.Contains("Bottle") || itemName.Contains("Potion") || itemName.Contains("Flask"))
             {
                 return "Holy Water";
             }

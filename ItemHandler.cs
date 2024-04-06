@@ -636,7 +636,7 @@ namespace LunacidAP
             {
                 return 2;
             }
-            else if (name.Contains("Silver ("))
+            else if (name == "Silver")
             {
                 return 0;
             }

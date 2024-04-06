@@ -12,6 +12,7 @@ namespace LunacidAP.Data
         public static string Password {get; set;} = "";
         public static int Index {get; set;} = 0;
         public static bool DeathLink {get; set;} = false;
+        public static int CheatedCount {get; set;} = 0;
         public static List<ReceivedItem> ReceivedItems {get; set;} = new List<ReceivedItem>(){};
         public static List<long> CompletedLocations {get; set;} = new List<long>(){};
         public static Dictionary<string, CommunionHint.HintData> CommunionHints {get; set;} = new Dictionary<string, CommunionHint.HintData>(){};
@@ -19,7 +20,7 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
-        int seed = 0, int index = 0, bool deathLink = false, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
+        int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null)
         {
             HostName = hostName;
@@ -29,6 +30,10 @@ namespace LunacidAP.Data
             Seed = seed;
             Index = index;
             DeathLink = deathLink;
+            if (cheatedCount > -1)
+            {
+                CheatedCount = cheatedCount;
+            }
             if (receivedItems is not null)
             {
                 ReceivedItems = receivedItems;
@@ -60,6 +65,7 @@ namespace LunacidAP.Data
             Seed = 0;
             Index = 0;
             DeathLink = false;
+            CheatedCount = 0;
             ReceivedItems = new List<ReceivedItem>(){};
             CompletedLocations = new List<long>(){};
             CommunionHints = new Dictionary<string, CommunionHint.HintData>(){};

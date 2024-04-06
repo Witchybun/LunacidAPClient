@@ -26,7 +26,8 @@ namespace LunacidAP
         {
             try
             {
-                SaveData(Save_Slot);
+                _log.LogInfo($"Trying to save to {Save_Slot}");
+                //SaveData(Save_Slot);
             }
             catch
             {
@@ -40,7 +41,7 @@ namespace LunacidAP
         {
             try
             {
-                ReadSave(Save_Slot);
+                //ReadSave(Save_Slot);
             }
             catch (Exception ex)
             {
@@ -72,6 +73,7 @@ namespace LunacidAP
                 Password = ConnectionData.Password,
                 Symbols = ConnectionData.Index,
                 DeathLink = ConnectionData.DeathLink,
+                CheatCount = ConnectionData.CheatedCount,
                 ObtainedItems = ConnectionData.ReceivedItems,
                 CheckedLocations = ConnectionData.CompletedLocations,
                 CommunionHints = ConnectionData.CommunionHints,
@@ -91,10 +93,12 @@ namespace LunacidAP
         {
             try
             {
+                
                 if (ArchipelagoClient.IsInGame)
                 {
                     return; // Don't keep spam loading in situations it isn't relevant; causes data loss.
                 }
+                _log.LogInfo($"Reading save {Save_Slot}");
                 var dir = Application.absoluteURL + "ArchSaves/";
                 if (!Directory.Exists(dir))
                 {
@@ -107,7 +111,7 @@ namespace LunacidAP
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
-                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
+                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances);
                     return;
                 }
@@ -133,6 +137,7 @@ namespace LunacidAP
         public int Seed;
         public int Symbols;
         public bool DeathLink;
+        public int CheatCount;
         public List<ReceivedItem> ObtainedItems;
         public List<long> CheckedLocations;
         public Dictionary<string, CommunionHint.HintData> CommunionHints;

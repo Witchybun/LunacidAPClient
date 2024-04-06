@@ -15,6 +15,8 @@ namespace LunacidAP
     using System.Collections;
     using System.Threading.Tasks;
     using static LunacidAP.Data.LunacidLocations;
+    using Archipelago.MultiClient.Net.Models;
+
 
     public class ArchipelagoClient : MonoBehaviour
     {
@@ -24,6 +26,7 @@ namespace LunacidAP
         private static GameObject Obj;
         public System.Random RandomStatic;
         public int SlotID;
+        private int cheatedCount;
         private int Stack;
         public const long LOCATION_INIT_ID = 771111110;
         private CONTROL Control;
@@ -37,6 +40,15 @@ namespace LunacidAP
             set
             {
                 _connected = value;
+            }
+        }
+        private bool _connecting;
+        public bool IsConnecting
+        {
+            get { return _connecting; }
+            set
+            {
+                _connecting = value;
             }
         }
         private DeathLinkService _deathLinkService;
@@ -59,6 +71,7 @@ namespace LunacidAP
         {
 
             _log.LogInfo($"Connecting: {slotName}, {hostName}, {port}");
+            IsConnecting = true;
             Authenticated = false;
             var minimumVersion = new Version(0, 4, 5);
             Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
@@ -74,6 +87,7 @@ namespace LunacidAP
             if (loginTask.IsFaulted)
             {
                 _log.LogError(loginTask.Exception.GetBaseException().Message);
+                IsConnecting = false;
                 yield break;
             }
             LoginResult result = loginTask.Result;
@@ -81,6 +95,7 @@ namespace LunacidAP
             {
                 LoginFailure failure = (LoginFailure)result;
                 _log.LogError(string.Join("\n", failure.Errors));
+                IsConnecting = false;
                 yield break;
             }
 
@@ -92,11 +107,13 @@ namespace LunacidAP
             {
                 _log.LogError("The server's seed does not match the save file's seed.  Make sure you're connecting with the right save file");
                 Disconnect();
+                IsConnecting = false;
                 yield break;
             }
             if (PluginInfo.PLUGIN_VERSION != SlotData.ClientVersion)
             {
                 _log.LogError($"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.");
+                IsConnecting = false;
                 yield break;
             }
             ConnectionData.Seed = seed;
@@ -133,6 +150,7 @@ namespace LunacidAP
             {
                 _log.LogError("Locating Syncing has failed.");
                 _log.LogError(locationCheckTask.Exception.GetBaseException().Message);
+                IsConnecting = false;
                 yield break;
             }
             // Sync collected locations
@@ -158,6 +176,8 @@ namespace LunacidAP
                 ConnectionData.DeathLink = true;
                 InitializeDeathLink();
             }
+            cheatedCount = 0;
+            IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
         }
 
@@ -199,22 +219,35 @@ namespace LunacidAP
         }
 
         private void Update()
-        {
-            if (Session is not null && Session.Items.Any() && IsInGame)
+        {     
+            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            if (Session is not null && Session.Items.Any() && IsInNormalGameState())
             {
                 var item = Session.Items.DequeueItem();
-                if (item.Location < 0 || !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location && item.Item == x.ItemId))
+                if (item.Location >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location && item.Item == x.ItemId))
                 {
                     var receivedItem = new ReceivedItem(item);
                     ConnectionData.ReceivedItems.Add(receivedItem);
                     StartCoroutine(ReceiveItem(receivedItem));
+                }
+                else if (item.Location < 0)
+                {
+                    _log.LogInfo($"Cheated Count {cheatedCount} before increment vs {ConnectionData.CheatedCount}");
+                    cheatedCount++;
+                    if (cheatedCount > ConnectionData.CheatedCount)
+                    {
+                        ConnectionData.CheatedCount = cheatedCount;
+                        var receivedItem = new ReceivedItem(item);
+                        ConnectionData.ReceivedItems.Add(receivedItem);
+                        StartCoroutine(ReceiveItem(receivedItem));
+                    }
                 }
             }
         }
 
         private void AppendItemToReceived(ReceivedItem receivedItem)
         {
-            foreach (var item in ConnectionData.ReceivedItems)
+            foreach (var item in ConnectionData.ReceivedItems.ToList())
             {
                 if (item.ItemId == receivedItem.ItemId && item.LocationId == item.LocationId && item.PlayerId == receivedItem.PlayerId)
                 {
@@ -322,9 +355,7 @@ namespace LunacidAP
         {
             var instanceStack = Stack + 1;
             Stack++;
-            var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
-            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            while (!Control.LOADED || isInEnding || GameObject.Find("PLAYER") is null || instanceStack < Stack)
+            while (instanceStack < Stack)
             {
                 yield return new WaitForSeconds(1f);
             }
@@ -433,6 +464,12 @@ namespace LunacidAP
         public bool HasGoal(Goal goal)
         {
             return SlotData.Ending.HasFlag(goal) || SlotData.Ending.HasFlag(Goal.AnyEnding);
+        }
+
+        private bool IsInNormalGameState()
+        {
+            var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
+            return Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;
         }
     }
 }

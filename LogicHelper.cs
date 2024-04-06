@@ -869,7 +869,7 @@ namespace LunacidAP
                     }
                 case "TP: Fourth Floor Maledictus Secret":
                     {
-                        return WasItemReceived("Terminus Prison Key");
+                        return WasItemReceived("Terminus Prison Key") && HasDustyOrb();
 
                     }
                 case "TP: Fourth Floor Hidden Jailer Sleeping Spot":

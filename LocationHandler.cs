@@ -222,6 +222,25 @@ namespace LunacidAP
             return "";
         }
 
+        [HarmonyPatch(typeof(Load_Area), "OnTriggerEnter")]
+        [HarmonyPostfix]
+        private static void OnTriggerEnter_FixDaedalusTheFuckingStinky(Load_Area __instance, Collider other)
+        {
+            if (__instance.gameObject.name != "LOAD_DUDE")
+            {
+                return;
+            }
+            if (__instance.Load.name != "STAGES")
+            {
+                return;
+            }
+            if (__instance.Load.transform.GetParent().GetChild(7).GetChild(1).gameObject.activeSelf)
+            {
+                __instance.Load.SetActive(false);
+            }
+            return;
+        }
+
         private static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
         {
             if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.

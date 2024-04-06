@@ -302,7 +302,7 @@ namespace LunacidAP
                             }
                             break;
                         }
-                        case "ARCHIVES":
+                        /*case "ARCHIVES":
                             {
                                 if (stateController == "FINAL_STAGES")
                                 {
@@ -323,7 +323,7 @@ namespace LunacidAP
                                     }
                                 }
                                 break;
-                            }
+                            }*/
                 }
                 return false;
             }

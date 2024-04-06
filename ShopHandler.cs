@@ -9,6 +9,7 @@ using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
@@ -225,6 +226,7 @@ namespace LunacidAP
                 }
                 var apLocation = DetermineShopLocation(sceneName, objectName);
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
+                var slotName = locationInfo.SlotName;
                 var itemName = locationInfo.Name.Replace("Progressive ", "");
                 var itemNameLength = itemName.Length;
                 itemName = itemName.Substring(0, Math.Min(itemNameLength, 25));
@@ -240,14 +242,11 @@ namespace LunacidAP
                 {
                     blurb = "an unknown land amongst the archipelagos.";
                 }
-                if (!ArchipelagoGames.GameToItem.TryGetValue(gameName, out string item))
-                {
-                    item = "Archipelago";
-                }
-                var totalBlurb = $"A curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
-                __instance.TXT[56].text = item + " Artifact";
+                var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\nA curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
+                __instance.TXT[56].text = itemName.ToUpper();
                 __instance.TXT[50].text = totalBlurb;
-                __instance.TXT[51].text = $"NAME: {itemName.ToUpper()}\nGAME: {gameName.ToUpper()}\nFLAG: {progression.ToUpper()}";
+				__instance.ITEMS[26].SetActive(value: false);
+                __instance.TXT[51].text = "";
                 __instance.TXT[52].text = "";
                 __instance.TXT[53].text = "";
                 __instance.TXT[54].text = "";

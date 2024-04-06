@@ -17,6 +17,11 @@ namespace LunacidAP
 
         public static void ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
+            _log.LogInfo($"Handling {locationData.APLocationName}");
+            if (LunacidLocations.LocationsThatImmediatelyReceive.Contains(locationData.APLocationName) || locationData.APLocationName.Contains("Daedalus Knowledge"))
+            {
+                return; // No need to swap models for locations you get dropped on top of you.
+            }
             var archipelagoItem = ArchipelagoClient.AP.LocationTable[locationData.APLocationID];
             var locationItem = archipelagoItem.Name;
             _log.LogInfo($"Handling {locationItem} from game {archipelagoItem.Game}");
@@ -198,6 +203,16 @@ namespace LunacidAP
                         return true;
                     }
                 case "DARK RAPIER":
+                    {
+                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
+                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
+                        foundObject.transform.SetParent(pickupObject.transform);
+                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                        HideLastChild(pickupObject);
+                        foundObject.SetActive(true);
+                        return true;
+                    }
+                case "RAPIER":
                     {
                         GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
                         GameObject.Destroy(foundObject.GetComponent<AudioSource>());

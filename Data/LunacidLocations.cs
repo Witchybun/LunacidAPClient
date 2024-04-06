@@ -425,5 +425,12 @@ namespace LunacidAP.Data
 
         };
 
+        public static readonly List<string> LocationsThatImmediatelyReceive = new(){
+            "Buy Enchanted Key", "Buy Rapier", "Buy Steel Needle", "Buy Crossbow", "Buy Oil Lantern",
+            "Buy Ocean Elixir (Sheryl)", "Buy Ocean Elixir (Patchouli)", "Buy Privateer Musket", 
+            "Buy Jotunn Slayer", "GWS: Demi's Gift", "FbA: Daedalus Knowledge (First)", "FbA: Daedalus Knowledge (Second)",
+            "FbA: Daedalus Knowledge (Third)", "WR: Clive's Gift", "WR: Demi's Introduction Gift", "WR: Demi's Victory Gift"
+        };
+
     }
 }
