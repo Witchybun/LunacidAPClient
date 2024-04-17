@@ -1,6 +1,7 @@
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using BepInEx.Logging;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace LunacidAP.Data
@@ -29,6 +30,17 @@ namespace LunacidAP.Data
             SlotName = ArchipelagoClient.AP.Session.Players.GetPlayerName(SlotID);
             Game = ArchipelagoClient.AP.Session.Players.Players[ArchipelagoClient.AP.Session.ConnectionInfo.Team][SlotID].Game;
             Classification = item.Flags;
+        }
+
+        [JsonConstructor]
+        public ArchipelagoItem(long id, string name, int slotID, string slotName, string game, ItemFlags classification)
+        {
+            ID = id;
+            Name = name;
+            SlotID = slotID;
+            SlotName = slotName;
+            Game = game;
+            Classification = classification;
         }
     }
 }

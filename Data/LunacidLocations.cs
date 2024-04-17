@@ -96,6 +96,7 @@ namespace LunacidAP.Data
             new LocationData( 2, "WR: Bench", "CRYSTAL_SHARD_PICKUP", new Vector3(2.6f, 0.8f, -22.2f) ),
             new LocationData( 3, "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3(14.5f, 1.3f, -1.9f) ),
             new LocationData( 4, "WR: Demi's Victory Gift", "VHS_PICKUP", new Vector3(-4.1f, 1.3f, -11.2f) ),
+            new LocationData( 5, "WR: Demi's Introduction Gift", "", new Vector3(-4.1f, 1.3f, -11.2f)),
 
         }
             },
@@ -191,7 +192,7 @@ namespace LunacidAP.Data
                 new(){
                     new LocationData( 94, "YF: Barrel Group", "HEALTH_VIAL_PICKUP", new Vector3(26.2f, 36.0f, 15.5f)),
                     new LocationData( 95, "YF: Blood Pool", "BLOOD_DRAIN_PICKUP", new Vector3(-35.6f, 30.1f, -56.4f)),
-                    new LocationData( 96, "YF: Banches Within Tree", "HEAL", new Vector3(-11.2f, 15.3f, 62.5f)),
+                    new LocationData( 96, "YF: Branches Within Tree", "HEAL", new Vector3(-11.2f, 15.3f, 62.5f)),
                     new LocationData( 97, "YF: Chest Near Tree", "ELF_BOW_PICKUP", new Vector3(-68.2f, 0.5f, -0.2f)),
                     new LocationData( 98, "YF: Blood Plant's Insides", "HEALTH_VIAL_PICKUP", new Vector3(-20.5f, 3.8f, -34.6f)),
                     new LocationData( 99, "YF: Hanging In The Trees", "SWORD_PICKUP", new Vector3(-209.8f, 26.5f, -41.9f)),
@@ -249,7 +250,7 @@ namespace LunacidAP.Data
                     new LocationData( 151, "CLF: Upper Floor Coffin Room (Small Room)", "EARTH_ELIXIR_PICKUP", new Vector3(-8.1f, 26.0f, -239.9f) ),
                     new LocationData( 152, "CLF: Upper Floor Coffin Room (Large Room)", "OCEAN_ELIXIR_PICKUP", new Vector3(-20.6f, 25.4f, -334.6f) ),
                     new LocationData( 153, "CLF: Upper Floor Coffin Room (Double)", "SWORD_PICKUP", new Vector3(-54.0f, 28.4f, -249.0f) ),
-                    new LocationData( 154, "CLF:  Upper Floor Coffin Room (Halllway)", "KEY2_PICKUP", new Vector3(-2.4f, -2.8f, -202.6f) ),
+                    new LocationData( 154, "CLF:  Upper Floor Coffin Room (Hallway)", "KEY2_PICKUP", new Vector3(-2.4f, -2.8f, -202.6f) ),
                 }
             },
             {
@@ -430,6 +431,15 @@ namespace LunacidAP.Data
             "Buy Ocean Elixir (Sheryl)", "Buy Ocean Elixir (Patchouli)", "Buy Privateer Musket", 
             "Buy Jotunn Slayer", "GWS: Demi's Gift", "FbA: Daedalus Knowledge (First)", "FbA: Daedalus Knowledge (Second)",
             "FbA: Daedalus Knowledge (Third)", "WR: Clive's Gift", "WR: Demi's Introduction Gift", "WR: Demi's Victory Gift"
+        };
+
+        public static readonly List<string> TowerLocations = new(){
+            "TA: Prize Beneath Tree", "TA: Floor 5 Chest", "TA: Floor 10 Chest", "TA: Floor 15 Chest", "TA: Floor 20 Chest",
+            "TA: Floor 25 Chest", "TA: Floor 30 Chest", "TA: Floor 35 Chest", "TA: Floor 40 Chest", "TA: Floor 45 Chest", "TA: Floor 50 Chest",
+        };
+
+        public static readonly List<string> CoinLocations = new(){
+            "HB: Temple Blood Altar", "AT: Kill Death", "SS: Killing the Jotunn"
         };
 
     }

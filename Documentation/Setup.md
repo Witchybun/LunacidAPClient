@@ -12,7 +12,7 @@ You will need:
 - Download and unpackage the BepInEx version for x64 into your Lunacid installation folder.  If you don't know where it is, in Steam you can right click and Manage -> Browse Local Files will get you there.
 - **LINUX ONLY**: Right click Lunacid in Steam, go to Properties, and in Launch Options put `WINEDLLOVERRIDES="winhttp.dll=n,b" %command%`.
 - Launch the game at least once, close.
-- In BepInEx/plugins, put the folder in the attached mod zip.
+- In BepInEx/plugins, take the folder in the mod zip named "LunacidAP" and place it here.
 - Install Archipelago Client.  Documentation is [here](https://archipelago.gg/tutorial/Archipelago/setup/en).
 - Once installed, go to where your client is installed, go to lib/worlds, drop the attached .apworld here.
 - Run ArchipelagoLauncher, hit Generate Template Settings, in order for the Lunacid.yaml to be generated.

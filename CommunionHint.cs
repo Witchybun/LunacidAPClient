@@ -160,8 +160,9 @@ namespace LunacidAP
             }
             CreatureHints = new() { };
             var random = new System.Random(seed);
-            var locationList = ArchipelagoClient.AP.LocationTable.Keys.ToList();
+            var locationList = ConnectionData.ScoutedLocations.Keys.ToList();
             var locationCount = locationList.Count();
+            _log.LogInfo($"Location Count is {locationCount}");
             var chosenLocations = new List<int>(){};
             foreach (var creature in CreatureToHint)
             {
@@ -174,7 +175,7 @@ namespace LunacidAP
                 var chosenLocation = locationList[chosenLocationPosition];
                 var location = ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation);
                 location = GetSuitableStringLength(location, 30);
-                var itemData = ArchipelagoClient.AP.LocationTable[chosenLocation];
+                var itemData = ConnectionData.ScoutedLocations[chosenLocation];
                 var isProgression = itemData.Classification.HasFlag(ItemFlags.Advancement);
                 var item = itemData.Name;
                 item = GetSuitableStringLength(item, 20);

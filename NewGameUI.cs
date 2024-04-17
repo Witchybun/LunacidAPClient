@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx.Logging;
@@ -20,6 +21,14 @@ namespace LunacidAP
         private static GameObject PasswordEntry;
         private static int _currentSave;
         public static NewGameUI UI;
+
+        public static readonly Dictionary<Goal, string> GoalToString = new(){
+            {Goal.AnyEnding, "Any"},
+            {Goal.EndingA, "A"},
+            {Goal.EndingB, "B"},
+            {Goal.EndingCD, "CD"},
+            {Goal.EndingE, "E"},
+        };
 
 
 
@@ -197,14 +206,23 @@ namespace LunacidAP
                             HostEntry.SetActive(value: true);
                             PortEntry.SetActive(value: true);
                             PasswordEntry.SetActive(value: true);
-                            create.GetChild(8).gameObject.SetActive(value: false);
-                            create.GetChild(9).gameObject.SetActive(value: false);
+                            create.GetChild(13).GetComponent<TextMeshProUGUI>().text = "Archipelago\nsettings";
+                            create.GetChild(14).gameObject.SetActive(value: false);
+                            create.GetChild(15).gameObject.SetActive(value: false);
+                            create.GetChild(16).gameObject.SetActive(value: false);
+                            create.GetChild(19).gameObject.SetActive(value: false);
+                            create.GetChild(20).gameObject.SetActive(value: false);
+                            create.GetChild(21).gameObject.SetActive(value: false);
+                            create.GetChild(22).gameObject.SetActive(value: false);
+                            create.GetChild(23).gameObject.SetActive(value: false);
                             create.GetChild(17).gameObject.SetActive(value: false);
                             create.GetChild(18).gameObject.SetActive(value: false);
                             create.GetChild(26).gameObject.SetActive(value: false);
                             create.GetChild(10).gameObject.SetActive(value: false);
                             create.GetChild(11).gameObject.SetActive(value: false);
                             create.GetChild(7).GetChild(0).GetComponent<TextMeshProUGUI>().text = "Connect";
+                            create.GetChild(8).gameObject.SetActive(value: false);
+                            create.GetChild(9).gameObject.SetActive(value: false);  
                             return;
                         }
                         else if (ArchipelagoClient.AP.Authenticated && PortEntry.activeSelf)
@@ -214,13 +232,33 @@ namespace LunacidAP
                             HostEntry.SetActive(value: false);
                             PortEntry.SetActive(value: false);
                             PasswordEntry.SetActive(value: false);
+                            create.GetChild(18).gameObject.SetActive(value: true);
+                            create.GetChild(11).gameObject.SetActive(value: true);
+                            var count = 0;
+                            var button = create.GetChild(11).GetComponent<UnityEngine.UI.Button>();
+                            while (count < ArchipelagoClient.AP.SlotData.StartingClass)
+                            {
+                                button.onClick.Invoke();
+                                count += 1;
+                            }
+                            count = 0;
+                            create.GetChild(11).gameObject.SetActive(value: false);
+                            create.GetChild(14).gameObject.SetActive(value: true);
+                            create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
+                            create.GetChild(15).gameObject.SetActive(value: true);
+                            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
+                            create.GetChild(16).gameObject.SetActive(value: true);
+                            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "DEATH";
+                            create.GetChild(19).gameObject.SetActive(value: true);
+                            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Dropsanity()}\n{Switchlock()}\n{Doorlock()}";
+                            create.GetChild(20).gameObject.SetActive(value: true);
+                            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
+                            create.GetChild(21).gameObject.SetActive(value: true);
+                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = Death();
                             create.GetChild(8).gameObject.SetActive(value: true);
                             create.GetChild(9).gameObject.SetActive(value: true);
                             create.GetChild(17).gameObject.SetActive(value: true);
-                            create.GetChild(18).gameObject.SetActive(value: true);
                             create.GetChild(26).gameObject.SetActive(value: true);
-                            create.GetChild(10).gameObject.SetActive(value: true);
-                            create.GetChild(11).gameObject.SetActive(value: true);
                             create.GetChild(7).GetChild(0).GetComponent<TextMeshProUGUI>().text = "Confirm";
                         }
                         return;
@@ -241,6 +279,61 @@ namespace LunacidAP
                     }
             }
 
+        }
+
+        private static string Ending()
+        {
+            return GoalToString[ArchipelagoClient.AP.SlotData.Ending];
+        }
+
+        private static string Shopsanity()
+        {
+            return ArchipelagoClient.AP.SlotData.Shopsanity ? "Y" : "N";
+        }
+
+        private static string Dropsanity()
+        {
+            return ArchipelagoClient.AP.SlotData.Dropsanity ? "Y" : "N";
+        }
+
+        private static string Switchlock()
+        {
+            return ArchipelagoClient.AP.SlotData.Switchlock ? "Y" : "N";
+        }
+
+        private static string Doorlock()
+        {
+            return ArchipelagoClient.AP.SlotData.Doorlock ? "Y" : "N";
+        }
+
+        private static string Secretdoor()
+        {
+            return ArchipelagoClient.AP.SlotData.FalseWalls ? "Y" : "N";
+        }
+
+        private static string ER()
+        {
+            return ArchipelagoClient.AP.SlotData.EntranceRandomizer ? "Y" : "N";
+        }
+
+        private static string Elements()
+        {
+            return ArchipelagoClient.AP.SlotData.RandomElements ? "Y" : "N";
+        }
+
+        private static string RequiredCoins()
+        {
+            return ArchipelagoClient.AP.SlotData.RequiredCoins.ToString();
+        }
+
+        private static string Filler()
+        {
+            return ArchipelagoClient.AP.SlotData.Fillerbundle.ToString();
+        }
+
+        private static string Death()
+        {
+            return ArchipelagoClient.AP.SlotData.DeathLink ? "Y" : "N";
         }
     }
 }

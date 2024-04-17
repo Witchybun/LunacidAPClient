@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
@@ -96,15 +97,36 @@ namespace LunacidAP
             {
                 return;
             }
-            if (sceneName == "END_E" && ArchipelagoClient.AP.HasGoal(Goal.EndingE) || 
-            sceneName == "END_B" && ArchipelagoClient.AP.HasGoal(Goal.EndingB) ||
-            sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA) ||
-            sceneName == "WhatWillBeAtTheEnd" && ArchipelagoClient.AP.HasGoal(Goal.EndingCD))
+            var anyEndingScenes = new List<string>(){"END_E", "END_B", "END_A", "WhatWillBeAtTheEnd"};
+            if (sceneName == "END_E" && ArchipelagoClient.AP.HasGoal(Goal.EndingE))
             {
-                var statusUpdatePacket = new StatusUpdatePacket();
+                CallForVictory();
+            }
+            else if (sceneName == "END_B" && ArchipelagoClient.AP.HasGoal(Goal.EndingB))
+            {
+                CallForVictory();
+            }
+            else if(sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA))
+            {
+                CallForVictory();
+            }
+            else if (sceneName == "WhatWillBeAtTheEnd" && ArchipelagoClient.AP.HasGoal(Goal.EndingCD))
+            {
+                CallForVictory();
+            }
+            else if (anyEndingScenes.Contains(sceneName) && ArchipelagoClient.AP.SlotData.Ending == Goal.AnyEnding) // Done because its zero.
+            {
+                CallForVictory();
+            }
+            
+                
+        }
+
+        private void CallForVictory()
+        {
+            var statusUpdatePacket = new StatusUpdatePacket();
             statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
             ArchipelagoClient.AP.Session.Socket.SendPacket(statusUpdatePacket);
-            }
         }
 
         private void CheckForDeath(string sceneName)
@@ -127,9 +149,8 @@ namespace LunacidAP
         {
             if (ArchipelagoClient.AP.Authenticated && ArchipelagoClient.AP.IsCurrentlyDeathLinked)
             {
-                StartCoroutine(ArchipelagoClient.AP.UnleashGhosts(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
+                StartCoroutine(ArchipelagoClient.AP.ReceiveDeathLink(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
             }
         }
-
     }
 }

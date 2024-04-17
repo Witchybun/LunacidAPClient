@@ -243,10 +243,8 @@ namespace LunacidAP
 
         private static void GiveSilver(string Name, string player = "", bool self = false)
         {
-
-            var currencyAmount = Name.Split('(', ')')[1];
             var currencyMultiplier = ArchipelagoClient.AP.SlotData.Fillerbundle;
-            currencyAmount = (int.Parse(currencyAmount) * currencyMultiplier).ToString();
+            var currencyAmount = (10 * currencyMultiplier).ToString();
             PopupCommand(0, currencyAmount, "white", player, self);
             Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
         }
@@ -268,10 +266,6 @@ namespace LunacidAP
                 _log.LogError("SlotData is null!");
             }
             var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
-            if (Name == "Strange Coin")
-            {
-                bundleSize = ArchipelagoClient.AP.SlotData.Coinbundle;
-            }
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
@@ -508,7 +502,11 @@ namespace LunacidAP
                 {
                     if (locationData.Value.Contains(sceneName))
                     {
-                        rightsideLocations.Add(locationData.Key);
+                        var locationID = ArchipelagoClient.AP.GetLocationIDFromName(locationData.Key);
+                        if (!ArchipelagoClient.AP.IsLocationChecked(locationID))
+                        {
+                            rightsideLocations.Add(locationData.Key);
+                        }
                     }
                 }
             }
@@ -517,13 +515,18 @@ namespace LunacidAP
             {
                 if (sceneName == "FOREST_A1")
                 {
-                    rightsideLocations.Add("Buy Ocean Elixir (Patchouli)");
+                    var locationID = ArchipelagoClient.AP.GetLocationIDFromName("Buy Ocean Elixir (Patchouli)");
+                    if (!ArchipelagoClient.AP.IsLocationChecked(locationID))
+                    {
+                        rightsideLocations.Add("Buy Ocean Elixir (Patchouli)");
+                    }
                 }
                 else
                 {
                     foreach (var locationData in LunacidLocations.ShopLocations)
                     {
-                        if (locationData.APLocationName != "Buy Ocean Elixir (Patchouli)")
+                        if (locationData.APLocationName != "Buy Ocean Elixir (Patchouli)" &&
+                        !ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
                         {
                             rightsideLocations.Add(locationData.APLocationName);
                         }
@@ -636,7 +639,7 @@ namespace LunacidAP
             {
                 return 2;
             }
-            else if (name == "Silver")
+            else if (name == "Silver" || name == "Silver (10)")
             {
                 return 0;
             }

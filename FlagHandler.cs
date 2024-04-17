@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -13,6 +14,7 @@ namespace LunacidAP
         private static CONTROL CON;
         private static ManualLogSource _log;
         private static string[] errorData { get; set; }
+        const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
         public static void Awake(ManualLogSource log)
         {
@@ -20,12 +22,63 @@ namespace LunacidAP
             Harmony.CreateAndPatchAll(typeof(FlagHandler));
         }
 
+        [HarmonyPatch(typeof(Ending_Switch), "Check")]
+        [HarmonyPrefix]
+        private static bool Check_CheckEndingScenarioForAP(Ending_Switch __instance)
+        {
+            bool flag = true;
+            if (!ArchipelagoClient.AP.WasItemReceived("White VHS Tape"))
+            {
+                flag = false;
+            }
+            int num = -1;
+            for (int i = 0; i < 128; i++)
+            {
+                if (CON.CURRENT_PL_DATA.SPELLS[i] == "" || CON.CURRENT_PL_DATA.SPELLS[i] == null)
+                {
+                    i = 999;
+                }
+                else
+                {
+                    num++;
+                }
+            }
+            if (num < 36)
+            {
+                flag = false;
+            }
+            Debug.Log(num.ToString());
+            if (flag)
+            {
+                __instance.END_E.SetActive(value: true);
+                __instance.END_A.SetActive(value: false);
+            }
+            else
+            {
+                __instance.END_E.SetActive(value: false);
+                __instance.END_A.SetActive(value: true);
+            }
+            return false;
+        }
+
+        [HarmonyPatch(typeof(Item_Adjust), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_ChangeCoinCountToSetting(Item_Adjust __instance)
+        {
+            if (__instance.item != "Strange Coin")
+            {
+                return true;
+            }
+            __instance.amount = ArchipelagoClient.AP.SlotData.RequiredCoins;
+            return true;
+        }
+
         public static void HandleFlagGivenItemName(string Name)
         {
             var sceneName = SceneManager.GetActiveScene().name;
             var itemData = LunacidFlags.ItemToFlag[Name];
             ApplyFlag(Name);
-            if (sceneName == itemData.Scene)
+            if (sceneName == itemData.Scene || (Name == "Skull of Josiah" && sceneName == "FOREST_A1"))
             {
                 RefreshSceneEntities(Name);
             }
@@ -39,7 +92,7 @@ namespace LunacidAP
                 ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Index));
                 return;
             }
-            if (!DoesPlayerHaveItem(Name))
+            if (!DoesPlayerHaveItem(Name) && Name != "Skull of Josiah")
             {
                 ModifyFlag(flagData[0], flagData[1], flagData[2]);
             }
@@ -151,7 +204,7 @@ namespace LunacidAP
                         break;
                     }
                 }
-                if (sceneName == "FOREST_A1" && stateController == "PATCHI")
+                /*if (sceneName == "FOREST_A1" && stateController == "PATCHI")
                 {
                     var canopyID = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
                     if (ArchipelagoClient.AP.WasItemReceived("Skull of Josiah") && ArchipelagoClient.AP.IsLocationChecked(canopyID))
@@ -161,14 +214,14 @@ namespace LunacidAP
                             finalValue = 5;
                         }
                     }
-                }
+                }*/
                 for (int i = 0; i < sTATES.Length; i++)
                 {
                     errorData[1] = i.ToString();
                     errorData[2] = sTATES[i].name;
                     sTATES[i].SetActive(value: false);
                 }
-                
+
                 errorData[2] = sTATES[finalValue].name;
                 __instance.STATES[finalValue].SetActive(value: true);
 
@@ -176,13 +229,25 @@ namespace LunacidAP
                 {
                     case "FOREST_A1":
                         {
-                            if (stateController == "PATCHI" && DoesPlayerHaveItem("Skull of Josiah") && !ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward"))
+                            if (stateController == "PATCHI")
                             {
-                                __instance.transform.GetChild(2).gameObject.SetActive(value: false);
-                                __instance.transform.GetChild(3).gameObject.SetActive(value: false);
-                                __instance.transform.GetChild(4).gameObject.SetActive(value: false);
-                                __instance.transform.GetChild(5).gameObject.SetActive(value: true);
-                                __instance.transform.GetChild(6).gameObject.SetActive(value: false);
+                                var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
+                                if (patchi.GetChild(4).gameObject.activeSelf)
+                                {
+                                    var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                                    if (DoesPlayerHaveItem("Skull of Josiah")
+                              && !isLocationChecked)
+                                    {
+                                        patchi.GetChild(4).gameObject.SetActive(false);
+                                        patchi.GetChild(5).gameObject.SetActive(true);
+                                    }
+                                    else if (isLocationChecked)
+                                    {
+                                        patchi.GetChild(4).gameObject.SetActive(false);
+                                        patchi.GetChild(6).gameObject.SetActive(true);
+                                    }
+
+                                }
                             }
                             break;
                         }
@@ -302,28 +367,6 @@ namespace LunacidAP
                             }
                             break;
                         }
-                        /*case "ARCHIVES":
-                            {
-                                if (stateController == "FINAL_STAGES")
-                                {
-                                    var hasBook3 = __instance.transform.parent.GetChild(8).GetChild(9).gameObject;
-                                    if (hasBook3.activeSelf)
-                                    {
-                                        __instance.transform.GetChild(1).gameObject.SetActive(value: true);
-                                        hasBook3.SetActive(value: false);
-                                    }
-                                }
-                                else if (stateController == "STAGES")
-                                {
-                                    var giveBook3 = __instance.transform.parent.GetChild(7).GetChild(1).gameObject;
-                                    if (giveBook3.activeSelf)
-                                    {
-                                        __instance.transform.GetChild(9).gameObject.SetActive(value: false);
-                                        giveBook3.SetActive(value: true);
-                                    }
-                                }
-                                break;
-                            }*/
                 }
                 return false;
             }
@@ -394,7 +437,35 @@ namespace LunacidAP
                     }
                 case "Skull of Josiah":
                     {
-                        // The effect really isn't felt in the same map anyway.
+                        if (sceneName == "FOREST_A1")
+                        {
+                            var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
+                            var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                            if (patchi.GetChild(3).gameObject.activeSelf && patchi.GetChild(3).GetChild(0).gameObject.activeSelf)
+                            {
+                                if (!isLocationChecked)
+                                {
+                                    patchi.GetChild(3).gameObject.SetActive(false);
+                                    patchi.GetChild(5).gameObject.SetActive(true);
+                                    break;
+                                }
+                                patchi.GetChild(3).gameObject.SetActive(false);
+                                patchi.GetChild(6).gameObject.SetActive(true);
+                            }
+                            if (patchi.GetChild(4).gameObject.activeSelf)
+                            {
+                                if (!isLocationChecked)
+                                {
+                                    patchi.GetChild(4).gameObject.SetActive(false);
+                                    patchi.GetChild(5).gameObject.SetActive(true);
+                                    break;
+                                }
+                                patchi.GetChild(4).gameObject.SetActive(false);
+                                patchi.GetChild(6).gameObject.SetActive(true);
+
+                            }
+
+                        }
                         break;
                     }
                 case "Hammer of Cruelty":

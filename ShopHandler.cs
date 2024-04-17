@@ -97,6 +97,10 @@ namespace LunacidAP
         private static bool Load_LoadShopItemsAnyway(Shop_Inventory __instance)
         {
 
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
+            {
+                return true;
+            }
             var sceneName = __instance.gameObject.scene.name;
             for (int i = 0; i < __instance.INV.Length; i++)
             {
@@ -186,7 +190,11 @@ namespace LunacidAP
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
         {
-            if (ArchipelagoClient.AP.SlotData.Shopsanity == true && LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
+            {
+                return true;
+            }
+            if (LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
             __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
             {
                 var objectName = __instance.INV[which].OBJ.name;

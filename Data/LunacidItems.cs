@@ -34,7 +34,7 @@ namespace LunacidAP.Data
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
-            "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago"
+            "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago", "Tent", "Strange Coin"
         };
 
         public static readonly List<string> Weapons = new(){
@@ -103,13 +103,13 @@ namespace LunacidAP.Data
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
-            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal"
+            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Shrimp", "Angel Feather", "Tent", "Curry"
         };
 
         public static readonly List<string> Materials = new(){
             "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes",
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
-            "Destroying Angel Mushroom"
+            "Destroying Angel Mushroom", "Ocean Bone Shell"
         };
 
         public static readonly List<string> Switches = new(){
@@ -222,7 +222,8 @@ namespace LunacidAP.Data
             {"Terminus Prison Key", "ENKEY_PICKUP"},
             {"Strange Coin", "GOLD_10"}, 
             {"Health ViaI", "HEALTH_VIAL_PICKUP"},
-            {"Angel Feather", "ANGEL_PICKUP"}
+            {"Angel Feather", "ANGEL_PICKUP"},
+            {"Shrimp", "SHRIMP_PICKUP"}
         };
 
         public static ItemType DetermineItemType(string item)

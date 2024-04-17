@@ -62,12 +62,21 @@ namespace LunacidAP
             }
             foreach (var hint in goodHints)
             {
-                var item = ArchipelagoClient.AP.LocationTable[hint.LocationId];
+                var item = ConnectionData.ScoutedLocations[hint.LocationId];
                 var locationName = ArchipelagoClient.AP.GetLocationNameFromID(hint.LocationId);
                 hintString += $"<size=50%>{item.SlotName} wants {item.Name} at {locationName}</size>\n";
             }
             return hintString;
+        }
 
+        [HarmonyPatch(typeof(Dialog), "Bye")]
+        [HarmonyPrefix]
+        private static bool Bye_MoveStateAhead(Dialog __instance)
+        {
+            var sceneName = __instance.gameObject.scene.name;
+            _log.LogInfo($"{__instance.npc_name}");
+
+            return true;
         }
     }
 }

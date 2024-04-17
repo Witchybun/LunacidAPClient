@@ -17,15 +17,13 @@ namespace LunacidAP
 
         public static void ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
-            _log.LogInfo($"Handling {locationData.APLocationName}");
             if (LunacidLocations.LocationsThatImmediatelyReceive.Contains(locationData.APLocationName) || locationData.APLocationName.Contains("Daedalus Knowledge"))
             {
                 return; // No need to swap models for locations you get dropped on top of you.
             }
-            var archipelagoItem = ArchipelagoClient.AP.LocationTable[locationData.APLocationID];
+            var archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var locationItem = archipelagoItem.Name;
-            _log.LogInfo($"Handling {locationItem} from game {archipelagoItem.Game}");
-            if (ArchipelagoClient.AP.LocationTable[locationData.APLocationID].Game != "Lunacid")
+            if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
             {
                 try
                 {
@@ -35,7 +33,6 @@ namespace LunacidAP
                         HideLastChild(pickupObject);
                         return;
                     }
-                    _log.LogInfo($"Using {substitutedItem} instead of {locationItem}");
                     locationItem = substitutedItem;
                 }
                 catch
@@ -200,6 +197,18 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
+                        return true;
+                    }
+                case "ELFEN SWORD":
+                    {
+                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
+                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
+                        foundObject.transform.SetParent(pickupObject.transform);
+                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                        HideLastChild(pickupObject);
+                        foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "DARK RAPIER":
@@ -210,6 +219,7 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "RAPIER":
@@ -220,6 +230,7 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "SHADOW BLADE":
@@ -230,6 +241,7 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "REPLICA SWORD":
@@ -240,6 +252,7 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "TORCH":
@@ -250,6 +263,7 @@ namespace LunacidAP
                         foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
                         HideLastChild(pickupObject);
                         foundObject.SetActive(true);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
                 case "MARAUDER BLACK FLAIL":
@@ -260,11 +274,26 @@ namespace LunacidAP
                         HideLastChild(pickupObject);
                         realFoundObject.gameObject.SetActive(true);
                         GameObject.Destroy(foundObject);
+                        HideTheFuckingHandBro(foundObject);
                         return true;
                     }
             }
             return false;
         }
+
+        private static void HideTheFuckingHandBro(GameObject weapon)
+        {
+            foreach (Transform child in weapon.transform)
+            {
+                if (child.name.Contains("HAND") || child.name.Contains("Hand"))
+                {
+                    child.gameObject.SetActive(false);
+                    return;
+                }
+            }
+
+        }
+
 
         private static void ReplaceModelWithBag(Item_Pickup_scr pickupObject)
         {

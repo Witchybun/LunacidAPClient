@@ -63,6 +63,7 @@ namespace LunacidAP
         {
             _log = log;
             Obj = new();
+            Obj.name = "ArchipelagoClient";
             DontDestroyOnLoad(Obj);
             AP = Obj.AddComponent<ArchipelagoClient>();
         }
@@ -119,7 +120,7 @@ namespace LunacidAP
             ConnectionData.Seed = seed;
 
             RandomStatic = new System.Random(seed);
-            if (!reconnect)
+            if (!reconnect && ConnectionData.ScoutedLocations.Count() == 0)
             {
                 BuildLocationTable();
 
@@ -139,11 +140,11 @@ namespace LunacidAP
                     int locationID = (int)item.Location;
                     LocationTable[locationID] = new ArchipelagoItem(item, false);
                 }
-
-                CommunionHint.DetermineHints(SlotData.Seed);
+                ConnectionData.ScoutedLocations = LocationTable;
             }
+            CommunionHint.DetermineHints(SlotData.Seed);
             // Sync checked locations
-            var checkedLocationIDs = from locationID in LocationTable.Keys where IsLocationChecked(locationID) select locationID;
+            var checkedLocationIDs = from locationID in ConnectionData.ScoutedLocations.Keys where IsLocationChecked(locationID) select locationID;
             var locationCheckTask = Task.Run(async () => await Session.Locations.CompleteLocationChecksAsync(checkedLocationIDs.ToArray()));
             yield return new WaitUntil(() => locationCheckTask.IsCompleted);
             if (locationCheckTask.IsFaulted)
@@ -293,17 +294,13 @@ namespace LunacidAP
             _deathLinkService.SendDeathLink(deathLink);
         }
 
-        public IEnumerator UnleashGhosts(string source, string reason)
+        public IEnumerator ReceiveDeathLink(string source, string reason)
         {
             yield return new WaitForSeconds(2f);
-            var ghost = GameObject.Find("UNDETH").transform.GetChild(0).gameObject;
-            if (!ghost.activeSelf)
-            {
-                GameObject.Find("MUSE").GetComponent<MUSE_scr>().Undeth();
-                ghost.SetActive(true);
-            }
+            var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
             Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            Control.PAPPY.POP($"The death of {source} by {reason} causes the ghosts to stir...", 1f, 11);
+            Control.PAPPY.POP($"The death of {source} by {reason} causes you to perish.", 1f, 1);
+            you.Die();
             IsCurrentlyDeathLinked = false;
         }
 
@@ -316,6 +313,18 @@ namespace LunacidAP
                 {
                     var allowedList = new List<string>() { "TOWER", "ARENA2" };
                     if (location.IgnoreLocationHandler == true && !allowedList.Contains(region.Key))
+                    {
+                        continue;
+                    }
+                    if (SlotData.ExcludeCoinLocations && LunacidLocations.CoinLocations.Contains(location.APLocationName))
+                    {
+                        continue;
+                    }
+                    if (SlotData.ExcludeTower && LunacidLocations.TowerLocations.Contains(location.APLocationName))
+                    {
+                        continue;
+                    }
+                    if (SlotData.StartingClass == 5 && location.APLocationName == "WR: Demi's Introduction Gift")
                     {
                         continue;
                     }
@@ -397,7 +406,7 @@ namespace LunacidAP
 
         public ArchipelagoItem ScoutLocation(long locationId)
         {
-            return LocationTable[locationId];
+            return ConnectionData.ScoutedLocations[locationId];
         }
 
         public bool IsLocationChecked(long location)
@@ -463,7 +472,7 @@ namespace LunacidAP
 
         public bool HasGoal(Goal goal)
         {
-            return SlotData.Ending.HasFlag(goal) || SlotData.Ending.HasFlag(Goal.AnyEnding);
+            return SlotData.Ending.HasFlag(goal);
         }
 
         private bool IsInNormalGameState()

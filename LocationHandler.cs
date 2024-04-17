@@ -37,9 +37,13 @@ namespace LunacidAP
                 return true;
             }
             var apLocation = DetermineGeneralPickupLocation(__instance);
-            if (apLocation.APLocationID == -1)
+            if (apLocation.APLocationID == -1 || Tower_IsExcludedAndIsExcludedLocation(apLocation))
             {
                 return true;
+            }
+            if (Coin_IsExcludedAndIsExcludedLocation(apLocation))
+            {
+                return false;
             }
             SwapperHandler.ReplaceModelWithAppropriateItem(__instance, apLocation);
             __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -68,9 +72,15 @@ namespace LunacidAP
             var sceneName = pickupObject.gameObject.scene.name;
             var objectLocation = pickupObject.gameObject.transform.position;
             var apLocation = DetermineGeneralPickupLocation(pickupObject);
-            if (apLocation.APLocationID == -1)
+            
+            if (apLocation.APLocationID == -1 || Tower_IsExcludedAndIsExcludedLocation(apLocation))
             {
                 keepOriginalDrop = true;
+                return;
+            }
+            if (Coin_IsExcludedAndIsExcludedLocation(apLocation))
+            {
+                keepOriginalDrop = false;
                 return;
             }
             keepOriginalDrop = false;
@@ -84,7 +94,7 @@ namespace LunacidAP
                 pickupObject.gameObject.SetActive(false);
                 return;
             }
-            var item = ArchipelagoClient.AP.LocationTable[apLocation.APLocationID];
+            var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
             DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
             pickupObject.gameObject.SetActive(false);
 
@@ -96,6 +106,10 @@ namespace LunacidAP
             var objectName = pickupObject.gameObject.name;
             var sceneName = pickupObject.gameObject.scene.name;
             var objectLocation = pickupObject.transform.position;
+            if (sceneName == "HUB_01" && Vector3.Distance(objectLocation, new Vector3(-4.1f, 1.3f, -11.2f)) < 5f && pickupObject.Name != "Dusty Crystal Orb")
+            {
+                return new LocationData(5, "WR: Demi's Introduction Gift", "", new Vector3());
+            }
             if (sceneName == "ARCHIVES" && Vector3.Distance(objectLocation, new Vector3(-3.2f, -19.3f, -45.9f)) < 5f)
             {
                 return new LocationData(-2, "FbA: Daedalus Knowledge", "", new Vector3());
@@ -196,7 +210,7 @@ namespace LunacidAP
                     x.APLocationName.Contains(nameHelper)) ?? new LocationData();
                 return foundLocation;
             }
-            else if (ArchipelagoClient.AP.SlotData.Dropsanity && IsDropLocation(sceneName, objectName, objectPosition))
+            else if (ArchipelagoClient.AP.SlotData.Dropsanity && IsDropLocation(sceneName, objectName))
             {
                 var foundLocation = DropLocations.FirstOrDefault(x => x.GameObjectName == cleanedName) ?? new LocationData();
                 return foundLocation;
@@ -256,7 +270,7 @@ namespace LunacidAP
                 }
                 if (location.APLocationName == "YF: Patchouli's Reward" && !ArchipelagoClient.AP.IsLocationChecked(patchouliCanopy))
                 {
-                    var patchouliItem = ArchipelagoClient.AP.LocationTable[patchouliCanopy];
+                    var patchouliItem = ConnectionData.ScoutedLocations[patchouliCanopy];
                     var patchouliReceivedItem = new ReceivedItem("YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
                     ConnectionData.ReceivedItems.Add(patchouliReceivedItem);
                     ItemHandler.GiveLunacidItem(patchouliReceivedItem, true);
@@ -441,36 +455,30 @@ namespace LunacidAP
             return isItemCollected;
         }
 
-        private static bool IsDropLocation(string sceneName, string objectName, Vector3 position)
+        private static bool IsDropLocation(string sceneName, string objectName)
         {
-            var isObjectInDropList = false;
-            foreach (var location in LunacidLocations.DropLocations)
+            var objectNameNoClone = objectName.Replace("(Clone)", "");
+            if (objectNameNoClone == "OCEAN_ELIXIR_PICKUP")
             {
-                if (objectName.Contains(location.GameObjectName))
+                var allowedScenesForElixir = new List<string>() { "LAKE", "HAUNT" };
+                if (allowedScenesForElixir.Contains(sceneName))
                 {
-                    isObjectInDropList = true;
-                    break;
+                    return true;
                 }
             }
-            if (!isObjectInDropList)
+            foreach (var location in LunacidLocations.DropLocations)
             {
-                return false;
-            }
-            if (objectName.Contains("OCEAN_ELIXIR_PICKUP"))
-            {
-                return true;
-            }
-            var allowedScenesForElixir = new List<string>() { "LAKE", "HAUNT" };
-            if (allowedScenesForElixir.Contains(sceneName))
-            {
-                return true;
+                if (objectNameNoClone == location.GameObjectName)
+                {
+                    return true;
+                }
             }
             return false;
         }
 
         private static bool IsDropLocation(Item_Pickup_scr pickupItem)
         {
-            return IsDropLocation(pickupItem.gameObject.scene.name, pickupItem.name, pickupItem.transform.position);
+            return IsDropLocation(pickupItem.gameObject.scene.name, pickupItem.name);
         }
 
         private static bool IsShopLocation(string sceneName, string objectName, Vector3 position)
@@ -585,6 +593,16 @@ namespace LunacidAP
         private static bool IsCloneAPLocation(Item_Pickup_scr pickupObject)
         {
             return IsDropLocation(pickupObject) || IsShopLocation(pickupObject) || IsOtherCloneObjectAPRelated(pickupObject);
+        }
+
+        private static bool Tower_IsExcludedAndIsExcludedLocation(LocationData locationData)
+        {
+            return ArchipelagoClient.AP.SlotData.ExcludeTower && LunacidLocations.TowerLocations.Contains(locationData.APLocationName);
+        }
+
+        private static bool Coin_IsExcludedAndIsExcludedLocation(LocationData locationData)
+        {
+            return ArchipelagoClient.AP.SlotData.ExcludeCoinLocations && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
         }
     }
 }

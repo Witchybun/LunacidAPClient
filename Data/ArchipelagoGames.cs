@@ -77,7 +77,8 @@ namespace LunacidAP.Data
             {"Ultrakill", "a lifeless being, desperate for blood,"},
             {"Resident Evil 2 Remake", "two souls desperate for answers"},
             {"Night of 100 Frights", "a group of sleuthing teenagers and their dog"},
-            {"Duke Nukem 3D", "a total badass in search for a holiday but found ass to kick"}
+            {"Duke Nukem 3D", "a total badass in search for a holiday but found ass to kick"},
+            {"The Legend of Zelda - Oracle of Seasons", "the Hero of Essences of Time and Nature"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -150,6 +151,7 @@ namespace LunacidAP.Data
             {"Resident Evil 2 Remake", "the remains of the city of Raccoon."},
             {"Night of 100 Frights", "an old, spooky mansion."},
             {"Duke Nukem 3D", "the city of Los Angeles."},
+            {"The Legend of Zelda - Oracle of Seasons", "the lands of Holodrum."}
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
@@ -189,7 +191,7 @@ namespace LunacidAP.Data
             }
             else if (itemName.Contains("Arrows") || itemName.Contains("Ammo"))
             {
-                return "Staff of Osiris";
+                return "VHS Tape";
             }
             else if (itemName.Contains("Sword") || itemName.Contains("Dagger") || itemName.Contains("Blade") || itemName.Contains("Knife"))
             {

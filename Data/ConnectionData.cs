@@ -18,10 +18,12 @@ namespace LunacidAP.Data
         public static Dictionary<string, CommunionHint.HintData> CommunionHints {get; set;} = new Dictionary<string, CommunionHint.HintData>(){};
         public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
+        public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
-        Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null)
+        Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
+        SortedDictionary<long, ArchipelagoItem> scouts = null)
         {
             HostName = hostName;
             Port = port;
@@ -54,6 +56,10 @@ namespace LunacidAP.Data
             {
                 Entrances = entrances;
             }
+            if (scouts is not null)
+            {
+                ScoutedLocations = scouts;
+            }
         }
 
         public static void WriteConnectionData()
@@ -71,8 +77,19 @@ namespace LunacidAP.Data
             CommunionHints = new Dictionary<string, CommunionHint.HintData>(){};
             Elements = new(){};
             Entrances = new(){};
-
+            ScoutedLocations = new(){};
         }
 
+        public static readonly Dictionary<int, string> ClassEnumToName = new(){
+            {0, "THIEF"},
+            {1, "KNIGHT"},
+            {2, "WITCH"},
+            {3, "VAMPIRE"},
+            {4, "UNDEAD"},
+            {5, "ROYAL"},
+            {6, "CLERIC"},
+            {7, "SHINOBI"},
+            {8, "FORSAKEN"}
+        };
     }
 }

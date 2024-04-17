@@ -12,12 +12,13 @@ namespace LunacidAP
         private ManualLogSource _log;
         private const string SEED_KEY = "seed";
         private const string VERSION = "client_version";
+        private const string CLASS_KEY = "starting_class";
         private const string ER_KEY = "entrance_randomization";
         private const string EXP_KEY = "experience";
         private const string WEXP_KEY = "weapon_experience";
         private const string SWITCH_KEY = "switch_locks";
         private const string DOOR_KEY = "door_locks";
-        private const string COIN_KEY = "strange_coin_bundle";
+        private const string COIN_KEY = "required_strange_coin";
         private const string FILLER_KEY = "filler_bundle";
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
@@ -27,9 +28,12 @@ namespace LunacidAP
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
         private const string ENT_KEY = "entrances";
+        private const string TOWER_KEY = "exclude_tower";
+        private const string COIN_LOC_KEY = "exclude_coin_locations";
         private Dictionary<string, object> _slotDataFields;
         public int Seed {get; private set;}
         public Goal Ending {get; private set;}
+        public int StartingClass {get; private set;}
         public bool EntranceRandomizer {get; private set;}
         public string ClientVersion {get; private set;}
         public bool Dropsanity {get; private set;}
@@ -38,17 +42,20 @@ namespace LunacidAP
         public bool Doorlock {get; private set;}
         public float ExperienceMultiplier {get; private set;}
         public float WExperienceMultiplier {get; private set;}
-        public int Coinbundle {get; private set;}
+        public int RequiredCoins {get; private set;}
         public int Fillerbundle {get; private set;}
         public bool DeathLink {get; private set;}
         public bool RandomElements {get; private set;}
         public bool FalseWalls {get; private set;}
+        public bool ExcludeTower {get; private set;}
+        public bool ExcludeCoinLocations {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
             _log = log;
             _slotDataFields = slotDataFields;
             Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
+            StartingClass = GetSlotSetting(CLASS_KEY, 0);
             EntranceRandomizer = GetSlotSetting(ER_KEY, false);
             Seed = GetSlotSetting(SEED_KEY, 0);
             ClientVersion = GetSlotSetting(VERSION, "0.0.0");
@@ -58,12 +65,14 @@ namespace LunacidAP
             Doorlock = GetSlotSetting(DOOR_KEY, false);
             ExperienceMultiplier = (float) GetSlotSetting(EXP_KEY, 100)/100;
             WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
-            Coinbundle = ParseCoinBundle(GetSlotSetting(COIN_KEY, StrangeCoin.Ten));
+            RequiredCoins = GetSlotSetting(COIN_KEY, 30);
             Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             FalseWalls = GetSlotSetting(WALL_KEY, false);
+            ExcludeTower = GetSlotSetting(TOWER_KEY, false);
+            ExcludeCoinLocations = GetSlotSetting(COIN_LOC_KEY, false);
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
@@ -85,11 +94,6 @@ namespace LunacidAP
         private Goal GetSlotSetting(string key, Goal defaultValue)
         {
             return (Goal)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Goal), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
-        }
-
-        private StrangeCoin GetSlotSetting(string key, StrangeCoin defaultValue)
-        {
-            return (StrangeCoin)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(StrangeCoin), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private string GetSlotSetting(string key, string defaultValue)
@@ -133,46 +137,6 @@ namespace LunacidAP
             _log.LogWarning($"SlotData did not contain expected key: \"{key}\"");
             return defaultValue;
         }
-
-        private int ParseCoinBundle(StrangeCoin strangeCoin)
-        {
-            switch (strangeCoin)
-            {
-                case StrangeCoin.One:
-                {
-                    return 1;
-                }
-                case StrangeCoin.Two:
-                {
-                    return 2;
-                }
-                case StrangeCoin.Three:
-                {
-                    return 3;
-                }
-                case StrangeCoin.Five:
-                {
-                    return 5;
-                }
-                case StrangeCoin.Six:
-                {
-                    return 6;
-                }
-                case StrangeCoin.Ten:
-                {
-                    return 10;
-                }
-                case StrangeCoin.Fifteen:
-                {
-                    return 15;
-                }
-                case StrangeCoin.Thirty:
-                {
-                    return 30;
-                }
-            }
-            return 10;
-        }
     }
 
     public enum Goal
@@ -182,17 +146,5 @@ namespace LunacidAP
         EndingB = 2,
         EndingCD = 3,
         EndingE = 4,
-    }
-
-    public enum StrangeCoin
-    {
-        One = 0,
-        Two = 1,
-        Three = 2,
-        Five = 3,
-        Six = 4,
-        Ten = 5,
-        Fifteen = 6,
-        Thirty = 7,
     }
 }
