@@ -103,7 +103,7 @@ namespace LunacidAP.Data
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
-            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Shrimp", "Angel Feather", "Tent", "Curry"
+            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Tent", "Curry"
         };
 
         public static readonly List<string> Materials = new(){
