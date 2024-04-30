@@ -27,6 +27,10 @@ namespace LunacidAP
         private static bool Check_CheckEndingScenarioForAP(Ending_Switch __instance)
         {
             bool flag = true;
+            if (ArchipelagoClient.AP.SlotData.Ending.HasFlag(Goal.EndingA))
+            {
+                flag = false;
+            }
             if (!ArchipelagoClient.AP.WasItemReceived("White VHS Tape"))
             {
                 flag = false;
@@ -62,15 +66,27 @@ namespace LunacidAP
         }
 
         [HarmonyPatch(typeof(Item_Adjust), "OnEnable")]
-        [HarmonyPrefix]
-        private static bool OnEnable_ChangeCoinCountToSetting(Item_Adjust __instance)
+        [HarmonyPostfix]
+        private static void OnEnable_ChangeCoinCountToSetting(Item_Adjust __instance)
         {
             if (__instance.item != "Strange Coin")
             {
-                return true;
+                return;
             }
-            __instance.amount = ArchipelagoClient.AP.SlotData.RequiredCoins;
-            return true;
+            if (ArchipelagoClient.AP.WasItemCountReceived("Strange Coin", ArchipelagoClient.AP.SlotData.RequiredCoins))
+            {
+                __instance.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+                __instance.gameObject.transform.GetChild(1).gameObject.SetActive(false);
+                __instance.gameObject.transform.GetChild(2).gameObject.SetActive(false);
+                __instance.gameObject.transform.GetChild(3).gameObject.SetActive(true);
+            }
+            else
+            {
+                __instance.gameObject.transform.GetChild(0).gameObject.SetActive(true);
+                __instance.gameObject.transform.GetChild(1).gameObject.SetActive(false);
+                __instance.gameObject.transform.GetChild(2).gameObject.SetActive(false);
+                __instance.gameObject.transform.GetChild(3).gameObject.SetActive(false);
+            }
         }
 
         public static void HandleFlagGivenItemName(string Name)
@@ -297,6 +313,10 @@ namespace LunacidAP
                                 if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
                                 {
                                     vhsTape.SetActive(value: true);
+                                }
+                                if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
+                                {
+                                    sTATES[1].SetActive(true);  // Fallback.
                                 }
                             }
                             break;
