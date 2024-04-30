@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using BepInEx.Logging;
@@ -12,7 +13,6 @@ namespace LunacidAP
     public class TeleportHandler
     {
         private static ManualLogSource _log;
-
         public TeleportHandler(ManualLogSource log)
         {
             _log = log;
@@ -24,7 +24,6 @@ namespace LunacidAP
         private static bool OnEnable_AlterWarpBasedOnER(GOTO_LEVEL __instance)
         {
             var currentWarp = new WarpDestinations.WarpData(__instance.LVL, __instance.POS, __instance.ROT);
-
             var eredWarp = HandleEntranceRandomizer(currentWarp);
 
             var finalWarp = FixWarps(eredWarp);
