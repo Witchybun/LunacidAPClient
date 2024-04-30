@@ -137,7 +137,7 @@ namespace LunacidAP.Data
             { "Obsidian", 10 },
             { "Snowflake Obsidian", 12 },
             { "Yellow Morel", 14 },
-            { "Destroying Angel", 16 },
+            { "Destroying Angel Mushroom", 16 },
             { "Lotus Seed Pod", 18 },
             { "Ashes", 20 },
             { "Ectoplasm", 30 },
