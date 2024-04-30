@@ -29,6 +29,7 @@ namespace LunacidAP
         public SaveHandler SaveHandler {get; private set;}
         public ExpHandler ExpHandler {get; private set;}
         public SwapperHandler SwapperHandler {get; private set;}
+        public MuseHandler MuseHandler {get; private set;}
         public NewGameUI UI {get; private set;}
         private void Awake()
         {
@@ -55,6 +56,7 @@ namespace LunacidAP
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);
                 UI = new NewGameUI(Log);
+                MuseHandler = new MuseHandler(Log);
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch
@@ -139,7 +141,7 @@ namespace LunacidAP
             {
                 ArchipelagoClient.AP.SendDeathLink();
             }
-            else if (ArchipelagoClient.IsInGame && ArchipelagoClient.AP.IsCurrentlyDeathLinked)
+            else if ((ArchipelagoClient.IsInGame && ArchipelagoClient.AP.IsCurrentlyDeathLinked) || !ArchipelagoClient.IsInGame)
             {
                 ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
             }
