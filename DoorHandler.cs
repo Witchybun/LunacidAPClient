@@ -9,7 +9,7 @@ namespace LunacidAP
     {
 
         private static ManualLogSource _log;
-        public DoorHandler(ManualLogSource log)
+                public DoorHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(DoorHandler));
@@ -47,6 +47,11 @@ namespace LunacidAP
                 var reversedEntrance = TeleportHandler.ReverseEntrance(entrance);
                 if (!LunacidDoors.EntranceToDoorKey.ContainsKey(entrance))
                 {
+                    if (!ConnectionData.Entrances.TryGetValue(entrance, out var _))
+                    {
+                        _log.LogWarning($"Tried to handle {entrance} and failed.");
+                        return true;
+                    }
                     entrance = TeleportHandler.ReverseEntrance(ConnectionData.Entrances[entrance]);
                 }
             }
@@ -90,6 +95,10 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_StopOpenIfNoKeyTower(ST_DOOR __instance)
         {
+            if (!ArchipelagoClient.AP.SlotData.Doorlock)
+            {
+                return true;
+            }
             if (!ArchipelagoClient.AP.WasItemReceived("Tower of Abyss Keyring"))
             {
                 var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
