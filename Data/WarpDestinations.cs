@@ -63,7 +63,8 @@ namespace LunacidAP.Data
         // Fix warps to be either more consistent or not kill you.
         public static readonly Dictionary<WarpData, WarpData> WarpFixes = new(){
             {new WarpData("PITT_A1", new Vector3(70.36f, 37.5f, -16.5f), 0), new WarpData("PITT_A1", new Vector3(35.404f, 15f, -15.1075f), 98)},
-            {new WarpData("CAS_PITT", new Vector3(1f, 16f, 5f), 90), new WarpData("CAS_PITT", new Vector3(149f, 1f, -79f), 0)}
+            {new WarpData("CAS_PITT", new Vector3(1f, 16f, 5f), 90), new WarpData("CAS_PITT", new Vector3(149f, 1f, -79f), 0)},
+            {new WarpData("ARENA", new Vector3(-178.0f, 4.0f, 0.0f), 90), new WarpData("ARENA", new Vector3(-145.021f, 5f, 0.0392f), 90)}
         };
 
         public static readonly Dictionary<string, WarpData> StartingArea = new(){
