@@ -270,6 +270,10 @@ namespace LunacidAP
             {
                 bundleSize = 1;
             }
+            if (Name == "Shrimp")
+            {
+                Name = "Pink Shrimp";
+            }
             if (Name == "Poison Throwing Knife" || Name == "Throwing Knife" || Name == "Survey Banner")
             {
                 bundleSize = Math.Min(10, bundleSize * 4); // Game normally boosts these anyway
