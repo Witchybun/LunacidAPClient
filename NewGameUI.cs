@@ -7,10 +7,6 @@ using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
-
 namespace LunacidAP
 {
     public class NewGameUI
