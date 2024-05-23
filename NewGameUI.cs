@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -75,7 +76,9 @@ namespace LunacidAP
         {
             var eqSlot2Field = __instance.GetType().GetField("EQ_SLOT2", BindingFlags.Instance | BindingFlags.NonPublic);
             var EQ_SLOT2 = (int)eqSlot2Field.GetValue(__instance);
-            _log.LogInfo($"Which {which}, Query {__instance.current_query}, EQ_SLOT2 {EQ_SLOT2}");
+            var eqselField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
+            var EQ_SEL = (int)eqselField.GetValue(__instance);
+            var loadTextMethod = __instance.GetType().GetMethod("LoadText", BindingFlags.Instance | BindingFlags.NonPublic);
             if (which == 51 && (__instance.current_query == 6 || __instance.current_query == 0)) // Loading a save from main menu
             {
                 var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -171,6 +174,16 @@ namespace LunacidAP
             return true;
         }
 
+        [HarmonyPatch(typeof(Menus), "Click")]
+        [HarmonyPostfix]
+        private static void Click_FixDueToPronouns_Postfix(int which, Menus __instance)
+        {
+            if (which == 83 || which == 84)
+            {
+                FixConnectionInfoDisplay();
+            }
+        }
+
         private static string OfferSaveInfo(CONTROL control, int saveSlot)
         {
             switch (saveSlot)
@@ -195,9 +208,9 @@ namespace LunacidAP
             {
                 case "CHAR_CREATE":
                     {
+                        var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
                         if (!ArchipelagoClient.AP.Authenticated && GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
                         {
-                            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
                             create.GetChild(12).GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "SLOT NAME\nHOST\nPORT\nPASSWORD";
                             HostEntry.SetActive(value: true);
                             PortEntry.SetActive(value: true);
@@ -218,12 +231,11 @@ namespace LunacidAP
                             create.GetChild(11).gameObject.SetActive(value: false);
                             create.GetChild(7).GetChild(0).GetComponent<TextMeshProUGUI>().text = "Connect";
                             create.GetChild(8).gameObject.SetActive(value: false);
-                            create.GetChild(9).gameObject.SetActive(value: false);  
+                            create.GetChild(9).gameObject.SetActive(value: false);
                             return;
                         }
                         else if (ArchipelagoClient.AP.Authenticated && PortEntry.activeSelf)
                         {
-                            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
                             create.GetChild(12).GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "NAME\nBEAUTY\nCLASS\nPRONOUNS";
                             HostEntry.SetActive(value: false);
                             PortEntry.SetActive(value: false);
@@ -257,6 +269,7 @@ namespace LunacidAP
                             create.GetChild(26).gameObject.SetActive(value: true);
                             create.GetChild(7).GetChild(0).GetComponent<TextMeshProUGUI>().text = "Confirm";
                         }
+
                         return;
                     }
                 case "Gameover":
@@ -269,12 +282,23 @@ namespace LunacidAP
                         else
                         {
                             load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "load";
-                            
+
                         }
                         return;
                     }
             }
 
+        }
+
+        private static void FixConnectionInfoDisplay()
+        {
+            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
+            create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
+            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
+            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "DEATH";
+            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Dropsanity()}\n{Switchlock()}\n{Doorlock()}";
+            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
+            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = Death();
         }
 
         private static string Ending()
