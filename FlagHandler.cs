@@ -302,9 +302,14 @@ namespace LunacidAP
                         {
                             var pittObjects = GameObject.Find("THE_PIT_A1");
                             var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
+                            var corruptKeyTrig = pittObjects.transform.GetChild(3).GetChild(0).GetChild(1).gameObject;
                             if (woodenGate.activeSelf)
                             {
                                 woodenGate.SetActive(value: false);
+                            }
+                            if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
+                            {
+                                corruptKeyTrig.SetActive(true);  // Fallback for the corrupt key location
                             }
                             if (stateController == "META")
                             {
@@ -313,10 +318,6 @@ namespace LunacidAP
                                 if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
                                 {
                                     vhsTape.SetActive(value: true);
-                                }
-                                if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
-                                {
-                                    sTATES[1].SetActive(true);  // Fallback.
                                 }
                             }
                             break;
