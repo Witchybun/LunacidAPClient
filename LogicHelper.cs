@@ -33,7 +33,7 @@ namespace LunacidAP
                     }
                 case "WR: Demi's Victory Gift":
                     {
-                        return false;
+                        return ConnectionData.EnteredScenes.Contains("ARENA2");
 
                     }
                 case "HB: Starting Weapon":
@@ -137,7 +137,7 @@ namespace LunacidAP
                     }
                 case "HB: Temple Sewer Puzzle":
                     {
-                        return CanEnterTemple() && HasSwitch("Temple of Silence Switch Key") && WasItemReceived("VHS Tape");
+                        return CanEnterTemple() && HasSwitch("Temple of Silence Switch Key") && WasItemReceived("VHS Tape") && ConnectionData.EnteredScenes.Contains("Accursed Tomb") && HasElement("Light") && HasDustyOrb();
 
                     }
                 case "HB: Temple Blood Altar":
@@ -281,7 +281,7 @@ namespace LunacidAP
                     }
                 case "AT: Red Skeleton":
                     {
-                        return HasLightSource() && HasElement("Light");
+                        return HasLightSource() && HasElement("Light") && WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});
 
                     }
                 case "AT: Mausoleum Hidden Chest":
@@ -482,34 +482,34 @@ namespace LunacidAP
                     }
                 case "FbA: Hidden Room Lower Floor":
                     {
-                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring"));
+                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp"));
 
                     }
                 case "FbA: Near Twisty Tree":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "FbA: uwu":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "FbA: Daedalus Knowledge (First)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 1);
+                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 1);
                 }
                 case "FbA: Daedalus Knowledge (Second)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 2);
+                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 2);
                 }
                 case "FbA: Daedalus Knowledge (Third)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 3);
+                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 3);
                 }
                 case "FbA: Corner Near Daedalus":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "CLF: Outside Corner":
@@ -1044,32 +1044,31 @@ namespace LunacidAP
                     }
                 case "Buy Steel Needle":
                     {
-                        return true;
-
+                        return CanBuyInitialShopItems();
                     }
                 case "Buy Crossbow":
                     {
-                        return true;
+                        return CanBuyInitialShopItems();
 
                     }
                 case "Buy Oil Lantern":
                     {
-                        return WasItemReceived("Ignis Calor");
+                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
 
                     }
                 case "Buy Ocean Elixir (Sheryl)":
                     {
-                        return true;
+                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
 
                     }
                 case "Buy Ocean Elixir (Patchouli)":
                     {
-                        return false;
+                        return CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});;
 
                     }
                 case "Buy Privateer Musket":
                     {
-                        return WasItemReceived("Ignis Calor");
+                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
 
                     }
                 case "Buy Jotunn Slayer":
@@ -1176,7 +1175,7 @@ namespace LunacidAP
 
 
         private static readonly List<string> QuestionableLocations = new(){
-            "HB: Temple Sewer Puzzle", "Buy Jotunn Slayer", "Buy Ocean Elixir (Sheryl)", "WR: Demi's Victory Gift", "YF: Hanging In The Trees"
+            "YF: Hanging In The Trees"
         };
 
         private static bool IsLocationQuestionable(string location)
@@ -1196,6 +1195,17 @@ namespace LunacidAP
                 return "#00FF00";
             }
             return "#FF0000";
+        }
+
+        private bool CanBuyInitialShopItems()
+        {
+            var allowedScenesForMoney = new List<string>(){"Boiling Grotto", "Accursed Tomb", "Forbidden Archives"};
+            foreach (var scene in allowedScenesForMoney)
+            {
+                if (ConnectionData.EnteredScenes.Contains(scene))
+                return true;
+            }
+            return false;
         }
 
         private bool CanEnterTemple()
