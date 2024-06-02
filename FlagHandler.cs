@@ -248,6 +248,14 @@ namespace LunacidAP
                             if (stateController == "PATCHI")
                             {
                                 var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
+                                if (patchi.GetChild(3).gameObject.activeSelf)
+                                {
+                                    if (ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Canopy Offer"))
+                                    {
+                                        patchi.GetChild(2).gameObject.SetActive(true);
+                                        patchi.GetChild(3).gameObject.SetActive(false);
+                                    }
+                                }
                                 if (patchi.GetChild(4).gameObject.activeSelf)
                                 {
                                     var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
@@ -409,7 +417,7 @@ namespace LunacidAP
             {
                 case "Progressive Vampiric Symbol":
                     {
-                        var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.Item) == "Progressive Vampiric Symbol");
+                        var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.ItemId) == "Progressive Vampiric Symbol");
                         Transform map = GameObject.Find(sceneName).transform;
                         if (sceneName == "ARCHIVES")
                         {
