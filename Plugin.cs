@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
 using BepInEx.Logging;
@@ -84,12 +85,32 @@ namespace LunacidAP
             {
                 CheckForVictory(sceneName);
                 CheckForDeath(sceneName);
+                AddSceneIfNotIncluded(sceneName);
+
             }
             if (sceneName == "CHAR_CREATE")
             {
                 UI.ModifyCharCreateForArchipelago();
             }
             
+
+        }
+
+        private void AddSceneIfNotIncluded(string sceneName)
+        {
+            ConnectionData.EnteredScenes ??= new List<string>();
+            if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var displayName))
+            {
+                Log.LogWarning($"Could not find appropriate scene for {sceneName}");
+                return;
+            }
+            if (ConnectionData.EnteredScenes.Contains(displayName))
+            {
+                return;
+            }
+            ConnectionData.EnteredScenes.Add(displayName);
+            ArchipelagoClient.AP.Session.DataStorage["CurrentMap"] = displayName;
+            ArchipelagoClient.AP.Session.DataStorage["EnteredScenes"] = ConnectionData.EnteredScenes.ToArray();
 
         }
 
@@ -126,9 +147,7 @@ namespace LunacidAP
 
         private void CallForVictory()
         {
-            var statusUpdatePacket = new StatusUpdatePacket();
-            statusUpdatePacket.Status = ArchipelagoClientState.ClientGoal;
-            ArchipelagoClient.AP.Session.Socket.SendPacket(statusUpdatePacket);
+            ArchipelagoClient.AP.Session.SetGoalAchieved();
         }
 
         private void CheckForDeath(string sceneName)

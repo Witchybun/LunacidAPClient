@@ -244,12 +244,12 @@ namespace LunacidAP
                             create.GetChild(11).gameObject.SetActive(value: true);
                             var count = 0;
                             var button = create.GetChild(11).GetComponent<UnityEngine.UI.Button>();
+                            _log.LogInfo($"We were given {ArchipelagoClient.AP.SlotData.StartingClass}");
                             while (count < ArchipelagoClient.AP.SlotData.StartingClass)
                             {
                                 button.onClick.Invoke();
                                 count += 1;
                             }
-                            count = 0;
                             create.GetChild(11).gameObject.SetActive(value: false);
                             create.GetChild(14).gameObject.SetActive(value: true);
                             create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";

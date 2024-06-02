@@ -135,7 +135,29 @@ namespace LunacidAP.Data
             {"PRISON", PrisonEntranceToDoor},
             {"ARENA", ArenaEntranceToDoor},
             {"ARENA2", FateEntranceToDoor},
+        };
 
+            public static readonly Dictionary<string, string> SceneToDisplayName = new(){
+            {"HUB_01", "Wing's Rest"},
+            {"PITT_A1", "Hollow Basin"},
+            {"FOREST_A1", "Yosei Forest"},
+            {"FOREST_B1", "Forest Canopy"},
+            {"SEWERS_A1", "The Fetid Mire"},
+            {"ARCHIVES", "Forbidden Archives"},
+            {"WALL_01", "Laetus Chasm"},
+            {"PITT_B1", "Great Well Surface"},
+            {"HAUNT", "Accursed Tomb"},
+            {"LAKE", "The Sanguine Sea"},
+            {"CAS_1", "Castle Le Fanu"},
+            {"CAVE", "Boiling Grotto"},
+            {"VOID", "Labyrinth of Ash"},
+            {"TOWER", "Tower of Abyss"},
+            {"CAS_2", "A Holy Battlefield"},
+            {"CAS_3", "Sealed Ballroom"},
+            {"PRISON", "Terminus Prison"},
+            {"ARENA", "Forlorn Arena"},
+            {"ARENA2", "Chamber of Fate"},
+            {"END_TOWN", "Grave of the Sleeper"}
         };
 
         public static readonly List<Vector3> BallroomDoors = new(){

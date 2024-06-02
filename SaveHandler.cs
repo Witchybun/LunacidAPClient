@@ -80,6 +80,7 @@ namespace LunacidAP
                 Elements = ConnectionData.Elements,
                 Entrances = ConnectionData.Entrances,
                 ScoutedLocations = ConnectionData.ScoutedLocations,
+                EnteredScenes = ConnectionData.EnteredScenes,
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
@@ -113,7 +114,7 @@ namespace LunacidAP
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations);
+                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes);
                     return;
                 }
 
@@ -145,5 +146,6 @@ namespace LunacidAP
         public Dictionary<string, string> Elements;
         public Dictionary<string, string> Entrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
+        public List<string> EnteredScenes;
     }
 }
