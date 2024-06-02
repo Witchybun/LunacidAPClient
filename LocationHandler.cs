@@ -259,7 +259,7 @@ namespace LunacidAP
         {
             if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.
             {
-                var receivedItem = new ReceivedItem(location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
+                var receivedItem = new ReceivedItem(item.Game, location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
                 ConnectionData.ReceivedItems.Add(receivedItem);
                 ItemHandler.GiveLunacidItem(receivedItem, true);
                 var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
@@ -271,7 +271,7 @@ namespace LunacidAP
                 if (location.APLocationName == "YF: Patchouli's Reward" && !ArchipelagoClient.AP.IsLocationChecked(patchouliCanopy))
                 {
                     var patchouliItem = ConnectionData.ScoutedLocations[patchouliCanopy];
-                    var patchouliReceivedItem = new ReceivedItem("YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
+                    var patchouliReceivedItem = new ReceivedItem(item.Game, "YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
                     ConnectionData.ReceivedItems.Add(patchouliReceivedItem);
                     ItemHandler.GiveLunacidItem(patchouliReceivedItem, true);
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);

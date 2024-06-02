@@ -15,20 +15,13 @@ namespace LunacidAP.Data
         public string Game;
         public ItemFlags Classification;
 
-        public ArchipelagoItem(NetworkItem item, bool received)
+        public ArchipelagoItem(ScoutedItemInfo item, bool received)
         {
-            ID = item.Item;
-            try
-            {
-                Name = ArchipelagoClient.AP.Session.Items.GetItemName(ID);
-            }
-            catch
-            {
-                Name = "an item";
-            }
+            ID = item.ItemId;
+            Name = item.ItemName;
             SlotID = received ? ArchipelagoClient.AP.SlotID : item.Player;
             SlotName = ArchipelagoClient.AP.Session.Players.GetPlayerName(SlotID);
-            Game = ArchipelagoClient.AP.Session.Players.Players[ArchipelagoClient.AP.Session.ConnectionInfo.Team][SlotID].Game;
+            Game = item.ItemGame;
             Classification = item.Flags;
         }
 

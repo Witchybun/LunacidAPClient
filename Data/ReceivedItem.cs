@@ -6,6 +6,7 @@ namespace LunacidAP.Data
 { 
     public class ReceivedItem
     {
+        public string Game { get; }
         public string LocationName { get; }
         public string ItemName { get; }
         public string PlayerName { get; }
@@ -15,9 +16,10 @@ namespace LunacidAP.Data
         public ItemFlags Classification { get; }
 
         [JsonConstructor]
-        public ReceivedItem(string locationName, string itemName, string playerName, long locationId, long itemId,
+        public ReceivedItem(string gameName, string locationName, string itemName, string playerName, long locationId, long itemId,
             long playerId, ItemFlags classification)
         {
+            Game = gameName;
             LocationName = locationName;
             ItemName = itemName;
             PlayerName = playerName;
@@ -27,16 +29,15 @@ namespace LunacidAP.Data
             Classification = classification;
         }
 
-        public ReceivedItem(NetworkItem item)
+        public ReceivedItem(ItemInfo item)
         {
-            var locationName = ArchipelagoClient.AP.GetLocationNameFromID(item.Location);
-            var itemName = ArchipelagoClient.AP.GetItemNameFromID(item.Item);
             var playerName = ArchipelagoClient.AP.GetPlayerNameFromSlot(item.Player);
-            LocationName = locationName;
-            ItemName = itemName;
+            Game = item.ItemGame;
+            LocationName = item.LocationName;
+            ItemName = item.ItemName;
             PlayerName = playerName;
-            LocationId = item.Location;
-            ItemId = item.Item;
+            LocationId = item.LocationId;
+            ItemId = item.ItemId;
             PlayerId = item.Player;
             Classification = item.Flags;
         }

@@ -15,7 +15,7 @@ namespace LunacidAP.Data
 
             public LocationData(long locationID, string apLocationName, string gameObjectName, Vector3 position, bool ignoreLocationHandler = false)
             {
-                APLocationID = ArchipelagoClient.LOCATION_INIT_ID + locationID;
+                APLocationID = locationID;
                 APLocationName = apLocationName;
                 GameObjectName = gameObjectName;
                 Position = position;

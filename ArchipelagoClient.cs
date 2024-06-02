@@ -28,7 +28,6 @@ namespace LunacidAP
         public int SlotID;
         private int cheatedCount;
         private int Stack;
-        public const long LOCATION_INIT_ID = 771111110;
         private CONTROL Control;
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
@@ -126,18 +125,19 @@ namespace LunacidAP
 
                 // Scout unchecked locations
                 var uncheckedLocationIDs = from locationID in LocationTable.Keys select locationID;
-                Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
-                yield return new WaitUntil(() => locationInfoTask.IsCompleted);
-                if (locationInfoTask.IsFaulted)
+                Task<Dictionary<long, ScoutedItemInfo>> scoutedInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
+                //Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
+                yield return new WaitUntil(() => scoutedInfoTask.IsCompleted);
+                if (scoutedInfoTask.IsFaulted)
                 {
-                    _log.LogError(locationInfoTask.Exception.GetBaseException().Message);
+                    _log.LogError(scoutedInfoTask.Exception.GetBaseException().Message);
                     yield break;
                 }
-                var locationInfo = locationInfoTask.Result;
+                var scoutedInfo = scoutedInfoTask.Result;
 
-                foreach (var item in locationInfo.Locations)
+                foreach (var item in scoutedInfo.Values)
                 {
-                    int locationID = (int)item.Location;
+                    int locationID = (int)item.LocationId;
                     LocationTable[locationID] = new ArchipelagoItem(item, false);
                 }
                 ConnectionData.ScoutedLocations = LocationTable;
@@ -225,13 +225,13 @@ namespace LunacidAP
             if (Session is not null && Session.Items.Any() && IsInNormalGameState())
             {
                 var item = Session.Items.DequeueItem();
-                if (item.Location >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.Location && item.Item == x.ItemId))
+                if (item.LocationId >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.LocationId && item.ItemId == x.ItemId))
                 {
                     var receivedItem = new ReceivedItem(item);
                     ConnectionData.ReceivedItems.Add(receivedItem);
                     StartCoroutine(ReceiveItem(receivedItem));
                 }
-                else if (item.Location < 0)
+                else if (item.LocationId < 0)
                 {
                     _log.LogInfo($"Cheated Count {cheatedCount} before increment vs {ConnectionData.CheatedCount}");
                     cheatedCount++;
@@ -432,12 +432,7 @@ namespace LunacidAP
 
         public string GetLocationNameFromID(long location)
         {
-            return Session.Locations.GetLocationNameFromId(location);
-        }
-
-        public string GetItemNameFromID(long itemID)
-        {
-            return Session.Items.GetItemName(itemID);
+            return Session.Locations.GetLocationNameFromId(location, "Lunacid");
         }
 
         public string GetPlayerNameFromSlot(int slot)

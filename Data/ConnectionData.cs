@@ -19,11 +19,12 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
+        public static List<string> EnteredScenes = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
-        SortedDictionary<long, ArchipelagoItem> scouts = null)
+        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null)
         {
             HostName = hostName;
             Port = port;
@@ -60,6 +61,10 @@ namespace LunacidAP.Data
             {
                 ScoutedLocations = scouts;
             }
+            if (EnteredScenes is not null)
+            {
+                EnteredScenes = enteredScenes;
+            }
         }
 
         public static void WriteConnectionData()
@@ -78,6 +83,7 @@ namespace LunacidAP.Data
             Elements = new(){};
             Entrances = new(){};
             ScoutedLocations = new(){};
+            EnteredScenes = new(){};
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){
