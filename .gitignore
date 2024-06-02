@@ -90,3 +90,5 @@ bin/Debug/netstandard2.0/Archipelago.Gifting.Net.dll
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/settings.json
+
+.fake
