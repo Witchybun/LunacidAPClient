@@ -95,6 +95,9 @@ namespace LunacidAP.Data
             {"Aquaria", "an amnesiac aquatic woman"},
             {"Final Fantasy 12 Open World", "a street rat"},
             {"Battle for Bikini Bottom", "a yellow sponge"},
+            {"Metroid Prime", "a space bounty hunter"},
+            {"Super Metroid Map Rando", "a space bounty hunter"},
+            {"Super Junkoid", "a young girl"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -183,7 +186,10 @@ namespace LunacidAP.Data
             {"Civilization VI", "from their respective lands, fighting for glory."},
             {"Aquaria", "from deep beneath the waves"},
             {"Final Fantasy 12 Open World", "from the lands of Ivalice."},
-            {"Battle for Bikini Bottom", "the underwater city of Bikini Bottom."}
+            {"Battle for Bikini Bottom", "the underwater city of Bikini Bottom."},
+            {"Metroid Prime", "on the remote planet of Pallon IV."},
+            {"Super Metroid Map Rando", "upon a distant planet's surface."},
+            {"Super Junkoid", "within their own eternal dreams, induced by a serpent."}
 
         };
 
