@@ -109,8 +109,8 @@ namespace LunacidAP
                 return;
             }
             ConnectionData.EnteredScenes.Add(displayName);
-            ArchipelagoClient.AP.Session.DataStorage["CurrentMap"] = displayName;
-            ArchipelagoClient.AP.Session.DataStorage["EnteredScenes"] = ConnectionData.EnteredScenes.ToArray();
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "CurrentMap"] = displayName;
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "EnteredScenes"] = ConnectionData.EnteredScenes.ToArray();
 
         }
 
