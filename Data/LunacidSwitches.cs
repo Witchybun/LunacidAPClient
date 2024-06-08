@@ -16,8 +16,8 @@ namespace LunacidAP.Data
         };
 
         private static readonly Dictionary<string, List<Vector3>> LibrarySwitches = new(){
-            { "Archives Shortcut Switch Key", new List<Vector3>(){new Vector3(-45.0f, -1.8f, 21.1f)} },
-            { "Archive Elevator Switch Keyring", new List<Vector3>(){new Vector3(-85.0f, -2.9f, 11.0f),
+            { "Forbidden Archives Shortcut Switch Key", new List<Vector3>(){new Vector3(-45.0f, -1.8f, 21.1f)} },
+            { "Forbidden Archives Elevator Switch Keyring", new List<Vector3>(){new Vector3(-85.0f, -2.9f, 11.0f),
                 new Vector3(-90.9f, -18.0f, 17.0f), new Vector3(-61.0f, 10.0f, 15.5f), new Vector3(-61.0f, -2.0f, 15.5f), 
                 new Vector3(-93.5f, 10.0f, -13.0f), new Vector3(-93.5f, -18.0f, -13.0f)} },
         };

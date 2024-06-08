@@ -43,7 +43,7 @@ namespace LunacidAP.Data
             "Moonlight", "Obsidian Seal", "Replica Sword", "Ritual Dagger", "Rusted Sword", "Serpent Fang", "Shadow Blade",
             "Steel Spear", "Stone Club", "Torch", "Twisted Staff", "Vampire Hunter Sword", "Wand of Power", "Wolfram Greatsword",
             "Wooden Shield", "Crossbow", "Steel Needle", "Hammer of Cruelty", "Lucid Blade", "Jotunn Slayer", "Rapier", "Privateer Musket",
-            "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
+            "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
             "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch"
@@ -53,7 +53,7 @@ namespace LunacidAP.Data
             "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Corrupted Dagger", "Dark Rapier","Elfen Sword",
             "Moonlight", "Obsidian Seal", "Replica Sword", "Ritual Dagger", "Rusted Sword", "Serpent Fang", "Shadow Blade",
             "Vampire Hunter Sword", "Wolfram Greatsword", "Steel Needle", "Jotunn Slayer", "Rapier",
-            "Brittle Arming Sword", "Golden Kopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
+            "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
             "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
             "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
             "Dark Greatsword", "Shining Blade"
@@ -114,7 +114,7 @@ namespace LunacidAP.Data
 
         public static readonly List<string> Switches = new(){
             "Hollow Basin Switch Key", "Temple of Silence Switch Key", "Fetid Mire Switch Key", "Accursed Tomb Switch Keyring",
-            "Prometheus Fire Switch Keyring", "Forbidden Archives Shortcut Switch Key", "Archive Elevator Switch Keyring", 
+            "Prometheus Fire Switch Keyring", "Forbidden Archives Shortcut Switch Key", "Forbidden Archives Elevator Switch Keyring", 
             "Sealed Ballroom Switch Key", "Grotto Fire Switch Keyring", "Sand Temple Switches Keyring",
             "Terminus Prison Back Alley Switch Key", "Forlorn Arena Gate Switch Key", "Temple of Water Switch Key",
             "Temple of Earth Switch Key", "Labyrinth of Ash Switch Key"
