@@ -142,11 +142,31 @@ namespace LunacidAP
             }
         }
 
-        private static string GetSuitableStringLength(string phrase, int size)
+        public static string GetSuitableStringLength(string phrase, int size)
         {
             var length = phrase.Length;
             if (length > size)
             {
+                if (phrase.Any(x => Char.IsWhiteSpace(x)))
+                {
+                    var phraseArray = phrase.Split(' ');
+                    var shortestPhrase = "";
+                    foreach (var word in phraseArray)
+                    {
+                        var previousPhrase = shortestPhrase;
+                        shortestPhrase += word + " ";
+                        
+                        if (shortestPhrase.Length > size)
+                        {
+                            shortestPhrase = previousPhrase;
+                            break;
+                        }
+                    }
+                    if (shortestPhrase != "")
+                    {
+                       return shortestPhrase + "..."; 
+                    }  
+                }
                 return phrase.Substring(0, size);
             }
             return phrase;
@@ -178,7 +198,7 @@ namespace LunacidAP
                 var itemData = ConnectionData.ScoutedLocations[chosenLocation];
                 var isProgression = itemData.Classification.HasFlag(ItemFlags.Advancement);
                 var item = itemData.Name;
-                item = GetSuitableStringLength(item, 20);
+                item = GetSuitableStringLength(item, 22);
                 var text = string.Format(creature.Value, location, item);
                 CreatureHints[creature.Key] = new HintData(text, chosenLocation, isProgression, false);
             }
