@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Enums;
-using LunacidAP.Data.ArchipelagoGameItems;
 
 namespace LunacidAP.Data
 {

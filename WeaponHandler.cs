@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -150,6 +149,11 @@ namespace LunacidAP
 
         private static bool IsElementShuffled(string weaponName, out int element)
         {
+            if (ConnectionData.Elements is null)
+            {
+                element = -1;
+                return false;
+            }
             if (ConnectionData.Elements.TryGetValue(weaponName, out string givenElement))
             {
                 if (LunacidItems.WeaponsWithDefaultElement.Contains(weaponName))

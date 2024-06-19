@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
@@ -6,10 +5,7 @@ using Archipelago.MultiClient.Net.Models;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
-using UnityEngine;
-using UnityEngine.Networking.Match;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements.Experimental;
 
 namespace LunacidAP
 {

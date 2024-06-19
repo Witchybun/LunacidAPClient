@@ -1,8 +1,6 @@
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
-using BepInEx.Logging;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace LunacidAP.Data
 {
