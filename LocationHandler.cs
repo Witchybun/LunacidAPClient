@@ -210,11 +210,6 @@ namespace LunacidAP
                     x.APLocationName.Contains(nameHelper)) ?? new LocationData();
                 return foundLocation;
             }
-            else if (ArchipelagoClient.AP.SlotData.Dropsanity && IsDropLocation(sceneName, objectName))
-            {
-                var foundLocation = DropLocations.FirstOrDefault(x => x.GameObjectName == cleanedName) ?? new LocationData();
-                return foundLocation;
-            }
             return new LocationData();
         }
 
@@ -255,7 +250,7 @@ namespace LunacidAP
             return;
         }
 
-        private static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
+        public static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
         {
             if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.
             {
@@ -466,7 +461,7 @@ namespace LunacidAP
                     return true;
                 }
             }
-            foreach (var location in LunacidLocations.DropLocations)
+            foreach (var location in LunacidLocations.UniqueDropLocations)
             {
                 if (objectNameNoClone == location.GameObjectName)
                 {

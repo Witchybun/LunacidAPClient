@@ -1,23 +1,21 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using BepInEx.Logging;
+using LunacidAP.Data;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
+using System.Threading.Tasks;
+using static LunacidAP.Data.LunacidLocations;
+using Archipelago.MultiClient.Net.Models;
+using Archipelago.Gifting.Net.Service;
+
 namespace LunacidAP
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Archipelago.MultiClient.Net;
-    using Archipelago.MultiClient.Net.Enums;
-    using Archipelago.MultiClient.Net.Helpers;
-    using Archipelago.MultiClient.Net.Packets;
-    using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
-    using BepInEx.Logging;
-    using LunacidAP.Data;
-    using UnityEngine;
-    using UnityEngine.SceneManagement;
-    using System.Collections;
-    using System.Threading.Tasks;
-    using static LunacidAP.Data.LunacidLocations;
-    using Archipelago.MultiClient.Net.Models;
-
-
     public class ArchipelagoClient : MonoBehaviour
     {
         public const string GAME_NAME = "Lunacid";
@@ -28,9 +26,12 @@ namespace LunacidAP
         public int SlotID;
         private int cheatedCount;
         private int Stack;
+        private int GiftCounter = 0;
         private CONTROL Control;
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
+        public GiftingService Gifting { get; private set; }
+        private GiftHelper giftHelper { get; set; }
 
         private bool _connected;
         public bool Authenticated
@@ -73,7 +74,7 @@ namespace LunacidAP
             _log.LogInfo($"Connecting: {slotName}, {hostName}, {port}");
             IsConnecting = true;
             Authenticated = false;
-            var minimumVersion = new Version(0, 4, 5);
+            var minimumVersion = new Version(0, 5, 0);
             Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
             var connectTask = Task.Run(Session.ConnectAsync);
             yield return new WaitUntil(() => connectTask.IsCompleted);
@@ -177,6 +178,9 @@ namespace LunacidAP
                 ConnectionData.DeathLink = true;
                 InitializeDeathLink();
             }
+            Gifting = new GiftingService(Session);
+            giftHelper = new GiftHelper(_log);
+            Gifting.OpenGiftBox();
             cheatedCount = 0;
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
@@ -220,28 +224,42 @@ namespace LunacidAP
         }
 
         private void Update()
-        {     
+        {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            if (Session is not null && Session.Items.Any() && IsInNormalGameState())
+            if (Session is not null && IsInNormalGameState())
             {
-                var item = Session.Items.DequeueItem();
-                if (item.LocationId >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.LocationId && item.ItemId == x.ItemId))
+                if (Session.Items.Any())
                 {
+                    HandleReceivedItems();
+                }
+                GiftCounter += 1;
+                if (GiftCounter > 60)
+                {
+                    giftHelper.HandleIncomingGifts();
+                    GiftCounter = 0;
+                }
+            }
+        }
+
+        private void HandleReceivedItems()
+        {
+            var item = Session.Items.DequeueItem();
+            if (item.LocationId >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.LocationId && item.ItemId == x.ItemId))
+            {
+                var receivedItem = new ReceivedItem(item);
+                ConnectionData.ReceivedItems.Add(receivedItem);
+                StartCoroutine(ReceiveItem(receivedItem));
+            }
+            else if (item.LocationId < 0)
+            {
+                _log.LogInfo($"Cheated Count {cheatedCount} before increment vs {ConnectionData.CheatedCount}");
+                cheatedCount++;
+                if (cheatedCount > ConnectionData.CheatedCount)
+                {
+                    ConnectionData.CheatedCount = cheatedCount;
                     var receivedItem = new ReceivedItem(item);
                     ConnectionData.ReceivedItems.Add(receivedItem);
                     StartCoroutine(ReceiveItem(receivedItem));
-                }
-                else if (item.LocationId < 0)
-                {
-                    _log.LogInfo($"Cheated Count {cheatedCount} before increment vs {ConnectionData.CheatedCount}");
-                    cheatedCount++;
-                    if (cheatedCount > ConnectionData.CheatedCount)
-                    {
-                        ConnectionData.CheatedCount = cheatedCount;
-                        var receivedItem = new ReceivedItem(item);
-                        ConnectionData.ReceivedItems.Add(receivedItem);
-                        StartCoroutine(ReceiveItem(receivedItem));
-                    }
                 }
             }
         }
@@ -342,9 +360,20 @@ namespace LunacidAP
                     locations.Add((int)location.APLocationID);
                 }
             }
-            if (SlotData.Dropsanity)
+            if (SlotData.Dropsanity != Dropsanity.Off)
             {
-                foreach (var location in LunacidLocations.DropLocations)
+                foreach (var location in LunacidLocations.UniqueDropLocations)
+                {
+                    if (location.IgnoreLocationHandler == true)
+                    {
+                        continue;
+                    }
+                    locations.Add((int)location.APLocationID);
+                }
+            }
+            if (SlotData.Dropsanity == Dropsanity.Randomized)
+            {
+                foreach (var location in LunacidLocations.OtherDropLocations)
                 {
                     if (location.IgnoreLocationHandler == true)
                     {

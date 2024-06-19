@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using BepInEx.Logging;
 using LunacidAP.Data;
-using UnityEngine.SceneManagement;
+using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP
 {
@@ -81,6 +81,7 @@ namespace LunacidAP
                 Entrances = ConnectionData.Entrances,
                 ScoutedLocations = ConnectionData.ScoutedLocations,
                 EnteredScenes = ConnectionData.EnteredScenes,
+                ReceivedGifts = ConnectionData.ReceivedGifts,
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
@@ -114,7 +115,7 @@ namespace LunacidAP
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes);
+                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts);
                     return;
                 }
 
@@ -147,5 +148,6 @@ namespace LunacidAP
         public Dictionary<string, string> Entrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
         public List<string> EnteredScenes;
+        public List<ReceivedGift> ReceivedGifts;
     }
 }

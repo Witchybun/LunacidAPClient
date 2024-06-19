@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP.Data
 {
@@ -20,11 +21,12 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
         public static List<string> EnteredScenes = new(){};
+        public static List<ReceivedGift> ReceivedGifts = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
-        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null)
+        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null)
         {
             HostName = hostName;
             Port = port;
@@ -61,9 +63,13 @@ namespace LunacidAP.Data
             {
                 ScoutedLocations = scouts;
             }
-            if (EnteredScenes is not null)
+            if (enteredScenes is not null)
             {
                 EnteredScenes = enteredScenes;
+            }
+            if (receivedGifts is not null)
+            {
+                ReceivedGifts = receivedGifts;
             }
         }
 
@@ -84,6 +90,7 @@ namespace LunacidAP.Data
             Entrances = new(){};
             ScoutedLocations = new(){};
             EnteredScenes = new(){};
+            ReceivedGifts = new(){};
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){

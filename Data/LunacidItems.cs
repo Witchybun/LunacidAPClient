@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using Archipelago.Gifting.Net.Giftboxes;
-using Archipelago.Gifting.Net.Traits;
-using Archipelago.MultiClient.Net.Enums;
 
 namespace LunacidAP.Data
 {
@@ -34,7 +30,8 @@ namespace LunacidAP.Data
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
-            "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago", "Tent", "Strange Coin"
+            "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago", "Tent", "Strange Coin",
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
         public static readonly List<string> Weapons = new(){
@@ -103,7 +100,8 @@ namespace LunacidAP.Data
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
-            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Tent", "Curry"
+            "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Sheryl's Initial Offerings Voucher", 
+            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
         public static readonly List<string> Materials = new(){
@@ -126,6 +124,10 @@ namespace LunacidAP.Data
             "Light Accursed Door Key", "Queen's Throne Door Key", "Prison Main Door Key", "Secondary Lock Key",
             "Burning Hot Key", "Forbidden Door Key", "Sucsarian Key", "Dreamer Key", "Ballroom Side Rooms Keyring",
             "Tower of Abyss Keyring"
+        };
+
+        public static readonly List<string> Traps = new(){
+            "Bleed Trap", "Poison Trap", "Curse Trap", "Slowness Trap", "Blindness Trap", "Mana Drain Trap", "XP Drain Trap",
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){

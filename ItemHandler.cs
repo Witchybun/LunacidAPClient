@@ -1,8 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -11,7 +11,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 namespace LunacidAP
 {
@@ -106,74 +105,74 @@ namespace LunacidAP
             return true;
         }
 
-        private static string ColorText(string phrase, string hex)
-        {
-            return $"<color=${hex}>{phrase}</color>";
-        }
-
-        public static void GiveLunacidItem(long itemID, ItemFlags itemFlag, string player = "", bool self = false)
+        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false)
         {
             if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
             {
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 ApplyItemToInventory("Orb of a Lost Archipelago");
             }
-            string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
             string color = ArchipelagoClient.FlagColor(itemFlag);
-            Name = ProgressiveSymbolHandler(Name);
-            if (LunacidFlags.ItemToFlag.Keys.Contains(Name))
+            itemName = ProgressiveSymbolHandler(itemName);
+            if (LunacidFlags.ItemToFlag.Keys.Contains(itemName))
             {
-                FlagHandler.HandleFlagGivenItemName(Name);
+                FlagHandler.HandleFlagGivenItemName(itemName);
             }
-            var type = IdentifyItemGetType(Name);
+            var type = IdentifyItemGetType(itemName);
             if (type == 1 || type == 2)
             {
-                Name = Name.ToUpper();
+                itemName = itemName.ToUpper();
             }
             switch (type)
             {
                 case 1:
                     {
-                        GiveWeapon(Name, color, player, self);
+                        GiveWeapon(itemName, color, player, self);
                         return;
                     }
                 case 2:
                     {
-                        GiveSpell(Name, color, player, self);
+                        GiveSpell(itemName, color, player, self);
                         return;
                     }
                 case 0:
                     {
-                        GiveSilver(Name, player, self);
+                        GiveSilver(itemName, player, self);
                         return;
                     }
                 case 4:
                     {
-                        GiveItem(Name, color, player, self);
+                        GiveItem(itemName, color, player, self);
                         return;
                     }
                 case 3:
                     {
-                        GiveMaterial(Name, color, player, self);
+                        GiveMaterial(itemName, color, player, self);
                         return;
                     }
                 case -1:
                     {
-                        GiveSwitch(Name, color, player, self);
+                        GiveSwitch(itemName, color, player, self);
                         return;
                     }
                 case -2:
                     {
-                        GiveDoor(Name, color, player, self);
+                        GiveDoor(itemName, color, player, self);
                         return;
                     }
             }
-            if (Name.Contains(" Trap"))
+            if (itemName.Contains(" Trap"))
             {
-                GiveTrap(Name, color, player, self);
+                GiveTrap(itemName, color, player, self);
                 return;
             }
-            _log.LogError($"Supplied item {Name} was not caught by any of the given cases");
+            _log.LogError($"Supplied item {itemName} was not caught by any of the given cases");
+        }
+
+        public static void GiveLunacidItem(long itemID, ItemFlags itemFlag, string player = "", bool self = false)
+        {
+            string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
+            GiveLunacidItem(Name, itemFlag, player, self);
         }
 
         public static void GiveLunacidItem(ReceivedItem receivedItem, bool self)
@@ -181,6 +180,17 @@ namespace LunacidAP
 
             GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
             ConnectionData.ReceivedItems.Add(receivedItem);
+        }
+
+        public static void GiveLunacidItem(Gift gift, bool isTrap)
+        {
+            var playerName = ArchipelagoClient.AP.GetPlayerNameFromSlot(gift.SenderSlot);
+            if (isTrap)
+            {
+                GiveLunacidItem(gift.ItemName, ItemFlags.Trap, playerName, false);
+                return;
+            }
+            GiveLunacidItem(gift.ItemName, ItemFlags.None, playerName, false);
         }
 
         private static void PopupCommand(int sprite, string Name, string color, string player, bool self)
@@ -500,16 +510,30 @@ namespace LunacidAP
                     }
                 }
             }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity)
+            if (ArchipelagoClient.AP.SlotData.Dropsanity != Dropsanity.Off)
             {
-                foreach (var locationData in LunacidLocations.DropLocationToScenes)
+                foreach (var locationData in LunacidLocations.UniqueDropLocations)
                 {
-                    if (locationData.Value.Contains(sceneName))
+                    var enemyName = locationData.APLocationName.Split(':')[0];
+                    if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
                     {
-                        var locationID = ArchipelagoClient.AP.GetLocationIDFromName(locationData.Key);
-                        if (!ArchipelagoClient.AP.IsLocationChecked(locationID))
+                        if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
                         {
-                            rightsideLocations.Add(locationData.Key);
+                            rightsideLocations.Add(locationData.APLocationName);
+                        }
+                    }
+                }
+            }
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Randomized)
+            {
+                foreach (var locationData in LunacidLocations.OtherDropLocations)
+                {
+                    var enemyName = locationData.APLocationName.Split(':')[0];
+                    if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
+                    {
+                        if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
+                        {
+                            rightsideLocations.Add(locationData.APLocationName);
                         }
                     }
                 }

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -27,7 +25,11 @@ namespace LunacidAP
             {Goal.EndingE, "E"},
         };
 
-
+        public static readonly Dictionary<Dropsanity, string> DropsanityToString = new(){
+            {Dropsanity.Off, "OFF"},
+            {Dropsanity.Unique, "UNQ"},
+            {Dropsanity.Randomized, "RAN"}
+        };
 
         public NewGameUI(ManualLogSource log)
         {
@@ -256,13 +258,13 @@ namespace LunacidAP
                             create.GetChild(15).gameObject.SetActive(value: true);
                             create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
                             create.GetChild(16).gameObject.SetActive(value: true);
-                            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "DEATH";
+                            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "NORMDROP\nDEATH";
                             create.GetChild(19).gameObject.SetActive(value: true);
-                            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Dropsanity()}\n{Switchlock()}\n{Doorlock()}";
+                            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
                             create.GetChild(20).gameObject.SetActive(value: true);
                             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
                             create.GetChild(21).gameObject.SetActive(value: true);
-                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = Death();
+                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{NormalizedDrops()}\n{Death()}";
                             create.GetChild(8).gameObject.SetActive(value: true);
                             create.GetChild(9).gameObject.SetActive(value: true);
                             create.GetChild(17).gameObject.SetActive(value: true);
@@ -295,10 +297,10 @@ namespace LunacidAP
             var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
             create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
             create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
-            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "DEATH";
-            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Dropsanity()}\n{Switchlock()}\n{Doorlock()}";
+            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "NORMDROP\nDEATH";
+            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
-            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = Death();
+            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{NormalizedDrops()}\n{Death()}";
         }
 
         private static string Ending()
@@ -311,9 +313,9 @@ namespace LunacidAP
             return ArchipelagoClient.AP.SlotData.Shopsanity ? "Y" : "N";
         }
 
-        private static string Dropsanity()
+        private static string Drops()
         {
-            return ArchipelagoClient.AP.SlotData.Dropsanity ? "Y" : "N";
+            return DropsanityToString[ArchipelagoClient.AP.SlotData.Dropsanity];
         }
 
         private static string Switchlock()
@@ -349,6 +351,11 @@ namespace LunacidAP
         private static string Filler()
         {
             return ArchipelagoClient.AP.SlotData.Fillerbundle.ToString();
+        }
+
+        private static string NormalizedDrops()
+        {
+            return ArchipelagoClient.AP.SlotData.NormalizedDrops ? "Y": "N";
         }
 
         private static string Death()

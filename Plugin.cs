@@ -1,14 +1,8 @@
-﻿
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Archipelago.MultiClient.Net.Enums;
-using Archipelago.MultiClient.Net.MessageLog.Messages;
-using Archipelago.MultiClient.Net.Packets;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.Data;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace LunacidAP
@@ -31,6 +25,7 @@ namespace LunacidAP
         public ExpHandler ExpHandler {get; private set;}
         public SwapperHandler SwapperHandler {get; private set;}
         public MuseHandler MuseHandler {get; private set;}
+        public EnemyHandler EnemyHandler {get; private set;}
         public NewGameUI UI {get; private set;}
         private void Awake()
         {
@@ -53,6 +48,7 @@ namespace LunacidAP
                 ShopHandler = new ShopHandler(Log);
                 TeleportHandler = new TeleportHandler(Log);
                 SwapperHandler = new SwapperHandler(Log);
+                EnemyHandler = new EnemyHandler(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);

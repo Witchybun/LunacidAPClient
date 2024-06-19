@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using Newtonsoft.Json;
@@ -23,6 +22,7 @@ namespace LunacidAP
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
+        private const string NORM_DROP_KEY = "normalized_drops";
         private const string DL_KEY = "death_link";
         private const string RANDOM_ELE_KEY = "random_elements";
         private const string ELE_DICT_KEY = "elements";
@@ -36,7 +36,8 @@ namespace LunacidAP
         public int StartingClass {get; private set;}
         public bool EntranceRandomizer {get; private set;}
         public string ClientVersion {get; private set;}
-        public bool Dropsanity {get; private set;}
+        public Dropsanity Dropsanity {get; private set;}
+        public bool NormalizedDrops {get; private set;}
         public bool Shopsanity {get; private set;}
         public bool Switchlock {get; private set;}
         public bool Doorlock {get; private set;}
@@ -59,7 +60,8 @@ namespace LunacidAP
             EntranceRandomizer = GetSlotSetting(ER_KEY, false);
             Seed = GetSlotSetting(SEED_KEY, 0);
             ClientVersion = GetSlotSetting(VERSION, "0.0.0");
-            Dropsanity = GetSlotSetting(DROP_KEY, false);
+            Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
+            NormalizedDrops = GetSlotSetting(NORM_DROP_KEY, false);
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
             Doorlock = GetSlotSetting(DOOR_KEY, false);
@@ -94,6 +96,11 @@ namespace LunacidAP
         private Goal GetSlotSetting(string key, Goal defaultValue)
         {
             return (Goal)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Goal), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
+        }
+
+        private Dropsanity GetSlotSetting(string key, Dropsanity defaultValue)
+        {
+            return (Dropsanity)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Dropsanity), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private string GetSlotSetting(string key, string defaultValue)
@@ -146,5 +153,12 @@ namespace LunacidAP
         EndingB = 2,
         EndingCD = 3,
         EndingE = 4,
+    }
+
+    public enum Dropsanity
+    {
+        Off = 0,
+        Unique = 1,
+        Randomized = 2,
     }
 }

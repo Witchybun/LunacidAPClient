@@ -13,7 +13,7 @@ namespace LunacidAP.Data
             public Vector3 Position { get; set; }
             public bool IgnoreLocationHandler { get; set; }
 
-            public LocationData(long locationID, string apLocationName, string gameObjectName, Vector3 position, bool ignoreLocationHandler = false)
+            public LocationData(long locationID, string apLocationName, string gameObjectName = "", Vector3 position = new Vector3(), bool ignoreLocationHandler = false)
             {
                 APLocationID = locationID;
                 APLocationName = apLocationName;
@@ -32,60 +32,180 @@ namespace LunacidAP.Data
             }
         }
 
-        public static readonly List<LocationData> DropLocations = new(){
-            new LocationData( 409, "Snail: Summon Snail Drop", "SUMMON_SNAIL", new Vector3() ),
-            new LocationData( 410, "Mummy: Rusted Sword Drop", "RUSTED_SWORD_PICKUP", new Vector3() ),
-            new LocationData( 411, "Kodama: Summon Kodama Drop", "SUMMON_KODAMA", new Vector3() ),
-            new LocationData( 412, "Chimera: Quick Stride Drop", "QUICK_STRIDE", new Vector3() ),
-            new LocationData( 413, "Milk Snail: Ice Sickle Drop", "SICKLE_PICKUP", new Vector3() ),
-            new LocationData( 414, "Skeleton: Skeleton Axe Drop", "SKELE_AXE_PICKUP", new Vector3() ),
-            new LocationData( 415, "Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP", new Vector3() ),
-            new LocationData( 416, "Phantom: Cursed Blade Drop", "CURSED_BLADE_PICKUP", new Vector3() ),
-            new LocationData( 417, "Obsidian Skeleton: Obsidian Cursebrand Drop", "OBS_SWORD_PICKUP", new Vector3() ),
-            new LocationData( 418, "Obsidian Skeleton: Obsidian Poisonguard Drop", "OBS_SHIELD_PICKUP", new Vector3() ),
-            new LocationData( 419, "Anpu: Golden Kopesh Drop", "GOLDEN_KOPESH_PICKUP", new Vector3() ),
-            new LocationData( 420, "Anpu: Golden Sickle Drop", "GOLDEN_SICKLE_PICKUP", new Vector3() ),
-            new LocationData( 421, "Malformed Horse: Brittle Arming Sword Drop", "BRITTLE_PICKUP", new Vector3() ),
-            new LocationData( 422, "Jailor: Jailor's Candle Drop", "CANDLE_WEP_PICKUP", new Vector3() ),
-            new LocationData( 423, "Vampire Page: Lyrian Longsword Drop", "VP_SWORD_PICKUP", new Vector3() ),
-            new LocationData( 424, "Sucsarian: Sucsarian Spear", "SUS_SPEAR_PICKUP", new Vector3() ),
-            new LocationData( 425, "Sucsarian: Sucsarian Dagger Drop", "SUS_DAGGER_PICKUP", new Vector3() ),
-            new LocationData( 426, "Cetea: Tornado Drop", "TORNADO_PICKUP", new Vector3() ),
-            new LocationData( 427, "Abyssal Demon: Ocean Elixir Drop", "OCEAN_ELIXIR_PICKUP", new Vector3() ),
+        public static readonly List<LocationData> UniqueDropLocations = new(){
+            new LocationData( 409, "Snail: Summon Snail Drop", "SUMMON_SNAIL" ),
+            new LocationData( 410, "Mummy: Rusted Sword Drop", "RUSTED_SWORD_PICKUP" ),
+            new LocationData( 411, "Kodama: Summon Kodama Drop", "SUMMON_KODAMA" ),
+            new LocationData( 412, "Chimera: Quick Stride Drop", "QUICK_STRIDE" ),
+            new LocationData( 413, "Milk Snail: Ice Sickle Drop", "SICKLE_PICKUP" ),
+            new LocationData( 414, "Skeleton: Skeleton Axe Drop", "SKELE_AXE_PICKUP" ),
+            new LocationData( 415, "Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
+            new LocationData( 416, "Phantom: Cursed Blade Drop", "CURSED_BLADE_PICKUP" ),
+            new LocationData( 417, "Obsidian Skeleton: Obsidian Cursebrand Drop", "OBS_SWORD_PICKUP" ),
+            new LocationData( 418, "Obsidian Skeleton: Obsidian Poisonguard Drop", "OBS_SHIELD_PICKUP" ),
+            new LocationData( 419, "Anpu: Golden Khopesh Drop", "GOLDEN_KOPESH_PICKUP" ),
+            new LocationData( 420, "Anpu: Golden Sickle Drop", "GOLDEN_SICKLE_PICKUP" ),
+            new LocationData( 421, "Malformed Horse: Brittle Arming Sword Drop", "BRITTLE_PICKUP" ),
+            new LocationData( 422, "Jailor: Jailor's Candle Drop", "CANDLE_WEP_PICKUP" ),
+            new LocationData( 423, "Vampire Page: Lyrian Longsword Drop", "VP_SWORD_PICKUP" ),
+            new LocationData( 424, "Sucsarian: Sucsarian Spear", "SUS_SPEAR_PICKUP" ),
+            new LocationData( 425, "Sucsarian: Sucsarian Dagger Drop", "SUS_DAGGER_PICKUP" ),
+            new LocationData( 426, "Giant Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
+            new LocationData( 427, "Cetea: Tornado Drop", "TORNADO_PICKUP" ),
+            new LocationData( 428, "Abyssal Demon: Ocean Elixir Drop", "OCEAN_ELIXIR_PICKUP" ),
         };
 
-        public static readonly Dictionary<string, List<string>> DropLocationToScenes = new(){
-            {"Snail: Summon Snail Drop", new List<string>(){"PITT_A1"}},
-            {"Mummy: Rusted Sword Drop", new List<string>(){"PITT_A1"}},
-            {"Kodama: Summon Kodama Drop", new List<string>(){"FOREST_A1"}},
-            {"Chimera: Quick Stride Drop", new List<string>(){"ARCHIVES"}},
-            {"Milk Snail: Ice Sickle Drop", new List<string>(){"PITT_A1", "ARCHIVES"}},
-            {"Skeleton: Skeleton Axe Drop", new List<string>(){"SEWERS_A1", "CAVE", "HAUNT", "PRISON"}},
-            {"Skeleton: Dark Skull Drop", new List<string>(){"SEWERS_A1", "CAVE", "HAUNT", "PRISON"}},
-            {"Phantom: Cursed Blade Drop", new List<string>(){"CAS_1", "CAS_3", "HAUNT"}},
-            {"Obsidian Skeleton: Obsidian Cursebrand Drop", new List<string>(){"CAVE", "PRISON"}},
-            {"Obsidian Skeleton: Obsidian Poisonguard Drop", new List<string>(){"CAVE", "PRISON"}},
-            {"Anpu: Golden Kopesh Drop", new List<string>(){"CAVE"}},
-            {"Anpu: Golden Sickle Drop", new List<string>(){"CAVE"}},
-            {"Malformed Horse: Brittle Arming Sword Drop", new List<string>(){"CAS_3"}},
-            {"Jailor: Jailor's Candle Drop", new List<string>(){"PRISON"}},
-            {"Vampire Page: Lyrian Longsword Drop", new List<string>(){"CAS_1"}},
-            {"Sucsarian: Sucsarian Spear", new List<string>(){"ARENA"}},
-            {"Sucsarian: Sucsarian Dagger Drop", new List<string>(){"ARENA"}},
-            {"Cetea: Tornado Drop", new List<string>(){"VOID"}},
-            {"Abyssal Demon: Ocean Elixir Drop", new List<string>(){"LAKE", "HAUNT"}}
+        public static readonly List<LocationData> OtherDropLocations = new(){
+            new LocationData( 440, "Snail: Small Silver Drop" ),
+            new LocationData( 441, "Snail: Large Silver Drop" ),
+            new LocationData( 442, "Snail: Ocean Bone Shard Drop" ),
+            new LocationData( 443, "Milk Snail: Small Silver Drop" ),
+            new LocationData( 444, "Milk Snail: Large Silver Drop" ),
+            new LocationData( 445, "Milk Snail: Ocean Bone Shard Drop" ),
+            new LocationData( 446, "Shulker: Obsidian Drop" ),
+            new LocationData( 447, "Shulker: Onyx Drop" ),
+            new LocationData( 448, "Mummy: Mana Vial Drop" ),
+            new LocationData( 449, "Mummy: Onyx Drop" ),
+            new LocationData( 450, "Mummy: Small Silver Drop" ),
+            new LocationData( 451, "Mummy Knight: Medium Silver Drop" ),
+            new LocationData( 452, "Necronomicon: Fire Opal Drop" ),
+            new LocationData( 453, "Necronomicon: Small Silver Drop" ),
+            new LocationData( 454, "Necronomicon: Medium Silver Drop" ),
+            new LocationData( 455, "Necronomicon: Mana Vial Drop" ),
+            new LocationData( 456, "Chimera: Light Urn Drop" ),
+            new LocationData( 457, "Chimera: Holy Water Drop" ),
+            new LocationData( 458, "Enlightened One: Mana Vial Drop" ),
+            new LocationData( 459, "Enlightened One: Ocean Bone Shell Drop" ),
+            new LocationData( 460, "Slime Skeleton: Ashes Drop" ),
+            new LocationData( 461, "Skeleton: Medium Silver Drop" ),
+            new LocationData( 462, "Skeleton: Mana Vial" ),
+            new LocationData( 463, "Skeleton: Onyx Drop" ),
+            new LocationData( 464, "Skeleton: Bones Drop" ),
+            new LocationData( 465, "Rat King: Medium Silver Drop" ),
+            new LocationData( 466, "Rat King: Lotus Seed Pod Drop" ),
+            new LocationData( 467, "Rat: Small Silver Drop" ),
+            new LocationData( 468, "Kodama: Small Silver Drop" ),
+            new LocationData( 469, "Kodama: Medium Silver Drop" ),
+            new LocationData( 470, "Kodama: Opal Drop" ),
+            new LocationData( 471, "Yakul: Medium Silver Drop" ),
+            new LocationData( 472, "Yakul: Fire Opal Drop" ),
+            new LocationData( 473, "Yakul: Opal Drop" ),
+            new LocationData( 474, "Yakul: Health Vial Drop" ),
+            new LocationData( 475, "Venus: Medium Silver Drop" ),
+            new LocationData( 476, "Venus: Yellow Morel Drop" ),
+            new LocationData( 477, "Venus: Destroying Angel Mushroom Drop" ),
+            new LocationData( 478, "Neptune: Medium Silver Drop" ),
+            new LocationData( 479, "Neptune: Yellow Morel Drop" ),
+            new LocationData( 480, "Neptune: Destroying Angel Mushroom Drop" ),
+            new LocationData( 481, "Unilateralis: Medium Silver Drop" ),
+            new LocationData( 482, "Unilateralis: Yellow Morel Drop" ),
+            new LocationData( 483, "Unilateralis: Destroying Angel Mushroom Drop" ),
+            new LocationData( 484, "Hemalith: Health Vial Drop" ),
+            new LocationData( 485, "Hemalith: Pink Shrimp Drop" ),
+            new LocationData( 486, "Hemalith: Bloodweed Drop" ),
+            new LocationData( 487, "Mi-Go: Ocean Bone Shell Drop" ),
+            new LocationData( 488, "Mi-Go: Medium Silver Drop" ),
+            new LocationData( 489, "Mi-Go: Snowflake Obsidian" ),
+            new LocationData( 490, "Mare: Medium Silver Drop" ),
+            new LocationData( 491, "Mare: Obsidian Drop" ),
+            new LocationData( 492, "Mare: Onyx Drop" ),
+            new LocationData( 493, "Cursed Painting: Fire Opal Drop" ),
+            new LocationData( 494, "Cursed Painting: Medium Silver Drop" ),
+            new LocationData( 495, "Cursed Painting: Mana Vial Pickup" ),
+            new LocationData( 496, "Cursed Painting: Large Silver Drop" ),
+            new LocationData( 497, "Phantom: Medium Silver Drop" ),
+            new LocationData( 498, "Phantom: Holy Water Drop" ),
+            new LocationData( 499, "Phantom: Moonlight Vial Drop" ),
+            new LocationData( 500, "Phantom: Ectoplasm Drop" ),
+            new LocationData( 501, "Vampire: Small Silver Drop" ),
+            new LocationData( 502, "Vampire: Vampiric Ashes Drop" ),
+            new LocationData( 503, "Vampire: Cloth Bandage Drop" ),
+            new LocationData( 504, "Vampire Page: Vampiric Ashes Drop" ),
+            new LocationData( 505, "Vampire Page: Large Silver Drop" ),
+            new LocationData( 506, "Malformed: Vampiric Ashes Drop" ),
+            new LocationData( 507, "Great Bat: Health Vial Drop" ),
+            new LocationData( 508, "Great Bat: Obsidian Drop" ),
+            new LocationData( 509, "Great Bat: Medium Silver Drop" ),
+            new LocationData( 510, "Poltergeist: Medium Silver Drop" ),
+            new LocationData( 511, "Poltergeist: Ectoplasm Drop" ),
+            new LocationData( 512, "Malformed Horse: Medium Silver Drop" ),
+            new LocationData( 513, "Malformed Horse: Mana Vial Drop" ),
+            new LocationData( 514, "Hallowed Husk: Medium Silver Drop" ),
+            new LocationData( 515, "Hallowed Husk: Bones Drop" ),
+            new LocationData( 516, "Hallowed Husk: Cloth Bandage Drop" ),
+            new LocationData( 517, "Hallowed Husk: Light Urn Drop" ),
+            new LocationData( 518, "Hallowed Husk: Fool's Gold Drop" ),
+            new LocationData( 519, "Hallowed Husk: Holy Water Drop" ),
+            new LocationData( 520, "Ikkur'ilb: Ikkur'ilb Root Drop" ),
+            new LocationData( 521, "Ikkur'ilb: Medium Silver Drop" ),
+            new LocationData( 522, "Ikkur'ilb: Snowflake Obsidian Drop" ),
+            new LocationData( 523, "Mimic: Moonlight Vial Drop" ),
+            new LocationData( 524, "Mimic: Obsidian Drop" ),
+            new LocationData( 525, "Mimic: Fools Gold Drop" ),
+            new LocationData( 526, "Obsidian Skeleton: Medium Silver Drop" ),
+            new LocationData( 527, "Obsidian Skeleton: Bones Drop" ),
+            new LocationData( 528, "Obsidian Skeleton: Mana Vial Drop" ),
+            new LocationData( 529, "Obsidian Skeleton: Obsidian Drop" ),
+            new LocationData( 530, "Anpu: Medium Silver Drop" ),
+            new LocationData( 531, "Anpu: Fire Opal Drop" ),
+            new LocationData( 532, "Serpent: Antidote Drop" ),
+            new LocationData( 533, "Serpent: Small Silver Drop" ),
+            new LocationData( 534, "Embalmed: Cloth Bandage Drop" ),
+            new LocationData( 535, "Embalmed: Ashes Drop" ),
+            new LocationData( 536, "Embalmed: Bones Drop" ),
+            new LocationData( 537, "Jailor: Medium Silver Drop" ),
+            new LocationData( 538, "Jailor: Spectral Candle Drop" ),
+            new LocationData( 539, "Jailor: Cloth Bandage Drop" ),
+            new LocationData( 540, "Jailor: Health Vial Drop" ),
+            new LocationData( 541, "Jailor: Angel's Feather Drop" ),
+            new LocationData( 542, "Cerritulus Lunam: Ectoplasm Drop" ),
+            new LocationData( 543, "Cerritulus Lunam: Medium Silver Drop" ),
+            new LocationData( 544, "Cerritulus Lunam: Snowflake Obsidian Drop" ),
+            new LocationData( 545, "Giant Skeleton: Dark Urn Drop" ),
+            new LocationData( 546, "Giant Skeleton: Bones Drop" ),
+            new LocationData( 547, "Giant Skeleton: Mana Vial Drop" ),
+            new LocationData( 548, "Giant Skeleton: Onyx Drop" ),
+            new LocationData( 549, "Sucsarian: Medium Silver Drop" ),
+            new LocationData( 550, "Sucsarian: Obsidian Drop" ),
+            new LocationData( 551, "Sucsarian: Snowflake Obsidian Drop" ),
+            new LocationData( 552, "Sucsarian: Throwing Knife Drop" ),
+            new LocationData( 553, "Vesta: Fairy Moss Drop" ),
+            new LocationData( 554, "Vesta: Yellow Morel Drop" ),
+            new LocationData( 555, "Vesta: Destroying Angel Mushroom Drop" ),
+            new LocationData( 556, "Ceres: Fairy Moss Drop" ),
+            new LocationData( 557, "Ceres: Yellow Morel Drop" ),
+            new LocationData( 558, "Ceres: Destroying Angel Mushroom Drop" ),
+            new LocationData( 559, "Gloom Wood: Fairy Moss Drop" ),
+            new LocationData( 560, "Gloom Wood: Yellow Morel Drop" ),
+            new LocationData( 561, "Gloom Wood: Destroying Angel Mushroom Drop" ),
+            new LocationData( 562, "Cetea: Medium Silver Drop" ),
+            new LocationData( 563, "Cetea: Ocean Bone Shell Drop" ),
+
+
         };
 
         public static readonly List<LocationData> ShopLocations = new(){
-            new LocationData( 360, "Buy Rapier", "RAPIER_PICKUP", new Vector3() ),
-            new LocationData( 361, "Buy Crossbow", "CROSSBOW_PICKUP", new Vector3() ),
-            new LocationData( 362, "Buy Oil Lantern", "LANT_PICKUP", new Vector3() ),
-            new LocationData( 363, "Buy Enchanted Key", "ENKEY_PICKUP", new Vector3() ),
-            new LocationData( 364, "Buy Jotunn Slayer", "SLAYER_PICKUP", new Vector3() ),
-            new LocationData( 365, "Buy Privateer Musket", "MUSKET_PICKUP", new Vector3() ),
-            new LocationData( 366, "Buy Steel Needle", "STEELNEEDLE_PICKUP", new Vector3() ),
-            new LocationData( 367, "Buy Ocean Elixir (Sheryl)", "OCEAN_ELIXIR_PICKUP", new Vector3() ),
-            new LocationData( 368, "Buy Ocean Elixir (Patchouli)", "OCEAN_ELIXIR_PICKUP", new Vector3() ),
+            new LocationData( 360, "Buy Rapier", "RAPIER_PICKUP" ),
+            new LocationData( 361, "Buy Crossbow", "CROSSBOW_PICKUP" ),
+            new LocationData( 362, "Buy Oil Lantern", "LANT_PICKUP" ),
+            new LocationData( 363, "Buy Enchanted Key", "ENKEY_PICKUP" ),
+            new LocationData( 364, "Buy Jotunn Slayer", "SLAYER_PICKUP" ),
+            new LocationData( 365, "Buy Privateer Musket", "MUSKET_PICKUP" ),
+            new LocationData( 366, "Buy Steel Needle", "STEELNEEDLE_PICKUP" ),
+            new LocationData( 367, "Buy Ocean Elixir (Sheryl)", "OCEAN_ELIXIR_PICKUP" ),
+            new LocationData( 368, "Buy Ocean Elixir (Patchouli)", "OCEAN_ELIXIR_PICKUP" ),
+        };
+
+        public static readonly List<string> InitialVoucherItems = new(){
+            "Enchanted Key", "RAPIER", "STEEL NEEDLE", "CROSSBOW"
+        };
+
+        public static readonly List<string> GoldenVoucherItems = new(){
+            "Oil Lantern", "PRIVATER MUSKET"
+        };
+
+        public static readonly List<string> DreamerVoucherItems = new(){
+            "Ocean Elixir", "JOTUNN SLAYER"
         };
 
         public static readonly Dictionary<string, List<LocationData>> APLocationData = new(){
@@ -96,7 +216,7 @@ namespace LunacidAP.Data
             new LocationData( 2, "WR: Bench", "CRYSTAL_SHARD_PICKUP", new Vector3(2.6f, 0.8f, -22.2f) ),
             new LocationData( 3, "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3(14.5f, 1.3f, -1.9f) ),
             new LocationData( 4, "WR: Demi's Victory Gift", "VHS_PICKUP", new Vector3(-4.1f, 1.3f, -11.2f) ),
-            new LocationData( 5, "WR: Demi's Introduction Gift", "", new Vector3(-4.1f, 1.3f, -11.2f)),
+            new LocationData( 5, "WR: Demi's Introduction Gift", position: new Vector3(-4.1f, 1.3f, -11.2f)),
 
         }
             },
@@ -123,7 +243,7 @@ namespace LunacidAP.Data
             new LocationData( 26, "HB: Temple Pillar Room Hidden Room", "BLOOD_STRIKE", new Vector3(5.8f, -24.3f, 113.0f) ),
             new LocationData( 27, "HB: Temple Hidden Room In Sewer", "VHS_PICKUP", new Vector3(142.9f, -26.2f, 75.0f) ),
             new LocationData( 28, "HB: Temple Table in Sewer", "RUSTED_SWORD_PICKUP", new Vector3(126.2f, -23.4f, 204.3f) ),
-            new LocationData( 29, "HB: Temple Sewer Puzzle", "ENKEY_PICKUP", new Vector3() ),
+            new LocationData( 29, "HB: Temple Sewer Puzzle", "ENKEY_PICKUP" ),
             new LocationData( 30, "HB: Temple Blood Altar", "COIN_PICKUP", new Vector3(117.6f, -23.2f, 70.0f) ),
             new LocationData( 31, "HB: Alcove on Path to Yosei Forest", "STEEL_SPEAR_PICKUP", new Vector3(49.9f, -8.5f, 12.3f) ),
 
@@ -156,7 +276,7 @@ namespace LunacidAP.Data
                     new LocationData( 58, "SS: Pillar In Front of Castle Le Fanu", "DAGGER_PICKUP", new Vector3(11.8f, 13.9f, 182.6f) ),
                     new LocationData( 59, "SS: Underblood Near Castle Le Fanu", "RAPIER_PICKUP", new Vector3(-4.2f, -9.2f, 270.0f) ),
                     new LocationData( 60, "SS: Fairy Circle", "FAIRY", new Vector3(-258.1f, 2.6f, -253.7f) ),
-                    new LocationData( 61, "SS: Killing the Jotunn", "COIN_PICKUP", new Vector3() ), // no position, but this works
+                    new LocationData( 61, "SS: Killing the Jotunn", "COIN_PICKUP" ), // no position, but this works
                 }
             },
             {
@@ -178,7 +298,7 @@ namespace LunacidAP.Data
                     new LocationData( 80, "AT: Mausoleum Central Room (Back)", "EARTH_ELIXIR_PICKUP", new Vector3(293.9f, -20.0f, -146.1f) ),
                     new LocationData( 81, "AT: Mausoleum Central Room (Left Path)", "HEALTH_VIAL_PICKUP", new Vector3(261.1f, -21.7f, -53.8f) ),
                     new LocationData( 82, "AT: Mausoleum Central Room (Right Path)", "OCEAN_ELIXIR_PICKUP", new Vector3(290.4f, -21.7f, -246.5f) ),
-                    new LocationData( 83, "AT: Kill Death", "COIN_PICKUP", new Vector3() ),
+                    new LocationData( 83, "AT: Kill Death", "COIN_PICKUP" ),
                     new LocationData( 84, "AT: Tomb With Switch", "DUNPEAL_PICKUP", new Vector3(47.9f, -7.1f, -40.8f) ),
                     new LocationData( 85, "AT: Tomb With Sitting Corpse", "BANNER_PICKUP", new Vector3(151.5f, -10.4f, 3.2f) ),
                     new LocationData( 86, "AT: Demi Chest", "LIGHTNING", new Vector3(155.3f, -3.2f, 73.0f) ),
@@ -256,7 +376,7 @@ namespace LunacidAP.Data
             {
                 "CAS_PITT", // A Holy Battlefield
                 new(){
-                    new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP", new Vector3() )
+                    new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP" )
                 }
             },
             {
@@ -320,16 +440,16 @@ namespace LunacidAP.Data
                 "TOWER", // Tower of Abyss
                 new(){
                     new LocationData( 222, "TA: Prize Beneath Tree", "BLADE_PICKUP", new Vector3(59.9f, -10.0f, -174.9f) ),
-                    new LocationData( 223, "TA: Floor 5 Chest", "MANA_VIAL_PICKUP", new Vector3(), true),
-                    new LocationData( 224, "TA: Floor 10 Chest", "ANTIDOTE_PICKUP", new Vector3(), true),
-                    new LocationData( 225, "TA: Floor 15 Chest", "FAIRY_MOSS_PICKUP", new Vector3(), true),
-                    new LocationData( 226, "TA: Floor 20 Chest", "SPECTRAL_CANDLE_PICKUP", new Vector3(), true),
-                    new LocationData( 227, "TA: Floor 25 Chest", "HEALTH_VIAL_PICKUP", new Vector3(), true),
-                    new LocationData( 228, "TA: Floor 30 Chest", "", new Vector3(), true),
-                    new LocationData( 229, "TA: Floor 35 Chest", "", new Vector3(), true),
-                    new LocationData( 230, "TA: Floor 40 Chest", "CANDLE_PICKUP", new Vector3(), true),
-                    new LocationData( 231, "TA: Floor 45 Chest", "EARTH_ELIXIR_PICKUP", new Vector3(), true),
-                    new LocationData( 232, "TA: Floor 50 Chest", "OCEAN_ELIXIR_PICKUP", new Vector3(), true),
+                    new LocationData( 223, "TA: Floor 5 Chest", "MANA_VIAL_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 224, "TA: Floor 10 Chest", "ANTIDOTE_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 225, "TA: Floor 15 Chest", "FAIRY_MOSS_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 226, "TA: Floor 20 Chest", "SPECTRAL_CANDLE_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 227, "TA: Floor 25 Chest", "HEALTH_VIAL_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 228, "TA: Floor 30 Chest", ignoreLocationHandler: true),
+                    new LocationData( 229, "TA: Floor 35 Chest", ignoreLocationHandler: true),
+                    new LocationData( 230, "TA: Floor 40 Chest", "CANDLE_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 231, "TA: Floor 45 Chest", "EARTH_ELIXIR_PICKUP", ignoreLocationHandler: true),
+                    new LocationData( 232, "TA: Floor 50 Chest", "OCEAN_ELIXIR_PICKUP", ignoreLocationHandler: true),
                 }
             },
             {
@@ -397,7 +517,7 @@ namespace LunacidAP.Data
             {
                 "ARENA2", // Chamber of Fate
                 new(){
-                    new LocationData( 319, "CF: Calamis' Weapon of Choice", "", new Vector3(), true)
+                    new LocationData( 319, "CF: Calamis' Weapon of Choice", ignoreLocationHandler: true)
                 }
             }
 
@@ -408,7 +528,7 @@ namespace LunacidAP.Data
             {"HUB_01", "Wing's Rest"},
             {"FOREST_A1", "Yosei Forest"},
             {"FOREST_B1", "Forest Canopy"},
-            {"SEWERS_A1", "The Fetid Mire"},
+            {"SEWER_A1", "The Fetid Mire"},
             {"ARCHIVES", "Forbidden Archives"},
             {"WALL_01", "Laetus Chasm"},
             {"PITT_B1", "Great Well Surface"},
