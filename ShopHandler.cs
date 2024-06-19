@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
@@ -186,6 +186,114 @@ namespace LunacidAP
             Array.Resize(ref arr, arr.Length - 1);
         }
 
+        [HarmonyPatch(typeof(Menus), "LoadText")]
+        [HarmonyPrefix]
+        private static bool LoadText_ChangeShopTextIfShopsanity_Prefix(Menus __instance, int text2load)
+        {
+            if (ArchipelagoClient.ScenesNotInGame.Contains(__instance.gameObject.scene.name))
+            {
+                return true; // This runs on a lot of stuff; avoid a case where it would try to run on scenes where you can't have initialized AP to begin with.
+            }
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity || text2load != 11)
+            {
+                return true;
+            }
+            __instance.TXT[55].text = __instance.CON.CURRENT_PL_DATA.GOLD.ToString();
+            for (int n = 1; n < __instance.ITEMS[25].transform.parent.childCount; n++)
+            {
+                UnityEngine.Object.Destroy(__instance.ITEMS[25].transform.parent.GetChild(n).gameObject);
+            }
+            EventSystem.current.SetSelectedGameObject(__instance.ITEMS[25]);
+            var sceneName = __instance.gameObject.scene.name;
+            int lengthOfArray = 0;
+            for (int i = 0; i < __instance.SHOP.INV.Length; i++)
+            {
+                if (__instance.SHOP.INV[i].count < 1 && __instance.SHOP.INV[i].OBJ.name != "HEALTH_VIAL_PICKUP" && __instance.SHOP.INV[i].OBJ.name != "MANA_VIAL_PICKUP")
+                {
+                    i = 999;
+                }
+                else
+                {
+                    lengthOfArray++;
+                }
+            }
+            var updatedName = WasGeneralShopDisplayNameUpdated(__instance.ITEMS[25], __instance.SHOP.INV[0], sceneName, out var newName) ? newName : StaticFuncs.REMOVE_NUMS(__instance.SHOP.INV[0].item) + " - <sprite=0>" + __instance.SHOP.INV[0].cost;
+            __instance.ITEMS[25].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = updatedName;
+            _log.LogInfo($"Old: {__instance.SHOP.INV[0].item}, New: {newName}");
+            for (int j = 1; j < lengthOfArray; j++)
+            {
+                GameObject obj = UnityEngine.Object.Instantiate(__instance.ITEMS[25], __instance.ITEMS[25].transform.parent);
+                obj.name = "WEP" + j;
+                _ = WasGeneralShopDisplayNameUpdated(obj, __instance.SHOP.INV[j], sceneName, out var newjthName);
+                obj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = newjthName;
+            }
+            return false;
+        }
+
+        private static bool WasGeneralShopDisplayNameUpdated(GameObject menuUI, Shop_Inventory.INV_ITEMS shopItem, string sceneName, out string newName)
+        {
+            var inventoryText = shopItem.OBJ.name;
+            foreach (var location in LunacidLocations.ShopLocations)
+            {
+                if (inventoryText == location.GameObjectName)
+                {
+                    if (!ConnectionData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
+                    {
+                        _log.LogError($"Location {location.APLocationName} failed in a scout!");
+                        continue;
+                    }
+                    if (item.Classification.HasFlag(ItemFlags.Trap))
+                    {
+                        var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
+                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                        item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
+                    }
+                    var itemName = item.Name;
+                    var itemNameCondensed = CommunionHint.GetSuitableStringLength(itemName, 22);
+                    if (itemNameCondensed != itemName)
+                    {
+                        itemNameCondensed += "...";
+                    }
+                    var cost = " - <sprite=0>" + shopItem.cost.ToString();
+                    if (DetermineItemCost(shopItem, sceneName) == 0)
+                    {
+                        cost = " - FREE!!";
+                    }
+                    newName = itemNameCondensed + cost;
+                    return true;
+                }
+            }
+            newName = shopItem.item + " - <sprite=0>" + shopItem.cost;
+            return false;
+        }
+
+        private static int DetermineItemCost(Shop_Inventory.INV_ITEMS shopItem, string sceneName)
+        {
+            if (sceneName == "FOREST_A1")
+            {
+                if (shopItem.item == "Ocean Elixir" && ArchipelagoClient.AP.WasItemReceived("Patchouli's Drink Voucher"))
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                if (LunacidLocations.InitialVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Initial Offerings Voucher"))
+                {
+                    return 0;
+                }
+                if (LunacidLocations.GoldenVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Golden Armor Voucher"))
+                {
+                    return 0;
+                }
+                if (LunacidLocations.DreamerVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Dreamer Voucher"))
+                {
+                    return 0;
+                }
+            }
+            return shopItem.cost;
+        }
+
         [HarmonyPatch(typeof(Shop_Inventory), "Buy")]
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
@@ -194,11 +302,12 @@ namespace LunacidAP
             {
                 return true;
             }
+            var sceneName = __instance.gameObject.scene.name;
+            __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
             if (LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
             __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
             {
                 var objectName = __instance.INV[which].OBJ.name;
-                var sceneName = __instance.gameObject.scene.name;
                 var apLocation = DetermineShopLocation(sceneName, objectName);
                 var location = +apLocation.APLocationID;
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
@@ -216,7 +325,7 @@ namespace LunacidAP
 
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
-        private static void ItemLoad_ChangeDisplayNameToApItem(Menus __instance)
+        private static void ItemLoad_ChangeDisplayNameToApItem_Postfix(Menus __instance)
         {
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
@@ -234,8 +343,14 @@ namespace LunacidAP
                 }
                 var apLocation = DetermineShopLocation(sceneName, objectName);
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
+                if (locationInfo.Classification.HasFlag(ItemFlags.Trap))
+                    {
+                        var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
+                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                        locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
+                    }
                 var slotName = locationInfo.SlotName;
-                var itemName = locationInfo.Name.Replace("Progressive ", "");
+                var itemName = locationInfo.Name;
                 var itemNameLength = itemName.Length;
                 itemName = itemName.Substring(0, Math.Min(itemNameLength, 25));
                 var gameName = locationInfo.Game;
@@ -253,7 +368,7 @@ namespace LunacidAP
                 var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\nA curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
                 __instance.TXT[56].text = itemName.ToUpper();
                 __instance.TXT[50].text = totalBlurb;
-				__instance.ITEMS[26].SetActive(value: false);
+                __instance.ITEMS[26].SetActive(value: false);
                 __instance.TXT[51].text = "";
                 __instance.TXT[52].text = "";
                 __instance.TXT[53].text = "";
