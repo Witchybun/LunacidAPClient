@@ -182,7 +182,6 @@ namespace LunacidAP
             var random = new System.Random(seed);
             var locationList = ConnectionData.ScoutedLocations.Keys.ToList();
             var locationCount = locationList.Count();
-            _log.LogInfo($"Location Count is {locationCount}");
             var chosenLocations = new List<int>(){};
             foreach (var creature in CreatureToHint)
             {

@@ -15,7 +15,7 @@ namespace LunacidAP.Data
 
             public LocationData(long locationID, string apLocationName, string gameObjectName = "", Vector3 position = new Vector3(), bool ignoreLocationHandler = false)
             {
-                APLocationID = locationID;
+                APLocationID = ArchipelagoClient.LOCATION_INIT_ID + locationID;
                 APLocationName = apLocationName;
                 GameObjectName = gameObjectName;
                 Position = position;
@@ -77,8 +77,8 @@ namespace LunacidAP.Data
             new LocationData( 458, "Enlightened One: Mana Vial Drop" ),
             new LocationData( 459, "Enlightened One: Ocean Bone Shell Drop" ),
             new LocationData( 460, "Slime Skeleton: Ashes Drop" ),
-            new LocationData( 461, "Skeleton: Medium Silver Drop" ),
-            new LocationData( 462, "Skeleton: Mana Vial" ),
+            new LocationData( 461, "Skeleton: Large Silver Drop" ),
+            new LocationData( 462, "Skeleton: Mana Vial Drop" ),
             new LocationData( 463, "Skeleton: Onyx Drop" ),
             new LocationData( 464, "Skeleton: Bones Drop" ),
             new LocationData( 465, "Rat King: Medium Silver Drop" ),
@@ -117,7 +117,7 @@ namespace LunacidAP.Data
             new LocationData( 498, "Phantom: Holy Water Drop" ),
             new LocationData( 499, "Phantom: Moonlight Vial Drop" ),
             new LocationData( 500, "Phantom: Ectoplasm Drop" ),
-            new LocationData( 501, "Vampire: Small Silver Drop" ),
+            new LocationData( 501, "Vampire: Large Silver Drop" ),
             new LocationData( 502, "Vampire: Vampiric Ashes Drop" ),
             new LocationData( 503, "Vampire: Cloth Bandage Drop" ),
             new LocationData( 504, "Vampire Page: Vampiric Ashes Drop" ),
@@ -125,20 +125,20 @@ namespace LunacidAP.Data
             new LocationData( 506, "Malformed: Vampiric Ashes Drop" ),
             new LocationData( 507, "Great Bat: Health Vial Drop" ),
             new LocationData( 508, "Great Bat: Obsidian Drop" ),
-            new LocationData( 509, "Great Bat: Medium Silver Drop" ),
-            new LocationData( 510, "Poltergeist: Medium Silver Drop" ),
+            new LocationData( 509, "Great Bat: Large Silver Drop" ),
+            new LocationData( 510, "Poltergeist: Large Silver Drop" ),
             new LocationData( 511, "Poltergeist: Ectoplasm Drop" ),
-            new LocationData( 512, "Malformed Horse: Medium Silver Drop" ),
+            new LocationData( 512, "Malformed Horse: Large Silver Drop" ),
             new LocationData( 513, "Malformed Horse: Mana Vial Drop" ),
-            new LocationData( 514, "Hallowed Husk: Medium Silver Drop" ),
+            new LocationData( 514, "Hallowed Husk: Large Silver Drop" ),
             new LocationData( 515, "Hallowed Husk: Bones Drop" ),
             new LocationData( 516, "Hallowed Husk: Cloth Bandage Drop" ),
             new LocationData( 517, "Hallowed Husk: Light Urn Drop" ),
             new LocationData( 518, "Hallowed Husk: Fool's Gold Drop" ),
             new LocationData( 519, "Hallowed Husk: Holy Water Drop" ),
-            new LocationData( 520, "Ikkur'ilb: Ikkur'ilb Root Drop" ),
-            new LocationData( 521, "Ikkur'ilb: Medium Silver Drop" ),
-            new LocationData( 522, "Ikkur'ilb: Snowflake Obsidian Drop" ),
+            new LocationData( 520, "Ikurr'ilb: Ikurr'ilb Root Drop" ),
+            new LocationData( 521, "Ikurr'ilb: Medium Silver Drop" ),
+            new LocationData( 522, "Iksurr'ilb: Snowflake Obsidian Drop" ),
             new LocationData( 523, "Mimic: Moonlight Vial Drop" ),
             new LocationData( 524, "Mimic: Obsidian Drop" ),
             new LocationData( 525, "Mimic: Fools Gold Drop" ),
@@ -201,7 +201,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> GoldenVoucherItems = new(){
-            "Oil Lantern", "PRIVATER MUSKET"
+            "Oil Lantern", "PRIVATEER MUSKET"
         };
 
         public static readonly List<string> DreamerVoucherItems = new(){

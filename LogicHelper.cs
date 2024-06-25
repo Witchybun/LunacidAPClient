@@ -1,6 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using UnityEngine.Rendering;
 
 namespace LunacidAP
 {
@@ -16,7 +19,7 @@ namespace LunacidAP
         public Dictionary<string, bool> LocationToLogic { get; private set; }
 
 
-        public bool LogicCases(string location)
+        public bool LogicCases(string location, string sceneName)
         {
             switch (location)
             {
@@ -1038,134 +1041,265 @@ namespace LunacidAP
                     }
                 case "Buy Rapier":
                     {
-                        return true;
+                        return WasItemReceived("Sheryl's Initial Offerings Voucher");
 
                     }
                 case "Buy Steel Needle":
                     {
-                        return CanBuyInitialShopItems();
+                        return WasItemReceived("Sheryl's Initial Offerings Voucher");
                     }
                 case "Buy Crossbow":
                     {
-                        return CanBuyInitialShopItems();
+                        return WasItemReceived("Sheryl's Initial Offerings Voucher");
 
                     }
                 case "Buy Oil Lantern":
                     {
-                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
-
+                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto") && WasItemReceived("Sheryl's Golden Armor Voucher");
                     }
                 case "Buy Ocean Elixir (Sheryl)":
                     {
-                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
+                        return WasItemReceived("Sheryl's Dreamer Voucher");
 
                     }
                 case "Buy Ocean Elixir (Patchouli)":
                     {
-                        return CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});;
+                        return (CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"})) && WasItemReceived("Patchouli's Drink Voucher");;
 
                     }
                 case "Buy Privateer Musket":
                     {
-                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto");
-
+                        return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto") && WasItemReceived("Sheryl's Golden Armor Voucher");
                     }
                 case "Buy Jotunn Slayer":
                     {
-                        return true;
-
+                        return WasItemReceived("Sheryl's Dreamer Voucher");
                     }
-                case "Snail: Summon Snail Drop":
+            }
+            var firstBit = location.Split(':')[0];
+            if (LunacidEnemies.EnemyNames.Contains(firstBit))
+            {
+                return ObtainDropLogic(firstBit, sceneName);
+            }
+            return false;
+        }
+
+        private bool ObtainDropLogic(string enemyName, string sceneName)
+        {
+            switch (enemyName)
+            {
+                case "Snail":
                     {
                         return true;
-
                     }
-                case "Mummy: Rusted Sword Drop":
+                case "Milk Snail":
+                    {
+                        if (sceneName == "ARCHIVES")
+                        {
+                            return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        }
+                        return true;
+                    }
+                case "Mummy":
                     {
                         return CanEnterTemple() && HasSwitch("Temple of Silence Switch Key");
-
                     }
-                case "Milk Snail: Ice Sickle Drop":
+                case "Mummy Knight":
+                    {
+                        return CanEnterTemple() && HasSwitch("Temple of Silence Switch Key");
+                    }
+                case "Shulker":
                     {
                         return true;
-
                     }
-                case "Skeleton: Skeleton Axe Drop":
+                case "Necronomicon":
                     {
                         return true;
-
                     }
-                case "Skeleton: Dark Skull Drop":
+                case "Chimera":
+                    {
+                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                    }
+                case "Enlightened One":
+                    {
+                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                    }
+                case "Slime Skeleton":
                     {
                         return true;
-
                     }
-                case "Phantom: Cursed Blade Drop":
+                case "Skeleton":
+                    {
+                        if (sceneName == "HAUNT")
+                        {
+                            return (CanJumpHeight("Medium") || HasElement("Light")) && HasLightSource();
+                        }
+                        return true;
+                    }
+                case "Rat King":
                     {
                         return true;
-
                     }
-                case "Kodama: Summon Kodama Drop":
+                case "Rat Queen":
                     {
                         return true;
-
                     }
-                case "Chimera: Quick Stride Drop":
+                case "Rat":
                     {
                         return true;
-
                     }
-                case "Vampire Page: Lyrian Longsword Drop":
-                    {
-                        return ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 1);
-                }
-                case "Malformed Horse: Brittle Arming Sword Drop":
+                case "Kodama":
                     {
                         return true;
-
                     }
-                case "Obsidian Skeleton: Obsidian Cursebrand Drop":
+                case "Yakul":
                     {
                         return true;
-
                     }
-                case "Obsidian Skeleton: Obsidian Poisonguard Drop":
+                case "Venus":
                     {
                         return true;
-
                     }
-                case "Anpu: Golden Kopesh Drop":
+                case "Neptune":
+                    {
+                        if (sceneName == "FOREST_B1")
+                        {
+                            return true;
+                        }
+                        return CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});
+                    }
+                case "Unilateralis":
+                    {
+                        return true;
+                    }
+                case "Mimic":
+                    {
+                        return HasDustyOrb();
+                    }
+                case "Hemalith":
+                    {
+                        return true;
+                    }
+                case "Mare":
+                    {
+                        return HasLightSource();
+                    }
+                case "Mi-Go":
+                    {
+                        return HasLightSource();
+                    }
+                case "Phantom":
+                    {
+                        if (sceneName == "HAUNT")
+                        {
+                            return HasLightSource() && HasElement("Light");
+                        }
+                        return true;
+                    }
+                case "Cursed Painting":
+                    {
+                        if (sceneName == "HAUNT")
+                        {
+                            return HasLightSource();
+                        }
+                        return ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 2);
+                    }
+                case "Malformed":
+                    {
+                        return (WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"}) && HasDustyOrb()) || 
+                        ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 2);
+                    }
+                case "Poltergeist":
+                    {
+                        return ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 2);
+                    }
+                case "Great Bat":
+                    {
+                        return IsVampire() || ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 1);
+                    }
+                case "Vampire":
+                    {
+                        return IsVampire() || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"});
+                    }
+                case "Vampire Page":
+                    {
+                        return IsVampire() || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"}) || 
+                        ArchipelagoClient.AP.WasItemCountReceived("Progressive Vampiric Symbol", 1);
+                    }
+                case "Malformed Horse":
+                    {
+                        return true;
+                    }
+                case "Hallowed Husk":
+                    {
+                        return true;
+                    }
+                case "Ikurr'Ilb":
+                    {
+                        return true;
+                    }
+                case "Obsidian Skeleton":
+                    {
+                        if (sceneName == "Prison")
+                        {
+                            return HasLightSource();
+                        }
+                        return true;
+                    }
+                case "Serpent":
                     {
                         return HasSwitch("Grotto Fire Switch Keyring");
-
                     }
-                case "Anpu: Golden Sickle Drop":
+                case "Anpu":
                     {
                         return HasSwitch("Grotto Fire Switch Keyring");
-
                     }
-                case "Jailor: Jailor's Candle Drop":
+                case "Embalmed":
+                    {
+                        return HasSwitch("Grotto Fire Switch Keyring");
+                    }
+                case "Cerritulus Lunam":
+                    {
+                        return HasLightSource();
+                    }
+                case "Jailor":
                     {
                         return true;
-
                     }
-                case "Sucsarian: Sucsarian Dagger Drop":
+                case "Lupine Skeleton":
+                    {
+                        return HasLightSource() || WasItemReceived("Terminus Prison Key");
+                    }
+                case "Giant Skeleton":
+                    {
+                        return HasLightSource();
+                    }
+                case "Sucsarian":
                     {
                         return true;
-
                     }
-                case "Sucsarian: Sucsarian Spear Drop":
+                case "Ceres":
+                    {
+                        return CanJumpHeight("High");
+                    }
+                case "Vesta":
+                    {
+                        return CanJumpHeight("High");
+                    }
+                case "Gloom Wood":
                     {
                         return true;
-
                     }
-                case "Cetea: Tornado Drop":
+                case "Cetea":
                     {
                         return true;
-
                     }
-                case "Abyssal Demon: Ocean Elixir Drop":
+                case "Abyssal Demon":
                     {
+                        if (sceneName == "HAUNT")
+                        {
+                            return HasLightSource() && HasElement("Light");
+                        }
                         return true;
                     }
             }
@@ -1182,9 +1316,9 @@ namespace LunacidAP
             return QuestionableLocations.Contains(location);
         }
 
-        public string ColorLogicLocation(string location)
+        public string ColorLogicLocation(string location, string sceneName)
         {
-            var logic = LogicCases(location);
+            var logic = LogicCases(location, sceneName);
             if (IsLocationQuestionable(location))
             {
                 return "#FFA500";
@@ -1205,6 +1339,11 @@ namespace LunacidAP
                 return true;
             }
             return false;
+        }
+
+        private bool IsVampire()
+        {
+            return ArchipelagoClient.AP.SlotData.StartingClass == 3;
         }
 
         private bool CanEnterTemple()

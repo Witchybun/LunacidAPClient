@@ -13,6 +13,8 @@ using System.Threading.Tasks;
 using static LunacidAP.Data.LunacidLocations;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
+using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP
 {
@@ -26,12 +28,13 @@ namespace LunacidAP
         public int SlotID;
         private int cheatedCount;
         private int Stack;
-        private int GiftCounter = 0;
         private CONTROL Control;
+        private POP_text_scr Popup;
         public ArchipelagoSession Session;
         public SlotData SlotData { get; private set; }
         public GiftingService Gifting { get; private set; }
         private GiftHelper giftHelper { get; set; }
+        public const long LOCATION_INIT_ID = 771111110;
 
         private bool _connected;
         public bool Authenticated
@@ -111,11 +114,17 @@ namespace LunacidAP
                 IsConnecting = false;
                 yield break;
             }
-            if (PluginInfo.PLUGIN_VERSION != SlotData.ClientVersion)
+            var gameVersion = PluginInfo.PLUGIN_VERSION.Split('.');
+            var archipelagoVersion = SlotData.ClientVersion.Split('.');
+            if (int.Parse(gameVersion[0]) > int.Parse(archipelagoVersion[0]) || int.Parse(gameVersion[1]) > int.Parse(archipelagoVersion[1]))
             {
                 _log.LogError($"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.");
                 IsConnecting = false;
                 yield break;
+            }
+            else if (int.Parse(gameVersion[2]) > int.Parse(archipelagoVersion[2]))
+            {
+                _log.LogWarning($"The server's game was made for {SlotData.ClientVersion} but the game is newer.  Should be fine though.");
             }
             ConnectionData.Seed = seed;
 
@@ -181,9 +190,51 @@ namespace LunacidAP
             Gifting = new GiftingService(Session);
             giftHelper = new GiftHelper(_log);
             Gifting.OpenGiftBox();
+            Gifting.SubscribeToNewGifts(Gifting_WhenGiftWasReceived);
+            Gifting.CheckGiftBox();
             cheatedCount = 0;
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
+        }
+        
+        public void AttemptConnectFromDeath(int currentSave)
+        {
+            StartCoroutine(Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, currentSave));
+        }
+
+        public void Gifting_WhenGiftWasReceived(Dictionary<string, Gift> incomingGifts)
+        {
+            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            Popup = Control.PAPPY;
+            StartCoroutine(giftHelper.HandleIncomingGifts());
+        }
+
+        public void PrepareGift(GiftVector giftVector, string slotName, string color)
+        {
+            StartCoroutine(SendGift(giftVector, slotName, color));   
+        }
+
+        private IEnumerator SendGift(GiftVector giftVector, string slotName, string color)
+        {
+            var sendGiftTask = Task.Run(async () => await Gifting.SendGiftAsync(giftVector.GiftItem, giftVector.GiftTraits, slotName, 0));
+            yield return new WaitUntil(() => sendGiftTask.IsCompleted);
+            if (sendGiftTask.IsFaulted)
+            {
+                _log.LogError(sendGiftTask.Exception.GetBaseException().Message);
+                yield break;
+            }
+            var wasSent = sendGiftTask.Result;
+            if (wasSent)
+            {
+                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                Popup = Control.PAPPY;
+                if (Popup is null)
+                {
+                    _log.LogWarning("We tried to tell you about sending an item but we got null output!");
+                    yield break;
+                }
+                Popup.POP($"Gifted <color={color}>{giftVector.GiftItem.Name}</color> to {slotName}", 1f, 0);
+            }
         }
 
         private void Session_SocketClosed(string _)
@@ -231,12 +282,6 @@ namespace LunacidAP
                 if (Session.Items.Any())
                 {
                     HandleReceivedItems();
-                }
-                GiftCounter += 1;
-                if (GiftCounter > 60)
-                {
-                    giftHelper.HandleIncomingGifts();
-                    GiftCounter = 0;
                 }
             }
         }
@@ -316,7 +361,7 @@ namespace LunacidAP
         {
             yield return new WaitForSeconds(2f);
             var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
-            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             Control.PAPPY.POP($"The death of {source} by {reason} causes you to perish.", 1f, 1);
             you.Die();
             IsCurrentlyDeathLinked = false;
@@ -499,7 +544,7 @@ namespace LunacidAP
             return SlotData.Ending.HasFlag(goal);
         }
 
-        private bool IsInNormalGameState()
+        public bool IsInNormalGameState()
         {
             var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
             return Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;

@@ -109,7 +109,7 @@ namespace LunacidAP
                 {
                     _log.LogInfo($"Reloading {_currentSave}");
                     SaveHandler.ReadSave(_currentSave);
-                    __instance.StartCoroutine(ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, _currentSave));
+                    ArchipelagoClient.AP.AttemptConnectFromDeath(_currentSave);
                     return false; // don't let the player play.
                 }
             }

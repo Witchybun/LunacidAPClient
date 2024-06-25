@@ -219,7 +219,6 @@ namespace LunacidAP
             }
             var updatedName = WasGeneralShopDisplayNameUpdated(__instance.ITEMS[25], __instance.SHOP.INV[0], sceneName, out var newName) ? newName : StaticFuncs.REMOVE_NUMS(__instance.SHOP.INV[0].item) + " - <sprite=0>" + __instance.SHOP.INV[0].cost;
             __instance.ITEMS[25].transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = updatedName;
-            _log.LogInfo($"Old: {__instance.SHOP.INV[0].item}, New: {newName}");
             for (int j = 1; j < lengthOfArray; j++)
             {
                 GameObject obj = UnityEngine.Object.Instantiate(__instance.ITEMS[25], __instance.ITEMS[25].transform.parent);

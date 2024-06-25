@@ -4,6 +4,15 @@ namespace LunacidAP.Data
 {
     public static class LunacidEnemies
     {
+        public static readonly List<string> EnemyNames = new(){
+            "Snail", "Milk Snail", "Shulker", "Mummy", "Mummy Knight", "Necronomicon", "Enlightened One", "Chimera", "Rat", "Hemalith",
+            "Great Bat", "Rat King", "Rat Queen", "Slime Skeleton", "Skeleton", "Slime", "Devil Slime", "Lunaga", "Kodama", "Yakul", 
+            "Venus", "Neptune", "Unilateralis", "Tillandsia", "Mimic", "Mare", "Mi-Go", "Phantom", "Cursed Painting", "Malformed", "Poltergeist",
+            "Giant Bat", "Vampire Page", "Vampire", "Malformed Horse", "Hallowed Husk", "Ikkur'ilb", "Obsidian Skeleton", "Serpent",
+            "Anpu", "Embalmed", "Jailor", "Lupine Skeleton", "Giant Skeleton", "Sucsarian", "Ceres", "Vesta", "Gloom Wood",
+            "Cetea", "Abyssal Demon", "Cerritulus Lunam",
+        };
+
         public static readonly Dictionary<string, string> NamesToGameObject = new(){
             // Some of these are clones; should be accounted for.
             {"MUMMY KNIGHT", "Mummy Knight"},
@@ -21,15 +30,19 @@ namespace LunacidAP.Data
             {"ELK_DED2(Clone)", "Yakul"},
             {"ELK_DED3(Clone)", "Yakul"},
             {"VENUS", "Venus"},
+            {"ABYSSAL DEMON", "Abyssal Demon"},
             {"NEPTUNE", "Neptune"},
             {"UNILAT_DED(Clone)", "Unilateralis"},
+            {"HEMALITH", "Hemalith"},
             {"MI-GO", "Mi-Go"},
             {"MARE_DIE(Clone)", "Mare"},
             {"CURSED PAINTING", "Cursed Painting"},
+            {"Cursed Painting", "Cursed Painting"},
             {"Necronomicon", "Necronomicon"},
             {"CHIMERA", "Chimera"},
             {"NERV_DED(Clone)", "Enlightened One"},
             {"PHANTOM", "Phantom"},
+            {"OBSIDIAN SKELETON", "Obsidian Skeleton"},
             {"Starved Vampire Thrall", "Vampire"},
             {"Vampire Page", "Vampire Page"},
             {"MALFORMED", "Malformed"},
@@ -37,8 +50,8 @@ namespace LunacidAP.Data
             {"Poltergeist", "Poltergeist"},
             {"MALFORMED HORSE", "Malformed Horse"},
             {"HALLOWED HUSK", "Hallowed Husk"},
-            {"IKKUR'ILB", "Ikurr'ilb"},
-            {"SKELELTON", "Skeleton"},
+            {"IKURR'ILB", "Ikurr'ilb"},
+            {"SKELETON", "Skeleton"},
             {"MIMIC", "Mimic"},
             {"Anpu", "Anpu"},
             {"Serpent", "Serpent"},
@@ -58,6 +71,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly Dictionary<string, string> ObjectToLocationSuffix = new(){
+            {"OCEAN_ELIXIR_PICKUP", "Ocean Elixir"},
             {"SUS_DAGGER_PICKUP", "Sucsarian Dagger"},
             {"SUS_SPEAR_PICKUP", "Sucsarian Spear"},
             {"SUMMON_SNAIL", "Summon Snail"},
@@ -67,6 +81,7 @@ namespace LunacidAP.Data
             {"GOLDEN_SICKLE_PICKUP", "Golden Sickle"},
             {"GOLDEN_KOPESH_PICKUP", "Golden Khopesh"},
             {"BRITTLE_PICKUP", "Brittle Arming Sword"},
+            {"BOOK_PICKUP", "Black Book"},
             {"OBS_SHIELD_PICKUP", "Obsidian Cursebrand"},
             {"OBS_SWORD_PICKUP", "Obsidian Poisonguard"},
             {"CURSED_BLADE_PICKUP", "Cursed Blade"},
@@ -117,10 +132,12 @@ namespace LunacidAP.Data
             {"Shulker", new List<string>(){"PITT_A1"}},
             {"Mummy", new List<string>(){"PITT_A1"}},
             {"Mummy Knight", new List<string>(){"PITT_A1"}},
-            {"Necromancer", new List<string>(){"ARCHIVES"}},
+            {"Necronomicon", new List<string>(){"ARCHIVES"}},
             {"Enlightened One", new List<string>(){"ARCHIVES"}},
             {"Chimera", new List<string>(){"ARCHIVES"}},
             {"Rat", new List<string>(){"SEWER_A1", "PRISON"}},
+            {"Hemalith", new List<string>(){"LAKE"}},
+            {"Great Bat", new List<string>(){"CAS_1"}},
             {"Rat King", new List<string>(){"SEWER_A1", "HAUNT", "PRISON"}},
             {"Rat Queen", new List<string>(){"SEWER_A1", "PRISON"}},
             {"Slime Skeleton", new List<string>(){"SEWER_A1"}},
@@ -159,7 +176,8 @@ namespace LunacidAP.Data
             {"Vesta", new List<string>(){"ARENA"}},
             {"Gloom Wood", new List<string>(){"ARENA"}},
             {"Cetea", new List<string>(){"VOID"}},
-            {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}}
+            {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}},
+            {"Cerritulus Lunam", new List<string>(){"PRISON"}},
         };
     }
 }

@@ -34,6 +34,10 @@ namespace LunacidAP.Data
             "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
+        public static readonly List<string> FakeItems = new(){
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+        };
+
         public static readonly List<string> Weapons = new(){
            "Axe of Harming", "Battle Axe", "Blade of Jusztina", "Blade of Ophelia", "Blessed Wind", "Broken Hilt", "Broken Lance",
             "Corrupted Dagger", "Dark Rapier", "Elfen Bow", "Elfen Sword", "Fishing Spear", "Flail", "Halberd", "Iron Claw",
@@ -102,6 +106,12 @@ namespace LunacidAP.Data
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
             "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Sheryl's Initial Offerings Voucher", 
             "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+        };
+
+        public static readonly List<string> Filler = new(){
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
+            "Throwing Knife", "Holy Water", "Antidote", "Survey Banner", "Pink Shrimp", "Angel Feather"
         };
 
         public static readonly List<string> Materials = new(){

@@ -1,10 +1,14 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Archipelago.Gifting.Net.Gifts;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using UnityEngine;
 using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP
@@ -19,14 +23,22 @@ namespace LunacidAP
             _log = log;
         }
 
-        public void HandleIncomingGifts()
+        
+
+        public IEnumerator HandleIncomingGifts()
         {
-            var giftBoxCheck = ArchipelagoClient.AP.Gifting.CheckGiftBox();
-            if (!giftBoxCheck.Any())
+            if (ArchipelagoClient.AP.Session is null || !ArchipelagoClient.AP.IsInNormalGameState())
             {
-                return;
+                yield return new WaitForSeconds(10f);
             }
-            var gifts = ArchipelagoClient.AP.Gifting.GetAllGiftsAndEmptyGiftbox();
+            var giftsTask = Task.Run(ArchipelagoClient.AP.Gifting.GetAllGiftsAndEmptyGiftboxAsync);
+            yield return new WaitUntil(() => giftsTask.IsCompleted);
+            if (giftsTask.IsFaulted)
+            {
+                _log.LogError(giftsTask.Exception.GetBaseException().Message);
+                yield break;
+            }
+            var gifts = giftsTask.Result;
             foreach (var giftPair in gifts)
             {
                 var gift = giftPair.Value;
@@ -44,7 +56,6 @@ namespace LunacidAP
                 ConnectionData.ReceivedGifts.Add(receivedGift);
 
             }
-            return;
         }
 
         private bool WasGiftReceivedBefore(Gift gift)
@@ -61,7 +72,7 @@ namespace LunacidAP
 
         private bool IsLunacidItem(Gift gift, out bool isTrap)
         {
-            if (LunacidItems.Items.Contains(gift.ItemName) || LunacidItems.Materials.Contains(gift.ItemName))
+            if (LunacidItems.Filler.Contains(gift.ItemName) || LunacidItems.Materials.Contains(gift.ItemName))
             {
                 isTrap = false;
                 return true;
@@ -85,25 +96,20 @@ namespace LunacidAP
 
         private string ClosestLunacidItem(Gift gift)
         {
+            var giftVector = new LunacidGifts.GiftVector(gift);
             List<string> chosenItem = new() { };
-            double closenessRating = 0;
+            double closenessRating = 10000000;
             var giftTraits = gift.Traits.ToList();
-            foreach (var kvp in LunacidTraits.LunacidItemTraits)
+            foreach (var kvp in LunacidGifts.LunacidItemsToGifts)
             {
-                var item = kvp.Key;
-                var traits = kvp.Value;
-                var intersection = giftTraits.Intersect(traits).ToList();
-                var totalMatches = intersection.Count();
-                var errors = 0.4f * traits.Where(x => giftTraits.Contains(x)).Count() + 0.1f * giftTraits.Where(x => traits.Contains(x)).Count();
-                if (closenessRating < totalMatches - errors)
+                var distance = kvp.Value.TraitDistance(giftVector);
+                if (distance < closenessRating)
                 {
-                    closenessRating = totalMatches - errors;
-                    chosenItem = new() { item };
-                    _log.LogInfo($"Item: {item}, Total Matches: {totalMatches}, Errors: {errors}");
+                    chosenItem = new(){kvp.Key};
                 }
-                else if (closenessRating == totalMatches - errors)
+                else if (distance == closenessRating)
                 {
-                    chosenItem.Add(item);
+                    chosenItem.Add(kvp.Key);
                 }
             }
             if (chosenItem.Any())

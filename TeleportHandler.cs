@@ -60,7 +60,6 @@ namespace LunacidAP
             {
                 return warpData;
             }
-            _log.LogInfo($"Found {entrance}");
             if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
                 return WarpDestinations.EntranceToWarp[newEntrance];

@@ -107,6 +107,10 @@ namespace LunacidAP
 
         public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false)
         {
+            if (LunacidItems.FakeItems.Contains(itemName))
+            {
+                return;
+            }
             if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
             {
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -346,7 +350,6 @@ namespace LunacidAP
         {
             if (!LunacidItems.MaterialNames.Keys.Contains(Name))
             {
-                _log.LogInfo($"MaterialNames has no definition for {Name}; cannot give it!");
                 return;
             }
             var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
@@ -515,6 +518,7 @@ namespace LunacidAP
                 foreach (var locationData in LunacidLocations.UniqueDropLocations)
                 {
                     var enemyName = locationData.APLocationName.Split(':')[0];
+                    _log.LogInfo($"Looking at {enemyName}");
                     if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
                     {
                         if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
@@ -529,7 +533,12 @@ namespace LunacidAP
                 foreach (var locationData in LunacidLocations.OtherDropLocations)
                 {
                     var enemyName = locationData.APLocationName.Split(':')[0];
-                    if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
+                    if (!LunacidEnemies.EnemyToScenes.TryGetValue(enemyName, out var sceneList))
+                    {
+                        _log.LogWarning($"Couldn't find {locationData.APLocationName} in multiworld, continuing.");
+                        continue;
+                    }
+                    if (sceneList.Contains(sceneName))
                     {
                         if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
                         {
@@ -565,6 +574,7 @@ namespace LunacidAP
             var random = new System.Random(DateTime.Today.Day + DateTime.Today.Hour + DateTime.Today.Minute);
             rightsideLocations = rightsideLocations.OrderBy(_ => random.Next()).ToList();
             var leftsideLocations = new List<string>() { };
+            var wasListTooBig = false;
 
             if (rightsideLocations.Count() == 0)
             {
@@ -572,6 +582,14 @@ namespace LunacidAP
             }
             else if (rightsideLocations.Count > 14)
             {
+                if (rightsideLocations.Count > 25)
+                {
+                    wasListTooBig = true;
+                    while(rightsideLocations.Count> 25)
+                    {
+                        rightsideLocations.RemoveAt(0);
+                    }
+                }
                 while (rightsideLocations.Count > 14)
                 {
                     leftsideLocations.Add(rightsideLocations[0]);
@@ -582,14 +600,18 @@ namespace LunacidAP
             var rightsideText = "";
             foreach (var location in rightsideLocations)
             {
-                rightsideText += $"<size=55%><align=center><color={_lunacidLogic.ColorLogicLocation(location)}>{location}</color></align></size>\n";
+                rightsideText += $"<size=55%><align=center><color={_lunacidLogic.ColorLogicLocation(location, sceneName)}>{location}</color></align></size>\n";
             }
             if (leftsideLocations.Count > 0)
             {
                 foreach (var location in leftsideLocations)
                 {
-                    leftsideText += $"<size=37%><align=center><color={_lunacidLogic.ColorLogicLocation(location)}>{location.ToUpper()}</color></align></size>\n";
+                    leftsideText += $"<size=37%><align=center><color={_lunacidLogic.ColorLogicLocation(location, sceneName)}>{location.ToUpper()}</color></align></size>\n";
                 }
+            }
+            if (wasListTooBig)
+            {
+                leftsideText += $"<size=50%>THE OTHER WORDS BLEND TOGETHER...</size>\n";
             }
             var inventoryItem = LunacidLocations.sceneToArea.Keys.Contains(sceneName) ? LunacidLocations.sceneToArea[sceneName] : "a Lost Archipelago";
             menu.TXT[32].text = $"Orb of {inventoryItem}";

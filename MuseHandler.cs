@@ -11,7 +11,7 @@ namespace LunacidAP
         public MuseHandler(ManualLogSource log)
         {
             _log = log;
-            Harmony.CreateAndPatchAll(typeof(MuseHandler));
+            //Harmony.CreateAndPatchAll(typeof(MuseHandler));
         }
         
         [HarmonyPatch(typeof(MUSE_scr), "NewTrack")]

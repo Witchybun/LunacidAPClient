@@ -2,18 +2,20 @@ using System.Linq;
 using Archipelago.Gifting.Net.Gifts;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
+using Archipelago.Gifting.Net.Traits;
+using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP
 {
     public class EnemyHandler
     {
         private static ManualLogSource _log;
-        private static CONTROL Control;
-        private static POP_text_scr Popup;
+        private const string STARDEW_RESOURCE_PREFIX = "Resource Pack: ";
         public EnemyHandler(ManualLogSource log)
         {
             _log = log;
@@ -30,8 +32,13 @@ namespace LunacidAP
             }
             float num = 0f;
             var lOOTS = __instance.LOOTS;
-            var nothingChance = lOOTS.First(x => x.ITEM is null).CHANCE;
+            var nothingChance = 0f;
+            if (lOOTS.Any(x=> x.ITEM is null))
+            {
+                nothingChance = lOOTS.First(x => x.ITEM is null).CHANCE;
+            }
             var areDropsNormalized = ArchipelagoClient.AP.SlotData.NormalizedDrops;
+            _log.LogInfo($"Dealing with {__instance.name}");
             if (areDropsNormalized && lOOTS.Length - 1 > 0)
             {
                 num += (float)2 * nothingChance;
@@ -156,26 +163,34 @@ namespace LunacidAP
 
         private static void GiftItemToOtherPlayer(string slotName, string itemName, ItemFlags itemClassification)
         {
-            var madeUpItem = new GiftItem(itemName, 1, 0);
-            var canGiftToPlayer = ArchipelagoClient.AP.Gifting.CanGiftToPlayer(slotName);
+            
+            var giftName = FixStardewValleyResourcePacks(itemName);
+            _log.LogInfo($"Sending {giftName} to {slotName}");
+            var madeUpItem = new GiftItem(giftName, 1, 0);
             var color = ArchipelagoClient.FlagColor(itemClassification);
-            if (canGiftToPlayer)
+            var giftTraits = new GiftTrait[]{};
+            if (itemClassification.HasFlag(ItemFlags.Trap))
             {
-                var wasItemSent = ArchipelagoClient.AP.Gifting.SendGift(madeUpItem, slotName);
-                if (wasItemSent)
-                {
-                    PopupCommand(itemName, color, slotName);
-                }
+                giftTraits.AddToArray(new GiftTrait(GiftFlag.Trap, 1, 1)); // Stardew in particular doesn't handle direct trap names.
             }
+            var packagedGift = new GiftVector(madeUpItem, giftTraits);
+            ArchipelagoClient.AP.PrepareGift(packagedGift, slotName, color);
         }
 
-        private static void PopupCommand(string Name, string color, string player)
+        private static string FixStardewValleyResourcePacks(string itemName)
         {
-            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            Popup = Control.PAPPY;
-            Popup?.POP($"Found <color={color}>{Name}</color> for {player}", 1f, 0);
+            if (!itemName.Contains(STARDEW_RESOURCE_PREFIX))
+            {
+                return itemName;
+            }
+            var firstPass = itemName.Replace(STARDEW_RESOURCE_PREFIX, "");
+            _log.LogInfo($"{itemName} -> {firstPass}");
+            var secondPass = Regex.Replace(firstPass, "[0-9]", "");
+            _log.LogInfo($"{firstPass} -> {secondPass}");
+            var lastPass = secondPass.Substring(1);
+            _log.LogInfo($"{secondPass} -> {lastPass}");
+            return lastPass;
         }
-
 
         private static void DropItemOnFloor(GameObject loot, Vector3 position)
         {
