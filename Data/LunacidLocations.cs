@@ -67,7 +67,7 @@ namespace LunacidAP.Data
             new LocationData( 448, "Mummy: Mana Vial Drop" ),
             new LocationData( 449, "Mummy: Onyx Drop" ),
             new LocationData( 450, "Mummy: Small Silver Drop" ),
-            new LocationData( 451, "Mummy Knight: Medium Silver Drop" ),
+            new LocationData( 451, "Mummy: Large Silver Drop" ),
             new LocationData( 452, "Necronomicon: Fire Opal Drop" ),
             new LocationData( 453, "Necronomicon: Small Silver Drop" ),
             new LocationData( 454, "Necronomicon: Medium Silver Drop" ),
@@ -138,7 +138,7 @@ namespace LunacidAP.Data
             new LocationData( 519, "Hallowed Husk: Holy Water Drop" ),
             new LocationData( 520, "Ikurr'ilb: Ikurr'ilb Root Drop" ),
             new LocationData( 521, "Ikurr'ilb: Medium Silver Drop" ),
-            new LocationData( 522, "Iksurr'ilb: Snowflake Obsidian Drop" ),
+            new LocationData( 522, "Ikurr'ilb: Snowflake Obsidian Drop" ),
             new LocationData( 523, "Mimic: Moonlight Vial Drop" ),
             new LocationData( 524, "Mimic: Obsidian Drop" ),
             new LocationData( 525, "Mimic: Fools Gold Drop" ),
@@ -165,7 +165,7 @@ namespace LunacidAP.Data
             new LocationData( 546, "Giant Skeleton: Bones Drop" ),
             new LocationData( 547, "Giant Skeleton: Mana Vial Drop" ),
             new LocationData( 548, "Giant Skeleton: Onyx Drop" ),
-            new LocationData( 549, "Sucsarian: Medium Silver Drop" ),
+            new LocationData( 549, "Sucsarian: Large Silver Drop" ),
             new LocationData( 550, "Sucsarian: Obsidian Drop" ),
             new LocationData( 551, "Sucsarian: Snowflake Obsidian Drop" ),
             new LocationData( 552, "Sucsarian: Throwing Knife Drop" ),
@@ -176,12 +176,14 @@ namespace LunacidAP.Data
             new LocationData( 557, "Ceres: Yellow Morel Drop" ),
             new LocationData( 558, "Ceres: Destroying Angel Mushroom Drop" ),
             new LocationData( 559, "Gloom Wood: Fairy Moss Drop" ),
-            new LocationData( 560, "Gloom Wood: Yellow Morel Drop" ),
-            new LocationData( 561, "Gloom Wood: Destroying Angel Mushroom Drop" ),
+            new LocationData( 560, "Gloom Wood: Health Vial Drop" ),
+            new LocationData( 561, "Gloom Wood: Mana Vial Drop" ),
             new LocationData( 562, "Cetea: Medium Silver Drop" ),
             new LocationData( 563, "Cetea: Ocean Bone Shell Drop" ),
-
-
+            new LocationData( 564, "Mummy Knight: Onyx Drop" ),
+            new LocationData( 565, "Mummy Knight: Large Silver Drop" ),
+            new LocationData( 566, "Mummy Knight: Small Silver Drop" ),
+            new LocationData( 567, "Sanguis Umbra: Black Book Drop" ),
         };
 
         public static readonly List<LocationData> ShopLocations = new(){
@@ -371,12 +373,6 @@ namespace LunacidAP.Data
                     new LocationData( 152, "CLF: Upper Floor Coffin Room (Large Room)", "OCEAN_ELIXIR_PICKUP", new Vector3(-20.6f, 25.4f, -334.6f) ),
                     new LocationData( 153, "CLF: Upper Floor Coffin Room (Double)", "SWORD_PICKUP", new Vector3(-54.0f, 28.4f, -249.0f) ),
                     new LocationData( 154, "CLF:  Upper Floor Coffin Room (Hallway)", "KEY2_PICKUP", new Vector3(-2.4f, -2.8f, -202.6f) ),
-                }
-            },
-            {
-                "CAS_PITT", // A Holy Battlefield
-                new(){
-                    new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP" )
                 }
             },
             {

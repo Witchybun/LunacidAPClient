@@ -8,7 +8,7 @@ namespace LunacidAP.Data
             "Snail", "Milk Snail", "Shulker", "Mummy", "Mummy Knight", "Necronomicon", "Enlightened One", "Chimera", "Rat", "Hemalith",
             "Great Bat", "Rat King", "Rat Queen", "Slime Skeleton", "Skeleton", "Slime", "Devil Slime", "Lunaga", "Kodama", "Yakul", 
             "Venus", "Neptune", "Unilateralis", "Tillandsia", "Mimic", "Mare", "Mi-Go", "Phantom", "Cursed Painting", "Malformed", "Poltergeist",
-            "Giant Bat", "Vampire Page", "Vampire", "Malformed Horse", "Hallowed Husk", "Ikkur'ilb", "Obsidian Skeleton", "Serpent",
+            "Giant Bat", "Vampire Page", "Vampire", "Malformed Horse", "Hallowed Husk", "Ikurr'ilb", "Obsidian Skeleton", "Serpent",
             "Anpu", "Embalmed", "Jailor", "Lupine Skeleton", "Giant Skeleton", "Sucsarian", "Ceres", "Vesta", "Gloom Wood",
             "Cetea", "Abyssal Demon", "Cerritulus Lunam",
         };
@@ -60,10 +60,12 @@ namespace LunacidAP.Data
             {"CERRITULUS LUNAM", "Cerritulus Lunam"},
             {"LUPINE SKELETON", "Lupine Skeleton"},
             {"GIANT SKELETON", "Giant Skeleton"},
+            {"CERES", "Ceres"},
             {"CETEA", "Cetea"},
             {"SUCSARIAN", "Sucsarian"},
             {"VESTA", "Vesta"},
             {"GLOOM WOOD", "Gloom Wood"},
+            {"SANGUINE UMBRA", "Sanguine Umbra"},
         };
 
         public static readonly List<string> NotEnemyWhitelist = new(){
@@ -163,7 +165,7 @@ namespace LunacidAP.Data
             {"Vampire", new List<string>(){"CAS_1"}},
             {"Malformed Horse", new List<string>(){"CAS_3"}},
             {"Hallowed Husk", new List<string>(){"CAS_3"}},
-            {"Ikkur'ilb", new List<string>(){"CAVE"}},
+            {"Ikurr'ilb", new List<string>(){"CAVE"}},
             {"Obsidian Skeleton", new List<string>(){"CAVE", "PRISON", "VOID"}},
             {"Serpent", new List<string>(){"CAVE"}},
             {"Anpu", new List<string>(){"CAVE"}},
@@ -178,6 +180,7 @@ namespace LunacidAP.Data
             {"Cetea", new List<string>(){"VOID"}},
             {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}},
             {"Cerritulus Lunam", new List<string>(){"PRISON"}},
+            {"Sanguine Umbra", new List<string>(){"CAS_PITT"}}
         };
     }
 }

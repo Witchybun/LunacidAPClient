@@ -32,6 +32,7 @@ namespace LunacidAP
             }
             float num = 0f;
             var lOOTS = __instance.LOOTS;
+            NameEveryDrop(__instance.name, lOOTS);
             var nothingChance = 0f;
             if (lOOTS.Any(x=> x.ITEM is null))
             {
@@ -96,6 +97,7 @@ namespace LunacidAP
                 return false;
             }
             var locationData = GetDropLocationData(location);
+            locationData = EnemyBugFix(locationData);
             if (locationData.APLocationName == "ERROR")
             {
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
@@ -118,6 +120,37 @@ namespace LunacidAP
             }
             LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
             return false;
+        }
+
+        // Attempt to fix a few locations for myself during an async.
+        private static LocationData EnemyBugFix(LocationData potentialData)
+        {
+            if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID == 567)
+            {
+                return new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP" );
+            }
+            else if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID > 563)
+            {
+                return new LocationData(0, "ERROR");
+            }
+            return potentialData;
+        }
+
+        private static void NameEveryDrop(string mobName, Loot_scr.Reward[] rewards)
+        {
+            foreach (var reward in rewards)
+            {
+                var name = "";
+                if (reward.ITEM is null)
+                {
+                    name = "NULL";
+                }
+                else
+                {
+                    name = reward.ITEM.name;
+                }
+                _log.LogInfo($"{mobName} drops {name}");
+            }
         }
 
         private static LocationData GetDropLocationData(string location)
