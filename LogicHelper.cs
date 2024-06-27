@@ -1059,7 +1059,7 @@ namespace LunacidAP
                     }
                 case "Buy Ocean Elixir (Sheryl)":
                     {
-                        return WasItemReceived("Sheryl's Dreamer Voucher");
+                        return WasItemReceived("Sheryl's Dreamer Voucher") && CanDefeatSucasrius();
 
                     }
                 case "Buy Ocean Elixir (Patchouli)":
@@ -1073,7 +1073,7 @@ namespace LunacidAP
                     }
                 case "Buy Jotunn Slayer":
                     {
-                        return WasItemReceived("Sheryl's Dreamer Voucher");
+                        return WasItemReceived("Sheryl's Dreamer Voucher") && CanDefeatSucasrius();
                     }
             }
             var firstBit = location.Split(':')[0];
@@ -1158,6 +1158,10 @@ namespace LunacidAP
                     }
                 case "Venus":
                     {
+                        if (sceneName == "ARENA")
+                        {
+                            return HasDustyOrb();
+                        }
                         return true;
                     }
                 case "Neptune":
@@ -1344,6 +1348,16 @@ namespace LunacidAP
         private bool IsVampire()
         {
             return ArchipelagoClient.AP.SlotData.StartingClass == 3;
+        }
+
+        private bool CanDefeatSucasrius()
+        {
+            var hasTalismans = WasItemReceived("Water Talisman") && WasItemReceived("Earth Talisman");
+            if (ArchipelagoClient.AP.SlotData.Doorlock)
+            {
+                return hasTalismans && WasItemReceived("Sucsarian Key");
+            }
+            return hasTalismans;
         }
 
         private bool CanEnterTemple()
