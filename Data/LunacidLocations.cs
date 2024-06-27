@@ -34,7 +34,7 @@ namespace LunacidAP.Data
 
         public static readonly List<LocationData> UniqueDropLocations = new(){
             new LocationData( 409, "Snail: Summon Snail Drop", "SUMMON_SNAIL" ),
-            new LocationData( 410, "Mummy: Rusted Sword Drop", "RUSTED_SWORD_PICKUP" ),
+            new LocationData( 410, "Mummy Knight: Rusted Sword Drop", "RUSTED_SWORD_PICKUP" ),
             new LocationData( 411, "Kodama: Summon Kodama Drop", "SUMMON_KODAMA" ),
             new LocationData( 412, "Chimera: Quick Stride Drop", "QUICK_STRIDE" ),
             new LocationData( 413, "Milk Snail: Ice Sickle Drop", "SICKLE_PICKUP" ),
@@ -48,7 +48,7 @@ namespace LunacidAP.Data
             new LocationData( 421, "Malformed Horse: Brittle Arming Sword Drop", "BRITTLE_PICKUP" ),
             new LocationData( 422, "Jailor: Jailor's Candle Drop", "CANDLE_WEP_PICKUP" ),
             new LocationData( 423, "Vampire Page: Lyrian Longsword Drop", "VP_SWORD_PICKUP" ),
-            new LocationData( 424, "Sucsarian: Sucsarian Spear", "SUS_SPEAR_PICKUP" ),
+            new LocationData( 424, "Sucsarian: Sucsarian Spear Drop", "SUS_SPEAR_PICKUP" ),
             new LocationData( 425, "Sucsarian: Sucsarian Dagger Drop", "SUS_DAGGER_PICKUP" ),
             new LocationData( 426, "Giant Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
             new LocationData( 427, "Cetea: Tornado Drop", "TORNADO_PICKUP" ),
@@ -142,7 +142,7 @@ namespace LunacidAP.Data
             new LocationData( 523, "Mimic: Moonlight Vial Drop" ),
             new LocationData( 524, "Mimic: Obsidian Drop" ),
             new LocationData( 525, "Mimic: Fools Gold Drop" ),
-            new LocationData( 526, "Obsidian Skeleton: Medium Silver Drop" ),
+            new LocationData( 526, "Obsidian Skeleton: Large Silver Drop" ),
             new LocationData( 527, "Obsidian Skeleton: Bones Drop" ),
             new LocationData( 528, "Obsidian Skeleton: Mana Vial Drop" ),
             new LocationData( 529, "Obsidian Skeleton: Obsidian Drop" ),

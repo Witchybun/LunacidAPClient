@@ -46,7 +46,6 @@ namespace LunacidAP.Data
         private static readonly GiftTrait[] WispHeartTrait = new[]{
             new GiftTrait(GiftFlag.Energy, 1, 1),
             new GiftTrait(GiftFlag.Damage, 1, 0.8),
-            new GiftTrait("Light", 1, 1),
             new GiftTrait(GiftFlag.Consumable, 1, 1),
         };
 
@@ -66,7 +65,7 @@ namespace LunacidAP.Data
         private static readonly GiftTrait[] SpectralCandleTrait = new[]{
             new GiftTrait(GiftFlag.Consumable, 1, 1),
             new GiftTrait(GiftFlag.Energy, 1, 1),
-            new GiftTrait("Light", 1, 1),
+            new GiftTrait(GiftFlag.Monster, 1, 1),
         };
 
         private static readonly GiftTrait[] HealthVialTrait = new[]{
@@ -100,7 +99,6 @@ namespace LunacidAP.Data
         private static readonly GiftTrait[] CrystalShardTrait = new[]{
             new GiftTrait(GiftFlag.Consumable, 1, 1),
             new GiftTrait(GiftFlag.Speed, 1, 5),
-            new GiftTrait("Teleport", 1, 1),
         };
 
         private static readonly GiftTrait[] TreeGirlBathWater = new[]{
