@@ -21,6 +21,7 @@ namespace LunacidAP
     public class ArchipelagoClient : MonoBehaviour
     {
         public const string GAME_NAME = "Lunacid";
+        public const string GIFT_COLOR = "#9DAE11";
         private static ManualLogSource _log;
         public static ArchipelagoClient AP;
         private static GameObject Obj;
@@ -209,12 +210,12 @@ namespace LunacidAP
             StartCoroutine(giftHelper.HandleIncomingGifts());
         }
 
-        public void PrepareGift(GiftVector giftVector, string slotName, string color)
+        public void PrepareGift(GiftVector giftVector, string slotName)
         {
-            StartCoroutine(SendGift(giftVector, slotName, color));   
+            StartCoroutine(SendGift(giftVector, slotName));   
         }
 
-        private IEnumerator SendGift(GiftVector giftVector, string slotName, string color)
+        private IEnumerator SendGift(GiftVector giftVector, string slotName)
         {
             var sendGiftTask = Task.Run(async () => await Gifting.SendGiftAsync(giftVector.GiftItem, giftVector.GiftTraits, slotName, 0));
             yield return new WaitUntil(() => sendGiftTask.IsCompleted);
@@ -233,8 +234,13 @@ namespace LunacidAP
                     _log.LogWarning("We tried to tell you about sending an item but we got null output!");
                     yield break;
                 }
-                Popup.POP($"Gifted <color={color}>{giftVector.GiftItem.Name}</color> to {slotName}", 1f, 0);
+                Popup.POP($"Gifted <color={GIFT_COLOR}>{giftVector.GiftItem.Name}</color> to {slotName}", 1f, 0);
             }
+            else
+            {
+                _log.LogWarning($"Player {slotName} isn't accepting gifts.");
+            }
+            
         }
 
         private void Session_SocketClosed(string _)
