@@ -105,7 +105,7 @@ namespace LunacidAP
             return true;
         }
 
-        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false)
+        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "")
         {
             if (LunacidItems.FakeItems.Contains(itemName))
             {
@@ -117,6 +117,10 @@ namespace LunacidAP
                 ApplyItemToInventory("Orb of a Lost Archipelago");
             }
             string color = ArchipelagoClient.FlagColor(itemFlag);
+            if (overrideColor != "")
+            {
+                color = overrideColor;
+            }
             itemName = ProgressiveSymbolHandler(itemName);
             if (LunacidFlags.ItemToFlag.Keys.Contains(itemName))
             {
