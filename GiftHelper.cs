@@ -46,14 +46,14 @@ namespace LunacidAP
                 {
                     continue; // You never send things which are Lunacid oriented anyway, so let them die.
                 }
+                var receivedGift = new ReceivedGift(gift.ItemName, gift.ID);
+                ConnectionData.ReceivedGifts.Add(receivedGift);
                 if (IsLunacidItem(gift, out var isTrap))
                 {
                     ItemHandler.GiveLunacidItem(gift, isTrap);
                     continue;
                 }
                 HandleGiftingByTrait(gift);
-                var receivedGift = new ReceivedGift(gift.ItemName, gift.ID);
-                ConnectionData.ReceivedGifts.Add(receivedGift);
 
             }
         }
@@ -91,7 +91,7 @@ namespace LunacidAP
             var closestItem = ClosestLunacidItem(gift);
             var itemFlag = LunacidItems.Traps.Contains(closestItem) ? ItemFlags.Trap : ItemFlags.None;
             var player = ArchipelagoClient.AP.GetPlayerNameFromSlot(gift.SenderSlot);
-            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false);
+            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false, overrideColor: ArchipelagoClient.GIFT_COLOR);
         }
 
         private string ClosestLunacidItem(Gift gift)
@@ -106,13 +106,15 @@ namespace LunacidAP
                 if (distance < closenessRating)
                 {
                     chosenItem = new(){kvp.Key};
+                    closenessRating = distance;
+                    _log.LogInfo($"New shortest distance found!  {kvp.Key}: {distance}");
                 }
                 else if (distance == closenessRating)
                 {
                     chosenItem.Add(kvp.Key);
                 }
             }
-            if (chosenItem.Any())
+            if (!chosenItem.Any())
             {
                 return "Silver";
             }
