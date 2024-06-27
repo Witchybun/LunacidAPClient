@@ -9,13 +9,13 @@ using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
 using Archipelago.Gifting.Net.Traits;
 using static LunacidAP.Data.LunacidGifts;
+using LunacidAP.Data.ArchipelagoGiftingCases;
 
 namespace LunacidAP
 {
     public class EnemyHandler
     {
         private static ManualLogSource _log;
-        private const string STARDEW_RESOURCE_PREFIX = "Resource Pack: ";
         public EnemyHandler(ManualLogSource log)
         {
             _log = log;
@@ -32,7 +32,7 @@ namespace LunacidAP
             }
             float num = 0f;
             var lOOTS = __instance.LOOTS;
-            NameEveryDrop(__instance.name, lOOTS);
+            //NameEveryDrop(__instance.name, lOOTS);
             var nothingChance = 0f;
             if (lOOTS.Any(x=> x.ITEM is null))
             {
@@ -105,17 +105,13 @@ namespace LunacidAP
             }
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap);
-            _log.LogInfo($"{locationData.APLocationName}, Repeatable? {isRepeatable}");
             if (ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
             {
                 if (item.SlotName == ConnectionData.SlotName && isRepeatable)
                 {
-                    ItemHandler.GiveLunacidItem(item.ID, item.Classification, item.SlotName, true); // Hey its junk.  Let them grind.  Let them suffer.
+                    ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: ArchipelagoClient.GIFT_COLOR); // Hey its junk.  Let them grind.  Let them suffer.
                 }
-                else if (!item.Classification.HasFlag(ItemFlags.Advancement)) // It will always send things right now.  Make sure it doesn't break logic mkay.
-                {
-                    GiftItemToOtherPlayer(item.SlotName, item.Name, item.Classification);
-                }
+                GiftItemToOtherPlayer(item);
                 return false;
             }
             LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
@@ -125,11 +121,11 @@ namespace LunacidAP
         // Attempt to fix a few locations for myself during an async.
         private static LocationData EnemyBugFix(LocationData potentialData)
         {
-            if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID == 567)
+            if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID == ArchipelagoClient.LOCATION_INIT_ID + 567)
             {
                 return new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP" );
             }
-            else if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID > 563)
+            else if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID > ArchipelagoClient.LOCATION_INIT_ID + 563)
             {
                 return new LocationData(0, "ERROR");
             }
@@ -194,35 +190,36 @@ namespace LunacidAP
 
         }
 
-        private static void GiftItemToOtherPlayer(string slotName, string itemName, ItemFlags itemClassification)
+        private static void GiftItemToOtherPlayer(ArchipelagoItem item)
         {
-            
-            var giftName = FixStardewValleyResourcePacks(itemName);
-            _log.LogInfo($"Sending {giftName} to {slotName}");
-            var madeUpItem = new GiftItem(giftName, 1, 0);
-            var color = ArchipelagoClient.FlagColor(itemClassification);
+            var game = item.Game;
+            var amount = 1;
+            var itemName = item.Name;
+            var itemClassification = item.Classification;
+            if (game == "Stardew Valley")
+            {
+                if (!StardewValleyGifts.IsStardewItemGiftable(itemName))
+                {
+                    return; // Too many fail cases because they have not allowed a player to give them an arbitrary gift.
+                }
+                // If it is, we might need to package the name and amounts so Stardew Valley knows what item it actually is, in-game.
+                var stardewItem = StardewValleyGifts.HandleStardewValleyItemCountAndName(itemName, out var stardewAmount);
+                amount = stardewAmount;
+                itemName = stardewItem;
+            }
+            else if (itemClassification.HasFlag(ItemFlags.Advancement))
+            {
+                return; //Don't resend advancement items to other games; might cause problems.
+            }
+            var slotName = item.SlotName;
+            var madeUpItem = new GiftItem(itemName, amount, 0);
             var giftTraits = new GiftTrait[]{};
             if (itemClassification.HasFlag(ItemFlags.Trap))
             {
                 giftTraits.AddToArray(new GiftTrait(GiftFlag.Trap, 1, 1)); // Stardew in particular doesn't handle direct trap names.
             }
             var packagedGift = new GiftVector(madeUpItem, giftTraits);
-            ArchipelagoClient.AP.PrepareGift(packagedGift, slotName, color);
-        }
-
-        private static string FixStardewValleyResourcePacks(string itemName)
-        {
-            if (!itemName.Contains(STARDEW_RESOURCE_PREFIX))
-            {
-                return itemName;
-            }
-            var firstPass = itemName.Replace(STARDEW_RESOURCE_PREFIX, "");
-            _log.LogInfo($"{itemName} -> {firstPass}");
-            var secondPass = Regex.Replace(firstPass, "[0-9]", "");
-            _log.LogInfo($"{firstPass} -> {secondPass}");
-            var lastPass = secondPass.Substring(1);
-            _log.LogInfo($"{secondPass} -> {lastPass}");
-            return lastPass;
+            ArchipelagoClient.AP.PrepareGift(packagedGift, slotName);
         }
 
         private static void DropItemOnFloor(GameObject loot, Vector3 position)
