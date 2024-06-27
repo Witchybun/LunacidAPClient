@@ -220,17 +220,6 @@ namespace LunacidAP
                         break;
                     }
                 }
-                /*if (sceneName == "FOREST_A1" && stateController == "PATCHI")
-                {
-                    var canopyID = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
-                    if (ArchipelagoClient.AP.WasItemReceived("Skull of Josiah") && ArchipelagoClient.AP.IsLocationChecked(canopyID))
-                    {
-                        if (finalValue <= 5)
-                        {
-                            finalValue = 5;
-                        }
-                    }
-                }*/
                 for (int i = 0; i < sTATES.Length; i++)
                 {
                     errorData[1] = i.ToString();
@@ -393,6 +382,18 @@ namespace LunacidAP
                             if (!book.gameObject.activeSelf)
                             {
                                 book.gameObject.SetActive(value: true);
+                            }
+                            break;
+                        }
+                    case "ARCHIVES":
+                        {
+                            var daedalus = GameObject.Find("ARCHIVES").transform.GetChild(5).GetChild(0);
+                            var finalStages = daedalus.GetChild(7);
+                            // If Daedalus has already read book 3...
+                            if (finalStages.GetChild(1).gameObject.activeSelf || finalStages.GetChild(2).gameObject.activeSelf)
+                            {
+                                //Then turn off the previous cases.
+                                daedalus.GetChild(8).gameObject.SetActive(false); 
                             }
                             break;
                         }
