@@ -22,6 +22,8 @@ namespace LunacidAP
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
+        private const string QUENCH_KEY = "quenchsanity";
+        private const string ETNAS_KEY = "etnas_pupil";
         private const string NORM_DROP_KEY = "normalized_drops";
         private const string DL_KEY = "death_link";
         private const string RANDOM_ELE_KEY = "random_elements";
@@ -30,6 +32,8 @@ namespace LunacidAP
         private const string ENT_KEY = "entrances";
         private const string TOWER_KEY = "exclude_tower";
         private const string COIN_LOC_KEY = "exclude_coin_locations";
+        private const string DAEDALUS_KEY = "exclude_daedalus";
+        private const string IS_CHRISTMAS = "is_christmas";
         private Dictionary<string, object> _slotDataFields;
         public int Seed {get; private set;}
         public Goal Ending {get; private set;}
@@ -37,6 +41,8 @@ namespace LunacidAP
         public bool EntranceRandomizer {get; private set;}
         public string ClientVersion {get; private set;}
         public Dropsanity Dropsanity {get; private set;}
+        public bool Quenchsanity {get; private set;}
+        public bool EtnasPupil {get; private set;}
         public bool NormalizedDrops {get; private set;}
         public bool Shopsanity {get; private set;}
         public bool Switchlock {get; private set;}
@@ -50,6 +56,8 @@ namespace LunacidAP
         public bool FalseWalls {get; private set;}
         public bool ExcludeTower {get; private set;}
         public bool ExcludeCoinLocations {get; private set;}
+        public bool ExcludeDaedalus {get; private set;}
+        public bool IsChristmas {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -61,6 +69,8 @@ namespace LunacidAP
             Seed = GetSlotSetting(SEED_KEY, 0);
             ClientVersion = GetSlotSetting(VERSION, "0.0.0");
             Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
+            Quenchsanity = GetSlotSetting(QUENCH_KEY, false);
+            EtnasPupil = GetSlotSetting(ETNAS_KEY, false);
             NormalizedDrops = GetSlotSetting(NORM_DROP_KEY, false);
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
@@ -75,6 +85,8 @@ namespace LunacidAP
             FalseWalls = GetSlotSetting(WALL_KEY, false);
             ExcludeTower = GetSlotSetting(TOWER_KEY, false);
             ExcludeCoinLocations = GetSlotSetting(COIN_LOC_KEY, false);
+            ExcludeDaedalus = GetSlotSetting(DAEDALUS_KEY, false);
+            IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
