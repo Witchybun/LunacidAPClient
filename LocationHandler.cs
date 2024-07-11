@@ -171,14 +171,6 @@ namespace LunacidAP
                         }
                         return new LocationData();
                     }
-                case "CAS_PITT":
-                    {
-                        if (cleanedName == "BOOK_PICKUP")
-                        {
-                            return APLocationData["CAS_PITT"][0];
-                        }
-                        return new LocationData();
-                    }
                 case "HUB_01":
                     {
                         if (!ArchipelagoClient.AP.SlotData.Shopsanity && IsShopLocation(sceneName, objectName, objectPosition))
@@ -239,6 +231,7 @@ namespace LunacidAP
             {
                 return;
             }
+            
             if (__instance.Load.name != "STAGES")
             {
                 return;
