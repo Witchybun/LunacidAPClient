@@ -385,18 +385,6 @@ namespace LunacidAP
                             }
                             break;
                         }
-                    case "ARCHIVES":
-                        {
-                            var daedalus = GameObject.Find("ARCHIVES").transform.GetChild(5).GetChild(0);
-                            var finalStages = daedalus.GetChild(7);
-                            // If Daedalus has already read book 3...
-                            if (finalStages.GetChild(1).gameObject.activeSelf || finalStages.GetChild(2).gameObject.activeSelf)
-                            {
-                                //Then turn off the previous cases.
-                                daedalus.GetChild(8).gameObject.SetActive(false); 
-                            }
-                            break;
-                        }
                 }
                 return false;
             }
