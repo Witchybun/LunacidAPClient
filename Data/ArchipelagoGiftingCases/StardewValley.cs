@@ -15,7 +15,7 @@ namespace LunacidAP.Data.ArchipelagoGiftingCases
             "Haste Elixir", "Lightning Elixir", "Armor Elixir", "Gravity Elixir", "Barbarian Elixir"
         };
 
-        private static readonly List<string> SeedSuffices = new()
+        private static readonly List<string> SeedSuffixes = new()
         {
             "Seeds", "Starter", "Sapling"
         };
@@ -30,7 +30,7 @@ namespace LunacidAP.Data.ArchipelagoGiftingCases
             {
                 return true;
             }
-            else if (SeedSuffices.Contains(itemName.Split(' ').Last()))
+            else if (SeedSuffixes.Contains(itemName.Split(' ').Last()))
             {
                 return true;
             }
