@@ -253,6 +253,8 @@ namespace LunacidAP
                     {
                         itemNameCondensed += "...";
                     }
+                    var color = ArchipelagoClient.FlagColor(item.Classification);
+                    itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
                     var cost = " - <sprite=0>" + shopItem.cost.ToString();
                     if (DetermineItemCost(shopItem, sceneName) == 0)
                     {
