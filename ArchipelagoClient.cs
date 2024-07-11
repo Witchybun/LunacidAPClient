@@ -15,6 +15,7 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using static LunacidAP.Data.LunacidGifts;
+using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 
 namespace LunacidAP
 {
@@ -188,16 +189,26 @@ namespace LunacidAP
                 ConnectionData.DeathLink = true;
                 InitializeDeathLink();
             }
-            Gifting = new GiftingService(Session);
-            giftHelper = new GiftHelper(_log);
-            Gifting.OpenGiftBox();
-            Gifting.SubscribeToNewGifts(Gifting_WhenGiftWasReceived);
-            Gifting.CheckGiftBox();
+            SetUpGifting();
             cheatedCount = 0;
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
         }
         
+        public void SetUpGifting()
+        {
+            Gifting = new GiftingService(Session);
+            BKTreeCloseTraitParser<string> closeTraitParser = new ();
+            giftHelper = new GiftHelper(_log, closeTraitParser);
+            Gifting.OpenGiftBox();
+            Gifting.SubscribeToNewGifts(Gifting_WhenGiftWasReceived);
+            Gifting.CheckGiftBox();
+            foreach (var lunacidGiftItem in LunacidTraits.LunacidItemTraits)
+            {
+                closeTraitParser.RegisterAvailableGift(lunacidGiftItem.Key, lunacidGiftItem.Value);
+            }
+        }
+
         public void AttemptConnectFromDeath(int currentSave)
         {
             StartCoroutine(Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, currentSave));

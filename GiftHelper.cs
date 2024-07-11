@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archipelago.Gifting.Net.Gifts;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using LunacidAP.Data;
@@ -18,9 +19,11 @@ namespace LunacidAP
         private ManualLogSource _log;
         private System.Random random = new(DateTime.Now.Second);
         public bool HandlingGifts = false;
-        public GiftHelper(ManualLogSource log)
+        private ICloseTraitParser<string> closeTraitParser {get; set;}
+        public GiftHelper(ManualLogSource log, ICloseTraitParser<string> _closeTraitParser)
         {
             _log = log;
+            _closeTraitParser = closeTraitParser;
         }
 
         
@@ -96,35 +99,18 @@ namespace LunacidAP
 
         private string ClosestLunacidItem(Gift gift)
         {
-            var giftVector = new LunacidGifts.GiftVector(gift);
-            List<string> chosenItem = new() { };
-            double closenessRating = 10000000;
-            var giftTraits = gift.Traits.ToList();
-            foreach (var kvp in LunacidGifts.LunacidItemsToGifts)
-            {
-                var distance = kvp.Value.TraitDistance(giftVector);
-                if (distance < closenessRating)
-                {
-                    chosenItem = new(){kvp.Key};
-                    closenessRating = distance;
-                    _log.LogInfo($"New shortest distance found!  {kvp.Key}: {distance}");
-                }
-                else if (distance == closenessRating)
-                {
-                    chosenItem.Add(kvp.Key);
-                }
-            }
-            if (!chosenItem.Any())
+            var matches = closeTraitParser.FindClosestAvailableGift(gift.Traits);
+            if (!matches.Any())
             {
                 return "Silver";
             }
-            else if (chosenItem.Count() == 1)
+            else if (matches.Count() == 1)
             {
-                return chosenItem[0];
+                return matches[0];
             }
             else
             {
-                return chosenItem[random.Next(chosenItem.Count())];
+                return matches[random.Next(matches.Count())];
             }
         }
     }
