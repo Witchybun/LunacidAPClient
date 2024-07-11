@@ -696,7 +696,7 @@ namespace LunacidAP
                     }
                 case "ST: Basement Snake Pit":
                     {
-                        return CanJumpHeight("High") && HasSwitch("Grotto Fire Switch Keyring");
+                        return CanJumpHeight("High") && HasSwitch("Grotto Fire Switch Keyring") && HasDustyOrb();
 
                     }
                 case "ST: Hidden Sarcophagus":
