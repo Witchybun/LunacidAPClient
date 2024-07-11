@@ -115,7 +115,7 @@ namespace LunacidAP.Data
 
         private static readonly GiftTrait[] CoalTraits = new[]{
             new GiftTrait(GiftFlag.Energy, 1, 1),
-            new GiftTrait(GiftFlag.Heat, 1, 1),
+            new GiftTrait(GiftFlag.Fire, 1, 1),
             new GiftTrait(GiftFlag.Ore, 1, 1),
         };
 
@@ -139,7 +139,7 @@ namespace LunacidAP.Data
 
         private static readonly GiftTrait[] SnowflakeObsidianTraits = new[]{
             new GiftTrait(GiftFlag.Material, 1, 1),
-            new GiftTrait(GiftFlag.Cold, 1, 1),
+            new GiftTrait(GiftFlag.Ice, 1, 1),
             new GiftTrait(GiftFlag.Ore, 1, 1),
         };
 
@@ -151,14 +151,14 @@ namespace LunacidAP.Data
 
         private static readonly GiftTrait[] FireOpalTraits = new[]{
             new GiftTrait(GiftFlag.Material, 1, 1),
-            new GiftTrait(GiftFlag.Heat, 1, 1),
+            new GiftTrait(GiftFlag.Fire, 1, 1),
             new GiftTrait(GiftFlag.Ore, 1, 1),
         };
 
         private static readonly GiftTrait[] AshesTraits = new[]{
             new GiftTrait(GiftFlag.Material, 1, 1),
             new GiftTrait(GiftFlag.Wood, 1, 1),
-            new GiftTrait(GiftFlag.Heat, 1, 1),
+            new GiftTrait(GiftFlag.Fire, 1, 1),
             new GiftTrait(GiftFlag.Monster, 1, 1),
         };
 
@@ -182,7 +182,7 @@ namespace LunacidAP.Data
 
         private static readonly GiftTrait[] ObsidianTraits = new[]{
             new GiftTrait(GiftFlag.Material, 1, 1),
-            new GiftTrait(GiftFlag.Heat, 1, 1),
+            new GiftTrait(GiftFlag.Fire, 1, 1),
             new GiftTrait(GiftFlag.Stone, 1, 1),
         };
 

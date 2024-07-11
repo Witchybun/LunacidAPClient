@@ -18,6 +18,7 @@ namespace LunacidAP.Data
             {"MUMMY KNIGHT", "Mummy Knight"},
             {"MUMMY", "Mummy"},
             {"MILK_SNAIL_DED(Clone)", "Milk Snail"},
+            {"MILK_SNAIL_DED2(Clone)", "Milk Snail"},
             {"SNAIL_DED(Clone)", "Snail"},
             {"SHULKER_DED(Clone)", "Shulker"},
             {"RAT_DED1(Clone)", "Rat"}, // Monitor this; seems to end with a different number sometimes?
@@ -82,7 +83,7 @@ namespace LunacidAP.Data
             {"CANDLE_WEP_PICKUP", "Jailor's Candle"},
             {"RUSTED_SWORD_PICKUP", "Rusted Sword"},
             {"GOLDEN_SICKLE_PICKUP", "Golden Sickle"},
-            {"GOLDEN_KOPESH_PICKUP", "Golden Khopesh"},
+            {"GOLDEN_KHOPESH_PICKUP", "Golden Khopesh"},
             {"BRITTLE_PICKUP", "Brittle Arming Sword"},
             {"BOOK_PICKUP", "Black Book"},
             {"OBS_SHIELD_PICKUP", "Obsidian Cursebrand"},
@@ -181,7 +182,7 @@ namespace LunacidAP.Data
             {"Cetea", new List<string>(){"VOID"}},
             {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}},
             {"Cerritulus Lunam", new List<string>(){"PRISON"}},
-            {"Sanguine Umbra", new List<string>(){"CAS_PITT"}}
+            {"Sanguis Umbra", new List<string>(){"CAS_PITT"}}
         };
     }
 }
