@@ -26,6 +26,8 @@ namespace LunacidAP
         public SwapperHandler SwapperHandler {get; private set;}
         public MuseHandler MuseHandler {get; private set;}
         public EnemyHandler EnemyHandler {get; private set;}
+        public QuenchHandler QuenchHandler {get; private set;}
+        public AlkiHandler AlkiHandler {get; private set;}
         public NewGameUI UI {get; private set;}
         private void Awake()
         {
@@ -49,6 +51,8 @@ namespace LunacidAP
                 TeleportHandler = new TeleportHandler(Log);
                 SwapperHandler = new SwapperHandler(Log);
                 EnemyHandler = new EnemyHandler(Log);
+                QuenchHandler = new QuenchHandler(Log);
+                AlkiHandler = new AlkiHandler(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);

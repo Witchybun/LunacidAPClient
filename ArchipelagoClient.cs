@@ -111,7 +111,9 @@ namespace LunacidAP
             int seed = SlotData.GetSlotSetting("seed", 0);
             if (ConnectionData.Seed != 0 && ConnectionData.Seed != seed)
             {
-                _log.LogError("The server's seed does not match the save file's seed.  Make sure you're connecting with the right save file");
+                var msg = "The server's seed does not match the save file's seed.  Make sure you're connecting with the right save file";
+                _log.LogWarning(msg);
+                //SendVisibleError(msg, "WARNING");
                 Disconnect();
                 IsConnecting = false;
                 yield break;
@@ -120,13 +122,17 @@ namespace LunacidAP
             var archipelagoVersion = SlotData.ClientVersion.Split('.');
             if (int.Parse(gameVersion[0]) > int.Parse(archipelagoVersion[0]) || int.Parse(gameVersion[1]) > int.Parse(archipelagoVersion[1]))
             {
-                _log.LogError($"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.");
+                var msg = $"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.";
+                _log.LogError(msg);
+                //SendVisibleError(msg, "ERROR");
                 IsConnecting = false;
                 yield break;
             }
             else if (int.Parse(gameVersion[2]) > int.Parse(archipelagoVersion[2]))
             {
-                _log.LogWarning($"The server's game was made for {SlotData.ClientVersion} but the game is newer.  Should be fine though.");
+                var msg = $"The server's game was made for {SlotData.ClientVersion} but the game is newer.  Should be fine though.";
+                _log.LogWarning(msg);
+                //SendVisibleError(msg, "WARNING");
             }
             ConnectionData.Seed = seed;
 
@@ -161,7 +167,9 @@ namespace LunacidAP
             yield return new WaitUntil(() => locationCheckTask.IsCompleted);
             if (locationCheckTask.IsFaulted)
             {
-                _log.LogError("Locating Syncing has failed.");
+                var msg = "Location Syncing has failed.";
+                _log.LogError(msg);
+                //SendVisibleError(msg, "ERROR");
                 _log.LogError(locationCheckTask.Exception.GetBaseException().Message);
                 IsConnecting = false;
                 yield break;
@@ -194,19 +202,32 @@ namespace LunacidAP
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
         }
+
+        // Need to figure this out; A lot of stuff isn't initialized when its best to serve this method.
+        public void SendVisibleError(string msg, string type)
+        {
+            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            Popup ??= Control.PAPPY;
+
+            if (type == "ERROR")
+            {
+                Popup.POP($"<color=FF0000>{msg}</color>", 1f, 1);
+            }
+            if (type == "WARNING")
+            {
+                Popup.POP($"<color=FFFF00>{msg}</color>", 1f, 1);
+            }
+            
+        }
         
         public void SetUpGifting()
         {
             Gifting = new GiftingService(Session);
-            BKTreeCloseTraitParser<string> closeTraitParser = new ();
-            giftHelper = new GiftHelper(_log, closeTraitParser);
+            giftHelper = new GiftHelper(_log);
+            giftHelper.InitializeTraits();
             Gifting.OpenGiftBox();
             Gifting.SubscribeToNewGifts(Gifting_WhenGiftWasReceived);
             Gifting.CheckGiftBox();
-            foreach (var lunacidGiftItem in LunacidTraits.LunacidItemTraits)
-            {
-                closeTraitParser.RegisterAvailableGift(lunacidGiftItem.Key, lunacidGiftItem.Value);
-            }
         }
 
         public void AttemptConnectFromDeath(int currentSave)
@@ -404,7 +425,11 @@ namespace LunacidAP
                     {
                         continue;
                     }
-                    if (SlotData.StartingClass == 5 && location.APLocationName == "WR: Demi's Introduction Gift")
+                    if (SlotData.ExcludeDaedalus && LunacidLocations.DaedalusLocations.Contains(location.APLocationName))
+                    {
+                        continue;
+                    }
+                    if (!SlotData.IsChristmas && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
@@ -436,6 +461,28 @@ namespace LunacidAP
             if (SlotData.Dropsanity == Dropsanity.Randomized)
             {
                 foreach (var location in LunacidLocations.OtherDropLocations)
+                {
+                    if (location.IgnoreLocationHandler == true)
+                    {
+                        continue;
+                    }
+                    locations.Add((int)location.APLocationID);
+                }
+            }
+            if (SlotData.Quenchsanity)
+            {
+                foreach (var location in LunacidLocations.QuenchLocation)
+                {
+                    if (location.IgnoreLocationHandler == true)
+                    {
+                        continue;
+                    }
+                    locations.Add((int)location.APLocationID);
+                }
+            }
+            if (SlotData.EtnasPupil)
+            {
+                foreach (var location in LunacidLocations.AlkiLocation)
                 {
                     if (location.IgnoreLocationHandler == true)
                     {
@@ -493,6 +540,25 @@ namespace LunacidAP
                 return "#00EEEE";
             }
             return "#FFFFFF";
+        }
+
+        public string SendLocationGivenLocationDataSendingGift(LocationData locationData)
+        {
+            
+            var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
+            if (ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
+            {
+                if (item.SlotName == ConnectionData.SlotName && isRepeatable)
+                {
+                    ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: ArchipelagoClient.GIFT_COLOR); // Hey its junk.  Let them grind.  Let them suffer.
+                    return item.Name;
+                }
+                return "ALREADY_ACQUIRED";
+            }
+            LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
+            return item.Name;
+
         }
 
         public ArchipelagoItem ScoutLocation(long locationId)
