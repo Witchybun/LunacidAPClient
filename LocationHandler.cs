@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.UIElements.Experimental;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
@@ -86,6 +87,11 @@ namespace LunacidAP
             keepOriginalDrop = false;
             if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
+                if (ArchipelagoClient.AP.SlotData.ExcludeDaedalus)
+                {
+                    keepOriginalDrop = false;
+                    return;
+                }
                 var actualName = TheDaedalusConundrum(pickupObject);
                 apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
             }
@@ -250,7 +256,7 @@ namespace LunacidAP
                 var receivedItem = new ReceivedItem(item.Game, location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
                 ConnectionData.ReceivedItems.Add(receivedItem);
                 ItemHandler.GiveLunacidItem(receivedItem, true);
-                var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
+                var patchouliCanopy = LunacidLocations.APLocationData["FOREST_A1"].First(x => x.APLocationName == "YF: Patchouli's Canopy Offer").APLocationID;
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
                 if (ArchipelagoClient.AP.Authenticated)
                 {
@@ -576,6 +582,23 @@ namespace LunacidAP
                     }
             }
             return false;
+        }
+
+        [HarmonyPatch(typeof(CRIMPUS), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_ItsCRIMPUS(CRIMPUS __instance)
+        {
+            if (ArchipelagoClient.AP.SlotData.IsChristmas)
+            {
+                __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+                if (__instance.gameObject.scene.name == "FOREST_A1")
+                {
+                    //Make sure the eggnog is out frfr ong
+                    __instance.transform.GetChild(0).GetChild(13).gameObject.SetActive(value: true);
+                }
+                return false;
+            }
+            return true;
         }
 
         private static bool IsCloneAPLocation(Item_Pickup_scr pickupObject)
