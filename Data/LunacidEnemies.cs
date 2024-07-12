@@ -60,6 +60,7 @@ namespace LunacidAP.Data
             {"JAILOR", "Jailor"},
             {"CERRITULUS LUNAM", "Cerritulus Lunam"},
             {"LUPINE SKELETON", "Lupine Skeleton"},
+            {"INFESTED CORPSE", "Infested Corpse"},
             {"GIANT SKELETON", "Giant Skeleton"},
             {"CERES", "Ceres"},
             {"CETEA", "Cetea"},
