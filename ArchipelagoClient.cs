@@ -413,19 +413,22 @@ namespace LunacidAP
                 foreach (var location in region.Value)
                 {
                     var allowedList = new List<string>() { "TOWER", "ARENA2" };
+                    var excludedCoins = SlotData.RemovedLocations.Contains("Strange Coins");
+                    var excludedTower = SlotData.RemovedLocations.Contains("Tower of Abyss");
+                    var excludedDaedalus = SlotData.RemovedLocations.Contains("Daedalus");
                     if (location.IgnoreLocationHandler == true && !allowedList.Contains(region.Key))
                     {
                         continue;
                     }
-                    if (SlotData.ExcludeCoinLocations && LunacidLocations.CoinLocations.Contains(location.APLocationName))
+                    if (excludedCoins && LunacidLocations.CoinLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
-                    if (SlotData.ExcludeTower && LunacidLocations.TowerLocations.Contains(location.APLocationName))
+                    if (excludedTower && LunacidLocations.TowerLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
-                    if (SlotData.ExcludeDaedalus && LunacidLocations.DaedalusLocations.Contains(location.APLocationName))
+                    if (excludedDaedalus && LunacidLocations.DaedalusLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }

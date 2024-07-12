@@ -30,9 +30,7 @@ namespace LunacidAP
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
         private const string ENT_KEY = "entrances";
-        private const string TOWER_KEY = "exclude_tower";
-        private const string COIN_LOC_KEY = "exclude_coin_locations";
-        private const string DAEDALUS_KEY = "exclude_daedalus";
+        private const string REMOVAL_KEY = "remove_locations";
         private const string IS_CHRISTMAS = "is_christmas";
         private Dictionary<string, object> _slotDataFields;
         public int Seed {get; private set;}
@@ -54,9 +52,7 @@ namespace LunacidAP
         public bool DeathLink {get; private set;}
         public bool RandomElements {get; private set;}
         public bool FalseWalls {get; private set;}
-        public bool ExcludeTower {get; private set;}
-        public bool ExcludeCoinLocations {get; private set;}
-        public bool ExcludeDaedalus {get; private set;}
+        public List<string> RemovedLocations {get; private set;}
         public bool IsChristmas {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
@@ -83,9 +79,8 @@ namespace LunacidAP
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             FalseWalls = GetSlotSetting(WALL_KEY, false);
-            ExcludeTower = GetSlotSetting(TOWER_KEY, false);
-            ExcludeCoinLocations = GetSlotSetting(COIN_LOC_KEY, false);
-            ExcludeDaedalus = GetSlotSetting(DAEDALUS_KEY, false);
+            var removedList = GetSlotSetting(REMOVAL_KEY, "");
+            RemovedLocations = JsonConvert.DeserializeObject<List<string>>(removedList);
             IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
