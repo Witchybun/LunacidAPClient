@@ -107,10 +107,7 @@ namespace LunacidAP
 
         public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "")
         {
-            if (LunacidItems.FakeItems.Contains(itemName))
-            {
-                return;
-            }
+            
             if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
             {
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -130,6 +127,10 @@ namespace LunacidAP
             if (type == 1 || type == 2)
             {
                 itemName = itemName.ToUpper();
+            }if (LunacidItems.FakeItems.Contains(itemName))
+            {
+                PopupCommand(0, itemName, color, player, self);
+                return;
             }
             switch (type)
             {
