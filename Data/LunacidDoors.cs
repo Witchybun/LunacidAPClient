@@ -95,7 +95,7 @@ namespace LunacidAP.Data
 
         private static readonly Dictionary<string, Vector3> PrisonEntranceToDoor = new(){
             {"Terminus Prison to Throne Chamber", new Vector3(56f, 19.25f, -67.25f)},
-            {"Terminus Prison Dark Areas to Labyrinth of Ash", new Vector3(157.25f, -50.75f, -58f)},
+            {"Terminus Prison Dark Areas to Labyrinth of Ash Entrance", new Vector3(157.25f, -50.75f, -58f)},
             {"Terminus Prison Dark Areas to Forlorn Arena", new Vector3(-8f, -14f, 62f)}
         };
 
@@ -163,6 +163,12 @@ namespace LunacidAP.Data
         public static readonly List<Vector3> BallroomDoors = new(){
             new Vector3(-48f, 1.9f, 6f), new Vector3(-48f, 1.9f, -70f), new Vector3(-54f, 1.9f, -44f), new Vector3(-54f, 1.9f, -24f),
             new Vector3(44f, 1.9f, -4f), new Vector3(80f, 1.9f, -34f), new Vector3(80f, 1.9f, -90f), new Vector3(-24f, 1.9f, -42f)
+        };
+
+        public static readonly List<Vector3> VoidDoors = new(){
+            new Vector3(-76f, 1.9f, -120f), new Vector3(-76f, 1.9f, -52f), new Vector3(-108f, 1.9f, -80f), new Vector3(-108f, 1.9f, 8f),
+            new Vector3(-68f, 1.9f, 68f), new Vector3(-68f, 1.9f, 44f), new Vector3(-68f, 1.9f, 12f), new Vector3(96f, 1.9f, -76f),
+            new Vector3(224f, 1.9f, -10f)
         };
 
         public static Vector3 AbyssDoor = new Vector3(-119.25f, -26.75f, 96f);
