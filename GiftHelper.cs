@@ -5,10 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Archipelago.Gifting.Net.Gifts;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using Archipelago.Gifting.Net.Traits;
 using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
+using HarmonyLib;
 using LunacidAP.Data;
+using LunacidAP.Data.ArchipelagoGiftingCases;
 using UnityEngine;
 using static LunacidAP.Data.LunacidGifts;
 
@@ -19,11 +22,10 @@ namespace LunacidAP
         private ManualLogSource _log;
         private System.Random random = new(DateTime.Now.Second);
         public bool HandlingGifts = false;
-        private ICloseTraitParser<string> closeTraitParser {get; set;}
-        public GiftHelper(ManualLogSource log, ICloseTraitParser<string> _closeTraitParser)
+        private ICloseTraitParser<string> CloseTraitParser {get; set;}
+        public GiftHelper(ManualLogSource log)
         {
             _log = log;
-            _closeTraitParser = closeTraitParser;
         }
 
         
@@ -97,9 +99,23 @@ namespace LunacidAP
             ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false, overrideColor: ArchipelagoClient.GIFT_COLOR);
         }
 
+        public void InitializeTraits()
+        {
+            
+            CloseTraitParser = new BKTreeCloseTraitParser<string>();
+            foreach (var lunacidGiftItem in LunacidTraits.LunacidItemTraits)
+            {
+                CloseTraitParser.RegisterAvailableGift(lunacidGiftItem.Key, lunacidGiftItem.Value);
+            }
+        }
+
         private string ClosestLunacidItem(Gift gift)
         {
-            var matches = closeTraitParser.FindClosestAvailableGift(gift.Traits);
+            if (CloseTraitParser is null)
+            {
+                InitializeTraits();
+            }
+            var matches = CloseTraitParser.FindClosestAvailableGift(gift.Traits);
             if (!matches.Any())
             {
                 return "Silver";
@@ -112,6 +128,38 @@ namespace LunacidAP
             {
                 return matches[random.Next(matches.Count())];
             }
+        }
+
+        public static void GiftItemToOtherPlayer(ArchipelagoItem item)
+        {
+            var game = item.Game;
+            var amount = 1;
+            var itemName = item.Name;
+            var itemClassification = item.Classification;
+            if (game == "Stardew Valley")
+            {
+                if (!StardewValleyGifts.IsStardewItemGiftable(itemName))
+                {
+                    return; // Too many fail cases because they have not allowed a player to give them an arbitrary gift.
+                }
+                // If it is, we might need to package the name and amounts so Stardew Valley knows what item it actually is, in-game.
+                var stardewItem = StardewValleyGifts.HandleStardewValleyItemCountAndName(itemName, out var stardewAmount);
+                amount = stardewAmount;
+                itemName = stardewItem;
+            }
+            else if (itemClassification.HasFlag(ItemFlags.Advancement))
+            {
+                return; //Don't resend advancement items to other games; might cause problems.
+            }
+            var slotName = item.SlotName;
+            var madeUpItem = new GiftItem(itemName, amount, 0);
+            var giftTraits = new GiftTrait[]{};
+            if (itemClassification.HasFlag(ItemFlags.Trap))
+            {
+                giftTraits.AddToArray(new GiftTrait(GiftFlag.Trap, 1, 1)); // Stardew in particular doesn't handle direct trap names.
+            }
+            var packagedGift = new GiftVector(madeUpItem, giftTraits);
+            ArchipelagoClient.AP.PrepareGift(packagedGift, slotName);
         }
     }
 }
