@@ -87,7 +87,7 @@ namespace LunacidAP
             keepOriginalDrop = false;
             if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
-                if (ArchipelagoClient.AP.SlotData.ExcludeDaedalus)
+                if (ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Daedalus"))
                 {
                     keepOriginalDrop = false;
                     return;
@@ -608,12 +608,17 @@ namespace LunacidAP
 
         private static bool Tower_IsExcludedAndIsExcludedLocation(LocationData locationData)
         {
-            return ArchipelagoClient.AP.SlotData.ExcludeTower && LunacidLocations.TowerLocations.Contains(locationData.APLocationName);
+            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Tower of Abyss") && LunacidLocations.TowerLocations.Contains(locationData.APLocationName);
         }
 
         private static bool Coin_IsExcludedAndIsExcludedLocation(LocationData locationData)
         {
-            return ArchipelagoClient.AP.SlotData.ExcludeCoinLocations && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
+            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Strange Coins") && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
+        }
+
+        private static bool Daedalus_IsExcludedAndIsExcludedLocation(LocationData locationData)
+        {
+            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Daedalus") && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
         }
     }
 }
