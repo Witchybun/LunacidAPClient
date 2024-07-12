@@ -47,7 +47,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch"
+            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo"
         };
 
         public static readonly List<string> Swords = new(){
@@ -57,7 +57,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
             "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
             "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade"
+            "Dark Greatsword", "Shining Blade", "Limbo"
         };
 
         public static readonly List<string> Axes = new(){
@@ -85,7 +85,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
-            "LUCID BLADE", "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
+            "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
             "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
             "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
@@ -99,17 +99,17 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> Items = new(){
-            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
             "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Sheryl's Initial Offerings Voucher", 
-            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Fool's Gold"
+            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
         public static readonly List<string> Filler = new(){
-            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
             "Throwing Knife", "Holy Water", "Antidote", "Survey Banner", "Pink Shrimp", "Angel Feather", "Fool's Gold"
         };
@@ -117,7 +117,7 @@ namespace LunacidAP.Data
         public static readonly List<string> Materials = new(){
             "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes",
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
-            "Destroying Angel Mushroom", "Ocean Bone Shell"
+            "Destroying Angel Mushroom", "Ocean Bone Shell", "Bones", "Fool's Gold", "Fiddlehead", "Fire Coral", "Vampiric Ashes"
         };
 
         public static readonly List<string> Switches = new(){

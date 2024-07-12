@@ -53,6 +53,7 @@ namespace LunacidAP.Data
             new LocationData( 418, "Giant Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
             new LocationData( 419, "Cetea: Tornado Drop", "TORNADO_PICKUP" ),
             new LocationData( 420, "Abyssal Demon: Ocean Elixir Drop", "OCEAN_ELIXIR_PICKUP" ),
+            new LocationData( 421, "Lupine Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
         };
 
         public static readonly List<LocationData> OtherDropLocations = new(){
@@ -153,7 +154,7 @@ namespace LunacidAP.Data
             new LocationData( 545, "Embalmed: Cloth Bandage Drop" ),
             new LocationData( 546, "Embalmed: Ashes Drop" ),
             new LocationData( 547, "Embalmed: Bones Drop" ),
-            new LocationData( 548, "Jailor: Medium Silver Drop" ),
+            new LocationData( 548, "Jailor: Large Silver Drop" ),
             new LocationData( 549, "Jailor: Spectral Candle Drop" ),
             new LocationData( 550, "Jailor: Cloth Bandage Drop" ),
             new LocationData( 551, "Jailor: Health Vial Drop" ),
@@ -184,6 +185,11 @@ namespace LunacidAP.Data
             new LocationData( 576, "Mummy Knight: Large Silver Drop" ),
             new LocationData( 577, "Mummy Knight: Small Silver Drop" ),
             new LocationData( 578, "Sanguis Umbra: Black Book Drop" ),
+            new LocationData( 579, "Lupine Skeleton: Medium Silver Drop" ),
+            new LocationData( 580, "Lupine Skeleton: Onyx Drop" ),
+            new LocationData( 581, "Lupine Skeleton: Bones Drop" ),
+            new LocationData( 582, "Infested Corpse: Bones Drop" ),
+            new LocationData( 583, "Infested Corpse: Antidote Drop" ),
         };
 
         public static readonly List<LocationData> ShopLocations = new(){
@@ -210,6 +216,48 @@ namespace LunacidAP.Data
             "Ocean Elixir", "JOTUNN SLAYER"
         };
 
+        public static readonly List<LocationData> QuenchLocation = new(){
+            new LocationData(601, "Quench Steel Claw", "STEEL CLAW"),
+            new LocationData(602, "Quench Iron Claw", "IRON CLAW"),
+            new LocationData(603, "Quench Iron Club", "IRON CLUB"),
+            new LocationData(604, "Quench Stone Club", "STONE CLUB"),
+            new LocationData(605, "Quench Torch", "TORCH"),
+            new LocationData(606, "Quench Brittle Arming Sword", "BRITTLE ARMING SWORD"),
+            new LocationData(607, "Quench Broken Hilt", "BROKEN HILT"),
+            new LocationData(608, "Quench Broken Lance", "BROKEN LANCE"),
+            new LocationData(609, "Quench Crossbow", "CROSSBOW"),
+            new LocationData(610, "Quench Elfen Sword", "ELFEN SWORD"),
+            new LocationData(611, "Quench Lyrian Longsword", "LYRIAN LONGSWORD"),
+            new LocationData(612, "Quench Obsidian Seal", "OBSIDIAN SEAL"),
+            new LocationData(613, "Quench Obsidian Cursebrand", "OBSIDIAN CURSEBRAND"),
+            new LocationData(614, "Quench Obsidian Poisonguard", "OBSIDIAN POISONGUARD"),
+            new LocationData(615, "Quench Rapier", "RAPIER"),
+            new LocationData(616, "Quench Replica Sword", "REPLICA SWORD"),
+            new LocationData(617, "Quench Rusted Sword", "RUSTED SWORD"),
+            new LocationData(618, "Quench Shadow Blade", "SHADOW BLADE"),
+            new LocationData(619, "Quench Shining Blade", "SHINING BLADE"),
+            new LocationData(620, "Quench Death Scythe", "DEATH SCYTHE"),
+        };
+
+        public static readonly List<LocationData> AlkiLocation = new(){
+            new LocationData(651, "Alchemize Concentrated Lunacy", "Moonlight Vial"),
+            new LocationData(652, "Alchemize Hostility Barrier", "Spectral Candle"),
+            new LocationData(653, "Alchemize Explosives", "Bomb"),
+            new LocationData(654, "Alchemize Venomous Object", "Poison Throwing Knife"),
+            new LocationData(655, "Alchemize Defense Construct", "Staff of Osiris"),
+            new LocationData(656, "Alchemize Concentrated Poison", "Poison Urn"),
+            new LocationData(657, "Alchemize Nature", "Fairy Moss"),
+            new LocationData(658, "Alchemize Antivenom", "Antidote"),
+            new LocationData(659, "Alchemize Cleromancy Tool", "Survey Banner"),
+            new LocationData(660, "Alchemize Healing Remedy", "Health Vial"),
+            new LocationData(661, "Alchemize Water of Life", "Holy Water"),
+            new LocationData(662, "Alchemize Sharp Object", "Throwing Knife"),
+            new LocationData(663, "Alchemize Golden Sin of Abdul", "Limbo"),
+            new LocationData(664, "Alchemize Mana Remedy", "Mana Vial"),
+            new LocationData(665, "Alchemize Unstable Stone", "Crystal Shard"),
+            new LocationData(666, "Alchemize Simple Life", "Wisp Heart"),
+        };
+
         public static readonly Dictionary<string, List<LocationData>> APLocationData = new(){
             {
                 "HUB_01", // Wing's Rest
@@ -219,7 +267,7 @@ namespace LunacidAP.Data
             new LocationData( 3, "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3(14.5f, 1.3f, -1.9f) ),
             new LocationData( 4, "WR: Demi's Victory Gift", "VHS_PICKUP", new Vector3(-4.1f, 1.3f, -11.2f) ),
             new LocationData( 5, "WR: Demi's Introduction Gift", position: new Vector3(-4.1f, 1.3f, -11.2f)),
-            new LocationData( 6, "WR: Christmas Present", position: new Vector3()),
+            new LocationData( 6, "WR: Christmas Present", position: new Vector3(-8.465f, 0.557f, -5.413f)),
 
         }
             },
@@ -323,6 +371,7 @@ namespace LunacidAP.Data
                     new LocationData( 101, "YF: Room Defended by Blood Plant", "EARTH_STRIKE", new Vector3(-274.7f, -32.4f, -176.2f)),
                     new LocationData( 102, "YF: Patchouli's Canopy Offer", "ENKEY_PICKUP", new Vector3(-57.9f, -16.8f, -116.1f)),
                     new LocationData( 103, "YF: Patchouli's Reward", "EARTH_ELIXIR_PICKUP", new Vector3(-57.9f, -16.8f, -116.3f)),
+                    new LocationData( 104, "YF: Patchouli's Yuletide Offering", "NOGG_PICKUP", new Vector3(-53.968f, -15.6588f, -116.677f))
                 }
             },
             {
@@ -559,5 +608,12 @@ namespace LunacidAP.Data
             "HB: Temple Blood Altar", "AT: Kill Death", "SS: Killing the Jotunn"
         };
 
+        public static readonly List<string> DaedalusLocations = new(){
+            "FbA: Daedalus Knowledge (First)", "FbA: Daedalus Knowledge (Second)", "FbA: Daedalus Knowledge (Third)"
+        };
+
+        public static readonly List<string> ChristmasLocations = new(){
+            "WR: Christmas Present", "YF: Patchouli's Yuletide Offering"
+        };
     }
 }
