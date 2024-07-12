@@ -9,7 +9,7 @@ namespace LunacidAP
     {
 
         private static ManualLogSource _log;
-                public DoorHandler(ManualLogSource log)
+        public DoorHandler(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(DoorHandler));
@@ -73,21 +73,41 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_StopOpenIfNoKey(Act_Button_scr __instance)
         {
-            if (__instance.gameObject.scene.name != "CAS_3")
-            {
-                return true;
-            }
             if (!ArchipelagoClient.AP.SlotData.Doorlock)
             {
                 return true;
             }
-            if (LunacidDoors.BallroomDoors.Contains(__instance.transform.position) && !ArchipelagoClient.AP.WasItemReceived("Ballroom Side Rooms Keyring"))
+            var sceneName = __instance.gameObject.scene.name;
+            if (sceneName != "CAS_3" || sceneName != "VOID")
             {
-                var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                var popup = control.PAPPY;
-                popup.POP("The door is locked...", 1f, 1);
-                return false;
+                return true;
             }
+            switch (sceneName)
+            {
+                case "CAS_3":
+                    {
+                        if (LunacidDoors.BallroomDoors.Contains(__instance.transform.position) && !ArchipelagoClient.AP.WasItemReceived("Ballroom Side Rooms Keyring"))
+                        {
+                            var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                            var popup = control.PAPPY;
+                            popup.POP("The door is locked...", 1f, 1);
+                            return false;
+                        }
+                        break;
+                    }
+                case "VOID":
+                    {
+                        if (LunacidDoors.VoidDoors.Contains(__instance.transform.position) && !ArchipelagoClient.AP.WasItemReceived("Ashen Doors Keyring"))
+                        {
+                            var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                            var popup = control.PAPPY;
+                            popup.POP("The door is locked...", 1f, 1);
+                            return false;
+                        }
+                        break;
+                    }
+            }
+
             return true;
         }
 

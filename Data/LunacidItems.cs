@@ -133,7 +133,7 @@ namespace LunacidAP.Data
             "Sewers Sea Door Key", "Accursed Door Key", "Castle Doors Key", "Library Exit Door Key", "Surface Door Key",
             "Light Accursed Door Key", "Queen's Throne Door Key", "Prison Main Door Key", "Secondary Lock Key",
             "Burning Hot Key", "Forbidden Door Key", "Sucsarian Key", "Dreamer Key", "Ballroom Side Rooms Keyring",
-            "Tower of Abyss Keyring"
+            "Tower of Abyss Keyring", "Ashen Doors Keyring"
         };
 
         public static readonly List<string> Traps = new(){
