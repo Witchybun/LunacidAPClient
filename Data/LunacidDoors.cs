@@ -171,7 +171,7 @@ namespace LunacidAP.Data
             new Vector3(224f, 1.9f, -10f)
         };
 
-        public static Vector3 AbyssDoor = new Vector3(-119.25f, -26.75f, 96f);
+        public static Vector3 AbyssDoor = new(-119.25f, -26.75f, 96f);
         
     }
 }
