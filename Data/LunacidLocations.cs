@@ -142,7 +142,7 @@ namespace LunacidAP.Data
             new LocationData( 533, "Ikurr'ilb: Snowflake Obsidian Drop" ),
             new LocationData( 534, "Mimic: Moonlight Vial Drop" ),
             new LocationData( 535, "Mimic: Obsidian Drop" ),
-            new LocationData( 536, "Mimic: Fools Gold Drop" ),
+            new LocationData( 536, "Mimic: Fool's Gold Drop" ),
             new LocationData( 537, "Obsidian Skeleton: Large Silver Drop" ),
             new LocationData( 538, "Obsidian Skeleton: Bones Drop" ),
             new LocationData( 539, "Obsidian Skeleton: Mana Vial Drop" ),
