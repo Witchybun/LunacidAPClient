@@ -183,7 +183,8 @@ namespace LunacidAP.Data
             {"Cetea", new List<string>(){"VOID"}},
             {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}},
             {"Cerritulus Lunam", new List<string>(){"PRISON"}},
-            {"Sanguis Umbra", new List<string>(){"CAS_PITT"}}
+            {"Sanguis Umbra", new List<string>(){"CAS_PITT"}},
+            {"Infested Corpse", new List<string>(){"PRISON"}},
         };
     }
 }
