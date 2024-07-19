@@ -22,11 +22,14 @@ namespace LunacidAP.Data
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
         public static List<string> EnteredScenes = new(){};
         public static List<ReceivedGift> ReceivedGifts = new(){};
+        public static string CustomName = "";
+        public static Dictionary<string, int> CustomStats = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
-        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null)
+        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, string customName = null,
+        Dictionary<string, int> customStats = null)
         {
             HostName = hostName;
             Port = port;
@@ -71,6 +74,14 @@ namespace LunacidAP.Data
             {
                 ReceivedGifts = receivedGifts;
             }
+            if (customName is not null)
+            {
+                CustomName = customName;
+            }
+            if (customStats is not null)
+            {
+                CustomStats = customStats;
+            }
         }
 
         public static void WriteConnectionData()
@@ -91,6 +102,8 @@ namespace LunacidAP.Data
             ScoutedLocations = new(){};
             EnteredScenes = new(){};
             ReceivedGifts = new(){};
+            CustomStats = new(){};
+            CustomName = "";
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){
@@ -102,7 +115,8 @@ namespace LunacidAP.Data
             {5, "ROYAL"},
             {6, "CLERIC"},
             {7, "SHINOBI"},
-            {8, "FORSAKEN"}
+            {8, "FORSAKEN"},
+            {9, "RANDOM"},
         };
     }
 }
