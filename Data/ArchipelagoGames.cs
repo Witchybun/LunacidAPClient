@@ -97,6 +97,7 @@ namespace LunacidAP.Data
             {"Metroid Prime", "a space bounty hunter"},
             {"Super Metroid Map Rando", "a space bounty hunter"},
             {"Super Junkoid", "a young girl"},
+            {"Earthbound", "four prophesized children"}
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -188,7 +189,8 @@ namespace LunacidAP.Data
             {"Battle for Bikini Bottom", "the underwater city of Bikini Bottom."},
             {"Metroid Prime", "on the remote planet of Pallon IV."},
             {"Super Metroid Map Rando", "upon a distant planet's surface."},
-            {"Super Junkoid", "within their own eternal dreams, induced by a serpent."}
+            {"Super Junkoid", "within their own eternal dreams, induced by a serpent."},
+            {"Earthbound", "traveling the lands of Eagle."},
 
         };
 

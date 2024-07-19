@@ -96,7 +96,7 @@ namespace LunacidAP
             var closestItem = ClosestLunacidItem(gift);
             var itemFlag = LunacidItems.Traps.Contains(closestItem) ? ItemFlags.Trap : ItemFlags.None;
             var player = ArchipelagoClient.AP.GetPlayerNameFromSlot(gift.SenderSlot);
-            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false, overrideColor: ArchipelagoClient.GIFT_COLOR);
+            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false, overrideColor: Colors.GIFT_COLOR_DEFAULT);
         }
 
         public void InitializeTraits()

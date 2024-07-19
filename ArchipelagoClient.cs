@@ -22,7 +22,6 @@ namespace LunacidAP
     public class ArchipelagoClient : MonoBehaviour
     {
         public const string GAME_NAME = "Lunacid";
-        public const string GIFT_COLOR = "#9DAE11";
         private static ManualLogSource _log;
         public static ArchipelagoClient AP;
         private static GameObject Obj;
