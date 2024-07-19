@@ -105,7 +105,7 @@ namespace LunacidAP.Data
         };
 
         private static readonly Dictionary<string, Vector3> AshEntranceToDoor = new(){
-            {"Labyrinth of Ash to Terminus Prison Dark Areas", new Vector3(47.25f, 17.25f, 68f)}
+            {"Labyrinth of Ash Entrance to Terminus Prison Dark Areas", new Vector3(47.25f, 17.25f, 68f)}
         };
 
         private static readonly Dictionary<string, Vector3> FateEntranceToDoor = new(){
