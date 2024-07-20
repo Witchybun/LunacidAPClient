@@ -285,7 +285,7 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                var color = ArchipelagoClient.FlagColor(item.Classification);
+                var color = Colors.DetermineItemColor(item.Classification);
                 _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
 
             }
@@ -297,7 +297,7 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                var color = ArchipelagoClient.FlagColor(item.Classification);
+                var color = Colors.DetermineItemColor(item.Classification);
                 _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
             }
             return false;

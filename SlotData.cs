@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using Newtonsoft.Json;
@@ -32,6 +33,9 @@ namespace LunacidAP
         private const string ENT_KEY = "entrances";
         private const string REMOVAL_KEY = "remove_locations";
         private const string IS_CHRISTMAS = "is_christmas";
+        private const string CUSTOM_NAME_KEY = "created_class_name";
+        private const string CUSTOM_CLASS_KEY = "created_class_stats";
+        private const string CUSTOM_COLORS_KEY = "item_colors";
         private Dictionary<string, object> _slotDataFields;
         public int Seed {get; private set;}
         public Goal Ending {get; private set;}
@@ -54,6 +58,9 @@ namespace LunacidAP
         public bool FalseWalls {get; private set;}
         public List<string> RemovedLocations {get; private set;}
         public bool IsChristmas {get; private set;}
+        public string CustomName {get; private set;}
+        public Dictionary<string, int> CustomStats {get; private set;}
+        public Dictionary<string, string> ItemColors {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -82,6 +89,12 @@ namespace LunacidAP
             var removedList = GetSlotSetting(REMOVAL_KEY, "");
             RemovedLocations = JsonConvert.DeserializeObject<List<string>>(removedList);
             IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
+            CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
+            var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
+            CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
+            var itemColors = GetSlotSetting(CUSTOM_COLORS_KEY, "");
+            ItemColors = JsonConvert.DeserializeObject<Dictionary<string, string>>(itemColors);
+            
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
@@ -98,6 +111,19 @@ namespace LunacidAP
                     ConnectionData.Entrances.Add(data.Key, data.Value);
                 }
             }
+            if (ConnectionData.CustomName == "")
+            {
+                ConnectionData.CustomName = CustomName;
+            }
+            if (!ConnectionData.CustomStats.Any())
+            {
+                ConnectionData.CustomStats = CustomStats;
+            }
+            if (!ConnectionData.ItemColors.Any())
+            {
+                ConnectionData.ItemColors = ItemColors;
+            }
+            
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)
