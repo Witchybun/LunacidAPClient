@@ -67,7 +67,7 @@ namespace LunacidAP.Data
             {"SUCSARIAN", "Sucsarian"},
             {"VESTA", "Vesta"},
             {"GLOOM WOOD", "Gloom Wood"},
-            {"SANGUINE UMBRA", "Sanguine Umbra"},
+            {"SANGUIS UMBRA", "Sanguis Umbra"},
         };
 
         public static readonly List<string> NotEnemyWhitelist = new(){
