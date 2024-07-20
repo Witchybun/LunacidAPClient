@@ -265,7 +265,7 @@ namespace LunacidAP
                     _log.LogWarning("We tried to tell you about sending an item but we got null output!");
                     yield break;
                 }
-                Popup.POP($"Gifted <color={GIFT_COLOR}>{giftVector.GiftItem.Name}</color> to {slotName}", 1f, 0);
+                Popup.POP($"Gifted <color={Colors.GetGiftColor()}>{giftVector.GiftItem.Name}</color> to {slotName}", 1f, 0);
             }
             else
             {
@@ -522,28 +522,6 @@ namespace LunacidAP
           {ItemFlags.Trap, "Trap"}
         };
 
-        public static string FlagColor(ItemFlags itemFlag)
-        {
-            if (itemFlag.HasFlag(ItemFlags.Advancement))
-            {
-                return "#AF99EF";
-            }
-            else if (itemFlag.HasFlag(ItemFlags.NeverExclude))
-            {
-                return "#6D8BE8";
-            }
-            else if (itemFlag.HasFlag(ItemFlags.Trap))
-            {
-                return "#FA8072";
-            }
-            else if (itemFlag.HasFlag(ItemFlags.None))
-            {
-
-                return "#00EEEE";
-            }
-            return "#FFFFFF";
-        }
-
         public string SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
             
@@ -553,7 +531,7 @@ namespace LunacidAP
             {
                 if (item.SlotName == ConnectionData.SlotName && isRepeatable)
                 {
-                    ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: ArchipelagoClient.GIFT_COLOR); // Hey its junk.  Let them grind.  Let them suffer.
+                    ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
                     return item.Name;
                 }
                 return "ALREADY_ACQUIRED";

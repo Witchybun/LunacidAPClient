@@ -113,7 +113,7 @@ namespace LunacidAP
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 ApplyItemToInventory("Orb of a Lost Archipelago");
             }
-            string color = ArchipelagoClient.FlagColor(itemFlag);
+            string color = Colors.DetermineItemColor(itemFlag);
             if (overrideColor != "")
             {
                 color = overrideColor;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx.Logging;
@@ -247,24 +248,26 @@ namespace LunacidAP
                             var count = 0;
                             var button = create.GetChild(11).GetComponent<UnityEngine.UI.Button>();
                             _log.LogInfo($"We were given {ArchipelagoClient.AP.SlotData.StartingClass}");
-                            while (count < ArchipelagoClient.AP.SlotData.StartingClass)
+                            var classCount = Math.Min(8, ArchipelagoClient.AP.SlotData.StartingClass); // Random utilizes Forsaken's slot anyway.
+                            while (count < classCount)
                             {
                                 button.onClick.Invoke();
                                 count += 1;
                             }
+                            FinalizeClass(create);
                             create.GetChild(11).gameObject.SetActive(value: false);
                             create.GetChild(14).gameObject.SetActive(value: true);
                             create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
                             create.GetChild(15).gameObject.SetActive(value: true);
                             create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
                             create.GetChild(16).gameObject.SetActive(value: true);
-                            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "NORMDROP\nDEATH";
+                            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
                             create.GetChild(19).gameObject.SetActive(value: true);
                             create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
                             create.GetChild(20).gameObject.SetActive(value: true);
                             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
                             create.GetChild(21).gameObject.SetActive(value: true);
-                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{NormalizedDrops()}\n{Death()}";
+                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
                             create.GetChild(8).gameObject.SetActive(value: true);
                             create.GetChild(9).gameObject.SetActive(value: true);
                             create.GetChild(17).gameObject.SetActive(value: true);
@@ -297,10 +300,19 @@ namespace LunacidAP
             var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
             create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
             create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
-            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "NORMDROP\nDEATH";
+            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
             create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
-            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{NormalizedDrops()}\n{Death()}";
+            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
+        }
+
+        private static void FinalizeClass(Transform createTransform)
+        {
+            if (ArchipelagoClient.AP.SlotData.StartingClass != 9)
+            {
+                return;
+            }
+
         }
 
         private static string Ending()
@@ -361,6 +373,16 @@ namespace LunacidAP
         private static string Death()
         {
             return ArchipelagoClient.AP.SlotData.DeathLink ? "Y" : "N";
+        }
+
+        private static string Etna()
+        {
+            return ArchipelagoClient.AP.SlotData.EtnasPupil ? "Y" : "N";
+        }
+
+        private static string Quench()
+        {
+            return ArchipelagoClient.AP.SlotData.Quenchsanity ? "Y": "N";
         }
     }
 }

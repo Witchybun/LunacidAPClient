@@ -25,28 +25,39 @@ namespace LunacidAP
         public static string DetermineItemColor(ItemFlags itemFlags)
         {
             var colors = new List<string>();
+            var isProgressionAdded = ConnectionData.ItemColors.TryGetValue("Progression", out var progression);
+            var isUsefulAdded = ConnectionData.ItemColors.TryGetValue("Unique", out var useful);
+            var isTrapAdded = ConnectionData.ItemColors.TryGetValue("Trap", out var trap);
             if (itemFlags.HasFlag(ItemFlags.Advancement))
             {
-                colors.Add(PROGRESSION_COLOR_DEFAULT);
+                colors.Add(isProgressionAdded ? progression : PROGRESSION_COLOR_DEFAULT);
             }
             if (itemFlags.HasFlag(ItemFlags.NeverExclude))
             {
-                colors.Add(USEFUL_COLOR_DEFAULT);
+                colors.Add(isUsefulAdded ? useful : USEFUL_COLOR_DEFAULT);
             }
             if (itemFlags.HasFlag(ItemFlags.Trap))
             {
-                colors.Add(TRAP_COLOR_DEFAULT);
+                colors.Add(isTrapAdded ? trap : TRAP_COLOR_DEFAULT);
             }
             if (!colors.Any())
             {
-                return "#000000"; // Its filler
+                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
+                return isFillerAdded ? filler : FILLER_COLOR_DEFAULT; // Its filler
             }
             return ColorMixer(colors);
         }
 
         public static string GetGiftColor()
         {
-            return GIFT_COLOR_DEFAULT;
+            var isGiftAdded = ConnectionData.ItemColors.TryGetValue("Gift", out var gift);
+            return isGiftAdded ? gift : GIFT_COLOR_DEFAULT;
+        }
+
+        public static string GetCheatColor()
+        {
+            var isCheatAdded = ConnectionData.ItemColors.TryGetValue("Cheat", out var cheat);
+            return isCheatAdded ? cheat : CHEAT_COLOR_DEFAULT;
         }
 
         private static string ColorMixer(List<string> colors)
@@ -74,19 +85,19 @@ namespace LunacidAP
             avgR /= 3;
             avgG /= 3;
             avgB /= 3;
-            var averageRGB = new int[]{avgR, avgG, avgB};
+            var averageRGB = new int[] { avgR, avgG, avgB };
             return RGBToHexConverter(averageRGB);
         }
 
         private static int[] HexToRGBConverter(string hex)
         {
-            if (hex.IndexOf('#') != -1)                
-                hex = hex.Replace("#", "");            
-            int r,g,b = 0;             
-            r = int.Parse(hex.Substring(0, 2), NumberStyles.AllowHexSpecifier);             
-            g = int.Parse(hex.Substring(2, 2), NumberStyles.AllowHexSpecifier);             
-            b = int.Parse(hex.Substring(4, 2), NumberStyles.AllowHexSpecifier);            
-            return new int[]{r, g, b};
+            if (hex.IndexOf('#') != -1)
+                hex = hex.Replace("#", "");
+            int r, g, b = 0;
+            r = int.Parse(hex.Substring(0, 2), NumberStyles.AllowHexSpecifier);
+            g = int.Parse(hex.Substring(2, 2), NumberStyles.AllowHexSpecifier);
+            b = int.Parse(hex.Substring(4, 2), NumberStyles.AllowHexSpecifier);
+            return new int[] { r, g, b };
         }
 
         private static string RGBToHexConverter(int[] rgb)

@@ -24,12 +24,13 @@ namespace LunacidAP.Data
         public static List<ReceivedGift> ReceivedGifts = new(){};
         public static string CustomName = "";
         public static Dictionary<string, int> CustomStats = new(){};
+        public static Dictionary<string, string> ItemColors = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
         SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, string customName = null,
-        Dictionary<string, int> customStats = null)
+        Dictionary<string, int> customStats = null, Dictionary<string, string> itemColors = null)
         {
             HostName = hostName;
             Port = port;
@@ -82,6 +83,10 @@ namespace LunacidAP.Data
             {
                 CustomStats = customStats;
             }
+            if (itemColors is not null)
+            {
+                ItemColors = itemColors;
+            }
         }
 
         public static void WriteConnectionData()
@@ -104,6 +109,7 @@ namespace LunacidAP.Data
             ReceivedGifts = new(){};
             CustomStats = new(){};
             CustomName = "";
+            ItemColors = new(){};
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){
