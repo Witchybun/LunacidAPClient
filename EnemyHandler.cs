@@ -97,7 +97,6 @@ namespace LunacidAP
                 return false;
             }
             var locationData = GetDropLocationData(location);
-            locationData = EnemyBugFix(locationData);
             if (locationData.APLocationName == "ERROR")
             {
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
@@ -105,20 +104,6 @@ namespace LunacidAP
             }
             var itemName = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
             return false;
-        }
-
-        // Attempt to fix a few locations for myself during an async.
-        private static LocationData EnemyBugFix(LocationData potentialData)
-        {
-            if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID == ArchipelagoClient.LOCATION_INIT_ID + 567)
-            {
-                return new LocationData( 160, "AHB: Sngula Umbra's Remains", "BOOK_PICKUP" );
-            }
-            else if (ArchipelagoClient.AP.SlotData.ClientVersion == "0.6.0" && potentialData.APLocationID > ArchipelagoClient.LOCATION_INIT_ID + 563)
-            {
-                return new LocationData(0, "ERROR");
-            }
-            return potentialData;
         }
 
         private static void NameEveryDrop(string mobName, Loot_scr.Reward[] rewards)
