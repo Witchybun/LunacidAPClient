@@ -17,38 +17,6 @@ namespace LunacidAP
         public SaveHandler(ManualLogSource log)
         {
             _log = log;
-            Harmony.CreateAndPatchAll(typeof(SaveHandler));
-        }
-
-        [HarmonyPatch(typeof(Save), "SAVE_FILE")]
-        [HarmonyPrefix]
-        private static void SaveFile_SaveArchipelagoData(int Save_Slot, Vector3 POS, CONTROL CON)
-        {
-            try
-            {
-                _log.LogInfo($"Trying to save to {Save_Slot}");
-                //SaveData(Save_Slot);
-            }
-            catch
-            {
-                _log.LogError("Could not save data!");
-            }
-        }
-
-        [HarmonyPatch(typeof(Save), "LOAD_FILE")]
-        [HarmonyPostfix]
-        private static void Load_LoadArchipelagoData(int Save_Slot)
-        {
-            try
-            {
-                //ReadSave(Save_Slot);
-            }
-            catch (Exception ex)
-            {
-                _log.LogError($"Failure in {nameof(Load_LoadArchipelagoData)}");
-                _log.LogError($"Reason: {ex.Message}");
-            }
-
         }
 
         public static void SaveData(int Save_Slot)
