@@ -15,7 +15,6 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using static LunacidAP.Data.LunacidGifts;
-using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 
 namespace LunacidAP
 {
