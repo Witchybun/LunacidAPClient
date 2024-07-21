@@ -2,28 +2,31 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
+using BepInEx.Logging;
+using JetBrains.Annotations;
 using LunacidAP.Data;
 
 namespace LunacidAP
 {
     public class Colors
     {
-        public const string PROGRESSIVE_COLOR_ORIGINAL = "#AF99EF";
-        public const string USEFUL_COLOR_ORIGINAL = "#6D8BE8";
-        public const string FILLER_COLOR_ORIGINAL = "#00EEEE";
-        public const string TRAP_COLOR_ORIGINAL = "#FA8072";
-        public const string CHEAT_COLOR_ORIGINAL = "FF0000";
-        public const string GIFT_COLOR_ORIGINAL = "#9DAE11";
+        public const string PROGRESSION_COLOR_DEFAULT = "#AF99EF";
+        public const string USEFUL_COLOR_DEFAULT = "#6D8BE8";
+        public const string FILLER_COLOR_DEFAULT = "#00EEEE";
+        public const string TRAP_COLOR_DEFAULT = "#FA8072";
+        public const string CHEAT_COLOR_DEFAULT = "#FF0000";
+        public const string GIFT_COLOR_DEFAULT = "#9DAE11";
 
-        public const string PROGRESSION_COLOR_DEFAULT = "#FFA500";
-        public const string USEFUL_COLOR_DEFAULT = "#0000FF";
-        public const string FILLER_COLOR_DEFAULT = "#000000";
-        public const string TRAP_COLOR_DEFAULT = "#FF1493";
-        public const string GIFT_COLOR_DEFAULT = "#00CED1";
-        public const string CHEAT_COLOR_DEFAULT = "#00FF00";
+        private static ManualLogSource _log;
+
+        public Colors(ManualLogSource log)
+        {
+            _log = log;
+        }
 
         public static string DetermineItemColor(ItemFlags itemFlags)
         {
+
             var colors = new List<string>();
             var isProgressionAdded = ConnectionData.ItemColors.TryGetValue("Progression", out var progression);
             var isUsefulAdded = ConnectionData.ItemColors.TryGetValue("Unique", out var useful);
@@ -45,7 +48,8 @@ namespace LunacidAP
                 var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
                 return isFillerAdded ? filler : FILLER_COLOR_DEFAULT; // Its filler
             }
-            return ColorMixer(colors);
+            var mixedColors = ColorMixer(colors);
+            return mixedColors;
         }
 
         public static string GetGiftColor()
@@ -67,6 +71,7 @@ namespace LunacidAP
             {
                 colorRGBs.Add(HexToRGBConverter(color));
             }
+            var count = colors.Count();
             int avgR = 0;
             int avgG = 0;
             int avgB = 0;
@@ -74,17 +79,17 @@ namespace LunacidAP
             {
                 avgR += colorRGBs[i][0];
             }
-            for (var j = 0; j < colors.Count; j++)
+            for (var j = 0; j < count; j++)
             {
                 avgG += colorRGBs[j][1];
             }
-            for (var k = 0; k < colors.Count; k++)
+            for (var k = 0; k < count; k++)
             {
                 avgB += colorRGBs[k][2];
             }
-            avgR /= 3;
-            avgG /= 3;
-            avgB /= 3;
+            avgR /= count;
+            avgG /= count;
+            avgB /= count;
             var averageRGB = new int[] { avgR, avgG, avgB };
             return RGBToHexConverter(averageRGB);
         }
@@ -104,9 +109,25 @@ namespace LunacidAP
         {
             string first, second, third = "";
             first = rgb[0].ToString("X");
+            _log.LogInfo($"First is {first}");
+            if (first.Length == 1)
+            {
+                first = "0" + first;
+            }
             second = rgb[1].ToString("X");
+            _log.LogInfo($"Second is {second}");
+            if (second.Length == 1)
+            {
+                second = "0" + second;
+            }
             third = rgb[2].ToString("X");
+            _log.LogInfo($"Third is {third}");
+            if (third.Length == 1)
+            {
+                third = "0" + third;
+            }
             var finalString = "#" + first + second + third;
+            _log.LogInfo($"Coloring with {finalString}");
             return finalString;
         }
 

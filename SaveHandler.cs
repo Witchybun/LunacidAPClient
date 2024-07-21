@@ -71,8 +71,6 @@ namespace LunacidAP
                 HostName = ConnectionData.HostName,
                 Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
-                CustomName = ConnectionData.CustomName,
-                CustomStats = ConnectionData.CustomStats,
                 ItemColors = ConnectionData.ItemColors,
                 Symbols = ConnectionData.Index,
                 DeathLink = ConnectionData.DeathLink,
@@ -119,7 +117,7 @@ namespace LunacidAP
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
-                    loadedSave.CustomName, loadedSave.CustomStats, loadedSave.ItemColors);
+                    loadedSave.ItemColors);
                     return;
                 }
 
@@ -153,8 +151,6 @@ namespace LunacidAP
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
         public List<string> EnteredScenes;
         public List<ReceivedGift> ReceivedGifts;
-        public string CustomName;
-        public Dictionary<string, int> CustomStats;
         public Dictionary<string, string> ItemColors;
     }
 }

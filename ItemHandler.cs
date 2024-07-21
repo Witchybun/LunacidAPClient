@@ -68,43 +68,6 @@ namespace LunacidAP
             return false;
         }
 
-        // This is a temporary patch to fix a vanilla bug.
-        [HarmonyPatch(typeof(Player_Poison), "Harm")]
-        [HarmonyPrefix]
-        private static bool Harm_FixSlownessBug(int type, float duration, Player_Poison __instance)
-        {
-            __instance.IMG.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = Camera.main.aspect;
-            if (type == 4)
-            {
-                var poisonType = __instance.GetType();
-                var plField = poisonType.GetField("PL", BindingFlags.Instance | BindingFlags.NonPublic);
-                GameObject PL = (GameObject)plField.GetValue(__instance);
-                if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP != null)
-                {
-                    return true;
-                }
-                else
-                {
-                    var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                    if (__instance.SLOW_DUR == 0f)
-                    {
-                        var audioMethod = poisonType.GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
-                        __instance.Active_Effects++;
-                        audioMethod.Invoke(__instance, new object[] { 2 });
-                        var SLOW_slotField = poisonType.GetField("SLOW_slot", BindingFlags.Instance | BindingFlags.NonPublic);
-                        SLOW_slotField.SetValue(__instance, __instance.Active_Effects - 1);
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().text = "slowed";
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().color = Color.grey;
-                    }
-                    var steps = duration;
-                    steps *= Mathf.LerpUnclamped(1.25f, 0.2f, (float)CON.CURRENT_PL_DATA.PLAYER_RES / 100f);
-                    __instance.SLOW_DUR = Time.time + steps;
-                }
-                return false;
-            }
-            return true;
-        }
-
         public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "")
         {
             
@@ -184,10 +147,16 @@ namespace LunacidAP
             GiveLunacidItem(Name, itemFlag, player, self);
         }
 
-        public static void GiveLunacidItem(ReceivedItem receivedItem, bool self)
+        public static void GiveLunacidItem(ReceivedItem receivedItem, bool self, bool isCheated)
         {
-
-            GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
+            if (isCheated)
+            {
+                GiveLunacidItem(receivedItem.ItemName, receivedItem.Classification, receivedItem.PlayerName, self, Colors.GetCheatColor());
+            }
+            else
+            {
+                GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
+            }
             ConnectionData.ReceivedItems.Add(receivedItem);
         }
 
@@ -262,7 +231,7 @@ namespace LunacidAP
 
         private static void GiveSilver(string Name, string player = "", bool self = false)
         {
-            var currencyMultiplier = ArchipelagoClient.AP.SlotData.Fillerbundle;
+            var currencyMultiplier = DetermineRandomAmount(Name);
             var currencyAmount = (10 * currencyMultiplier).ToString();
             PopupCommand(0, currencyAmount, "white", player, self);
             Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
@@ -284,7 +253,7 @@ namespace LunacidAP
             {
                 _log.LogError("SlotData is null!");
             }
-            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
+            var bundleSize = DetermineRandomAmount(Name);
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
@@ -357,7 +326,7 @@ namespace LunacidAP
             {
                 return;
             }
-            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
+            var bundleSize = DetermineRandomAmount(Name);
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
@@ -404,6 +373,29 @@ namespace LunacidAP
             {
                 ApplyItemToInventory("Great Well Switches Keyring");
             }
+        }
+
+        private static int DetermineRandomAmount(string Name)
+        {
+            var random = new System.Random(Name.GetHashCode() + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute);
+            var chosenValue = random.Next(0, 100);
+            if (chosenValue < 30)
+            {
+                return 1;
+            }
+            else if (chosenValue < 60)
+            {
+                return 2;
+            }
+            else if (chosenValue < 80)
+            {
+                return 3;
+            }
+            else if (chosenValue < 90)
+            {
+                return 4;
+            }
+            return 5;
         }
 
         private static void GiveDoor(string Name, string color, string player = "", bool self = false)

@@ -19,7 +19,6 @@ namespace LunacidAP
         private const string SWITCH_KEY = "switch_locks";
         private const string DOOR_KEY = "door_locks";
         private const string COIN_KEY = "required_strange_coin";
-        private const string FILLER_KEY = "filler_bundle";
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
@@ -34,6 +33,7 @@ namespace LunacidAP
         private const string REMOVAL_KEY = "remove_locations";
         private const string IS_CHRISTMAS = "is_christmas";
         private const string CUSTOM_NAME_KEY = "created_class_name";
+        private const string CUSTOM_DESC_KEY = "created_class_description";
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
         private const string CUSTOM_COLORS_KEY = "item_colors";
         private Dictionary<string, object> _slotDataFields;
@@ -52,13 +52,13 @@ namespace LunacidAP
         public float ExperienceMultiplier {get; private set;}
         public float WExperienceMultiplier {get; private set;}
         public int RequiredCoins {get; private set;}
-        public int Fillerbundle {get; private set;}
         public bool DeathLink {get; private set;}
         public bool RandomElements {get; private set;}
         public bool FalseWalls {get; private set;}
         public List<string> RemovedLocations {get; private set;}
         public bool IsChristmas {get; private set;}
         public string CustomName {get; private set;}
+        public string CustomDescription {get; private set;}
         public Dictionary<string, int> CustomStats {get; private set;}
         public Dictionary<string, string> ItemColors {get; private set;}
 
@@ -81,7 +81,6 @@ namespace LunacidAP
             ExperienceMultiplier = (float) GetSlotSetting(EXP_KEY, 100)/100;
             WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
             RequiredCoins = GetSlotSetting(COIN_KEY, 30);
-            Fillerbundle = GetSlotSetting(FILLER_KEY, 1);
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
@@ -90,6 +89,7 @@ namespace LunacidAP
             RemovedLocations = JsonConvert.DeserializeObject<List<string>>(removedList);
             IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
+            CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
             var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
             CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
             var itemColors = GetSlotSetting(CUSTOM_COLORS_KEY, "");
@@ -110,14 +110,6 @@ namespace LunacidAP
                 {
                     ConnectionData.Entrances.Add(data.Key, data.Value);
                 }
-            }
-            if (ConnectionData.CustomName == "")
-            {
-                ConnectionData.CustomName = CustomName;
-            }
-            if (!ConnectionData.CustomStats.Any())
-            {
-                ConnectionData.CustomStats = CustomStats;
             }
             if (!ConnectionData.ItemColors.Any())
             {

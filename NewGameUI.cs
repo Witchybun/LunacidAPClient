@@ -254,18 +254,22 @@ namespace LunacidAP
                                 button.onClick.Invoke();
                                 count += 1;
                             }
-                            FinalizeClass(create);
+                            if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
+                            {
+                                create.GetChild(18).GetComponent<TextMeshProUGUI>().text = ArchipelagoClient.AP.SlotData.CustomName;
+                                create.GetChild(24).GetComponent<TextMeshProUGUI>().text = ArchipelagoClient.AP.SlotData.CustomDescription;
+                            }
                             create.GetChild(11).gameObject.SetActive(value: false);
                             create.GetChild(14).gameObject.SetActive(value: true);
                             create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
                             create.GetChild(15).gameObject.SetActive(value: true);
-                            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
+                            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN";
                             create.GetChild(16).gameObject.SetActive(value: true);
                             create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
                             create.GetChild(19).gameObject.SetActive(value: true);
                             create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
                             create.GetChild(20).gameObject.SetActive(value: true);
-                            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
+                            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}";
                             create.GetChild(21).gameObject.SetActive(value: true);
                             create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
                             create.GetChild(8).gameObject.SetActive(value: true);
@@ -295,24 +299,93 @@ namespace LunacidAP
 
         }
 
-        private static void FixConnectionInfoDisplay()
-        {
-            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
-            create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
-            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN\nFILLER";
-            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
-            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
-            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}\n{Filler()}";
-            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
-        }
-
-        private static void FinalizeClass(Transform createTransform)
+        [HarmonyPatch(typeof(CONTROL), "SkillSet")]
+        [HarmonyPostfix]
+        private static void SkillSet_RestoreCustomStats(CONTROL __instance)
         {
             if (ArchipelagoClient.AP.SlotData.StartingClass != 9)
             {
                 return;
             }
+            __instance.NORMAL_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Normal Res"] / 100f;
+            __instance.FIRE_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Fire Res"] / 100f;
+            __instance.ICE_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Ice Res"] / 100f;
+            __instance.POISON_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Poison Res"] / 100f;
+            __instance.LIGHT_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Light Res"] / 100f;
+            __instance.DARK_MULT = ArchipelagoClient.AP.SlotData.CustomStats["Dark Res"] / 100f;
+        }
 
+        [HarmonyPatch(typeof(Menus), "LoadText")]
+        [HarmonyPostfix]
+        private static void LoadText_FixCustomName(Menus __instance, int text2load)
+        {
+            if (!ArchipelagoClient.AP.Authenticated)
+            {
+                return;
+            }
+            if (ArchipelagoClient.AP.SlotData.StartingClass != 9)
+            {
+                return;
+            }
+            if (text2load != 0)
+            {
+                return;
+            }
+            __instance.TXT[1].text = "LEVEL " + __instance.CON.CURRENT_PL_DATA.PLAYER_LVL + ": " + ArchipelagoClient.AP.SlotData.CustomName.ToUpper();
+
+        }
+
+        private static void FixConnectionInfoDisplay()
+        {
+            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
+            if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
+            {
+                create.GetChild(18).GetComponent<TextMeshProUGUI>().text = ArchipelagoClient.AP.SlotData.CustomName;
+                create.GetChild(24).GetComponent<TextMeshProUGUI>().text = ArchipelagoClient.AP.SlotData.CustomDescription;
+            }
+            create.GetChild(14).GetComponent<TextMeshProUGUI>().text = "ENDING\nSHOPS\nDROPS\nSWITCH\nDOOR";
+            create.GetChild(15).GetComponent<TextMeshProUGUI>().text = "SECRET\nER\nELEMENT\nREQ COIN";
+            create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
+            create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
+            create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}";
+            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
+
+        }
+
+        [HarmonyPatch(typeof(Menus), "Click")]
+        [HarmonyPostfix]
+        public static void Click_InitializeCustom(Menus __instance, int which)
+        {
+            if (which != 28 || __instance.current_query != 1)
+            {
+                return;
+            }
+
+            var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            var statData = ArchipelagoClient.AP.SlotData.CustomStats;
+            control.CURRENT_PL_DATA.PLAYER_LVL = statData["Level"];
+            control.CURRENT_PL_DATA.PLAYER_STR = statData["Strength"];
+            control.CURRENT_PL_DATA.PLAYER_DEF = statData["Defense"];
+            control.CURRENT_PL_DATA.PLAYER_SPD = statData["Speed"];
+            control.CURRENT_PL_DATA.PLAYER_DEX = statData["Dexterity"];
+            control.CURRENT_PL_DATA.PLAYER_INT = statData["Intelligence"];
+            control.CURRENT_PL_DATA.PLAYER_RES = statData["Resistance"];
+
+            control.CURRENT_PL_DATA.PLAYER_H = control.PLAYER_MAX_HP;
+            control.CURRENT_PL_DATA.PLAYER_B = control.PLAYER_MAX_HP;
+            control.CURRENT_PL_DATA.PLAYER_M = control.PLAYER_MAX_MP;
+			control.CURRENT_PL_DATA.PLAYER_L = 0f;
+
+
+            control.NORMAL_MULT = statData["Normal Res"] / 100f;
+            control.FIRE_MULT = statData["Fire Res"] / 100f;
+            control.ICE_MULT = statData["Ice Res"] / 100f;
+            control.POISON_MULT = statData["Poison Res"] / 100f;
+            control.LIGHT_MULT = statData["Light Res"] / 100f;
+            control.DARK_MULT = statData["Dark Res"] / 100f;
+            //To double ensure a reload is okay
+            Save.SAVE_FILE(PlayerPrefs.GetInt("CURRENT_SAVE", 0), new Vector3(0.1f, 1f, 0f), __instance.CON);
+            Hold_Data.HD = __instance.CON.CURRENT_PL_DATA;
         }
 
         private static string Ending()
@@ -360,14 +433,9 @@ namespace LunacidAP
             return ArchipelagoClient.AP.SlotData.RequiredCoins.ToString();
         }
 
-        private static string Filler()
-        {
-            return ArchipelagoClient.AP.SlotData.Fillerbundle.ToString();
-        }
-
         private static string NormalizedDrops()
         {
-            return ArchipelagoClient.AP.SlotData.NormalizedDrops ? "Y": "N";
+            return ArchipelagoClient.AP.SlotData.NormalizedDrops ? "Y" : "N";
         }
 
         private static string Death()
@@ -382,7 +450,7 @@ namespace LunacidAP
 
         private static string Quench()
         {
-            return ArchipelagoClient.AP.SlotData.Quenchsanity ? "Y": "N";
+            return ArchipelagoClient.AP.SlotData.Quenchsanity ? "Y" : "N";
         }
     }
 }

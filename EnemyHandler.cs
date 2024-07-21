@@ -1,15 +1,9 @@
 using System.Linq;
-using Archipelago.Gifting.Net.Gifts;
-using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
-using System.Text.RegularExpressions;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
-using Archipelago.Gifting.Net.Traits;
-using static LunacidAP.Data.LunacidGifts;
-using LunacidAP.Data.ArchipelagoGiftingCases;
 
 namespace LunacidAP
 {
