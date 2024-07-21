@@ -194,7 +194,7 @@ namespace LunacidAP
             {
                 return true; // This runs on a lot of stuff; avoid a case where it would try to run on scenes where you can't have initialized AP to begin with.
             }
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity || text2load != 11)
+            if (text2load != 11)
             {
                 return true;
             }
@@ -236,18 +236,18 @@ namespace LunacidAP
             {
                 if (inventoryText == location.GameObjectName)
                 {
-                    if (!ConnectionData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
+                    var itemName = shopItem.item;
+                    if (ConnectionData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
                     {
-                        _log.LogError($"Location {location.APLocationName} failed in a scout!");
-                        continue;
+                        if (item.Classification.HasFlag(ItemFlags.Trap))
+                        {
+                            var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
+                            var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                            item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
+                        }
+                        itemName = item.Name;
                     }
-                    if (item.Classification.HasFlag(ItemFlags.Trap))
-                    {
-                        var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
-                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
-                        item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
-                    }
-                    var itemName = item.Name;
+
                     var itemNameCondensed = CommunionHint.GetSuitableStringLength(itemName, 22);
                     if (itemNameCondensed != itemName)
                     {
@@ -345,11 +345,11 @@ namespace LunacidAP
                 var apLocation = DetermineShopLocation(sceneName, objectName);
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
                 if (locationInfo.Classification.HasFlag(ItemFlags.Trap))
-                    {
-                        var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
-                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
-                        locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
-                    }
+                {
+                    var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
+                    var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                    locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
+                }
                 var slotName = locationInfo.SlotName;
                 var itemName = locationInfo.Name;
                 var itemNameLength = itemName.Length;
@@ -394,19 +394,6 @@ namespace LunacidAP
                 x.APLocationName.Contains(nameHelper)) ?? new LocationData();
             }
             return new LocationData();
-        }
-
-        private static string ThePatchouliConundrum(string apLocation, string sceneName)
-        {
-            if (sceneName == "FOREST_A1" && apLocation == "Buy Ocean Elixir")
-            {
-                apLocation += " (Patchouli)";
-            }
-            else if (apLocation == "Buy Ocean Elixir")
-            {
-                apLocation += " (Sheryl)";
-            }
-            return apLocation;
         }
 
         private static string BlurbOnProgression(ItemFlags flag)
