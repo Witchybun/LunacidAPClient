@@ -103,7 +103,6 @@ namespace LunacidAP
                 IsConnecting = false;
                 yield break;
             }
-
             LoginSuccessful login = (LoginSuccessful)result;
             SlotID = login.Slot;
             SlotData = new SlotData(login.SlotData, _log);
@@ -341,7 +340,7 @@ namespace LunacidAP
                     ConnectionData.CheatedCount = cheatedCount;
                     var receivedItem = new ReceivedItem(item);
                     ConnectionData.ReceivedItems.Add(receivedItem);
-                    StartCoroutine(ReceiveItem(receivedItem));
+                    StartCoroutine(ReceiveItem(receivedItem, true));
                 }
             }
         }
@@ -500,7 +499,7 @@ namespace LunacidAP
             }
         }
 
-        private IEnumerator ReceiveItem(ReceivedItem item)
+        private IEnumerator ReceiveItem(ReceivedItem item, bool isCheated = false)
         {
             var instanceStack = Stack + 1;
             Stack++;
@@ -510,7 +509,7 @@ namespace LunacidAP
             }
             var self = false;
             if (item.PlayerName == ConnectionData.SlotName) self = true;
-            ItemHandler.GiveLunacidItem(item, self);
+            ItemHandler.GiveLunacidItem(item, self, isCheated);
             Stack--;
         }
 

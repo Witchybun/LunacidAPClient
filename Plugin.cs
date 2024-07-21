@@ -11,6 +11,7 @@ namespace LunacidAP
     public class Plugin : BaseUnityPlugin
     {
         public ManualLogSource Log { get; private set; }
+        public GeneralTweaks GeneralTweaks {get; private set;}
         public ArchipelagoClient Archipelago {get; private set;}
         public LogicHelper LunacidLogic {get; private set;}
         public static ManualLogSource LOG {get; private set;}
@@ -29,6 +30,7 @@ namespace LunacidAP
         public QuenchHandler QuenchHandler {get; private set;}
         public AlkiHandler AlkiHandler {get; private set;}
         public NewGameUI UI {get; private set;}
+        public Colors Colors {get; private set;}
         private void Awake()
         {
             try
@@ -39,6 +41,7 @@ namespace LunacidAP
                 BepInEx.Logging.Logger.Sources.Add(Log);
                 Archipelago = new ArchipelagoClient();
                 ArchipelagoClient.Setup(Log);
+                GeneralTweaks = new GeneralTweaks(Log);
                 LocationHandler = new LocationHandler(Log);
                 LunacidLogic = new LogicHelper(Log);
                 ItemHandler = new ItemHandler(LunacidLogic, Log);
@@ -53,6 +56,7 @@ namespace LunacidAP
                 EnemyHandler = new EnemyHandler(Log);
                 QuenchHandler = new QuenchHandler(Log);
                 AlkiHandler = new AlkiHandler(Log);
+                Colors = new Colors(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);
@@ -92,9 +96,8 @@ namespace LunacidAP
             {
                 UI.ModifyCharCreateForArchipelago();
             }
-            
-
         }
+
 
         private void AddSceneIfNotIncluded(string sceneName)
         {

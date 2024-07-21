@@ -15,7 +15,6 @@ namespace LunacidAP
         private static POP_text_scr _popup;
         private static ManualLogSource _log;
         private static int _currentFloor = 0;
-        private static string[] _kept { get; set; }
 
 
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -255,7 +254,7 @@ namespace LunacidAP
             {
                 var receivedItem = new ReceivedItem(item.Game, location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
                 ConnectionData.ReceivedItems.Add(receivedItem);
-                ItemHandler.GiveLunacidItem(receivedItem, true);
+                ItemHandler.GiveLunacidItem(receivedItem, true, false);
                 var patchouliCanopy = LunacidLocations.APLocationData["FOREST_A1"].First(x => x.APLocationName == "YF: Patchouli's Canopy Offer").APLocationID;
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
                 if (ArchipelagoClient.AP.Authenticated)
@@ -267,7 +266,7 @@ namespace LunacidAP
                     var patchouliItem = ConnectionData.ScoutedLocations[patchouliCanopy];
                     var patchouliReceivedItem = new ReceivedItem(item.Game, "YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
                     ConnectionData.ReceivedItems.Add(patchouliReceivedItem);
-                    ItemHandler.GiveLunacidItem(patchouliReceivedItem, true);
+                    ItemHandler.GiveLunacidItem(patchouliReceivedItem, true, false);
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                     if (ArchipelagoClient.AP.Authenticated)
                     {
@@ -303,27 +302,7 @@ namespace LunacidAP
             return false;
         }
 
-        [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
-        [HarmonyPrefix]
-        private static bool Save_LogAndDenySave(AREA_SAVED_ITEM __instance)
-        {
-            foreach (var location in LunacidFlags.ItemToFlag)
-            {
-                if (__instance.Zone == location.Value.Flag[0] && __instance.Slot == location.Value.Flag[1] & __instance.value == location.Value.Flag[2])
-                {
-                    return false;
-                }
-                foreach (var maxFlag in LunacidFlags.MaximumPlotFlags)
-                {
-                    if (__instance.Zone == maxFlag[0] && __instance.Slot == maxFlag[1] && __instance.value > maxFlag[2])
-                    {
-                        _log.LogWarning($"Object {__instance.name} tried to overstep its save data.  Refusing.");
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
+
 
         [HarmonyPatch(typeof(ShadowTower_CON), "Door")]
         [HarmonyPostfix]
@@ -354,89 +333,7 @@ namespace LunacidAP
         }
 
 
-        [HarmonyPatch(typeof(Spawn_if_moon), "OnEnable")]
-        [HarmonyPostfix]
-        private static void OnEnable_AllowBrokenSword(Spawn_if_moon __instance)
-        {
-            if (__instance.gameObject.scene.name != "ARENA")
-            {
-                return;
-            }
-            foreach (var target in __instance.TARGETS)
-            {
-                if (target.name == "SW")
-                {
-                    target.SetActive(value: true); // always let this show up
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(Boss), "Start")]
-        [HarmonyPostfix]
-        private static void Start_SendLucidCheck(Boss __instance)
-        {
-            var lucidID = ArchipelagoClient.AP.GetLocationIDFromName("CF: Calamis' Weapon of Choice");
-            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            _popup = __instance.CON.PAPPY;
-            var locationInfo = ArchipelagoClient.AP.ScoutLocation(lucidID);
-            var itemInfo = locationInfo.Name;
-            var slotNameofItemOwner = locationInfo.SlotName;
-            ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(lucidID);
-            ConnectionData.CompletedLocations.Add(lucidID);
-            if (ConnectionData.SlotName != slotNameofItemOwner)
-            {
-                _popup.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
-            }
-            return;
-        }
-
-        [HarmonyPatch(typeof(Boss), "End")]
-        [HarmonyPrefix]
-        private static bool End_ReturnWithoutLucid(Boss __instance)
-        {
-            Debug.Log("END");
-            string[] KEEP = (string[])__instance.GetType().GetField("KEEP", Flags).GetValue(__instance);
-            _kept = KEEP;
-            __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
-            __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
-            try
-            {
-                __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];
-                __instance.CON.CURRENT_PL_DATA.ITEM2 = _kept[3];
-                __instance.CON.CURRENT_PL_DATA.ITEM3 = _kept[4];
-                __instance.CON.CURRENT_PL_DATA.ITEM4 = _kept[5];
-                __instance.CON.CURRENT_PL_DATA.ITEM5 = _kept[6];
-                __instance.CON.CURRENT_PL_DATA.MAG1 = _kept[7];
-                __instance.CON.CURRENT_PL_DATA.MAG2 = _kept[8];
-            }
-            catch
-            {
-                _log.LogError($"There was an error re-adding items.  Might be vanilla bug.");
-            }
-            __instance.CON.CURRENT_PL_DATA.PLAYER_H = Mathf.Max(__instance.CON.CURRENT_PL_DATA.PLAYER_H, 20f);
-            __instance.CON.PL.Poison.POISON_DUR = 0.01f;
-            __instance.CON.CURRENT_PL_DATA.PLAYER_B = __instance.CON.CURRENT_PL_DATA.PLAYER_H;
-            __instance.CON.EQITEMS();
-            __instance.CON.EQMagic();
-            return false;
-        }
-
-        [HarmonyPatch(typeof(WaitAMonth), "Start")]
-        [HarmonyPrefix]
-        private static bool Start_WaitInstantly(WaitAMonth __instance)
-        {
-            __instance.transform.GetChild(0).gameObject.SetActive(value: true);
-            return false;
-        }
-
-        [HarmonyPatch(typeof(Wam_scr), "OnEnable")]
-        [HarmonyPrefix]
-        private static bool OnEnable_FixIfOwnHarmingAxe(Wam_scr __instance)
-        {
-            var reelWait = __instance.GetType().GetField("reel_wait", Flags);
-            reelWait.SetValue(__instance, __instance.wait);
-            return false;
-        }
+        
 
         private static bool IsLocationCollected(LocationData apLocation)
         {
