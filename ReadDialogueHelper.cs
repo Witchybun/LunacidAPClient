@@ -64,15 +64,5 @@ namespace LunacidAP
             }
             return hintString;
         }
-
-        [HarmonyPatch(typeof(Dialog), "Bye")]
-        [HarmonyPrefix]
-        private static bool Bye_MoveStateAhead(Dialog __instance)
-        {
-            var sceneName = __instance.gameObject.scene.name;
-            _log.LogInfo($"{__instance.npc_name}");
-
-            return true;
-        }
     }
 }
