@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
-using JetBrains.Annotations;
 using LunacidAP.Data;
 
 namespace LunacidAP

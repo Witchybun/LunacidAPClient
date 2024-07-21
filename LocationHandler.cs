@@ -5,7 +5,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
-using UnityEngine.UIElements.Experimental;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
