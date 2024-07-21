@@ -75,6 +75,23 @@ namespace LunacidAP
             {
                 __instance.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
             }
+            else if (castName == "CONST_DAMAGE" && !__instance.EffectPlayer && __instance.frequency == 0.5f && __instance.element == 0)
+            {
+                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["EARTH THORN"]];
+            }
+            else if (castName == "HURT" && __instance.EffectPlayer && !__instance.OnlyPL && __instance.frequency == 0.5f && __instance.element == 1)
+            {
+                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["LAVA CHASM"]];
+            }
+            else if (castName == "Damage" && !__instance.EffectPlayer && __instance.frequency == 0.25f && __instance.element == 4)
+            {
+                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["MOON BEAM"]];
+            }
+            else if (castName == "FANG_CAST" && !__instance.EffectPlayer && __instance.frequency == 0.25f && __instance.element == 4)
+            {
+                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["SERPENT FANG"]];
+            }
+
             return true;
         }
 
