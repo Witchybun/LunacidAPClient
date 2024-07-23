@@ -28,10 +28,6 @@ namespace LunacidAP
             }
             var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
             _log.LogInfo($"Saving to {savePath}...");
-            if (!File.Exists(savePath))
-            {
-
-            }
 
             var newAPSaveData = new APSaveData()
             {
