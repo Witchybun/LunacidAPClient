@@ -247,14 +247,16 @@ namespace LunacidAP
                         }
                         itemName = item.Name;
                     }
-
                     var itemNameCondensed = CommunionHint.GetSuitableStringLength(itemName, 22);
                     if (itemNameCondensed != itemName)
                     {
                         itemNameCondensed += "...";
                     }
-                    var color = Colors.DetermineItemColor(item.Classification);
-                    itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
+                    if (item is not null)
+                    {
+                        var color = Colors.DetermineItemColor(item.Classification);
+                        itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
+                    }
                     var cost = " - <sprite=0>" + shopItem.cost.ToString();
                     if (DetermineItemCost(shopItem, sceneName) == 0)
                     {
