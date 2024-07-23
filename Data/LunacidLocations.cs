@@ -200,7 +200,6 @@ namespace LunacidAP.Data
             new LocationData( 355, "Buy Jotunn Slayer", "SLAYER_PICKUP" ),
             new LocationData( 356, "Buy Privateer Musket", "MUSKET_PICKUP" ),
             new LocationData( 357, "Buy Steel Needle", "STEELNEEDLE_PICKUP" ),
-            new LocationData( 358, "Buy Ocean Elixir (Sheryl)", "OCEAN_ELIXIR_PICKUP" ),
             new LocationData( 359, "Buy Ocean Elixir (Patchouli)", "OCEAN_ELIXIR_PICKUP" ),
         };
 

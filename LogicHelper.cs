@@ -1054,11 +1054,6 @@ namespace LunacidAP
                     {
                         return WasItemReceived("Ignis Calor") && ConnectionData.EnteredScenes.Contains("Boiling Grotto") && WasItemReceived("Sheryl's Golden Armor Voucher");
                     }
-                case "Buy Ocean Elixir (Sheryl)":
-                    {
-                        return WasItemReceived("Sheryl's Dreamer Voucher") && CanDefeatSucasrius();
-
-                    }
                 case "Buy Ocean Elixir (Patchouli)":
                     {
                         return (CanJumpHeight("Medium") || WereAnyItemsReceived(new List<string>(){"Blood Strike", "Blood Drain"})) && WasItemReceived("Patchouli's Drink Voucher");;
