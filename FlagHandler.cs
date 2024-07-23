@@ -378,11 +378,20 @@ namespace LunacidAP
                         }
                     case "HUB_01":
                         {
-                            var book = GameObject.Find("LEVEL").transform.GetChild(9).GetChild(1);
+                            var level = GameObject.Find("LEVEL").transform;
+                            var book = level.transform.GetChild(9).GetChild(1);
+                            var aftermath = level.transform.GetChild(7);
+                            var originalNPCs = level.transform.GetChild(8);
                             if (!book.gameObject.activeSelf)
                             {
                                 book.gameObject.SetActive(value: true);
                             }
+                            if (aftermath.GetChild(0).gameObject.activeSelf)
+                            {
+                                aftermath.gameObject.SetActive(true);
+                                originalNPCs.gameObject.SetActive(false); // Just make sure they're around.
+                            }
+                            
                             break;
                         }
                 }
