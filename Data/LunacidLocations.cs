@@ -250,7 +250,7 @@ namespace LunacidAP.Data
             new LocationData(659, "Alchemize Cleromancy Tool", "Survey Banner"),
             new LocationData(660, "Alchemize Healing Remedy", "Health Vial"),
             new LocationData(661, "Alchemize Water of Life", "Holy Water"),
-            new LocationData(662, "Alchemize Sharp Object", "Throwing Knife"),
+            new LocationData(662, "Alchemize Sharp Object", "Throwing Knives"),
             new LocationData(663, "Alchemize Golden Sin of Abdul", "Limbo"),
             new LocationData(664, "Alchemize Mana Remedy", "Mana Vial"),
             new LocationData(665, "Alchemize Unstable Stone", "Crystal Shard"),
