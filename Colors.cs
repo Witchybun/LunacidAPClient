@@ -108,25 +108,21 @@ namespace LunacidAP
         {
             string first, second, third = "";
             first = rgb[0].ToString("X");
-            _log.LogInfo($"First is {first}");
             if (first.Length == 1)
             {
                 first = "0" + first;
             }
             second = rgb[1].ToString("X");
-            _log.LogInfo($"Second is {second}");
             if (second.Length == 1)
             {
                 second = "0" + second;
             }
             third = rgb[2].ToString("X");
-            _log.LogInfo($"Third is {third}");
             if (third.Length == 1)
             {
                 third = "0" + third;
             }
             var finalString = "#" + first + second + third;
-            _log.LogInfo($"Coloring with {finalString}");
             return finalString;
         }
 
