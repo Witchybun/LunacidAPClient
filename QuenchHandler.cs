@@ -1,6 +1,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
+using UnityEngine;
 
 namespace LunacidAP
 {
@@ -50,6 +51,7 @@ namespace LunacidAP
             {
                 LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
             }
+            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
             __instance.CON.EQ_WEP.cooling = 0f;
             __instance.CON.PAPPY.POP(item.Name + " CREATED", 1f, 7);
             if (weaponToCheck == "DEATH SCYTHE")
