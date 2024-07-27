@@ -1,6 +1,7 @@
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
+using UnityEngine;
 
 namespace LunacidAP
 {
@@ -18,6 +19,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool FORGE_ForgeACheck(Alki __instance)
         {
+            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
             var num = FindMater(__instance, out var flag);
             if (flag)
             {
