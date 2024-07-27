@@ -391,6 +391,10 @@ namespace LunacidAP
                                 aftermath.gameObject.SetActive(true);
                                 originalNPCs.gameObject.SetActive(false); // Just make sure they're around.
                             }
+                            else if (!aftermath.gameObject.activeSelf && !originalNPCs.gameObject.activeSelf)
+                            {
+                                aftermath.gameObject.SetActive(true);
+                            }
                             
                             break;
                         }
