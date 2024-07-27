@@ -93,6 +93,11 @@ namespace LunacidAP
                 PopupCommand(0, itemName, color, player, self);
                 return;
             }
+            if (itemName == "Deep Knowledge")
+            {
+                GiveEXP(itemName, color, player, self);
+                return;
+            }
             switch (type)
             {
                 case 1:
@@ -239,6 +244,18 @@ namespace LunacidAP
         {
             PopupCommand(4, Name, color, player, self);
             ApplyItemToInventory(Name);
+        }
+
+        private static void GiveEXP(string Name, string color, string player = "", bool self = false)
+        {
+            PopupCommand(0, Name, color, player, self);
+            var currentXP = Control.CURRENT_PL_DATA.XP;
+            if (currentXP/20 < 100)
+            {
+                Control.CURRENT_PL_DATA.XP += 100;
+                return;
+            }
+            Control.CURRENT_PL_DATA.XP += currentXP/20;
         }
 
         private static void ApplyItemToInventory(string Name)
