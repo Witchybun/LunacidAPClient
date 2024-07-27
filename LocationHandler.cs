@@ -61,11 +61,11 @@ namespace LunacidAP
         private static bool Pickup_SendLocation(Item_Pickup_scr __instance)
         {
             _popup = __instance.CON.PAPPY;
-            CollectLocation(__instance, out var keepOriginalDrop);
+            var keepOriginalDrop = CollectLocation(__instance);
             return keepOriginalDrop;
         }
 
-        private static void CollectLocation(Item_Pickup_scr pickupObject, out bool keepOriginalDrop)
+        private static bool CollectLocation(Item_Pickup_scr pickupObject)
         {
             var objectName = pickupObject.gameObject.name;
             var sceneName = pickupObject.gameObject.scene.name;
@@ -74,21 +74,17 @@ namespace LunacidAP
             
             if (apLocation.APLocationID == -1 || Tower_IsExcludedAndIsExcludedLocation(apLocation))
             {
-                keepOriginalDrop = true;
-                return;
+                return true;
             }
             if (Coin_IsExcludedAndIsExcludedLocation(apLocation))
             {
-                keepOriginalDrop = false;
-                return;
+                return false;
             }
-            keepOriginalDrop = false;
             if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
                 if (ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Daedalus"))
                 {
-                    keepOriginalDrop = false;
-                    return;
+                    return false;
                 }
                 var actualName = TheDaedalusConundrum(pickupObject);
                 apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
@@ -96,13 +92,13 @@ namespace LunacidAP
             if (ArchipelagoClient.AP.IsLocationChecked(apLocation.APLocationID))
             {
                 pickupObject.gameObject.SetActive(false);
-                return;
+                return false;
             }
             var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
             DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
             pickupObject.gameObject.SetActive(false);
 
-            return;
+            return false;
         }
 
         private static LocationData DetermineGeneralPickupLocation(Item_Pickup_scr pickupObject)
