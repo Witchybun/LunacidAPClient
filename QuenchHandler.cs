@@ -23,6 +23,7 @@ namespace LunacidAP
             {
                 return true;
             }
+            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
             if (!ArchipelagoClient.AP.SlotData.Quenchsanity)
             {
                 return true;
@@ -51,7 +52,6 @@ namespace LunacidAP
             {
                 LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
             }
-            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
             __instance.CON.EQ_WEP.cooling = 0f;
             __instance.CON.PAPPY.POP(item.Name + " CREATED", 1f, 7);
             if (weaponToCheck == "DEATH SCYTHE")

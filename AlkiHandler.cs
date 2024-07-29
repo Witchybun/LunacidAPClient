@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -17,9 +18,13 @@ namespace LunacidAP
 
         [HarmonyPatch(typeof(Alki), "FORGE")]
         [HarmonyPrefix]
-        private static bool FORGE_ForgeACheck(Alki __instance)
+        private static bool FORGE_ForgeACheck(Alki __instance, out bool __result)
         {
-            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            __result = false;
+            if (!ArchipelagoClient.AP.SlotData.EtnasPupil)
+            {
+                return true;
+            }
             var num = FindMater(__instance, out var flag);
             if (flag)
             {
@@ -35,19 +40,21 @@ namespace LunacidAP
                 if (locationData.APLocationName == "ERROR")
                 {
                     _log.LogError($"Could not find recipe location for {__instance.Recipes[num].name}!");
-                    return flag;
+                    __result = false;
+                    return false;
                 }
                 var item = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
+                __instance.has_made = item + " Created!";
                 if (item == "ALREADY_ACQUIRED")
                 {
-                    __instance.has_made = "Already Checked!";
+                    __instance.has_made = item + " Already Made!";
                     __instance.Reset();
-                    return flag;
+                    __result = false;
+                    return false;
                 }
                 __instance.CON.RemoveMatter(__instance.current_1.ToString());
                 __instance.CON.RemoveMatter(__instance.current_2.ToString());
                 __instance.CON.RemoveMatter(__instance.current_3.ToString());
-                __instance.has_made = item + " Created!";
                 __instance.Recipes[num].unlocked = 1;
                 int num2 = num + 1;
                 string zONE_ = __instance.CON.CURRENT_PL_DATA.ZONE_8;
@@ -58,8 +65,9 @@ namespace LunacidAP
                     __instance.transform.GetChild(0).gameObject.SetActive(value: true);
                 }
                 __instance.Reset();
+                __result = true;
             }
-            return flag;
+            return false;
         }
 
         private static int FindMater(Alki alki, out bool wasFound)
