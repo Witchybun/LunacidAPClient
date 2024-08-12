@@ -96,6 +96,11 @@ namespace LunacidAP
             }
             var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
             DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
+            if (item.SlotName != ConnectionData.SlotName)
+            {
+                var color = Colors.DetermineItemColor(item.Classification);
+                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+            }
             pickupObject.gameObject.SetActive(false);
 
             return false;
@@ -245,6 +250,7 @@ namespace LunacidAP
 
         public static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
         {
+            _popup = _popup = GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY; // Though done before, other calls might not catch it.
             if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.
             {
                 var receivedItem = new ReceivedItem(item.Game, location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
@@ -279,8 +285,6 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                var color = Colors.DetermineItemColor(item.Classification);
-                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
 
             }
             else  // Otherwise just save it for syncing later.
@@ -291,8 +295,6 @@ namespace LunacidAP
                     ConnectionData.CompletedLocations.Add(patchouliCanopy);
                 }
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
-                var color = Colors.DetermineItemColor(item.Classification);
-                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
             }
             return false;
         }
