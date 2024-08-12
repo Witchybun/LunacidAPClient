@@ -137,5 +137,17 @@ namespace LunacidAP
             }
             return num;
         }
+
+        [HarmonyPatch(typeof(Menus), "Click")]
+        [HarmonyPrefix]
+        private static bool Click_EnsureControlIsInitialized(Menus __instance, int which)
+        {
+            if (which != 72)
+            {
+                return true;
+            }
+            __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            return true;
+        }
     }
 }

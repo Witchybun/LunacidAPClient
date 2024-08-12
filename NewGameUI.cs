@@ -360,7 +360,10 @@ namespace LunacidAP
             {
                 return;
             }
-
+            if (ArchipelagoClient.AP.SlotData.StartingClass != 9)
+            {
+                return;
+            }
             var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             var statData = ArchipelagoClient.AP.SlotData.CustomStats;
             control.CURRENT_PL_DATA.PLAYER_LVL = statData["Level"];
