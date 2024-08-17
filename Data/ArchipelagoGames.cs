@@ -98,7 +98,9 @@ namespace LunacidAP.Data
             {"Super Metroid Map Rando", "a space bounty hunter"},
             {"Super Junkoid", "a young girl"},
             {"Earthbound", "four prophesized children"},
-            {"Sonic Adventure DX", "a blue hedgehog and his friends"}
+            {"Sonic Adventure DX", "a blue hedgehog and his friends"},
+            {"Majora's Mask Recompiled", "the Hero of Time"},
+            {"Balatro", "a gambling fool"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -193,7 +195,8 @@ namespace LunacidAP.Data
             {"Super Junkoid", "within their own eternal dreams, induced by a serpent."},
             {"Earthbound", "traveling the lands of Eagle."},
             {"Sonic Adventure DX", "within the city of Station Square."},
-
+            {"Majora's Mask Recompiled", "within the lands of Termina."},
+            {"Balatro", "within their own mind casino, chasing the highest ante."},
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
