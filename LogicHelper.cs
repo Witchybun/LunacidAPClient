@@ -456,59 +456,59 @@ namespace LunacidAP
                     }
                 case "FbA: Snail Lectern (Near)":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
 
                     }
                 case "FbA: Snail Lectern (Far)":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
 
                     }
                 case "FbA: Rug on Balcony":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
 
                     }
                 case "FbA: Rooftops":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
 
                     }
                 case "FbA: Hidden Room Upper Floor":
                     {
-                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring"));
+                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring"));
 
                     }
                 case "FbA: Hidden Room Lower Floor":
                     {
-                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp"));
+                        return HasDustyOrb() && (CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp"));
 
                     }
                 case "FbA: Near Twisty Tree":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "FbA: uwu":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "FbA: Daedalus Knowledge (First)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 1);
+                        return (CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 1);
                 }
                 case "FbA: Daedalus Knowledge (Second)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 2);
+                        return (CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 2);
                 }
                 case "FbA: Daedalus Knowledge (Third)":
                     {
-                        return (CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 3);
+                        return (CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp")) && ArchipelagoClient.AP.WasItemCountReceived("Black Book", 3);
                 }
                 case "FbA: Corner Near Daedalus":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring") || WasItemReceived("Spirit Warp");
 
                     }
                 case "CLF: Outside Corner":
@@ -1088,7 +1088,7 @@ namespace LunacidAP
                     {
                         if (sceneName == "ARCHIVES")
                         {
-                            return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                            return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
                         }
                         return true;
                     }
@@ -1110,11 +1110,11 @@ namespace LunacidAP
                     }
                 case "Chimera":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
                     }
                 case "Enlightened One":
                     {
-                        return CanJumpHeight("High") || HasSwitch("Archive Elevator Switch Keyring");
+                        return CanJumpHeight("High") || HasSwitch("Forbidden Archives Elevator Switch Keyring");
                     }
                 case "Slime Skeleton":
                     {
