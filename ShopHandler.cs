@@ -359,7 +359,6 @@ namespace LunacidAP
                 var gameName = locationInfo.Game;
                 var gameNameLength = gameName.Length;
                 gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
-                var progression = ArchipelagoClient.ProgressionFlagToString[locationInfo.Classification];
                 if (!ArchipelagoGames.GameToProtagonist.TryGetValue(gameName, out string protag))
                 {
                     protag = "an unknown entity";
