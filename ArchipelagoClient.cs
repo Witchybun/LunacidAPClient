@@ -512,14 +512,6 @@ namespace LunacidAP
             Stack--;
         }
 
-        public static readonly Dictionary<ItemFlags, string> ProgressionFlagToString = new()
-        {
-          {ItemFlags.Advancement, "Progression"},
-          {ItemFlags.NeverExclude, "Useful"},
-          {ItemFlags.None, "Filler"},
-          {ItemFlags.Trap, "Trap"}
-        };
-
         public string SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
             
@@ -541,7 +533,11 @@ namespace LunacidAP
 
         public ArchipelagoItem ScoutLocation(long locationId)
         {
-            return ConnectionData.ScoutedLocations[locationId];
+            if (!ConnectionData.ScoutedLocations.TryGetValue(locationId, out var archipelagoItem))
+            {
+                _log.LogError($"Could not find location for {locationId}");
+            }
+            return archipelagoItem;
         }
 
         public bool IsLocationChecked(long location)
