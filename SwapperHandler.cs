@@ -9,6 +9,10 @@ namespace LunacidAP
     public class SwapperHandler
     {
         private static ManualLogSource _log;
+        private static readonly List<string> ModelNames = new()
+        {
+            "MDL", "Health_Vial_Model", "Ring", "Bag", "Club_Torch", "Sword_Heritage", "RUSTED SWORD", "VHS", "mdl"
+        };
 
         public SwapperHandler(ManualLogSource log)
         {
@@ -41,7 +45,7 @@ namespace LunacidAP
                     return;
                 }
             }
-            if (locationItem.Contains("Silver (10)"))
+            if (locationItem.Contains("Silver"))
             {
                 try
                 {
@@ -67,6 +71,10 @@ namespace LunacidAP
             }
             if (LunacidItems.Items.Contains(locationItem))
             {
+                if (LunacidItems.Vouchers.Contains(locationItem))
+                {
+                    locationItem = "Cloth Bandage";
+                }
                 try
                 {
                     ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/");
@@ -187,98 +195,32 @@ namespace LunacidAP
 
         private static bool CanHandleSpecialCase(Item_Pickup_scr pickupObject, string locationItem, GameObject foundObject)
         {
-            switch (locationItem)
+            if (locationItem == "MARAUDER BLACK FLAIL")
             {
-                case "BROKEN HILT":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "ELFEN SWORD":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "DARK RAPIER":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "RAPIER":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "SHADOW BLADE":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "REPLICA SWORD":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "TORCH":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "MARAUDER BLACK FLAIL":
-                    {
-                        var realFoundObject = GameObject.Instantiate(foundObject.transform.GetChild(2));
-                        realFoundObject.transform.SetParent(pickupObject.transform);
-                        realFoundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        realFoundObject.gameObject.SetActive(true);
-                        GameObject.Destroy(foundObject);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
+                var realFoundObject = GameObject.Instantiate(foundObject.transform.GetChild(2));
+                realFoundObject.transform.SetParent(pickupObject.transform);
+                realFoundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                HideLastChild(pickupObject);
+                realFoundObject.gameObject.SetActive(true);
+                GameObject.Destroy(foundObject);
+                HideTheFuckingHandBro(foundObject);
+                return true;
             }
-            return false;
+            try
+            {
+                GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
+                GameObject.Destroy(foundObject.GetComponent<AudioSource>());
+                foundObject.transform.SetParent(pickupObject.transform);
+                foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                HideLastChild(pickupObject);
+                foundObject.SetActive(true);
+                HideTheFuckingHandBro(foundObject);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static void HideTheFuckingHandBro(GameObject weapon)
@@ -330,7 +272,7 @@ namespace LunacidAP
 
         private static void ReplaceModelWithTrickyThing(Item_Pickup_scr pickupObject)
         {
-            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare" };
+            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight"};
             var random = ArchipelagoClient.AP.RandomStatic.Next(0, 3);
             var chosenTrick = trickyThings[random];
             var type = "";
@@ -354,7 +296,22 @@ namespace LunacidAP
                 case "Flame Flare":
                     {
                         type = "MAGIC/";
-                        return;
+                        break;
+                    }
+                case "Shining Blade":
+                    {
+                        type = "WEPS/";
+                        break;
+                    }
+                case "Bomb":
+                    {
+                        type = "ITEMS/";
+                        break;
+                    }
+                case "Moonlight":
+                    {
+                        type = "WEPS/";
+                        break;
                     }
             }
             ReplaceItemGeneric(pickupObject, chosenTrick, type);
@@ -362,10 +319,19 @@ namespace LunacidAP
 
         private static void HideLastChild(Item_Pickup_scr pickupObject)
         {
-            if (pickupObject.transform.childCount > 1)
+            foreach (Transform child in pickupObject.transform)
             {
-                pickupObject.transform.GetChild(pickupObject.transform.childCount - 2).gameObject.SetActive(false);
+                var name = child.gameObject.name;
+                _log.LogInfo($"Found child named {name}");
+                foreach (var matchString in ModelNames)
+                {
+                    if (matchString.Contains(name))
+                    {
+                        child.gameObject.SetActive(false);
+                    }
+                }
             }
+
         }
     }
 }
