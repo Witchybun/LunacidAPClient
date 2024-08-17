@@ -108,6 +108,10 @@ namespace LunacidAP.Data
             "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
+        public static readonly List<string> Vouchers = new(){
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+        };
+
         public static readonly List<string> Filler = new(){
             "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
