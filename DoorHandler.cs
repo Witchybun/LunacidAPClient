@@ -78,7 +78,7 @@ namespace LunacidAP
                 return true;
             }
             var sceneName = __instance.gameObject.scene.name;
-            if (sceneName != "CAS_3" || sceneName != "VOID")
+            if (sceneName != "CAS_3" && sceneName != "VOID")
             {
                 return true;
             }
