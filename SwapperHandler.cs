@@ -317,21 +317,33 @@ namespace LunacidAP
             ReplaceItemGeneric(pickupObject, chosenTrick, type);
         }
 
-        private static void HideLastChild(Item_Pickup_scr pickupObject)
+        private static Transform FindModelCandidate(Item_Pickup_scr pickupObject)
         {
+            var childNames = "";
             foreach (Transform child in pickupObject.transform)
             {
                 var name = child.gameObject.name;
-                _log.LogInfo($"Found child named {name}");
+                childNames += name;
                 foreach (var matchString in ModelNames)
                 {
                     if (matchString.Contains(name))
                     {
-                        child.gameObject.SetActive(false);
+                        return child;
                     }
                 }
             }
+            _log.LogWarning($"The object {pickupObject.name} didn't have a model to hide.  Children: {childNames}");
+            return pickupObject.transform;
+        }
 
+        private static void HideLastChild(Item_Pickup_scr pickupObject)
+        {
+            var model = FindModelCandidate(pickupObject);
+            if (model.name == pickupObject.name)
+            {
+                return;
+            }
+            model.gameObject.SetActive(false);
         }
     }
 }
