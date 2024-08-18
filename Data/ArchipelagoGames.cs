@@ -190,7 +190,7 @@ namespace LunacidAP.Data
             {"Aquaria", "from deep beneath the waves"},
             {"Final Fantasy 12 Open World", "from the lands of Ivalice."},
             {"Battle for Bikini Bottom", "the underwater city of Bikini Bottom."},
-            {"Metroid Prime", "on the remote planet of Pallon IV."},
+            {"Metroid Prime", "on the remote planet of Tallon IV."},
             {"Super Metroid Map Rando", "upon a distant planet's surface."},
             {"Super Junkoid", "within their own eternal dreams, induced by a serpent."},
             {"Earthbound", "traveling the lands of Eagle."},
