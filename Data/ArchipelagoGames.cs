@@ -221,11 +221,15 @@ namespace LunacidAP.Data
             {
                 return "Enchanted Key";
             }
-            if (itemName.Contains("Chaos Emerald"))
+            else if (itemName.Contains("Emerald") || itemName.Contains("Diamond") || itemName.Contains("Sapphire"))
             {
                 return "Wisp Heart";
             }
-            if (itemName.Contains("Feather"))
+            else if (itemName.Contains("Ruby") || itemName.Contains("Crystal"))
+            {
+                return "Crystal Shard";
+            }
+            else if (itemName.Contains("Feather"))
             {
                 return "Angel Feather";
             }
@@ -234,19 +238,19 @@ namespace LunacidAP.Data
             {
                 return "Silver";
             }
-            else if (itemName.Contains("Arrows") || itemName.Contains("Ammo"))
+            else if (itemName.Contains("Fishing Rod"))
             {
-                return "VHS Tape";
+                return "Fishing Spear";
             }
             else if (itemName.Contains("Sword") || itemName.Contains("Dagger") || itemName.Contains("Blade") || itemName.Contains("Knife"))
             {
                 return LunacidItems.Swords[random.Next(0, LunacidItems.Swords.Count)];
             }
-            else if (itemName.Contains("Spear") || itemName.Contains("Lance"))
+            else if (itemName.Contains("Spear") || itemName.Contains("Lance") || itemName.Contains("Greatlance"))
             {
                 return LunacidItems.Spears[random.Next(0, LunacidItems.Spears.Count)];
             }
-            else if (itemName.Contains("Axe"))
+            else if (itemName.Contains("Axe") || itemName.Contains("Greataxe"))
             {
                 return LunacidItems.Axes[random.Next(0, LunacidItems.Axes.Count)];
             }
@@ -264,7 +268,7 @@ namespace LunacidAP.Data
             {
                 return LunacidItems.Gloves[random.Next(0, LunacidItems.Gloves.Count)];
             }
-            else if (itemName.Contains("Shield"))
+            else if (itemName.Contains("Shield") || itemName.Contains("Aegis") || itemName.Contains("Parma"))
             {
                 return LunacidItems.Shields[random.Next(0, LunacidItems.Shields.Count)];
             }
@@ -289,7 +293,7 @@ namespace LunacidAP.Data
             {
                 return "Holy Water";
             }
-            else if (archipelagoItem.Classification.HasFlag(ItemFlags.None))
+            else if (archipelagoItem.Classification == ItemFlags.None)
             {
                 return "Ashes";
             }
