@@ -11,7 +11,8 @@ namespace LunacidAP
         private static ManualLogSource _log;
         private static readonly List<string> ModelNames = new()
         {
-            "MDL", "Health_Vial_Model", "Ring", "Bag", "Club_Torch", "Sword_Heritage", "RUSTED SWORD", "VHS", "mdl"
+            "MDL", "Health_Vial_Model", "Ring", "Bag", "Club_Torch", "Sword_Heritage", "RUSTED SWORD", "VHS", "mdl", "Sword_Brittle1", "Candel",
+            "Bow_Elf", "KEY_MDL", "Sickle", "Axe_Anu"
         };
 
         public SwapperHandler(ManualLogSource log)
@@ -34,7 +35,7 @@ namespace LunacidAP
                     var substitutedItem = ArchipelagoGames.KeywordToItem(archipelagoItem);
                     if (substitutedItem == "NULL")
                     {
-                        HideLastChild(pickupObject);
+                        HideItemModel(pickupObject);
                         return;
                     }
                     locationItem = substitutedItem;
@@ -159,7 +160,7 @@ namespace LunacidAP
                 }
                 else
                 {
-                    HideLastChild(pickupObject);
+                    HideItemModel(pickupObject);
                     GameObject.Destroy(resourceReference);
                     return;
                 }
@@ -188,7 +189,7 @@ namespace LunacidAP
             modelReference = GameObject.Instantiate(modelReference);
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             modelReference.gameObject.SetActive(true);
             GameObject.Destroy(resourceReference);
         }
@@ -200,7 +201,7 @@ namespace LunacidAP
                 var realFoundObject = GameObject.Instantiate(foundObject.transform.GetChild(2));
                 realFoundObject.transform.SetParent(pickupObject.transform);
                 realFoundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                HideLastChild(pickupObject);
+                HideItemModel(pickupObject);
                 realFoundObject.gameObject.SetActive(true);
                 GameObject.Destroy(foundObject);
                 HideTheFuckingHandBro(foundObject);
@@ -212,7 +213,7 @@ namespace LunacidAP
                 GameObject.Destroy(foundObject.GetComponent<AudioSource>());
                 foundObject.transform.SetParent(pickupObject.transform);
                 foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                HideLastChild(pickupObject);
+                HideItemModel(pickupObject);
                 foundObject.SetActive(true);
                 HideTheFuckingHandBro(foundObject);
                 return true;
@@ -244,7 +245,7 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
@@ -255,7 +256,7 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
@@ -266,7 +267,7 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
@@ -336,7 +337,7 @@ namespace LunacidAP
             return pickupObject.transform;
         }
 
-        private static void HideLastChild(Item_Pickup_scr pickupObject)
+        private static void HideItemModel(Item_Pickup_scr pickupObject)
         {
             var model = FindModelCandidate(pickupObject);
             if (model.name == pickupObject.name)
