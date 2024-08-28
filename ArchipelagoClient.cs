@@ -304,6 +304,7 @@ namespace LunacidAP
                 Session.Socket.DisconnectAsync();
                 _log.LogInfo($"Disconnecting.");
             }
+            _deathLinkService = null;
             Session = null;
             Authenticated = false;
             HasReceivedItems = false;
@@ -363,14 +364,7 @@ namespace LunacidAP
                 _deathLinkService = Session.CreateDeathLinkService();
                 _deathLinkService.OnDeathLinkReceived += DeathLinkReceieved;
             }
-            if (ConnectionData.DeathLink)
-            {
-                _deathLinkService.EnableDeathLink();
-            }
-            else
-            {
-                _deathLinkService.DisableDeathLink();
-            }
+             _deathLinkService.EnableDeathLink();
         }
 
         private void DeathLinkReceieved(DeathLink deathLink)
@@ -395,11 +389,21 @@ namespace LunacidAP
         public IEnumerator ReceiveDeathLink(string source, string reason)
         {
             yield return new WaitForSeconds(2f);
-            var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
-            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            Control.PAPPY.POP($"The death of {source} by {reason} causes you to perish.", 1f, 1);
-            you.Die();
-            IsCurrentlyDeathLinked = false;
+            try
+            {
+                if (!IsInGame)
+                {
+                    yield break;
+                }
+                var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
+                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                you.Die();
+                IsCurrentlyDeathLinked = false;
+            }
+            catch
+            {
+                _log.LogWarning("Tried to die somewhere where the player does not exist.");
+            }
         }
 
         private void BuildLocationTable()

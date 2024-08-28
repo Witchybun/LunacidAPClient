@@ -162,6 +162,7 @@ namespace LunacidAP
             if (sceneName == "GAME_OVER")
             {
                 ArchipelagoClient.AP.SendDeathLink();
+                ArchipelagoClient.AP.Disconnect();
             }
             else if ((ArchipelagoClient.IsInGame && ArchipelagoClient.AP.IsCurrentlyDeathLinked) || !ArchipelagoClient.IsInGame)
             {
