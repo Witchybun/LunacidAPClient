@@ -101,6 +101,7 @@ namespace LunacidAP.Data
             {"Sonic Adventure DX", "a blue hedgehog and his friends"},
             {"Majora's Mask Recompiled", "the Hero of Time"},
             {"Balatro", "a gambling fool"},
+            {"A Link Between Worlds", "the Hero of Legend"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -197,6 +198,7 @@ namespace LunacidAP.Data
             {"Sonic Adventure DX", "within the city of Station Square."},
             {"Majora's Mask Recompiled", "within the lands of Termina."},
             {"Balatro", "within their own mind casino, chasing the highest ante."},
+            {"A Link Between Worlds", "from the lands of Hyrule and Lorule."},
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
