@@ -98,6 +98,10 @@ namespace LunacidAP.Data
             "Quick Stride", "Jingle Bells", "Poison Mist"
         };
 
+        public static readonly List<string> UniqueDrop = new(){
+            "Ocean Elixir", "Black Book"
+        };
+
         public static readonly List<string> Items = new(){
             "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",

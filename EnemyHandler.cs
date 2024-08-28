@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -148,7 +149,7 @@ namespace LunacidAP
                 _log.LogWarning($"Item {itemObjectName} is not in the Dictionary");
                 return "FAIL";
             }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Unique && !LunacidItems.Weapons.Contains(itemName) && !LunacidItems.Spells.Contains(itemName))
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Unique && !LunacidItems.Weapons.Contains(itemName) && !LunacidItems.Spells.Contains(itemName) && !LunacidItems.UniqueDrop.Contains(itemName))
             {
                 _log.LogWarning($"Location {enemyName}: {itemName} Drop isn't in the current game's possible locations.  Giving item as normal.");
                 return "SETTING_DIFFERENCE";
