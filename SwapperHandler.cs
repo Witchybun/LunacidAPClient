@@ -72,7 +72,7 @@ namespace LunacidAP
             }
             if (LunacidItems.Items.Contains(locationItem))
             {
-                if (LunacidItems.Vouchers.Contains(locationItem) || locationItem == "Deep Knowledge")
+                if (LunacidItems.Vouchers.Contains(locationItem) || locationItem == "Deep Knowledge" || locationItem == "Angel Feather")
                 {
                     locationItem = "Cloth Bandage";
                 }
