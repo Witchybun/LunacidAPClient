@@ -161,5 +161,27 @@ namespace LunacidAP
             }
             return true;
         }
+
+        [HarmonyPatch(typeof(LunacyGain), "OnTriggerStay")]
+        [HarmonyPrefix]
+        private static bool OnTriggerStay_TryFixNull(LunacyGain __instance, Collider other)
+        {
+            if (__instance.CON is null)
+            {
+                __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(MoonHeal), "Start")]
+        [HarmonyPrefix]
+        private static bool Start_FixMoonNull(MoonHeal __instance)
+        {
+            if (__instance.MOON is null)
+            {
+                __instance.MOON = GameObject.Find("CONTROL").GetComponent<SimpleMoon>();
+            }
+            return true;
+        }
     }
 }
