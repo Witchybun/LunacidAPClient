@@ -418,6 +418,10 @@ namespace LunacidAP
                     var excludedCoins = SlotData.RemovedLocations.Contains("Strange Coins");
                     var excludedTower = SlotData.RemovedLocations.Contains("Tower of Abyss");
                     var excludedDaedalus = SlotData.RemovedLocations.Contains("Daedalus");
+                    if (!ArchipelagoClient.AP.SlotData.IsChristmas && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
+                    {
+                        continue;
+                    }
                     if (location.IgnoreLocationHandler == true && !allowedList.Contains(region.Key))
                     {
                         continue;
@@ -598,6 +602,7 @@ namespace LunacidAP
                     foundCount += 1;
                 }
             }
+            _log.LogInfo($"Item: {itemName}, Count Requested: {count}, Actual: {foundCount}");
             return count <= foundCount;
         }
 
