@@ -1,8 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 namespace LunacidAP
@@ -11,26 +16,26 @@ namespace LunacidAP
     public class Plugin : BaseUnityPlugin
     {
         public ManualLogSource Log { get; private set; }
-        public GeneralTweaks GeneralTweaks {get; private set;}
-        public ArchipelagoClient Archipelago {get; private set;}
-        public LogicHelper LunacidLogic {get; private set;}
-        public static ManualLogSource LOG {get; private set;}
-        public LocationHandler LocationHandler {get; private set;}
-        public ItemHandler ItemHandler {get; private set;}
-        public SwitchLocker SwitchLocker {get; private set;}
-        public DoorHandler DoorHandler {get; private set;}
-        public TeleportHandler TeleportHandler {get; private set;}
-        public ShopHandler ShopHandler {get; private set;}
-        public WeaponHandler WeaponHandler {get; private set;}
-        public SaveHandler SaveHandler {get; private set;}
-        public ExpHandler ExpHandler {get; private set;}
-        public SwapperHandler SwapperHandler {get; private set;}
-        public MuseHandler MuseHandler {get; private set;}
-        public EnemyHandler EnemyHandler {get; private set;}
-        public QuenchHandler QuenchHandler {get; private set;}
-        public AlkiHandler AlkiHandler {get; private set;}
-        public NewGameUI UI {get; private set;}
-        public Colors Colors {get; private set;}
+        public GeneralTweaks GeneralTweaks { get; private set; }
+        public ArchipelagoClient Archipelago { get; private set; }
+        public LogicHelper LunacidLogic { get; private set; }
+        public static ManualLogSource LOG { get; private set; }
+        public LocationHandler LocationHandler { get; private set; }
+        public ItemHandler ItemHandler { get; private set; }
+        public SwitchLocker SwitchLocker { get; private set; }
+        public DoorHandler DoorHandler { get; private set; }
+        public TeleportHandler TeleportHandler { get; private set; }
+        public ShopHandler ShopHandler { get; private set; }
+        public WeaponHandler WeaponHandler { get; private set; }
+        public SaveHandler SaveHandler { get; private set; }
+        public ExpHandler ExpHandler { get; private set; }
+        public SwapperHandler SwapperHandler { get; private set; }
+        public MuseHandler MuseHandler { get; private set; }
+        public EnemyHandler EnemyHandler { get; private set; }
+        public QuenchHandler QuenchHandler { get; private set; }
+        public AlkiHandler AlkiHandler { get; private set; }
+        public NewGameUI UI { get; private set; }
+        public Colors Colors { get; private set; }
         private void Awake()
         {
             try
@@ -62,6 +67,7 @@ namespace LunacidAP
                 ReadDialogueHelper.Awake(Log);
                 UI = new NewGameUI(Log);
                 MuseHandler = new MuseHandler(Log);
+                StoreCustomAudio();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch
@@ -123,7 +129,7 @@ namespace LunacidAP
             {
                 return;
             }
-            var anyEndingScenes = new List<string>(){"END_E", "END_B", "END_A", "WhatWillBeAtTheEnd"};
+            var anyEndingScenes = new List<string>() { "END_E", "END_B", "END_A", "WhatWillBeAtTheEnd" };
             if (sceneName == "END_E" && ArchipelagoClient.AP.HasGoal(Goal.EndingE))
             {
                 CallForVictory();
@@ -132,7 +138,7 @@ namespace LunacidAP
             {
                 CallForVictory();
             }
-            else if(sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA))
+            else if (sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA))
             {
                 CallForVictory();
             }
@@ -167,6 +173,48 @@ namespace LunacidAP
             else if ((ArchipelagoClient.IsInGame && ArchipelagoClient.AP.IsCurrentlyDeathLinked) || !ArchipelagoClient.IsInGame)
             {
                 ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
+            }
+        }
+
+        private void StoreCustomAudio()
+        {
+            StartCoroutine(GetCustomAudio());
+            MuseHandler.InitializeTrackInfo();
+        }
+
+        // Thanks aihodge from the wild internet unity forums for this banger
+        private IEnumerator GetCustomAudio()
+        {
+            var dir = Application.dataPath.Replace("LUNACID_Data", "") + "CustomMusic/";
+            var songs = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories).ToList();
+            foreach (var song in songs)
+            {
+                var songName = song.Replace(dir, "").Replace(".mp3", "");
+                using (var uwr = UnityWebRequestMultimedia.GetAudioClip("file://" + song, AudioType.MPEG))
+                {
+                    ((DownloadHandlerAudioClip)uwr.downloadHandler).streamAudio = true;
+
+                    yield return uwr.SendWebRequest();
+
+                    if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError)
+                    {
+                        Debug.LogError(uwr.error);
+                        yield break;
+                    }
+
+                    DownloadHandlerAudioClip dlHandler = (DownloadHandlerAudioClip)uwr.downloadHandler;
+
+                    if (dlHandler.isDone)
+                    {
+                        AudioClip audioClip = dlHandler.audioClip;
+
+                        if (audioClip != null)
+                        {
+                            MuseHandler.storedSongs[songName] = DownloadHandlerAudioClip.GetContent(uwr);
+
+                        }
+                    }
+                }
             }
         }
 
