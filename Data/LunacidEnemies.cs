@@ -186,5 +186,138 @@ namespace LunacidAP.Data
             {"Sanguis Umbra", new List<string>(){"CAS_PITT"}},
             {"Infested Corpse", new List<string>(){"PRISON"}},
         };
+
+        public class EnemyPositionData
+        {
+            public string groupName;
+            public int[] childPath;
+            public int[] affectedChildren;
+
+            public EnemyPositionData(string name, int[] path, int[] affected)
+            {
+                groupName = name;
+                childPath = path;
+                affectedChildren = affected;
+            }
+        }
+
+        public static readonly Dictionary<string, string> SceneToWorldObjectsName = new(){
+            {"PITT_A1", "THE_PIT_A1"},
+            {"FOREST_A1", "FOREST_A1"},
+            {"SEWER_A1", "SEWER"},
+            {"FOREST_B1", "FOREST_B1"},
+            {"LAKE", "BLOOD_LAKE"},
+            {"ARCHIVES", "ARCHIVES"},
+            {"HAUNT", "HAUNT"},
+            {"CAS_1", "CAS_1"},
+            {"CAVE", "CAVE"},
+            {"CAS_3", "CAS_3"},
+            {"PRISON", "PRISON"},
+            {"ARENA", "ARENA"},
+            {"VOID", "VOID_WORLD"},
+
+        };
+
+        public static readonly Dictionary<string, List<EnemyPositionData>> AllEnemyPositionData = new(){
+            {"PITT_A1", new(){
+            new EnemyPositionData("SmallGroupPittA1", new int[]{7, 2}, new int[]{0, 1, 2, 3}),
+            new EnemyPositionData("StartSnailPittA1", new int[]{7, 4, 0}, new int[]{0, 1, 2, 3, 4}),
+            new EnemyPositionData("MainPittA1",  new int[]{7}, new int[]{6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18}),
+            new EnemyPositionData("HiddenPittA1",  new int[]{7, 3}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}),
+            new EnemyPositionData("CrawlingPittA1",  new int[]{7, 3, 10}, new int[]{0, 1, 2, 3, 4, 5, 6})
+            }},
+            {"FOREST_A1", new(){
+            new EnemyPositionData("LowerFrontForestA1", new int[]{7, 0}, new int[]{0, 1, 2, 3, 4}),
+            new EnemyPositionData("LowerBackYakulForestA1", new int[]{7, 1}, new int[]{0, 1}),
+            new EnemyPositionData("LowerBackBunForestA1", new int[]{7, 2}, new int[]{0, 1, 2, 3, 4, 5}),
+            new EnemyPositionData("MainForestA1", new int[]{7}, new int[]{3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23})
+            }},
+            {"SEWER_A1", new(){
+            new EnemyPositionData("RatNestSewerA1", new int[]{6, 11}, new int[]{12, 13, 14, 15}),
+            new EnemyPositionData("MainSewerA1", new int[]{6}, new int[]{0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 
+            22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38})
+            }},
+            {"FOREST_B1", new(){
+            new EnemyPositionData("NestForestB1", new int[]{7, 14}, new int[]{0, 1, 2}),
+            new EnemyPositionData("MainForestB1", new int[]{7}, new int[]{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19})
+            }},
+            {"LAKE", new(){
+            new EnemyPositionData("DryLake", new int[]{4, 5}, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11}),
+            new EnemyPositionData("DryNest1Lake", new int[]{4, 5, 12}, new int[]{0, 1, 2}),
+            new EnemyPositionData("DryNest2Lake", new int[]{4, 5, 13}, new int[]{0, 1}),
+            new EnemyPositionData("WetLake", new int[]{4, 6}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8}),
+            new EnemyPositionData("WetNest1Lake", new int[]{4, 6, 9}, new int[]{0, 1, 2}),
+            new EnemyPositionData("WetNest2Lake", new int[]{4, 6, 10}, new int[]{0, 1}),
+            new EnemyPositionData("MainLake", new int[]{4}, new int[]{1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14})
+            }},
+            {"ARCHIVES", new(){
+            new EnemyPositionData("MainArchives", new int[]{5}, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 32}),
+            new EnemyPositionData("ChimeraTopArchives", new int[]{5, 17}, new int[]{0}),
+            new EnemyPositionData("ChimeraLowerArchives", new int[]{5, 18}, new int[]{0}),
+            new EnemyPositionData("SnailNest1Archives", new int[]{5, 20}, new int[]{0, 1, 2, 3, 4}),
+            new EnemyPositionData("SnailNest2Archives", new int[]{5, 21}, new int[]{0, 1}),
+            new EnemyPositionData("SnailNest3Archives", new int[]{5, 22}, new int[]{0, 1}),
+            new EnemyPositionData("NerveNest1Archives", new int[]{5, 23}, new int[]{0, 1}),
+            new EnemyPositionData("NerveNest2Archives", new int[]{5, 24}, new int[]{0}),
+            new EnemyPositionData("RandomNest1Archives", new int[]{5, 25}, new int[]{0, 1, 2}),
+            new EnemyPositionData("NerveNest3Archives", new int[]{5, 31}, new int[]{0, 1}),
+            new EnemyPositionData("RandomNest2Archives", new int[]{5, 34}, new int[]{0, 1})
+            }},
+            {"HAUNT", new(){
+            new EnemyPositionData("JumpscareHaunt", new int[]{7, 56}, new int[0]),
+            new EnemyPositionData("NestHaunt", new int[]{7, 27}, new int[]{0, 1, 2}),
+            new EnemyPositionData("MainHaunt", new int[]{7}, new int[]{2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 
+            22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, })
+            }},
+            {"CAS_1", new(){
+            new EnemyPositionData("RedAreaCas1", new int[]{2, 7}, new int[]{0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16}),
+            new EnemyPositionData("RedAreaNestCas1", new int[]{2, 7, 7}, new int[]{0, 1}),
+            new EnemyPositionData("EntryCas1", new int[]{2, 8}, new int[]{0, 1, 2, 3}),
+            new EnemyPositionData("InteriorPhantomCas1", new int[]{2, 9}, new int[]{0, 1, 2, 3}),
+            new EnemyPositionData("UndergroundNest1Cas1", new int[]{2, 10, 0}, new int[]{0, 1, 2}),
+            new EnemyPositionData("UndergroundNest2Cas1", new int[]{2, 10, 1}, new int[]{0, 1}),
+            new EnemyPositionData("InteriorOtherCas1", new int[]{2, 11}, new int[]{0, 1, 2, 3, 4, 5}),
+            new EnemyPositionData("UpstairsCas1", new int[]{2, 13}, new int[]{0, 1, 2, 3, 4, 6, 7, 8}),
+            new EnemyPositionData("UpstairsNestCas1", new int[]{2, 13, 5}, new int[]{0, 1, 2}),
+            }},
+            {"CAVE", new(){
+            new EnemyPositionData("SnakeDen1Cave", new int[]{2, 10}, new int[]{0, 1, 2, 3}),
+            new EnemyPositionData("SnakeDen2Cave", new int[]{2, 11}, new int[]{0, 1, 2, 3, 4, 5, 6}),
+            new EnemyPositionData("AnpuSpawnCave", new int[]{2, 17}, new int[]{0}),
+            new EnemyPositionData("MimicSpawnCave", new int[]{2, 21}, new int[]{0}),
+            new EnemyPositionData("MummyUp1Cave", new int[]{2, 31}, new int[]{1}),
+            new EnemyPositionData("MainCave", new int[]{2}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15, 16, 18, 20, 23, 24, 25, 
+            26, 27, 28, 29, 33, 34, 35})
+            }},
+            {"CAS_3", new(){
+            new EnemyPositionData("HallowNest1Cas3", new int[]{2, 0}, new int[]{0, 1, 2, 3}),
+            new EnemyPositionData("HallowNest2Cas3", new int[]{2, 1}, new int[]{0, 1}),
+            new EnemyPositionData("HallowNest3Cas3", new int[]{2, 2}, new int[]{0, 1, 2}),
+            new EnemyPositionData("HorseJumpscareCas3", new int[]{2, 14}, new int[]{0}),
+            new EnemyPositionData("MainCas3", new int[]{2}, new int[]{3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13})
+            }},
+            {"PRISON", new(){
+            new EnemyPositionData("MainPrison", new int[]{7}, new int[]{5, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 27, 29, 
+            30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 51, }),
+            new EnemyPositionData("AliveCorpsesPrison", new int[]{7, 10, 0}, new int[]{0, 1, 2}),
+            new EnemyPositionData("NoAggroCorpsesPrison", new int[]{7, 10, 1}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
+            16, 17, 18, 19, 20}),
+            new EnemyPositionData("SkelNest1Prison", new int[]{7, 25}, new int[]{0, 1}),
+            new EnemyPositionData("SkelNest2Prison", new int[]{7, 26}, new int[]{0, 1}),
+            new EnemyPositionData("DogPackPrison", new int[]{7, 36}, new int[]{11, 12}),
+            new EnemyPositionData("SkelSpawnPrison", new int[]{7, 48}, new int[]{0}),
+            new EnemyPositionData("RatNestPrison", new int[]{7, 52}, new int[]{0, 1, 2, 3})
+            }},
+            {"ARENA", new(){
+            new EnemyPositionData("MainArena", new int[]{2}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+            21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 
+            54, 55, 56, 57, 58, 59, 60, 61, 62, 63})
+            }},
+            {"VOID", new(){
+            new EnemyPositionData("RayNestVoid", new int[]{8, 9}, new int[]{0, 1}),
+            new EnemyPositionData("MainVoid", new int[]{8}, new int[]{0, 1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 
+            22, 23, 24, 25})
+            }}
+        };
     }
 }
