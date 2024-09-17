@@ -4,6 +4,7 @@ using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using Newtonsoft.Json;
+using static LunacidAP.Data.LunacidEnemies;
 
 namespace LunacidAP
 {
@@ -19,6 +20,8 @@ namespace LunacidAP
         private const string SWITCH_KEY = "switch_locks";
         private const string DOOR_KEY = "door_locks";
         private const string COIN_KEY = "required_strange_coin";
+        private const string ENEMY_RANDO_KEY = "enemy_randomization";
+        private const string ENEMY_DATA_KEY = "enemy_placement";
         private const string ENDING_KEY = "ending";
         private const string SHOP_KEY = "shopsanity";
         private const string DROP_KEY = "dropsanity";
@@ -36,31 +39,35 @@ namespace LunacidAP
         private const string CUSTOM_DESC_KEY = "created_class_description";
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
         private const string CUSTOM_COLORS_KEY = "item_colors";
+        private const string CUSTOM_MUSIC_KEY = "custom_music";
         private Dictionary<string, object> _slotDataFields;
-        public int Seed {get; private set;}
-        public Goal Ending {get; private set;}
-        public int StartingClass {get; private set;}
-        public bool EntranceRandomizer {get; private set;}
-        public string ClientVersion {get; private set;}
-        public Dropsanity Dropsanity {get; private set;}
-        public bool Quenchsanity {get; private set;}
-        public bool EtnasPupil {get; private set;}
-        public bool NormalizedDrops {get; private set;}
-        public bool Shopsanity {get; private set;}
-        public bool Switchlock {get; private set;}
-        public bool Doorlock {get; private set;}
-        public float ExperienceMultiplier {get; private set;}
-        public float WExperienceMultiplier {get; private set;}
-        public int RequiredCoins {get; private set;}
-        public bool DeathLink {get; private set;}
-        public bool RandomElements {get; private set;}
-        public bool FalseWalls {get; private set;}
-        public List<string> RemovedLocations {get; private set;}
-        public bool IsChristmas {get; private set;}
-        public string CustomName {get; private set;}
-        public string CustomDescription {get; private set;}
-        public Dictionary<string, int> CustomStats {get; private set;}
-        public Dictionary<string, string> ItemColors {get; private set;}
+        public int Seed { get; private set; }
+        public Goal Ending { get; private set; }
+        public int StartingClass { get; private set; }
+        public bool EntranceRandomizer { get; private set; }
+        public string ClientVersion { get; private set; }
+        public bool EnemyRandomization { get; private set; }
+        public Dictionary<string, RandomizedEnemyData> RandomEnemyData { get; private set; }
+        public Dropsanity Dropsanity { get; private set; }
+        public bool Quenchsanity { get; private set; }
+        public bool EtnasPupil { get; private set; }
+        public bool NormalizedDrops { get; private set; }
+        public bool Shopsanity { get; private set; }
+        public bool Switchlock { get; private set; }
+        public bool Doorlock { get; private set; }
+        public float ExperienceMultiplier { get; private set; }
+        public float WExperienceMultiplier { get; private set; }
+        public int RequiredCoins { get; private set; }
+        public bool DeathLink { get; private set; }
+        public bool RandomElements { get; private set; }
+        public bool FalseWalls { get; private set; }
+        public List<string> RemovedLocations { get; private set; }
+        public bool IsChristmas { get; private set; }
+        public string CustomName { get; private set; }
+        public string CustomDescription { get; private set; }
+        public Dictionary<string, int> CustomStats { get; private set; }
+        public bool CustomMusic { get; private set; }
+        public Dictionary<string, string> ItemColors { get; private set; }
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -71,6 +78,7 @@ namespace LunacidAP
             EntranceRandomizer = GetSlotSetting(ER_KEY, false);
             Seed = GetSlotSetting(SEED_KEY, 0);
             ClientVersion = GetSlotSetting(VERSION, "0.0.0");
+            EnemyRandomization = GetSlotSetting(ENEMY_RANDO_KEY, false);
             Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
             Quenchsanity = GetSlotSetting(QUENCH_KEY, false);
             EtnasPupil = GetSlotSetting(ETNAS_KEY, false);
@@ -78,8 +86,8 @@ namespace LunacidAP
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
             Doorlock = GetSlotSetting(DOOR_KEY, false);
-            ExperienceMultiplier = (float) GetSlotSetting(EXP_KEY, 100)/100;
-            WExperienceMultiplier = (float) GetSlotSetting(WEXP_KEY, 100)/100;
+            ExperienceMultiplier = (float)GetSlotSetting(EXP_KEY, 100) / 100;
+            WExperienceMultiplier = (float)GetSlotSetting(WEXP_KEY, 100) / 100;
             RequiredCoins = GetSlotSetting(COIN_KEY, 30);
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
@@ -90,11 +98,13 @@ namespace LunacidAP
             IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
             CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
+            CustomMusic = GetSlotSetting(CUSTOM_MUSIC_KEY, false);
             var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
             CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
             var itemColors = GetSlotSetting(CUSTOM_COLORS_KEY, "");
             ItemColors = JsonConvert.DeserializeObject<Dictionary<string, string>>(itemColors);
-            
+            var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
+
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
@@ -111,11 +121,33 @@ namespace LunacidAP
                     ConnectionData.Entrances.Add(data.Key, data.Value);
                 }
             }
+            if (EnemyRandomization)
+            {
+                if (ConnectionData.RandomEnemyData.Any())
+                {
+                    _log.LogInfo("The enemy data was already filled, so no need to regenerate again.");
+                }
+                else
+                {
+                    foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(enemyData))
+                    {
+                        var constructedList = new List<RandomizedEnemyData>();
+                        foreach (var item in data.Value)
+                        {
+                            var splitDataString = item.Split('|');
+                            constructedList.Add(new RandomizedEnemyData(splitDataString[0], int.Parse(splitDataString[1]), splitDataString[2]));
+                        }
+                        ConnectionData.RandomEnemyData[data.Key] = constructedList;
+                    }
+                }
+
+            }
+
             if (!ConnectionData.ItemColors.Any())
             {
                 ConnectionData.ItemColors = ItemColors;
             }
-            
+
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)
