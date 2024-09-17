@@ -34,6 +34,10 @@ namespace LunacidAP
             {
                 return true; // Don't randomize music in non-ingame scenarios.
             }
+            if (!ArchipelagoClient.AP.SlotData.CustomMusic)
+            {
+                return true; // Randomized music is off, don't change anything.
+            }
             _log.LogInfo($"{track.name}: {Track_Info}, Volume: {vol}");
             if (!randomizedSongs.TryGetValue(track.name, out var newTrack))
             {
@@ -60,6 +64,11 @@ namespace LunacidAP
                 Directory.CreateDirectory(dir);
             }
             var trackPath = Path.Combine(dir, "Tracks.json");
+            if (!File.Exists(trackPath))
+            {
+                _log.LogWarning("There is no Track.json file.  Returning.");
+                return;
+            }
             using StreamReader reader = new StreamReader(trackPath);
             string text = reader.ReadToEnd();
             var tracks = JsonConvert.DeserializeObject<Dictionary<string, string>>(text);
