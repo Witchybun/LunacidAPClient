@@ -124,8 +124,8 @@ namespace LunacidAP
         public static int ReadFlagValue(int Zone, int Slot)
         {
             var flag = LoadFlag(Zone);
-            char value = flag[Slot];
-            return value;
+            var flagArray = flag.ToArray();
+            return int.Parse(flagArray[Slot].ToString());
 
         }
 
@@ -380,21 +380,11 @@ namespace LunacidAP
                         {
                             var level = GameObject.Find("LEVEL").transform;
                             var book = level.transform.GetChild(9).GetChild(1);
-                            var aftermath = level.transform.GetChild(7);
-                            var originalNPCs = level.transform.GetChild(8);
                             if (!book.gameObject.activeSelf)
                             {
                                 book.gameObject.SetActive(value: true);
                             }
-                            if (aftermath.GetChild(0).gameObject.activeSelf)
-                            {
-                                aftermath.gameObject.SetActive(true);
-                                originalNPCs.gameObject.SetActive(false); // Just make sure they're around.
-                            }
-                            else if (!aftermath.gameObject.activeSelf && !originalNPCs.gameObject.activeSelf)
-                            {
-                                aftermath.gameObject.SetActive(true);
-                            }
+                            
                             
                             break;
                         }
