@@ -183,5 +183,14 @@ namespace LunacidAP
             }
             return true;
         }
+
+        public static void EnsureAftermathAfterKill(Transform hubLevel)
+        {
+            if (!hubLevel.GetChild(7).gameObject.activeSelf && ConnectionData.EnteredScenes.Contains("Chamber of Fate"))
+            {
+                hubLevel.GetChild(8).gameObject.SetActive(false);
+                hubLevel.GetChild(7).gameObject.SetActive(true);
+            }
+        }
     }
 }
