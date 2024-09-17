@@ -98,6 +98,11 @@ namespace LunacidAP
                 GiveEXP(itemName, color, player, self);
                 return;
             }
+            if (itemName == "Text on Great Well Resourcefulness")
+            {
+                GiveDropBoost(itemName, color, player, self);
+                return;
+            }
             switch (type)
             {
                 case 1:

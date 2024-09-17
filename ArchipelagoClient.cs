@@ -34,7 +34,7 @@ namespace LunacidAP
         public SlotData SlotData { get; private set; }
         public GiftingService Gifting { get; private set; }
         private GiftHelper giftHelper { get; set; }
-        public const long LOCATION_INIT_ID = 771111110;
+        public const long LOCATION_INIT_ID = 0;
 
         private bool _connected;
         public bool Authenticated
