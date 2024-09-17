@@ -18,7 +18,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<int[]> MaximumPlotFlags = new(){
-          new int[3]{15, 1, 1}, new int[3]{14, 16, 1}, new int[3]{6, 15, 6}, new int[3]{12, 2, 1}  
+          new int[3]{15, 1, 1}, new int[3]{14, 16, 2}, new int[3]{6, 15, 6}, new int[3]{12, 2, 1}  
         };
 
         public class LunacidItemFlags

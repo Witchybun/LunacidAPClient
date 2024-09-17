@@ -82,7 +82,7 @@ namespace LunacidAP.Data
             new LocationData( 473, "Skeleton: Mana Vial Drop" ),
             new LocationData( 474, "Skeleton: Onyx Drop" ),
             new LocationData( 475, "Skeleton: Bones Drop" ),
-            new LocationData( 476, "Rat King: Medium Silver Drop" ),
+            new LocationData( 476, "Rat King: Large Silver Drop" ),
             new LocationData( 477, "Rat King: Lotus Seed Pod Drop" ),
             new LocationData( 478, "Rat: Small Silver Drop" ),
             new LocationData( 479, "Kodama: Small Silver Drop" ),

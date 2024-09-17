@@ -19,6 +19,7 @@ namespace LunacidAP.Data
             {"Haunted2", "Lunacid: The Mouth is Wide"},
             {"PrisonTrack4LunacidMaybe", "Lunacid: As Above"},
             {"Forest", "Lunacid: Forgotten Forest"},
+            {"Forest_Cave", "Lunacid: Apollo - Akuma Kira"},
             {"Arena3", "Lunacid: The Rain of Saint Ishii"},
             {"Arena2", "Lunacid: Bent Armor"},
             {"Arena", "Lunacid: Neither Just Nor Fair"},
@@ -32,7 +33,9 @@ namespace LunacidAP.Data
             {"Threating", "Lunacid: Serpentine Superiorem"},
             {"Water", "Lunacid: River of Death"},
             {"MN_VoidWorld2", "Lunacid: Wings in the Night"},
-            {"Sleep", "Lunacid: Sleep"}
+            {"Sleep", "Lunacid: Sleep"},
+            {"So_Below_Final", "Lunacid: So Below - Jarren Crist"},
+            {"WaterTemple", "Lunacid: The Binds of Life - Akuma Kira"},
         };
     }
 }
