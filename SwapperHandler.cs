@@ -12,7 +12,7 @@ namespace LunacidAP
         private static readonly List<string> ModelNames = new()
         {
             "MDL", "Health_Vial_Model", "Ring", "Bag", "Club_Torch", "Sword_Heritage", "RUSTED SWORD", "VHS", "mdl", "Sword_Brittle1", "Candel",
-            "Bow_Elf", "KEY_MDL", "Sickle", "Axe_Anu"
+            "Bow_Elf", "KEY_MDL", "Sickle", "Axe_Anu", "Staff_Osiris"
         };
 
         public SwapperHandler(ManualLogSource log)
