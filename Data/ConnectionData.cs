@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using static LunacidAP.Data.LunacidEnemies;
 using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP.Data
@@ -23,12 +24,13 @@ namespace LunacidAP.Data
         public static List<string> EnteredScenes = new(){};
         public static List<ReceivedGift> ReceivedGifts = new(){};
         public static Dictionary<string, string> ItemColors = new(){};
+        public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new(){};
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
         SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
-        Dictionary<string, string> itemColors = null)
+        Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
             HostName = hostName;
             Port = port;
@@ -77,6 +79,10 @@ namespace LunacidAP.Data
             {
                 ItemColors = itemColors;
             }
+            if (randomEnemyData is not null)
+            {
+                RandomEnemyData = randomEnemyData;
+            }
         }
 
         public static void WriteConnectionData()
@@ -98,6 +104,7 @@ namespace LunacidAP.Data
             EnteredScenes = new(){};
             ReceivedGifts = new(){};
             ItemColors = new(){};
+            RandomEnemyData = new(){};
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){

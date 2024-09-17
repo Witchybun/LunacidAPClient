@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using static LunacidAP.Data.LunacidGifts;
+using static LunacidAP.Data.LunacidEnemies;
 
 namespace LunacidAP
 {
@@ -47,6 +48,7 @@ namespace LunacidAP
                 ScoutedLocations = ConnectionData.ScoutedLocations,
                 EnteredScenes = ConnectionData.EnteredScenes,
                 ReceivedGifts = ConnectionData.ReceivedGifts,
+                RandomEnemyData = ConnectionData.RandomEnemyData,
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
@@ -81,7 +83,7 @@ namespace LunacidAP
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
-                    loadedSave.ItemColors);
+                    loadedSave.ItemColors, loadedSave.RandomEnemyData);
                     return;
                 }
 
@@ -116,5 +118,6 @@ namespace LunacidAP
         public List<string> EnteredScenes;
         public List<ReceivedGift> ReceivedGifts;
         public Dictionary<string, string> ItemColors;
+        public Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData;
     }
 }
