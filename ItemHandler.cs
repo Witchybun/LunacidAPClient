@@ -258,6 +258,12 @@ namespace LunacidAP
             Control.CURRENT_PL_DATA.XP += currentXP/20;
         }
 
+        private static void GiveDropBoost(string Name, string color, string player = "", bool self = false)
+        {
+            PopupCommand(0, Name, color, player, self);
+            
+        }
+
         private static void ApplyItemToInventory(string Name)
         {
             if (ArchipelagoClient.AP is null)
