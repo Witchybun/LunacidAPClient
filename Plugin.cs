@@ -36,6 +36,8 @@ namespace LunacidAP
         public AlkiHandler AlkiHandler { get; private set; }
         public NewGameUI UI { get; private set; }
         public Colors Colors { get; private set; }
+        private string CurrentSceneName;
+        private GameObject HubLevel;
         private void Awake()
         {
             try
@@ -102,8 +104,9 @@ namespace LunacidAP
             {
                 UI.ModifyCharCreateForArchipelago();
             }
+            CurrentSceneName = "";
+            HubLevel = null;
         }
-
 
         private void AddSceneIfNotIncluded(string sceneName)
         {
@@ -224,6 +227,19 @@ namespace LunacidAP
             {
                 StartCoroutine(ArchipelagoClient.AP.ReceiveDeathLink(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
             }
+            if (CurrentSceneName == "")
+            {
+                CurrentSceneName = SceneManager.GetActiveScene().name;
+            }
+            if (CurrentSceneName != "HUB_01")
+            {
+                return;
+            }
+            if (HubLevel is null)
+            {
+                HubLevel = GameObject.Find("LEVEL");
+            }
+            GeneralTweaks.EnsureAftermathAfterKill(HubLevel.transform);
         }
     }
 }
