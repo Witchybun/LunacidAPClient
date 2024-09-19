@@ -263,7 +263,8 @@ namespace LunacidAP.Data
 
         public static readonly List<string> EnemySpells = new(){
             "LAVA_CAST", "POI_SPORE_CAST", "DARK_WAVE_CAST", "WIND_NPC_CAST", "ACID_SPIT_CAST",
-            "DARK_SPHERE_CAST", "NPC_GHOST_FLARE_CAST", "SUS_DAGGER_CAST", "LASER_BEAM_CAST"
+            "DARK_SPHERE_CAST", "NPC_GHOST_FLARE_CAST", "SUS_DAGGER_CAST", "LASER_BEAM_CAST", "LIGHT_BEAM_CAST",
+            "DARK_SPOUT_CAST", "DARK_EXPLODE_CAST", "LASER_BEAM_CAST3"
         };
         public static readonly Dictionary<string, int> SceneToAverageLevel = new(){
             {"PITT_A1", 9},
