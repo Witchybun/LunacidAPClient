@@ -36,6 +36,7 @@ namespace LunacidAP.Data
             {"Sleep", "Lunacid: Sleep"},
             {"So_Below_Final", "Lunacid: So Below - Jarren Crist"},
             {"WaterTemple", "Lunacid: The Binds of Life - Akuma Kira"},
+            {"AT_music", "Lunacid: Old Song from a cancelled game - Akuma Kira"},
         };
     }
 }
