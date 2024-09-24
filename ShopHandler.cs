@@ -301,12 +301,12 @@ namespace LunacidAP
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
         {
+            var sceneName = __instance.gameObject.scene.name;
+            __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
                 return true;
             }
-            var sceneName = __instance.gameObject.scene.name;
-            __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
             if (LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
             __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
             {
