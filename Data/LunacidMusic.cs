@@ -37,6 +37,12 @@ namespace LunacidAP.Data
             {"So_Below_Final", "Lunacid: So Below - Jarren Crist"},
             {"WaterTemple", "Lunacid: The Binds of Life - Akuma Kira"},
             {"AT_music", "Lunacid: Old Song from a cancelled game - Akuma Kira"},
+            {"Arbys", "In the Shadows - Kira"},
+            {"me_when_the_harp_is_chord2", "Me when the harp is chord - Vrisk"},
+            {"KIRA_GAME_8_-_Search_a_Symphony", ""},
+            {"MLG_Music", "Lunacid: I am afraid of being alone - Kira"},
+            {"Blood_Flooded", "Cruor - Lunacid: Jarren Crist"},
+            {"Reaper", "Lunacid: Reaper"},
         };
     }
 }
