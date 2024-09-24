@@ -63,6 +63,10 @@ namespace LunacidAP.Data
             {"Celeste 64", "a short, bouncy girl"},
             {"Yoshi's Island", "a group of dinosaurs and a small child"},
             {"Zork Grand Inquisitor", "a bumbling salesperson of an old electric company"},
+            {"Old School Runescape", "an quirky adventurer"},
+            {"Kingdom Hearts", "a young boy and his two animal companions"},
+            {"Mega Man 2", "a robotic boy with myriad of powers"},
+            {"Yacht Dice", "a group of dice"},
             // Unsupported
             {"Lunacid", "an outcast"},
             {"Wario Land 4", "a plump, greedy man"},
@@ -71,7 +75,6 @@ namespace LunacidAP.Data
             {"Little Witch Nobeta", "a little girl"},
             {"Ender Lilies", "a little girl"},
             {"Pseudoregalia", "a goat-rabbit woman"},
-            {"Old School Runescape", "an quirky adventurer"},
             {"Mario & Luigi Superstar Saga", "two dynamic brothers"},
             {"Ultrakill", "a lifeless being, desperate for blood,"},
             {"Resident Evil 2 Remake", "two souls desperate for answers"},
@@ -83,7 +86,6 @@ namespace LunacidAP.Data
             {"Hades", "the son of Hades"},
             {"An Untitled Story", "an egg"},
             {"Mega Man X", "a robotic boy with myriad of powers"},
-            {"Yacht Dice", "a group of dice"},
             {"Final Fantasy V Career Day", "an adventerous boy and his trusted large chicken"},
             {"Final Fantasy 6 Worlds Collide", "an esper and her allies"},
             {"Inscryption", "a curious man"},
@@ -102,6 +104,7 @@ namespace LunacidAP.Data
             {"Majora's Mask Recompiled", "the Hero of Time"},
             {"Balatro", "a gambling fool"},
             {"A Link Between Worlds", "the Hero of Legend"},
+            {"Soul Blazer", "an angel"}
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -160,6 +163,10 @@ namespace LunacidAP.Data
             {"Celeste 64", "the tall peaks of Celeste Mountain."},
             {"Yoshi's Island", "the vast lands of Yoshi's Island."},
             {"Zork Grand Inquisitor", "the oppressed lands of the kingdom of Quendor."},
+            {"Old School Runescape", "the town of Lumbridge."},
+            {"Kingdom Hearts", "the isles of Destiny."},
+            {"Mega Man 2", "a far flung future within the lab of a bright mind."},
+            {"Yacht Dice", "the tumbing cup within your very hands."},
             // Unsupported
             {"Lunacid", "a world, similar to this one, yet different."},
             {"Wario Land 4", "deep within an ancient pyramid."},
@@ -168,7 +175,6 @@ namespace LunacidAP.Data
             {"Little Witch Nobeta", "a long lost lab she inevitably returns to."},
             {"Ender Lilies", "the kingdom of Land's End."},
             {"Pseudoregalia", "deep within a dilapidated dungeon."},
-            {"Old School Runescape", "the town of Lumbridge."},
             {"Mario & Luigi Superstar Saga", "the kingdom of Beans, though they were only visiting."},
             {"Ultrakill", "the depths of hell."},
             {"Resident Evil 2 Remake", "the remains of the city of Raccoon."},
@@ -180,7 +186,6 @@ namespace LunacidAP.Data
             {"Hades", "deep within the Underworld."},
             {"An Untitled Story", "the lands surrounding their comfortable nest."},
             {"Mega Man X", "the far future during a war against the Reploids."},
-            {"Yacht Dice", "the tumbing cup within your very hands."},
             {"Final Fantasy V Career Day", "a far off land protected by four crystals."},
             {"Final Fantasy 6 Worlds Collide", "a land of magitek ruled by a tyrant."},
             {"Inscryption", "your home town, sucked into a mystery surrounding a floppy disk."},
@@ -199,6 +204,7 @@ namespace LunacidAP.Data
             {"Majora's Mask Recompiled", "within the lands of Termina."},
             {"Balatro", "within their own mind casino, chasing the highest ante."},
             {"A Link Between Worlds", "from the lands of Hyrule and Lorule."},
+            {"Soul Blazer", "from the heavens above the lands of the Freil Empire."}
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
