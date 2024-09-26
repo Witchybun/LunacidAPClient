@@ -35,7 +35,7 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> FakeItems = new(){
-            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Bestial Mastery"
         };
 
         public static readonly List<string> Weapons = new(){
