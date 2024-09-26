@@ -12,6 +12,7 @@ namespace LunacidAP
     {
         // Should be for any fixes or changes to code that aren't necessarily AP oriented but change something.
         private static ManualLogSource _log;
+        private static long LucidID = 319;
         private static string[] _kept { get; set; }
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
@@ -77,6 +78,24 @@ namespace LunacidAP
                 popup.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
             }
             return;
+        }
+
+        [HarmonyPatch(typeof(Kill_Other), "Start")]
+        [HarmonyPrefix]
+        private static bool Start_KillPlayerNoSword(Kill_Other __instance)
+        {
+            if (__instance.name != "SHOT_B2")
+            {
+                return true;
+            }
+            var calamisItem = ConnectionData.ScoutedLocations[LucidID].Name;
+            if (!ArchipelagoClient.AP.WasItemReceived("Lucid Blade") && calamisItem != "Lucid Blade")
+            {
+                var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
+                you.Die();    
+                return false;
+            }
+            return true;
         }
 
         [HarmonyPatch(typeof(Boss), "End")]
