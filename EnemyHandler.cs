@@ -32,6 +32,11 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool OnEnable_ModifyDrops_Prefix(Loot_scr __instance)
         {
+            if ((ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off && __instance.name == "SANGUIS UMBRA") || __instance.name == "CENTAUR" || __instance.gameObject.scene.name == "TOWER")
+            {
+                return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.
+                // Also tower has no drops, so why run this.
+            }
             if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off)
             {
                 return true;
@@ -44,10 +49,6 @@ namespace LunacidAP
             float nothingWeightScalar = (float)Math.Max(0.75, 0.25*dropBoosts);
             var lOOTS = __instance.LOOTS;
             //NameEveryDrop(__instance.name, lOOTS);
-            if (lOOTS.Count() < 1)
-            {
-                return false; // It doesn't drop anything, don't even spend resources rolling.  Probably a Centaur
-            }
             var nothingWeight = 0f;
             var areDropsNormalized = ArchipelagoClient.AP.SlotData.NormalizedDrops;
             var normalizedNonemptyWeight = 0;
