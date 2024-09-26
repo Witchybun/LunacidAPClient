@@ -33,13 +33,13 @@ namespace LunacidAP
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
         private const string ENT_KEY = "entrances";
-        private const string REMOVAL_KEY = "remove_locations";
         private const string IS_CHRISTMAS = "is_christmas";
         private const string CUSTOM_NAME_KEY = "created_class_name";
         private const string CUSTOM_DESC_KEY = "created_class_description";
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
         private const string CUSTOM_COLORS_KEY = "item_colors";
         private const string CUSTOM_MUSIC_KEY = "custom_music";
+        private const string IMPORTANT_ITEM_KEY = "item_spots";
         private Dictionary<string, object> _slotDataFields;
         public int Seed { get; private set; }
         public Goal Ending { get; private set; }
@@ -61,13 +61,13 @@ namespace LunacidAP
         public bool DeathLink { get; private set; }
         public bool RandomElements { get; private set; }
         public bool FalseWalls { get; private set; }
-        public List<string> RemovedLocations { get; private set; }
         public bool IsChristmas { get; private set; }
         public string CustomName { get; private set; }
         public string CustomDescription { get; private set; }
         public Dictionary<string, int> CustomStats { get; private set; }
         public bool CustomMusic { get; private set; }
         public Dictionary<string, string> ItemColors { get; private set; }
+        public Dictionary<string, List<string>> ImportantItemLocations {get; private set;}
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -93,8 +93,6 @@ namespace LunacidAP
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             FalseWalls = GetSlotSetting(WALL_KEY, false);
-            var removedList = GetSlotSetting(REMOVAL_KEY, "");
-            RemovedLocations = JsonConvert.DeserializeObject<List<string>>(removedList);
             IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
             CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
@@ -104,6 +102,8 @@ namespace LunacidAP
             var itemColors = GetSlotSetting(CUSTOM_COLORS_KEY, "");
             ItemColors = JsonConvert.DeserializeObject<Dictionary<string, string>>(itemColors);
             var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
+            var itemSpots = GetSlotSetting(IMPORTANT_ITEM_KEY, "");
+            ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(itemSpots);
 
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {

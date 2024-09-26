@@ -111,7 +111,7 @@ namespace LunacidAP
         public int CheatCount;
         public List<ReceivedItem> ObtainedItems;
         public List<long> CheckedLocations;
-        public Dictionary<string, CommunionHint.HintData> CommunionHints;
+        public Dictionary<string, string> CommunionHints;
         public Dictionary<string, string> Elements;
         public Dictionary<string, string> Entrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
