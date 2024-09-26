@@ -36,13 +36,9 @@ namespace LunacidAP
                 return true;
             }
             var apLocation = DetermineGeneralPickupLocation(__instance);
-            if (apLocation.APLocationID == -1 || Tower_IsExcludedAndIsExcludedLocation(apLocation))
+            if (apLocation.APLocationID == -1)
             {
                 return true;
-            }
-            if (Coin_IsExcludedAndIsExcludedLocation(apLocation))
-            {
-                return false;
             }
             SwapperHandler.ReplaceModelWithAppropriateItem(__instance, apLocation);
             __instance.CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -71,21 +67,13 @@ namespace LunacidAP
             var sceneName = pickupObject.gameObject.scene.name;
             var objectLocation = pickupObject.gameObject.transform.position;
             var apLocation = DetermineGeneralPickupLocation(pickupObject);
-            
-            if (apLocation.APLocationID == -1 || Tower_IsExcludedAndIsExcludedLocation(apLocation))
+
+            if (apLocation.APLocationID == -1)
             {
                 return true;
             }
-            if (Coin_IsExcludedAndIsExcludedLocation(apLocation))
-            {
-                return false;
-            }
             if (apLocation.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
-                if (ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Daedalus"))
-                {
-                    return false;
-                }
                 var actualName = TheDaedalusConundrum(pickupObject);
                 apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
             }
@@ -119,12 +107,36 @@ namespace LunacidAP
             {
                 return new LocationData(-2, "FbA: Daedalus Knowledge", "", new Vector3());
             }
+            if (sceneName == "TOWER")
+            {
+                if (Vector3.Distance(objectLocation, new Vector3(60.22f, -10f, -168.66f)) < 2f)
+                {
+                    var item1Location = string.Format("TA: Floor {0} Item 1", TheTowerDNumberDilemma(pickupObject).ToString());
+                    return APLocationData["TOWER"].First(x => x.APLocationName == item1Location);
+                }
+                else if (Vector3.Distance(objectLocation, new Vector3(59.878f, -10f, -174.863f)) < 2f)
+                {
+                    var item2Location = string.Format("TA: Floor {0} Item 2", TheTowerDNumberDilemma(pickupObject).ToString());
+                    return APLocationData["TOWER"].First(x => x.APLocationName == item2Location);
+                }
+            }
             if (objectName.Contains("(Clone)") && IsCloneAPLocation(pickupObject))
             {
                 return DetermineClonePickupLocation(sceneName, objectName, objectLocation);
             }
             var type = pickupObject.type;
             return DetermineTypicalPickupLocation(sceneName, objectName, objectLocation, type);
+        }
+
+        private static int TheTowerDNumberDilemma(Item_Pickup_scr pickupObject)
+        {
+            var trueParent = pickupObject.transform.GetParent().GetParent();
+            if (trueParent.name[0] != 'D')
+            {
+                return -1;
+            }
+            var numberInName = trueParent.name.Replace("D","");
+            return 5 * int.Parse(numberInName);
         }
 
         private static LocationData DetermineTypicalPickupLocation(string sceneName, string objectName, Vector3 objectPosition, int type)
@@ -236,7 +248,7 @@ namespace LunacidAP
             {
                 return;
             }
-            
+
             if (__instance.Load.name != "STAGES")
             {
                 return;
@@ -329,8 +341,34 @@ namespace LunacidAP
             }
         }
 
+        [HarmonyPatch(typeof(Item_Adjust), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_AllowItemIfNotCollected(Item_Adjust __instance)
+        {
+            if (__instance.gameObject.scene.name != "TOWER")
+            {
+                return true;
+            }
+            if (__instance.ACT.name != "KILL_HEALTH" && __instance.ACT.name != "KILL_SHARD")
+            {
+                return true;
+            }
+            var locationName = "";
+            if (__instance.ACT.name == "KILL_HEALTH")
+            {
+                locationName = string.Format("TA: Floor {0} Item 1", _currentFloor);
+            }
+            else if (__instance.ACT.name == "KILL_SHARD")
+            {
+                locationName = string.Format("TA: Floor {0} Item 2", _currentFloor);
+            }
+            if (ArchipelagoClient.AP.IsLocationChecked(locationName) && __instance.ACT is not null)
+            {
+                __instance.ACT.SetActive(true);
+            }
+            return false;
+        }
 
-        
 
         private static bool IsLocationCollected(LocationData apLocation)
         {
@@ -498,21 +536,6 @@ namespace LunacidAP
         private static bool IsCloneAPLocation(Item_Pickup_scr pickupObject)
         {
             return IsDropLocation(pickupObject) || IsShopLocation(pickupObject) || IsOtherCloneObjectAPRelated(pickupObject);
-        }
-
-        private static bool Tower_IsExcludedAndIsExcludedLocation(LocationData locationData)
-        {
-            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Tower of Abyss") && LunacidLocations.TowerLocations.Contains(locationData.APLocationName);
-        }
-
-        private static bool Coin_IsExcludedAndIsExcludedLocation(LocationData locationData)
-        {
-            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Strange Coins") && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
-        }
-
-        private static bool Daedalus_IsExcludedAndIsExcludedLocation(LocationData locationData)
-        {
-            return ArchipelagoClient.AP.SlotData.RemovedLocations.Contains("Daedalus") && LunacidLocations.CoinLocations.Contains(locationData.APLocationName);
         }
     }
 }
