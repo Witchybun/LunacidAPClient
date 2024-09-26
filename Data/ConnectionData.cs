@@ -17,7 +17,7 @@ namespace LunacidAP.Data
         public static int CheatedCount {get; set;} = 0;
         public static List<ReceivedItem> ReceivedItems {get; set;} = new List<ReceivedItem>(){};
         public static List<long> CompletedLocations {get; set;} = new List<long>(){};
-        public static Dictionary<string, CommunionHint.HintData> CommunionHints {get; set;} = new Dictionary<string, CommunionHint.HintData>(){};
+        public static Dictionary<string, string> CommunionHints {get; set;} = new Dictionary<string, string>(){};
         public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
@@ -28,7 +28,7 @@ namespace LunacidAP.Data
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, List<ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
-        Dictionary<string, CommunionHint.HintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
+        Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
         SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
         Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
@@ -97,7 +97,7 @@ namespace LunacidAP.Data
             CheatedCount = 0;
             ReceivedItems = new List<ReceivedItem>(){};
             CompletedLocations = new List<long>(){};
-            CommunionHints = new Dictionary<string, CommunionHint.HintData>(){};
+            CommunionHints = new Dictionary<string, string>(){};
             Elements = new(){};
             Entrances = new(){};
             ScoutedLocations = new(){};
