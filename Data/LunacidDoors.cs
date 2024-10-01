@@ -21,7 +21,7 @@ namespace LunacidAP.Data
             {"Throne Chamber to Terminus Prison", "Prison Main Door Key"},
             {"Castle Le Fanu White Area to Throne Chamber", "Queen's Throne Door Key"},
             {"Terminus Prison Dark Areas to Forlorn Arena", "Secondary Lock Key"},
-            {"Terminus Prison Dark Areas to Labyrinth of Ash", "Forbidden Door Key"},
+            {"Terminus Prison Dark Areas to Labyrinth of Ash Entrance", "Forbidden Door Key"},
             {"Castle Le Fanu Blue Area to Boiling Grotto", "Burning Hot Key"},
             {"Forlorn Arena to Chamber of Fate", "Sucsarian Key"},
             {"Chamber of Fate to Grave of the Sleeper", "Dreamer Key"},
