@@ -78,9 +78,9 @@ namespace LunacidAP
             }
         }
 
-        public static void InitializeChosenSongs()
+        public static void InitializeChosenSongs(int seed)
         {
-            var random = new System.Random(ConnectionData.Seed);
+            var random = new System.Random(seed);
             var possibleSongs = storedSongs.Keys.ToList();
             var usedSongs = new List<string>();
             foreach (var file in LunacidMusic.FileToTitle)
