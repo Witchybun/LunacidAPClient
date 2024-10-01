@@ -195,7 +195,7 @@ namespace LunacidAP
                 InitializeDeathLink();
             }
             SetUpGifting();
-            MuseHandler.InitializeChosenSongs();
+            MuseHandler.InitializeChosenSongs(seed);
             cheatedCount = 0;
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
