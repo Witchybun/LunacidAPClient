@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -20,25 +21,63 @@ namespace LunacidAP
             Harmony.CreateAndPatchAll(typeof(WeaponHandler));
         }
 
-        [HarmonyPatch(typeof(Weapon_scr), "Attack")]
-        [HarmonyPrefix]
-        private static bool Attack_ModifyWeaponElement(Weapon_scr __instance)
+        [HarmonyPatch(typeof(CONTROL), "OnSwap")]
+        [HarmonyPostfix]
+        private static void OnSwap_ModifyWeaponElement(CONTROL __instance)
         {
+            if (__instance.EQ_WEP is null)
+            {
+                return;
+            }
+            var weaponName = StaticFuncs.REMOVE_NUMS(__instance.EQ_WEP.name.Replace("(Clone)", ""));
             if (!ArchipelagoClient.AP.SlotData.RandomElements)
             {
-                return true;
+                if (ConnectionData.Elements.TryGetValue(weaponName, out string elementName))
+                {
+                    if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
+                    {
+                        __instance.EQ_WEP.WEP_ELEMENT = element;
+                    }
+                }
             }
-            var weaponName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
-            if (!ConnectionData.Elements.TryGetValue(weaponName, out string elementName))
+            _log.LogInfo(weaponName);
+            if (weaponName == "THORN" || weaponName == "GHOST SWORD")
             {
-                _log.LogError($"{weaponName} not in list for elements.");
-                return true;
+                var currentWeapon = __instance.EQ_WEP.gameObject;
+                var oldHand = currentWeapon.transform.Find("HAND");
+                GameObject relevantWeapon = (GameObject)Resources.Load("WEPS/MOONLIGHT");
+                if (weaponName == "THORN")
+                {
+                    relevantWeapon = (GameObject)Resources.Load("WEPS/REPLICA SWORD");
+                }
+                var newHand = GameObject.Instantiate(relevantWeapon.transform.Find("HAND"));
+                newHand.parent = oldHand.parent;
+                newHand.localPosition = oldHand.localPosition;
+                newHand.localRotation = oldHand.localRotation;
+                newHand.localScale = oldHand.localScale;
+                oldHand.gameObject.SetActive(false);
             }
-            if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
+        }
+
+        [HarmonyPatch(typeof(Break_from_parent), "Start")]
+        [HarmonyPostfix]
+        private static void Start_ModifyRangedElement(Break_from_parent __instance)
+        {
+            var castName = __instance.name.Replace("(Clone)", "");
+            _log.LogInfo(castName);
+            var componentsInChildren = __instance.GetComponentsInChildren(typeof(Damage_Trigger), true);
+            if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
             {
-                __instance.WEP_ELEMENT = element;
+                foreach (Damage_Trigger trigger in componentsInChildren.Cast<Damage_Trigger>())
+                {
+                    trigger.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
+                }
             }
-            return true;
+            else
+            {
+                _log.LogWarning($"Could not change element for {castName}");
+            }
+
         }
 
         [HarmonyPatch(typeof(Magic_scr), "Cast")]
@@ -71,7 +110,7 @@ namespace LunacidAP
             {
                 __instance.element = CurrentElement;
             }
-            else if (LunacidItems.ArrowToWeapon.TryGetValue(castName, out string weapon))
+            else if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
             {
                 __instance.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
             }
