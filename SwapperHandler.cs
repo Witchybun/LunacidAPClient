@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
 using LunacidAP.Data;
@@ -274,7 +275,7 @@ namespace LunacidAP
         private static void ReplaceModelWithTrickyThing(Item_Pickup_scr pickupObject)
         {
             var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight"};
-            var random = ArchipelagoClient.AP.RandomStatic.Next(0, 3);
+            var random = new System.Random(ConnectionData.Seed + DateTime.Today.Day + pickupObject.gameObject.GetInstanceID()).Next(0, 6);
             var chosenTrick = trickyThings[random];
             var type = "";
             switch (chosenTrick)
