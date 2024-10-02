@@ -21,6 +21,7 @@ namespace LunacidAP
             Harmony.CreateAndPatchAll(typeof(WeaponHandler));
         }
 
+        // Kudos to Tesseract for suggesting this instead.
         [HarmonyPatch(typeof(CONTROL), "OnSwap")]
         [HarmonyPostfix]
         private static void OnSwap_ModifyWeaponElement(CONTROL __instance)
@@ -59,6 +60,7 @@ namespace LunacidAP
             }
         }
 
+        // Kudos to Tesseract for suggesting this instead.
         [HarmonyPatch(typeof(Break_from_parent), "Start")]
         [HarmonyPostfix]
         private static void Start_ModifyRangedElement(Break_from_parent __instance)
