@@ -80,60 +80,6 @@ namespace LunacidAP
 
         }
 
-        [HarmonyPatch(typeof(Magic_scr), "Cast")]
-        [HarmonyPrefix]
-        private static bool Cast_ModifySpellElement(Magic_scr __instance)
-        {
-            if (!ArchipelagoClient.AP.SlotData.RandomElements)
-            {
-                return true;
-            }
-            var spellName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
-            if (!ConnectionData.Elements.TryGetValue(spellName, out string elementName))
-            {
-                return true;
-            }
-            CurrentCastChild = __instance.MAG_CHILD;
-            if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
-            {
-                CurrentElement = element;
-            }
-            return true;
-        }
-
-        [HarmonyPatch(typeof(Damage_Trigger), "Hurt")]
-        [HarmonyPrefix]
-        private static bool Hurt_WhatElementIsIt(Damage_Trigger __instance)
-        {
-            var castName = StaticFuncs.REMOVE_NUMS(__instance.name.Replace("(Clone)", ""));
-            if (castName == CurrentCastChild)
-            {
-                __instance.element = CurrentElement;
-            }
-            else if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
-            {
-                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
-            }
-            else if (castName == "CONST_DAMAGE" && !__instance.EffectPlayer && __instance.frequency == 0.5f && __instance.element == 0)
-            {
-                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["EARTH THORN"]];
-            }
-            else if (castName == "HURT" && __instance.EffectPlayer && !__instance.OnlyPL && __instance.frequency == 0.5f && __instance.element == 1)
-            {
-                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["LAVA CHASM"]];
-            }
-            else if (castName == "Damage" && !__instance.EffectPlayer && __instance.frequency == 0.25f && __instance.element == 4)
-            {
-                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["MOON BEAM"]];
-            }
-            else if (castName == "FANG_CAST" && !__instance.EffectPlayer && __instance.frequency == 0.25f && __instance.element == 4)
-            {
-                __instance.element = LunacidItems.ElementToID[ConnectionData.Elements["SERPENT FANG"]];
-            }
-
-            return true;
-        }
-
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
         private static void ItemLoad_FixElementInMenu(Menus __instance)
