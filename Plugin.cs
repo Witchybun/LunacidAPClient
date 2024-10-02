@@ -6,6 +6,7 @@ using Archipelago.MultiClient.Net.Enums;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -88,6 +89,13 @@ namespace LunacidAP
         {
             var sceneName = scene.name;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
+            if (sceneName == "MainMenu")
+            {
+                var versionLabel = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(4).GetChild(3);
+                versionLabel.position += new Vector3(0.1f, 0f, 0f);
+                var gameVersion = versionLabel.GetComponent<TextMeshProUGUI>().text;
+                versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
+            }
             if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {
                 ArchipelagoClient.AP.Disconnect();
