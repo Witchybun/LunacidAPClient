@@ -47,7 +47,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo"
+            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo", "Thorn", "Ghost Sword"
         };
 
         public static readonly List<string> Swords = new(){
@@ -57,7 +57,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
             "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
             "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Limbo"
+            "Dark Greatsword", "Shining Blade", "Limbo", "Ghost Sword", "Thorn"
         };
 
         public static readonly List<string> Axes = new(){
@@ -86,7 +86,7 @@ namespace LunacidAP.Data
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
             "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
-            "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
+            "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
             "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
 
@@ -201,7 +201,7 @@ namespace LunacidAP.Data
             "COIN_PICKUP", "ENKEY_PICKUP"
         };
 
-        public static Dictionary<string, string> ArrowToWeapon = new(){
+        public static Dictionary<string, string> CastToWeapon = new(){
             {"ARROW_CAST", "ELFEN BOW"},
             {"TWISTED_STAFF_CAST", "TWISTED STAFF"},
             {"BOLT_CAST", "CROSSBOW"},
@@ -210,6 +210,27 @@ namespace LunacidAP.Data
             {"MOONLIGHT_CAST", "MOONLIGHT"},
             {"BULLET_CAST", "PRIVATEER MUSKET"},
             {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
+            {"ICE_SPIKE_CAST", "ICE TEAR"},
+            {"LAVA_FLOOR_CAST", "LAVA CHASM"},
+            {"MOON_BEAM_CAST", "MOON BEAM"},
+            {"THORN_CAST", "EARTH THORN"},
+            {"BLOOD_STRIKE_CAST", "BLOOD STRIKE"},
+            {"BLUE_FLAME_CAST", "BLUE FLAME ARC"},
+            {"SKULL_CAST", "DARK SKULL"},
+            {"ROCK_CAST", "EARTH STRIKE"},
+            {"FLAME_WORM_CAST2", "FIRE WORM"},
+            {"FLAME_FLARE_CAST", "FLAME FLARE"},
+            {"FLAME_SPEAR_CAST", "FLAME SPEAR"},
+            {"ICE_SPEAR_CAST_PL", "ICE SPEAR"},
+            {"IGNIS_CAST", "IGNIS CALOR"},
+            {"LIGHTNING_CAST", "LIGHTNING"},
+            {"POI_CLOUD_CAST", "POISON CLOUD"},
+            {"SLIME_CAST", "SLIME ORB"},
+            {"TORNADO_CAST", "TORNADO"},
+            {"WIND_CUT_CAST", "WIND SLICER"},
+            {"LUCID_CAST", "LUCID BLADE"},
+            {"FANG_CAST", "SERPENT FANG"},
+
         };
 
         public static Dictionary<string, string> ItemToPickup = new(){
