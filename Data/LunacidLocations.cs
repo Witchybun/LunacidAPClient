@@ -190,6 +190,7 @@ namespace LunacidAP.Data
             new LocationData( 581, "Lupine Skeleton: Bones Drop" ),
             new LocationData( 582, "Infested Corpse: Bones Drop" ),
             new LocationData( 583, "Infested Corpse: Antidote Drop" ),
+            new LocationData( 709, "Headless Horseman: Cavalry Saber Drop"),
         };
 
         public static readonly List<LocationData> ShopLocations = new(){
@@ -266,7 +267,9 @@ namespace LunacidAP.Data
             new LocationData( 3, "WR: Clive's Gift", "HEALTH_VIAL_PICKUP", new Vector3(14.5f, 1.3f, -1.9f) ),
             new LocationData( 4, "WR: Demi's Victory Gift", "VHS_PICKUP", new Vector3(-4.1f, 1.3f, -11.2f) ),
             new LocationData( 5, "WR: Demi's Introduction Gift", position: new Vector3(-4.1f, 1.3f, -11.2f)),
-            new LocationData( 6, "WR: Christmas Present", position: new Vector3(-8.465f, 0.557f, -5.413f)),
+            new LocationData( 701, "Demi's Spooky Treats", "Hallow_Candy", new Vector3(-5.913f, 0f, -8.41f)),
+            new LocationData( 708, "Demi's Reward for All Soul Candies", "PUMPKIN POP", new Vector3(-5.857f, 0.748f, -8.368f)),
+            new LocationData( 751, "Christmas Present", position: new Vector3(-8.465f, 0.557f, -5.413f)),
 
         }
             },
@@ -318,6 +321,7 @@ namespace LunacidAP.Data
                     new LocationData( 50, "FM: Underwater Pipe", "P_THROWING_KNIFE_PICKUP", new Vector3(64.9f, -31.6f, -279.5f) ),
                     new LocationData( 51, "FM: Underworks Waterfall", "ANTIDOTE_PICKUP", new Vector3(-9.6f, -28.0f, -260.5f) ),
                     new LocationData( 52, "FM: Underworks Skeleton", "HILT_PICKUP", new Vector3(-60.4f, -28.0f, -172.0f) ),
+                    new LocationData( 702, "Jellisha's Jelly Treats", "Hallow_Candy"),
                 }
             },
             {
@@ -370,7 +374,8 @@ namespace LunacidAP.Data
                     new LocationData( 101, "YF: Room Defended by Blood Plant", "EARTH_STRIKE", new Vector3(-274.7f, -32.4f, -176.2f)),
                     new LocationData( 102, "YF: Patchouli's Canopy Offer", "ENKEY_PICKUP", new Vector3(-57.9f, -16.8f, -116.1f)),
                     new LocationData( 103, "YF: Patchouli's Reward", "EARTH_ELIXIR_PICKUP", new Vector3(-57.9f, -16.8f, -116.3f)),
-                    new LocationData( 104, "YF: Patchouli's Yuletide Offering", "NOGG_PICKUP", new Vector3(-53.968f, -15.6588f, -116.677f))
+                    new LocationData( 752, "Patchouli's Yuletide Offering", "NOGG_PICKUP", new Vector3(-53.968f, -15.6588f, -116.677f)),
+                    new LocationData( 703, "Patchouli's Poisoned Treats", "Hallow_Candy", new Vector3(-62.833f, -16.769f, -119.37f))
                 }
             },
             {
@@ -401,7 +406,8 @@ namespace LunacidAP.Data
                     new LocationData( 131, "FbA: Daedalus Knowledge (First)", "RING", new Vector3(-3.2f, -19.3f, -45.9f)),
                     new LocationData( 132, "FbA: Daedalus Knowledge (Second)", "RING", new Vector3(-3.2f, -19.3f, -45.9f)),
                     new LocationData( 133, "FbA: Daedalus Knowledge (Third)", "RING", new Vector3(-3.2f, -19.3f, -45.9f)),
-                    new LocationData( 134, "FbA: Corner Near Daedalus", "HEALTH_VIAL_PICKUP", new Vector3(-43.6f, -20.0f, -29.6f))
+                    new LocationData( 134, "FbA: Corner Near Daedalus", "HEALTH_VIAL_PICKUP", new Vector3(-43.6f, -20.0f, -29.6f)),
+                    new LocationData( 705, "Daedalus' Blackened Treats", "Hallow_Candy", new Vector3( -1.04f, -20f, -40.17f))
                 }
             },
             {
@@ -422,6 +428,7 @@ namespace LunacidAP.Data
                     new LocationData( 152, "CLF: Upper Floor Coffin Room (Large Room)", "OCEAN_ELIXIR_PICKUP", new Vector3(-20.6f, 25.4f, -334.6f) ),
                     new LocationData( 153, "CLF: Upper Floor Coffin Room (Double)", "SWORD_PICKUP", new Vector3(-54.0f, 28.4f, -249.0f) ),
                     new LocationData( 154, "CLF:  Upper Floor Coffin Room (Hallway)", "KEY2_PICKUP", new Vector3(-2.4f, -2.8f, -202.6f) ),
+                    new LocationData( 704, "Crilall's Bloody Treats", "Hallow_Candy", new Vector3(-3.75f, 2f, -101.43f))
                 }
             },
             {
@@ -479,6 +486,7 @@ namespace LunacidAP.Data
                     new LocationData( 215, "ST: Chest Overlooking Crypt", "OCEAN_ELIXIR_PICKUP", new Vector3(-327.4f, 12.7f, 45.0f) ),
                     new LocationData( 216, "ST: Floor Switch Maze", "Moon_Vial_PICKUP", new Vector3(-361.6f, -20.0f, -85.2f) ),
                     new LocationData( 217, "ST: Triple Sarcophagus", "GOLD_10", new Vector3(-327.4f, 12.0f, -139.8f)),
+                    new LocationData( 706, "Shery's Delectable Treats", "Hallow_Candy", new Vector3(-91.1f, 8f, -171.96f))
                 }
             },
             {
@@ -542,6 +550,7 @@ namespace LunacidAP.Data
                     new LocationData( 277, "TP: Etna's Resting Place Item 3", "MOONPETAL", new Vector3(31.2f, 24.3f, -14.9f) ),
                     new LocationData( 278, "TP: Fourth Floor Collapsed Tunnel", "HAMMER_PICKUP", new Vector3(41.3f, 24.3f, -37.5f) ),
                     new LocationData( 279, "TP: Egg's Resting Place", "RATTLE_PICKUP", new Vector3(72.4f, -48.0f, -19.9f)),
+                    new LocationData( 707, "Lobos' Late Treats", "Hallow_Candy", new Vector3(-2.19f, 11f, -9.41f))
                 }
             },
             {
@@ -632,7 +641,13 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> ChristmasLocations = new(){
-            "WR: Christmas Present", "YF: Patchouli's Yuletide Offering"
+            "Christmas Present", "Patchouli's Yuletide Offering"
+        };
+
+        public static readonly List<string> SpookyLocations = new(){
+            "Demi's Spooky Treats", "Jellisha's Jelly Treats", "Patchouli's Poisoned Treats", "Crilall's Bloody Treats",
+            "Daedalus' Blackened Treats", "Lobos' Late Treats", "Shery's Delectable Treats", "Demi's Reward for All Soul Candies",
+            "Headless Horseman: Cavalry Saber Drop"
         };
     }
 }

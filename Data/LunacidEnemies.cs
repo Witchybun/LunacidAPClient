@@ -68,6 +68,7 @@ namespace LunacidAP.Data
             {"VESTA", "Vesta"},
             {"GLOOM WOOD", "Gloom Wood"},
             {"SANGUIS UMBRA", "Sanguis Umbra"},
+            {"Headless Horseman", "Headless Horseman"}
         };
 
         public static readonly List<string> NotEnemyWhitelist = new(){
@@ -186,6 +187,7 @@ namespace LunacidAP.Data
             {"Cerritulus Lunam", new List<string>(){"PRISON"}},
             {"Sanguis Umbra", new List<string>(){"CAS_PITT"}},
             {"Infested Corpse", new List<string>(){"PRISON"}},
+            {"Headless Horseman", new List<string>(){"SEWER_A1"}}
         };
 
         public static Dictionary<string, string> APWorldNameToGameName = new(){
@@ -264,7 +266,7 @@ namespace LunacidAP.Data
         public static readonly List<string> EnemySpells = new(){
             "LAVA_CAST", "POI_SPORE_CAST", "DARK_WAVE_CAST", "WIND_NPC_CAST", "ACID_SPIT_CAST",
             "DARK_SPHERE_CAST", "NPC_GHOST_FLARE_CAST", "SUS_DAGGER_CAST", "LASER_BEAM_CAST", "LIGHT_BEAM_CAST",
-            "DARK_SPOUT_CAST", "DARK_EXPLODE_CAST", "LASER_BEAM_CAST3"
+            "DARK_SPOUT_CAST", "DARK_EXPLODE_CAST", "LASER_BEAM_CAST3", "DARK_CONE_CAST"
         };
         public static readonly Dictionary<string, int> SceneToAverageLevel = new(){
             {"PITT_A1", 9},
