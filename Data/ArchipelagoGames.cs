@@ -104,7 +104,13 @@ namespace LunacidAP.Data
             {"Majora's Mask Recompiled", "the Hero of Time"},
             {"Balatro", "a gambling fool"},
             {"A Link Between Worlds", "the Hero of Legend"},
-            {"Soul Blazer", "an angel"}
+            {"Soul Blazer", "an angel"},
+            {"Kindergarten 2", "a small child"},
+            {"Hunie Pop 2", "a lustful soul"},
+            {"Hammerwatch", "a group of adventurers"},
+            {"Cave Story", "a robotic entity"},
+            {"Anodyne", "a young one"},
+            {"Flipwitch Forbidden Sex Hex", "a genderfluid witch"}
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -204,7 +210,13 @@ namespace LunacidAP.Data
             {"Majora's Mask Recompiled", "within the lands of Termina."},
             {"Balatro", "within their own mind casino, chasing the highest ante."},
             {"A Link Between Worlds", "from the lands of Hyrule and Lorule."},
-            {"Soul Blazer", "from the heavens above the lands of the Freil Empire."}
+            {"Soul Blazer", "from the heavens above the lands of the Freil Empire."},
+            {"Kindergarten 2", "within a hellish school full of other children."},
+            {"Hunie Pop 2", "surrounded by possible dates on a tropical island."},
+            {"Hammerwatch", "storming the castle of Hammerwatch."},
+            {"Cave Story", "a floating island amongst the clouds."},
+            {"Anodyne", "within the depths of their own psyche."},
+            {"Flipwitch Forbidden Sex Hex", "from the sexual lands surrounding Spirit City."}
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
