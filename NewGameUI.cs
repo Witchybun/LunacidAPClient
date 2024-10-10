@@ -214,14 +214,24 @@ namespace LunacidAP
                         var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
                         if (!ArchipelagoClient.AP.Authenticated && GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
                         {
-                            create.GetChild(12).GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "SLOT NAME\nHOST\nPORT\nPASSWORD";
+                            var names = create.Find("Labels");
+                            names.GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "SLOT NAME";
+                            names.Find("B").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "HOST";
+                            names.Find("C").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "PORT";
+                            names.Find("D").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "PASSWORD";
                             HostEntry.SetActive(value: true);
                             PortEntry.SetActive(value: true);
                             PasswordEntry.SetActive(value: true);
                             create.GetChild(13).GetComponent<TextMeshProUGUI>().text = "Archipelago\nsettings";
                             create.GetChild(14).gameObject.SetActive(value: false);
+                            create.GetChild(14).GetChild(0).gameObject.SetActive(value: false);
+                            create.GetChild(14).GetChild(1).gameObject.SetActive(value: false);
                             create.GetChild(15).gameObject.SetActive(value: false);
+                            create.GetChild(15).GetChild(0).gameObject.SetActive(value: false);
+                            create.GetChild(15).GetChild(1).gameObject.SetActive(value: false);
                             create.GetChild(16).gameObject.SetActive(value: false);
+                            create.GetChild(16).GetChild(0).gameObject.SetActive(value: false);
+                            create.GetChild(16).GetChild(1).gameObject.SetActive(value: false);
                             create.GetChild(19).gameObject.SetActive(value: false);
                             create.GetChild(20).gameObject.SetActive(value: false);
                             create.GetChild(21).gameObject.SetActive(value: false);
@@ -239,7 +249,12 @@ namespace LunacidAP
                         }
                         else if (ArchipelagoClient.AP.Authenticated && PortEntry.activeSelf)
                         {
-                            create.GetChild(12).GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "NAME\nBEAUTY\nCLASS\nPRONOUNS";
+                            
+                            var names = create.Find("Labels");
+                            names.GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "NAME";
+                            names.Find("B").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "BEAUTY";
+                            names.Find("C").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "CLASS";
+                            names.Find("D").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "PRONOUNS";
                             HostEntry.SetActive(value: false);
                             PortEntry.SetActive(value: false);
                             PasswordEntry.SetActive(value: false);
