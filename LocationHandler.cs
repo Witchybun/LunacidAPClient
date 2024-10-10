@@ -99,7 +99,15 @@ namespace LunacidAP
             var objectName = pickupObject.gameObject.name;
             var sceneName = pickupObject.gameObject.scene.name;
             var objectLocation = pickupObject.transform.position;
-            if (sceneName == "HUB_01" && Vector3.Distance(objectLocation, new Vector3(-4.1f, 1.3f, -11.2f)) < 5f && pickupObject.Name != "Dusty Crystal Orb")
+            if (sceneName == "HUB_01" && objectName == "Hallow_Candy")
+            {
+                new LocationData( 701, "Demi's Spooky Treats", "Hallow_Candy", new Vector3(-5.913f, 0f, -8.41f));
+            }
+            if (sceneName == "HUB_01" && objectName == "PUMPKIN POP")
+            {
+                new LocationData( 708, "Demi's Reward for All Soul Candies", "PUMPKIN POP", new Vector3(-5.857f, 0.748f, -8.368f));
+            }
+            if (sceneName == "HUB_01" && Vector3.Distance(objectLocation, new Vector3(-4.1f, 1.3f, -11.2f)) < 5f && pickupObject.Name != "Dusty Crystal Orb" && objectName != "Hallow_Candy")
             {
                 return new LocationData(5, "WR: Demi's Introduction Gift", "", new Vector3());
             }
@@ -520,7 +528,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool OnEnable_ItsCRIMPUS(CRIMPUS __instance)
         {
-            if (ArchipelagoClient.AP.SlotData.IsChristmas)
+            if (ArchipelagoClient.AP.SlotData.RolledMonth == 12)
             {
                 __instance.transform.GetChild(0).gameObject.SetActive(value: true);
                 if (__instance.gameObject.scene.name == "FOREST_A1")
@@ -528,6 +536,18 @@ namespace LunacidAP
                     //Make sure the eggnog is out frfr ong
                     __instance.transform.GetChild(0).GetChild(13).gameObject.SetActive(value: true);
                 }
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(typeof(HALLO), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_ItsHALLO(HALLO __instance)
+        {
+            if (ArchipelagoClient.AP.SlotData.RolledMonth == 10)
+            {
+                __instance.transform.GetChild(0).gameObject.SetActive(value: true);
                 return false;
             }
             return true;

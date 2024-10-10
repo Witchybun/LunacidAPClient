@@ -33,7 +33,7 @@ namespace LunacidAP
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
         private const string ENT_KEY = "entrances";
-        private const string IS_CHRISTMAS = "is_christmas";
+        private const string MONTH_KEY = "rolled_month";
         private const string CUSTOM_NAME_KEY = "created_class_name";
         private const string CUSTOM_DESC_KEY = "created_class_description";
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
@@ -61,7 +61,7 @@ namespace LunacidAP
         public bool DeathLink { get; private set; }
         public bool RandomElements { get; private set; }
         public bool FalseWalls { get; private set; }
-        public bool IsChristmas { get; private set; }
+        public int RolledMonth { get; private set; }
         public string CustomName { get; private set; }
         public string CustomDescription { get; private set; }
         public Dictionary<string, int> CustomStats { get; private set; }
@@ -93,7 +93,7 @@ namespace LunacidAP
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             FalseWalls = GetSlotSetting(WALL_KEY, false);
-            IsChristmas = GetSlotSetting(IS_CHRISTMAS, false);
+            RolledMonth = GetSlotSetting(MONTH_KEY, 1);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
             CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
             CustomMusic = GetSlotSetting(CUSTOM_MUSIC_KEY, false);

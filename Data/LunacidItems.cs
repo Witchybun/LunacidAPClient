@@ -4,27 +4,6 @@ namespace LunacidAP.Data
 {
     public class LunacidItems
     {
-        public class ItemData
-        {
-            public long ItemID { get; set; }
-            public string ItemName { get; set; }
-            public string GameObjectName { get; set; }
-            public ItemType Type {get; set;}
-            public bool OneCount {get; set;}
-            public int CountMult {get; set;}
-            public string Element {get; set;}
-
-            public ItemData(long itemID, string itemName, string gameObject, ItemType type, bool oneCount = true, int countMult = 1, string element = "NA")
-            {
-                ItemID = itemID;
-                ItemName = ItemName;
-                GameObjectName = gameObject;
-                Type = type;
-                OneCount = oneCount;
-                CountMult = countMult;
-                Element = element;
-            }
-        }
 
         public static readonly List<string> OneCountItems = new(){
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
@@ -47,7 +26,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo", "Thorn", "Ghost Sword"
+            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo", "Thorn", "Ghost Sword", "Cavalry Saber"
         };
 
         public static readonly List<string> Swords = new(){
@@ -57,7 +36,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
             "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
             "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Limbo", "Ghost Sword", "Thorn"
+            "Dark Greatsword", "Shining Blade", "Limbo", "Ghost Sword", "Thorn", "Cavalry Sword"
         };
 
         public static readonly List<string> Axes = new(){
@@ -95,7 +74,7 @@ namespace LunacidAP.Data
             "Earth Thorn", "Fire Worm", "Flame Flare", "Flame Spear", "Ghost Light", "Holy Warmth", "Icarian Flight", "Ice Spear", "Ice Tear",
             "Ignis Calor", "Lava Chasm", "Light Reveal", "Lightning", "Lithomancy", "Moon Beam", "Rock Bridge", "Slime Orb",
             "Spirit Warp", "Summon Fairy", "Summon Ice Sword", "Wind Dash", "Wind Slicer", "Summon Snail", "Summon Kodama", "Tornado", "Dark Skull",
-            "Quick Stride", "Jingle Bells", "Poison Mist"
+            "Quick Stride", "Jingle Bells", "Poison Mist", "Pumpkin Pop"
         };
 
         public static readonly List<string> UniqueDrop = new(){
@@ -109,7 +88,7 @@ namespace LunacidAP.Data
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
             "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Sheryl's Initial Offerings Voucher", 
-            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Soul Candy"
         };
 
         public static readonly List<string> Vouchers = new(){

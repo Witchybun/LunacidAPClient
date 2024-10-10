@@ -415,7 +415,7 @@ namespace LunacidAP
                 foreach (var location in region.Value)
                 {
                     var allowedList = new List<string>() { "TOWER", "ARENA2" };
-                    if (!ArchipelagoClient.AP.SlotData.IsChristmas && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
+                    if (SlotData.RolledMonth != 12 && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
@@ -423,7 +423,7 @@ namespace LunacidAP
                     {
                         continue;
                     }
-                    if (!SlotData.IsChristmas && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
+                    if (SlotData.RolledMonth != 10 && LunacidLocations.SpookyLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
@@ -587,7 +587,6 @@ namespace LunacidAP
                     foundCount += 1;
                 }
             }
-            _log.LogInfo($"Item: {itemName}, Count Requested: {count}, Actual: {foundCount}");
             return count <= foundCount;
         }
 
