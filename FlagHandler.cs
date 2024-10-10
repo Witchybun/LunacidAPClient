@@ -187,6 +187,30 @@ namespace LunacidAP
                 case 16:
                     CON.CURRENT_PL_DATA.ZONE_16 = current_string;
                     break;
+                case 17:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 18:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 19:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 20:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 21:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 22:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 23:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 24:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
             }
         }
 
@@ -317,6 +341,12 @@ namespace LunacidAP
                                     vhsTape.SetActive(value: true);
                                 }
                             }
+                            var daDemiTwiggaUwu = pittObjects.transform.Find("NEW_NPC").Find("DEMI_0");
+                            if (!daDemiTwiggaUwu.Find("Demi").gameObject.activeSelf && !ConnectionData.EnteredScenes.Contains("HUB_01"))
+                            {
+                                daDemiTwiggaUwu.Find("TRIGGER_POINT").gameObject.SetActive(true);
+                                daDemiTwiggaUwu.Find("TRIGGER_POINT").Find("AUTO").gameObject.SetActive(true);
+                            }
                             break;
                         }
                     case "CAS_1":
@@ -379,13 +409,37 @@ namespace LunacidAP
                     case "HUB_01":
                         {
                             var level = GameObject.Find("LEVEL").transform;
-                            var book = level.transform.GetChild(9).GetChild(1);
+                            var book = level.GetChild(9).GetChild(1);
                             if (!book.gameObject.activeSelf)
                             {
                                 book.gameObject.SetActive(value: true);
                             }
-                            
-                            
+                            if (ArchipelagoClient.AP.SlotData.RolledMonth == 10)
+                            {
+                                var quest = level.Find("Props").Find("HALLO_CHECK").Find("Hallo").Find("Halloween_Props").Find("Hallow_Bowl").Find("QUEST");
+                                quest.gameObject.SetActive(true);
+                                var quest2 = quest.GetChild(0);
+                                quest2.gameObject.SetActive(true);
+                                var quest3 = quest2.GetChild(0);
+                                quest3.gameObject.SetActive(true);
+                                var quest4 = quest3.GetChild(0);
+                                quest4.gameObject.SetActive(true);
+                                var quest5 = quest4.GetChild(0);
+                                quest5.gameObject.SetActive(true);
+                                var quest6 = quest5.Find("QUEST6");
+                                quest6.gameObject.SetActive(true);
+                                var spell = quest6.Find("PUMPKIN POP");
+
+                                if (ArchipelagoClient.AP.WasItemCountReceived("Soul Candy", 35))
+                                {
+                                    spell.gameObject.SetActive(true);
+                                }
+                                else
+                                {
+                                    spell.gameObject.SetActive(false);
+                                }
+                            }
+
                             break;
                         }
                 }
@@ -589,6 +643,30 @@ namespace LunacidAP
                     current_string = CON.CURRENT_PL_DATA.ZONE_15;
                     break;
                 case 16:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 17:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 18:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 19:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 20:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 21:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 22:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 23:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    break;
+                case 24:
                     current_string = CON.CURRENT_PL_DATA.ZONE_16;
                     break;
             }
