@@ -31,7 +31,7 @@ namespace LunacidAP
                 return;
             }
             var weaponName = StaticFuncs.REMOVE_NUMS(__instance.EQ_WEP.name.Replace("(Clone)", ""));
-            if (!ArchipelagoClient.AP.SlotData.RandomElements)
+            if (ArchipelagoClient.AP.SlotData.RandomElements)
             {
                 if (ConnectionData.Elements.TryGetValue(weaponName, out string elementName))
                 {
@@ -41,7 +41,6 @@ namespace LunacidAP
                     }
                 }
             }
-            _log.LogInfo(weaponName);
             if (weaponName == "THORN" || weaponName == "GHOST SWORD")
             {
                 var currentWeapon = __instance.EQ_WEP.gameObject;
@@ -65,8 +64,11 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void Start_ModifyRangedElement(Break_from_parent __instance)
         {
+            if (!ArchipelagoClient.AP.SlotData.RandomElements)
+            {
+                return;
+            }
             var castName = __instance.name.Replace("(Clone)", "");
-            _log.LogInfo(castName);
             var componentsInChildren = __instance.GetComponentsInChildren(typeof(Damage_Trigger), true);
             if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
             {
