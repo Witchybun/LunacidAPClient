@@ -91,8 +91,8 @@ namespace LunacidAP
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
             if (sceneName == "MainMenu")
             {
-                var versionLabel = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(4).GetChild(3);
-                versionLabel.position += new Vector3(0.1f, 0f, 0f);
+                var versionLabel = GameObject.Find("PLAYER").transform.Find("Canvas").Find("HUD").Find("ROOT").Find("MAIN").Find("version_label");
+                versionLabel.position = new Vector3(-75.0263f, -20.5211f, -262.409f);
                 var gameVersion = versionLabel.GetComponent<TextMeshProUGUI>().text;
                 versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
             }
