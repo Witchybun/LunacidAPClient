@@ -42,7 +42,7 @@ namespace LunacidAP
         public void ModifyCharCreateForArchipelago()
         {
 
-            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
+            var create = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
             var textField = create.GetChild(6).gameObject;
 
             HostEntry = GameObject.Instantiate(textField);
@@ -211,8 +211,8 @@ namespace LunacidAP
             {
                 case "CHAR_CREATE":
                     {
-                        var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
-                        if (!ArchipelagoClient.AP.Authenticated && GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
+                        var create = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
+                        if (!ArchipelagoClient.AP.Authenticated && GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
                         {
                             var names = create.Find("Labels");
                             names.GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "SLOT NAME";
@@ -298,7 +298,7 @@ namespace LunacidAP
                     }
                 case "Gameover":
                     {
-                        var load = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(2).GetChild(0);
+                        var load = GameObject.FindObjectOfType<Menus>().transform.GetChild(2).GetChild(0);
                         if (!ArchipelagoClient.AP.Authenticated)
                         {
                             load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "connect";
@@ -352,7 +352,7 @@ namespace LunacidAP
 
         private static void FixConnectionInfoDisplay()
         {
-            var create = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2);
+            var create = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
             if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
             {
                 create.GetChild(18).GetComponent<TextMeshProUGUI>().text = ArchipelagoClient.AP.SlotData.CustomName;
