@@ -10,7 +10,7 @@ namespace LunacidAP.Data
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
             "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago", "Tent", "Strange Coin",
-            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Soul Candy"
         };
 
         public static readonly List<string> FakeItems = new(){
@@ -209,6 +209,7 @@ namespace LunacidAP.Data
             {"WIND_CUT_CAST", "WIND SLICER"},
             {"LUCID_CAST", "LUCID BLADE"},
             {"FANG_CAST", "SERPENT FANG"},
+            {"LIGHTBLADE_CAST", "SHINING BLADE"}
 
         };
 
