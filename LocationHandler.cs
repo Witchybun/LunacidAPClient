@@ -99,13 +99,19 @@ namespace LunacidAP
             var objectName = pickupObject.gameObject.name;
             var sceneName = pickupObject.gameObject.scene.name;
             var objectLocation = pickupObject.transform.position;
+            _log.LogInfo($"{objectName}, {sceneName}, {objectLocation}");
+            _log.LogInfo($"Is this Christmas Present?  {sceneName == "HUB_01" && objectName == "PICKUP"}");
             if (sceneName == "HUB_01" && objectName == "Hallow_Candy")
             {
-                new LocationData( 701, "Demi's Spooky Treats", "Hallow_Candy", new Vector3(-5.913f, 0f, -8.41f));
+                return new LocationData( 701, "Demi's Spooky Treats", "Hallow_Candy", new Vector3(-5.913f, 0f, -8.41f));
             }
             if (sceneName == "HUB_01" && objectName == "PUMPKIN POP")
             {
-                new LocationData( 708, "Demi's Reward for All Soul Candies", "PUMPKIN POP", new Vector3(-5.857f, 0.748f, -8.368f));
+                return new LocationData( 708, "Demi's Reward for All Soul Candies", "PUMPKIN POP", new Vector3(-5.857f, 0.748f, -8.368f));
+            }
+            if (sceneName == "HUB_01" && objectName == "PICKUP")
+            {
+                return new LocationData( 751, "Christmas Present", "PICKUP", new Vector3(-8.465f, 0.557f, -5.413f));
             }
             if (sceneName == "HUB_01" && Vector3.Distance(objectLocation, new Vector3(-4.1f, 1.3f, -11.2f)) < 5f && pickupObject.Name != "Dusty Crystal Orb" && objectName != "Hallow_Candy")
             {
@@ -271,31 +277,7 @@ namespace LunacidAP
         public static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
         {
             _popup = _popup = GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY; // Though done before, other calls might not catch it.
-            if (item.SlotName == ConnectionData.SlotName) // Handle without an internet connection.
-            {
-                var receivedItem = new ReceivedItem(item.Game, location.APLocationName, item.Name, item.SlotName, location.APLocationID, item.ID, item.SlotID, item.Classification);
-                ConnectionData.ReceivedItems.Add(receivedItem);
-                ItemHandler.GiveLunacidItem(receivedItem, true, false);
-                var patchouliCanopy = LunacidLocations.APLocationData["FOREST_A1"].First(x => x.APLocationName == "YF: Patchouli's Canopy Offer").APLocationID;
-                ConnectionData.CompletedLocations.Add(location.APLocationID);
-                if (ArchipelagoClient.AP.Authenticated)
-                {
-                    ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location.APLocationID);
-                }
-                if (location.APLocationName == "YF: Patchouli's Reward" && !ArchipelagoClient.AP.IsLocationChecked(patchouliCanopy))
-                {
-                    var patchouliItem = ConnectionData.ScoutedLocations[patchouliCanopy];
-                    var patchouliReceivedItem = new ReceivedItem(item.Game, "YF: Patchouli's Canopy Offer", patchouliItem.Name, patchouliItem.SlotName, patchouliCanopy, patchouliItem.ID, patchouliItem.SlotID, patchouliItem.Classification);
-                    ConnectionData.ReceivedItems.Add(patchouliReceivedItem);
-                    ItemHandler.GiveLunacidItem(patchouliReceivedItem, true, false);
-                    ConnectionData.CompletedLocations.Add(patchouliCanopy);
-                    if (ArchipelagoClient.AP.Authenticated)
-                    {
-                        ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(patchouliCanopy);
-                    }
-                }
-            }
-            else if (ArchipelagoClient.AP.Authenticated) // If someone else's item an online, do the usual
+            if (ArchipelagoClient.AP.Authenticated) // If someone else's item an online, do the usual
             {
                 ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location.APLocationID);
                 if (location.APLocationName == "YF: Patchouli's Reward")
