@@ -6,6 +6,7 @@ using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using I2.Loc;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,12 +19,24 @@ namespace LunacidAP
         private static POP_text_scr Popup;
         private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
+        private static List<string> _specialItems = new(){"Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring"};
 
         public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
         {
             _log = log;
             _lunacidLogic = lunacidLogic;
             Harmony.CreateAndPatchAll(typeof(ItemHandler));
+        }
+
+        [HarmonyPatch(typeof(LocalizationManager), "GetTranslation")]
+        [HarmonyPostfix]
+        private static void GetTranslation_UseCustomNameWhenApplicable(string Term, ref string __result, bool FixForRTL = true, int maxLineLengthForRTL = 0, bool ignoreRTLnumbers = true, bool applyParameters = false, GameObject localParametersRoot = null, string overrideLanguage = null, bool allowLocalizedParameters = true)
+        {
+            var itemNoHeader = Term.Replace("Items/", "");
+            if (_specialItems.Contains(itemNoHeader))
+            {
+                __result = itemNoHeader;
+            }
         }
 
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
@@ -44,8 +57,7 @@ namespace LunacidAP
             {
                 return true;
             }
-            var keyItems = new List<string>() { "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago" };
-            if (!keyItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
+            if (!_specialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
             {
                 return true;
             }
@@ -165,7 +177,6 @@ namespace LunacidAP
             {
                 GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
             }
-            ConnectionData.ReceivedItems.Add(receivedItem);
         }
 
         public static void GiveLunacidItem(Gift gift, bool isTrap)
