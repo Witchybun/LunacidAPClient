@@ -326,10 +326,14 @@ namespace LunacidAP
         private void HandleReceivedItems()
         {
             var item = Session.Items.DequeueItem();
-            if (item.LocationId >= 0 && !ConnectionData.ReceivedItems.Any(x => x.PlayerId == item.Player && x.LocationId == item.LocationId && item.ItemId == x.ItemId))
+            var header = GetHeaderFromItem(item);
+            var footer = GetFooterFromItem(item);
+            var identifier = header + "." + footer;
+            if (ConnectionData.ReceivedItems.ContainsKey(identifier)) return;
+            if (item.LocationId >= 0)
             {
                 var receivedItem = new ReceivedItem(item);
-                ConnectionData.ReceivedItems.Add(receivedItem);
+                ConnectionData.ReceivedItems[identifier] = receivedItem;
                 StartCoroutine(ReceiveItem(receivedItem));
             }
             else if (item.LocationId < 0)
@@ -340,22 +344,22 @@ namespace LunacidAP
                 {
                     ConnectionData.CheatedCount = cheatedCount;
                     var receivedItem = new ReceivedItem(item);
-                    ConnectionData.ReceivedItems.Add(receivedItem);
+                    ConnectionData.ReceivedItems[identifier] = receivedItem;
                     StartCoroutine(ReceiveItem(receivedItem, true));
                 }
             }
         }
 
-        private void AppendItemToReceived(ReceivedItem receivedItem)
+        private string GetHeaderFromItem(ItemInfo itemInfo)
         {
-            foreach (var item in ConnectionData.ReceivedItems.ToList())
-            {
-                if (item.ItemId == receivedItem.ItemId && item.LocationId == item.LocationId && item.PlayerId == receivedItem.PlayerId)
-                {
-                    return;
-                }
-                ConnectionData.ReceivedItems.Add(receivedItem);
-            }
+            if (itemInfo.LocationId < 0) return "X";
+            return itemInfo.Player.Slot.ToString();
+        }
+
+        private string GetFooterFromItem(ItemInfo itemInfo)
+        {
+            if (itemInfo.LocationId < 0) return cheatedCount.ToString();
+            return itemInfo.LocationId.ToString();
         }
 
         public void InitializeDeathLink()
@@ -569,7 +573,7 @@ namespace LunacidAP
         {
             foreach (var receivedItem in ConnectionData.ReceivedItems)
             {
-                if (receivedItem.ItemName == itemName)
+                if (receivedItem.Value.ItemName == itemName)
                 {
                     return true;
                 }
@@ -582,7 +586,7 @@ namespace LunacidAP
             var foundCount = 0;
             foreach (var receivedItem in ConnectionData.ReceivedItems)
             {
-                if (receivedItem.ItemName == itemName)
+                if (receivedItem.Value.ItemName == itemName)
                 {
                     foundCount += 1;
                 }

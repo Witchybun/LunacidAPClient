@@ -45,7 +45,7 @@ namespace LunacidAP
             {
                 AddFeatherToJailor(__instance);
             }
-            var dropBoosts = ConnectionData.ReceivedItems.Where(x => x.ItemName == "Text on Great Well Resourcefulness").Count();
+            var dropBoosts = ConnectionData.ReceivedItems.Where(x => x.Value.ItemName == "Text on Great Well Resourcefulness").Count();
             float nothingWeightScalar = (float)Math.Max(0.75, 0.25*dropBoosts);
             var lOOTS = __instance.LOOTS;
             //NameEveryDrop(__instance.name, lOOTS);

@@ -109,7 +109,7 @@ namespace LunacidAP
         public int Symbols;
         public bool DeathLink;
         public int CheatCount;
-        public List<ReceivedItem> ObtainedItems;
+        public Dictionary<string, ReceivedItem> ObtainedItems;
         public List<long> CheckedLocations;
         public Dictionary<string, string> CommunionHints;
         public Dictionary<string, string> Elements;

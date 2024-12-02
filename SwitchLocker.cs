@@ -40,7 +40,7 @@ namespace LunacidAP
             _popup = control.PAPPY;
             foreach (var receivedItem in ConnectionData.ReceivedItems)
             {
-                if (receivedItem.ItemName == itemName)
+                if (receivedItem.Value.ItemName == itemName)
                 {
                     return true; // Allow the switch to function.
                 }
