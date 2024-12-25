@@ -6,6 +6,7 @@ using Archipelago.MultiClient.Net.Enums;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -106,7 +107,6 @@ namespace LunacidAP
                 CheckForVictory(sceneName);
                 CheckForDeath(sceneName);
                 AddSceneIfNotIncluded(sceneName);
-
             }
             if (sceneName == "CHAR_CREATE")
             {
@@ -115,23 +115,48 @@ namespace LunacidAP
             CurrentSceneName = "";
             HubLevel = null;
         }
-
         private void AddSceneIfNotIncluded(string sceneName)
         {
             ConnectionData.EnteredScenes ??= new List<string>();
-            if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var displayName))
+            if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var newScene))
             {
-                Log.LogWarning($"Could not find appropriate scene for {sceneName}");
+                Log.LogWarning($"Could not find appropriate scene for {newScene}");
                 return;
             }
-            if (ConnectionData.EnteredScenes.Contains(displayName))
-            {
-                return;
-            }
-            ConnectionData.EnteredScenes.Add(displayName);
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "CurrentMap"] = displayName;
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "EnteredScenes"] = ConnectionData.EnteredScenes.ToArray();
 
+            var oldScene = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"];
+
+            if (oldScene == newScene)
+            {
+                return;
+            }
+
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
+
+            var sceneLinks = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"]
+                .To<Dictionary<string, List<string>>>();
+
+            AddToSceneLink(sceneLinks, oldScene, newScene);
+            AddToSceneLink(sceneLinks, newScene, oldScene);
+
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"] = JObject.FromObject(sceneLinks);
+
+            if (!ConnectionData.EnteredScenes.Contains(newScene))
+            {
+                ConnectionData.EnteredScenes.Add(newScene);
+            }
+        }
+
+        private void AddToSceneLink(Dictionary<string, List<string>> sceneLinks, string sceneA, string sceneB)
+        {
+            if (!sceneLinks.ContainsKey(sceneA))
+            {
+                sceneLinks.Add(sceneA, new List<string> { sceneB });
+            }
+            else if (!sceneLinks[sceneA].Contains(sceneB))
+            {
+                sceneLinks[sceneA].Add(sceneB);
+            }
         }
 
         private void CheckForVictory(string sceneName)
