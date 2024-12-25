@@ -15,6 +15,7 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
 using Archipelago.Gifting.Net.Gifts.Versions.Current;
 using static LunacidAP.Data.LunacidGifts;
+using Newtonsoft.Json.Linq;
 
 namespace LunacidAP
 {
@@ -196,6 +197,7 @@ namespace LunacidAP
             }
             SetUpGifting();
             MuseHandler.InitializeChosenSongs(seed);
+            InitDataStorage();
             cheatedCount = 0;
             IsConnecting = false;
             _log.LogInfo("Successfully connected to server!");
@@ -409,6 +411,12 @@ namespace LunacidAP
             {
                 _log.LogWarning("Tried to die somewhere where the player does not exist.");
             }
+        }
+        private void InitDataStorage()
+        {
+            _log.LogInfo("Init DataStorage");
+            Session.DataStorage[Scope.Slot, "currentScene"].Initialize("Hollow Basin");
+            Session.DataStorage[Scope.Slot, "sceneLinks"].Initialize(JObject.FromObject(new Dictionary<string, List<string>>()));
         }
 
         private void BuildLocationTable()
