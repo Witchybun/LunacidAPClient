@@ -2,8 +2,8 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
-using Archipelago.Gifting.Net.Gifts;
-using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using Archipelago.Gifting.Net.Versioning.Gifts;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using Archipelago.Gifting.Net.Traits;
 using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 using Archipelago.MultiClient.Net.Enums;
@@ -35,7 +35,7 @@ namespace LunacidAP
             {
                 yield return new WaitForSeconds(10f);
             }
-            var giftsTask = Task.Run(ArchipelagoClient.AP.Gifting.GetAllGiftsAndEmptyGiftboxAsync);
+            var giftsTask = Task.Run(ArchipelagoClient.AP.Gifting.GetAllGiftsAndEmptyGiftBoxAsync);
             yield return new WaitUntil(() => giftsTask.IsCompleted);
             if (giftsTask.IsFaulted)
             {

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using static LunacidAP.Data.LunacidLocations;
 using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
-using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using static LunacidAP.Data.LunacidGifts;
 
 namespace LunacidAP
@@ -224,7 +224,7 @@ namespace LunacidAP
             giftHelper = new GiftHelper(_log);
             giftHelper.InitializeTraits();
             Gifting.OpenGiftBox();
-            Gifting.SubscribeToNewGifts(Gifting_WhenGiftWasReceived);
+            Gifting.OnNewGift += Gifting_WhenGiftWasReceived;
             Gifting.CheckGiftBox();
         }
 
@@ -233,7 +233,7 @@ namespace LunacidAP
             StartCoroutine(Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, currentSave));
         }
 
-        public void Gifting_WhenGiftWasReceived(Dictionary<string, Gift> incomingGifts)
+        public void Gifting_WhenGiftWasReceived(Gift incomingGift)
         {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             Popup = Control.PAPPY;
@@ -254,7 +254,7 @@ namespace LunacidAP
                 _log.LogError(sendGiftTask.Exception.GetBaseException().Message);
                 yield break;
             }
-            var wasSent = sendGiftTask.Result;
+            var wasSent = sendGiftTask.Result.Success;
             if (wasSent)
             {
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();

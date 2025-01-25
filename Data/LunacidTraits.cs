@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Archipelago.Gifting.Net.Traits;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 
 namespace LunacidAP.Data
 {
