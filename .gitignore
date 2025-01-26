@@ -95,3 +95,15 @@ bin/Debug/netstandard2.0/Archipelago.Gifting.Net.dll
 bin/Release/netstandard2.0/Archipelago.Gifting.Net.dll
 bin/Release/netstandard2.0/Archipelago.Gifting.Net.dll
 CustomMusic.zip
+bin/Debug/netstandard2.0/Microsoft.CSharp.dll
+bin/Debug/netstandard2.0/System.Dynamic.Runtime.dll
+bin/Debug/netstandard2.0/System.Linq.Expressions.dll
+bin/Debug/netstandard2.0/System.ObjectModel.dll
+bin/Debug/netstandard2.0/System.Runtime.Numerics.dll
+bin/Debug/netstandard2.0/System.Runtime.Serialization.Formatters.dll
+bin/Debug/netstandard2.0/System.Runtime.Serialization.Primitives.dll
+bin/Debug/netstandard2.0/System.Text.RegularExpressions.dll
+bin/Debug/netstandard2.0/System.Threading.Tasks.Extensions.dll
+bin/Debug/netstandard2.0/System.Xml.ReaderWriter.dll
+bin/Debug/netstandard2.0/System.Xml.XDocument.dll
+bin/Debug/netstandard2.0/System.Xml.XmlDocument.dll
