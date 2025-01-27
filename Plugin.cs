@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -74,9 +75,11 @@ namespace LunacidAP
                 StoreCustomAudio();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
-            catch
+            catch (Exception ex)
             {
-                Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} failed to load session!");
+                Log.LogError($"Plugin {PluginInfo.PLUGIN_GUID} failed to load session!");
+                Log.LogError(ex);
+
             }
 
         }
@@ -149,6 +152,10 @@ namespace LunacidAP
 
         private void AddToSceneLink(Dictionary<string, List<string>> sceneLinks, string sceneA, string sceneB)
         {
+            if (sceneLinks is null)
+            {
+                sceneLinks = new();
+            }
             if (!sceneLinks.ContainsKey(sceneA))
             {
                 sceneLinks.Add(sceneA, new List<string> { sceneB });
@@ -222,6 +229,10 @@ namespace LunacidAP
         private IEnumerator GetCustomAudio()
         {
             var dir = Application.dataPath.Replace("LUNACID_Data", "") + "CustomMusic/";
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
             var songs = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories).ToList();
             foreach (var song in songs)
             {

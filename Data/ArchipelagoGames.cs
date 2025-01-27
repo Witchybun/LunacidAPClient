@@ -67,6 +67,7 @@ namespace LunacidAP.Data
             {"Kingdom Hearts", "a young boy and his two animal companions"},
             {"Mega Man 2", "a robotic boy with myriad of powers"},
             {"Yacht Dice", "a group of dice"},
+            {"TUNIC", "a tiny fox"},
             // Unsupported
             {"Lunacid", "an outcast"},
             {"Wario Land 4", "a plump, greedy man"},
@@ -110,7 +111,7 @@ namespace LunacidAP.Data
             {"Hammerwatch", "a group of adventurers"},
             {"Cave Story", "a robotic entity"},
             {"Anodyne", "a young one"},
-            {"Flipwitch Forbidden Sex Hex", "a genderfluid witch"}
+            {"Flipwitch Forbidden Sex Hex", "a genderfluid witch"},
         };
         public static readonly Dictionary<string, string> GameToItemBlurb = new(){
             // Supported
@@ -173,6 +174,7 @@ namespace LunacidAP.Data
             {"Kingdom Hearts", "the isles of Destiny."},
             {"Mega Man 2", "a far flung future within the lab of a bright mind."},
             {"Yacht Dice", "the tumbing cup within your very hands."},
+            {"TUNIC", "a land filled with lost legends."},
             // Unsupported
             {"Lunacid", "a world, similar to this one, yet different."},
             {"Wario Land 4", "deep within an ancient pyramid."},
