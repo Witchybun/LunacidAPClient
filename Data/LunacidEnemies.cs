@@ -99,7 +99,7 @@ namespace LunacidAP.Data
             {"SHRIMP_PICKUP", "Pink Shrimp"},
             {"FAIRY_MOSS_PICKUP", "Fairy Moss"},
             {"THROWING_KNIFE_PICKUP", "Throwing Knife"},
-            {"ANGEL_PICKUP", "Angel Feather"},
+            {"ANGEL_PICKUP", "Angel's Feather"},
             {"CANDLE_PICKUP", "Spectral Candle"},
             {"HEALTH_VIAL_PICKUP", "Health Vial"},
             {"MANA_VIAL_PICKUP", "Mana Vial"},
