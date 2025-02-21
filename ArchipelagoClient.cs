@@ -331,6 +331,8 @@ namespace LunacidAP
             var header = GetHeaderFromItem(item);
             var footer = GetFooterFromItem(item);
             var identifier = header + "." + footer;
+            _log.LogInfo(identifier);
+            if (item.LocationId < 0) cheatedCount++;
             if (ConnectionData.ReceivedItems.ContainsKey(identifier)) return;
             if (item.LocationId >= 0)
             {
@@ -341,7 +343,6 @@ namespace LunacidAP
             else if (item.LocationId < 0)
             {
                 _log.LogInfo($"Cheated Count {cheatedCount} before increment vs {ConnectionData.CheatedCount}");
-                cheatedCount++;
                 if (cheatedCount > ConnectionData.CheatedCount)
                 {
                     ConnectionData.CheatedCount = cheatedCount;
