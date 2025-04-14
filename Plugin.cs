@@ -38,6 +38,7 @@ namespace LunacidAP
         public QuenchHandler QuenchHandler { get; private set; }
         public AlkiHandler AlkiHandler { get; private set; }
         public NewGameUI UI { get; private set; }
+        public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
         private string CurrentSceneName;
         private GameObject HubLevel;
@@ -71,6 +72,7 @@ namespace LunacidAP
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);
                 UI = new NewGameUI(Log);
+                LivingGateHandler = new LivingGateHandler(Log);
                 MuseHandler = new MuseHandler(Log);
                 StoreCustomAudio();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
