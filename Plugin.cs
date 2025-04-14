@@ -120,7 +120,6 @@ namespace LunacidAP
         }
         private void AddSceneIfNotIncluded(string sceneName)
         {
-            ConnectionData.EnteredScenes ??= new List<string>();
             if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var newScene))
             {
                 Log.LogWarning($"Could not find appropriate scene for {newScene}");
@@ -136,33 +135,9 @@ namespace LunacidAP
 
             ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
 
-            var sceneLinks = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"]
-                .To<Dictionary<string, List<string>>>();
-
-            AddToSceneLink(sceneLinks, oldScene, newScene);
-            AddToSceneLink(sceneLinks, newScene, oldScene);
-
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"] = JObject.FromObject(sceneLinks);
-
             if (!ConnectionData.EnteredScenes.Contains(newScene))
             {
                 ConnectionData.EnteredScenes.Add(newScene);
-            }
-        }
-
-        private void AddToSceneLink(Dictionary<string, List<string>> sceneLinks, string sceneA, string sceneB)
-        {
-            if (sceneLinks is null)
-            {
-                sceneLinks = new();
-            }
-            if (!sceneLinks.ContainsKey(sceneA))
-            {
-                sceneLinks.Add(sceneA, new List<string> { sceneB });
-            }
-            else if (!sceneLinks[sceneA].Contains(sceneB))
-            {
-                sceneLinks[sceneA].Add(sceneB);
             }
         }
 

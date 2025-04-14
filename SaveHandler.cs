@@ -45,6 +45,7 @@ namespace LunacidAP
                 CommunionHints = ConnectionData.CommunionHints,
                 Elements = ConnectionData.Elements,
                 Entrances = ConnectionData.Entrances,
+                TraversedEntrances = ConnectionData.TraversedEntrances,
                 ScoutedLocations = ConnectionData.ScoutedLocations,
                 EnteredScenes = ConnectionData.EnteredScenes,
                 ReceivedGifts = ConnectionData.ReceivedGifts,
@@ -82,7 +83,7 @@ namespace LunacidAP
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
+                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
                     loadedSave.ItemColors, loadedSave.RandomEnemyData);
                     return;
                 }
@@ -114,6 +115,7 @@ namespace LunacidAP
         public Dictionary<string, string> CommunionHints;
         public Dictionary<string, string> Elements;
         public Dictionary<string, string> Entrances;
+        public Dictionary<string, string> TraversedEntrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
         public List<string> EnteredScenes;
         public List<ReceivedGift> ReceivedGifts;
