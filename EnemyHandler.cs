@@ -83,7 +83,12 @@ namespace LunacidAP
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
                 return false;
             }
-            var itemName = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
+            var item = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
+            if (item.SlotName != ConnectionData.SlotName)
+            {
+                var color = Colors.DetermineItemColor(item.Classification);
+                GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+            }
             return false;
         }
 
