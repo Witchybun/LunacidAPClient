@@ -519,7 +519,7 @@ namespace LunacidAP
             Stack--;
         }
 
-        public string SendLocationGivenLocationDataSendingGift(LocationData locationData)
+        public ArchipelagoItem SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
             
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
@@ -529,12 +529,12 @@ namespace LunacidAP
                 if (item.SlotName == ConnectionData.SlotName && isRepeatable)
                 {
                     ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
-                    return item.Name;
+                    return item;
                 }
-                return "ALREADY_ACQUIRED";
+                return null;
             }
             LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
-            return item.Name;
+            return item;
 
         }
 
