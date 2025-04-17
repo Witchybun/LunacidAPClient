@@ -44,8 +44,8 @@ namespace LunacidAP
                     return false;
                 }
                 var item = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
-                __instance.has_made = item + " Created!";
-                if (item == "ALREADY_ACQUIRED")
+                __instance.has_made = item.Name + " Created!";
+                if (item is null)
                 {
                     __instance.has_made = item + " Already Made!";
                     __instance.Reset();

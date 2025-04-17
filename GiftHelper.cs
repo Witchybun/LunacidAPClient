@@ -129,7 +129,7 @@ namespace LunacidAP
             }
         }
 
-        public static void GiftItemToOtherPlayer(ArchipelagoItem item)
+        public static bool GiftItemToOtherPlayer(ArchipelagoItem item)
         {
             var game = item.Game;
             var amount = 1;
@@ -139,7 +139,7 @@ namespace LunacidAP
             {
                 if (!StardewValleyGifts.IsStardewItemGiftable(itemName))
                 {
-                    return; // Too many fail cases because they have not allowed a player to give them an arbitrary gift.
+                    return false; // Too many fail cases because they have not allowed a player to give them an arbitrary gift.
                 }
                 // If it is, we might need to package the name and amounts so Stardew Valley knows what item it actually is, in-game.
                 var stardewItem = StardewValleyGifts.HandleStardewValleyItemCountAndName(itemName, out var stardewAmount);
@@ -148,7 +148,7 @@ namespace LunacidAP
             }
             else if (itemClassification.HasFlag(ItemFlags.Advancement))
             {
-                return; //Don't resend advancement items to other games; might cause problems.
+                return false; //Don't resend advancement items to other games; might cause problems.
             }
             var slotName = item.SlotName;
             var madeUpItem = new GiftItem(itemName, amount, 0);
@@ -159,6 +159,7 @@ namespace LunacidAP
             }
             var packagedGift = new GiftVector(madeUpItem, giftTraits);
             ArchipelagoClient.AP.PrepareGift(packagedGift, slotName);
+            return true;
         }
     }
 }

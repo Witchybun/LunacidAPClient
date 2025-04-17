@@ -531,6 +531,10 @@ namespace LunacidAP
                     ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
                     return item;
                 }
+                else if (GiftHelper.GiftItemToOtherPlayer(item))
+                {
+                    return item;
+                }
                 return null;
             }
             LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
