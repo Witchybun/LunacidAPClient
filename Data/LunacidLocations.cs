@@ -54,6 +54,7 @@ namespace LunacidAP.Data
             new LocationData( 419, "Cetea: Tornado Drop", "TORNADO_PICKUP" ),
             new LocationData( 420, "Abyssal Demon: Ocean Elixir Drop", "OCEAN_ELIXIR_PICKUP" ),
             new LocationData( 421, "Lupine Skeleton: Dark Skull Drop", "DARK_SKULL_PICKUP" ),
+            new LocationData( 422, "Sanguis Umbra: Black Book Drop", "BOOK_PICKUP" ),
         };
 
         public static readonly List<LocationData> OtherDropLocations = new(){
@@ -184,7 +185,6 @@ namespace LunacidAP.Data
             new LocationData( 575, "Mummy Knight: Onyx Drop" ),
             new LocationData( 576, "Mummy Knight: Large Silver Drop" ),
             new LocationData( 577, "Mummy Knight: Small Silver Drop" ),
-            new LocationData( 578, "Sanguis Umbra: Black Book Drop" ),
             new LocationData( 579, "Lupine Skeleton: Medium Silver Drop" ),
             new LocationData( 580, "Lupine Skeleton: Onyx Drop" ),
             new LocationData( 581, "Lupine Skeleton: Bones Drop" ),
