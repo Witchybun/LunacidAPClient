@@ -38,6 +38,7 @@ namespace LunacidAP
         public QuenchHandler QuenchHandler { get; private set; }
         public AlkiHandler AlkiHandler { get; private set; }
         public NewGameUI UI { get; private set; }
+        public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
         private string CurrentSceneName;
         private GameObject HubLevel;
@@ -71,6 +72,7 @@ namespace LunacidAP
                 CommunionHint.Awake(Log);
                 ReadDialogueHelper.Awake(Log);
                 UI = new NewGameUI(Log);
+                LivingGateHandler = new LivingGateHandler(Log);
                 MuseHandler = new MuseHandler(Log);
                 StoreCustomAudio();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
@@ -120,7 +122,6 @@ namespace LunacidAP
         }
         private void AddSceneIfNotIncluded(string sceneName)
         {
-            ConnectionData.EnteredScenes ??= new List<string>();
             if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var newScene))
             {
                 Log.LogWarning($"Could not find appropriate scene for {newScene}");
@@ -136,33 +137,9 @@ namespace LunacidAP
 
             ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
 
-            var sceneLinks = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"]
-                .To<Dictionary<string, List<string>>>();
-
-            AddToSceneLink(sceneLinks, oldScene, newScene);
-            AddToSceneLink(sceneLinks, newScene, oldScene);
-
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "sceneLinks"] = JObject.FromObject(sceneLinks);
-
             if (!ConnectionData.EnteredScenes.Contains(newScene))
             {
                 ConnectionData.EnteredScenes.Add(newScene);
-            }
-        }
-
-        private void AddToSceneLink(Dictionary<string, List<string>> sceneLinks, string sceneA, string sceneB)
-        {
-            if (sceneLinks is null)
-            {
-                sceneLinks = new();
-            }
-            if (!sceneLinks.ContainsKey(sceneA))
-            {
-                sceneLinks.Add(sceneA, new List<string> { sceneB });
-            }
-            else if (!sceneLinks[sceneA].Contains(sceneB))
-            {
-                sceneLinks[sceneA].Add(sceneB);
             }
         }
 

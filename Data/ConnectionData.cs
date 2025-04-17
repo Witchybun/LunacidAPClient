@@ -20,6 +20,7 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> CommunionHints {get; set;} = new Dictionary<string, string>(){};
         public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
+        public static Dictionary<string, string> TraversedEntrances { get; set; } = new() { };
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
         public static List<string> EnteredScenes = new(){};
         public static List<ReceivedGift> ReceivedGifts = new(){};
@@ -29,7 +30,7 @@ namespace LunacidAP.Data
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
-        SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
+        Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
         Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
             HostName = hostName;
@@ -62,6 +63,10 @@ namespace LunacidAP.Data
             if (entrances is not null)
             {
                 Entrances = entrances;
+            }
+            if (traversedEntrances is not null)
+            {
+                TraversedEntrances = traversedEntrances;
             }
             if (scouts is not null)
             {
@@ -100,6 +105,7 @@ namespace LunacidAP.Data
             CommunionHints = new Dictionary<string, string>(){};
             Elements = new(){};
             Entrances = new(){};
+            TraversedEntrances = new(){};
             ScoutedLocations = new(){};
             EnteredScenes = new(){};
             ReceivedGifts = new(){};

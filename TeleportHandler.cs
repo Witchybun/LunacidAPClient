@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -25,10 +26,11 @@ namespace LunacidAP
 
             var finalWarp = FixWarps(eredWarp);
 
-
             __instance.LVL = finalWarp.Scene;
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
+
+            UpdateTraversedEntrancesAP(currentWarp, finalWarp);
 
             return true;
         }
@@ -113,6 +115,30 @@ namespace LunacidAP
             var entranceArray = entrance.Split(new string[] { " to " }, StringSplitOptions.None);
             var reversedEntrance = entranceArray[1] + " to " + entranceArray[0];
             return reversedEntrance;
+        }
+
+        private static void UpdateTraversedEntrancesAP(WarpDestinations.WarpData from, WarpDestinations.WarpData to)
+        {
+            var fromString = DetermineEntrance(from);
+            var toString = DetermineEntrance(to);
+
+            if (fromString == "NULL" || toString == "NULL")
+            {
+                return;
+            }
+
+            var toStringReverse = ReverseEntrance(toString);
+
+            if (ConnectionData.TraversedEntrances.ContainsKey(fromString)
+                && ConnectionData.TraversedEntrances.ContainsKey(toStringReverse))
+            {
+                return;
+            }
+
+            ConnectionData.TraversedEntrances.Add(fromString, toStringReverse);
+            ConnectionData.TraversedEntrances.Add(toStringReverse, fromString);
+
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = ConnectionData.TraversedEntrances.ToArray();
         }
     }
 }
