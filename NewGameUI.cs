@@ -298,7 +298,7 @@ namespace LunacidAP
                     }
                 case "Gameover":
                     {
-                        var load = GameObject.FindObjectOfType<Menus>().transform.GetChild(2).GetChild(0);
+                        var load = GameObject.FindObjectOfType<Menus>().transform.GetChild(3).GetChild(0);
                         if (!ArchipelagoClient.AP.Authenticated)
                         {
                             load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "connect";
