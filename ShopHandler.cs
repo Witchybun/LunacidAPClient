@@ -242,8 +242,18 @@ namespace LunacidAP
                         if (item.Classification.HasFlag(ItemFlags.Trap))
                         {
                             var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
-                            var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
-                            item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
+                            var scouts = ConnectionData.ScoutedLocations.Values.ToList();
+                            var scoutedLocationsAvoidingTrapsObject = scouts.Where(x => !x.Classification.HasFlag(ItemFlags.Trap));
+                            try
+                            {
+                                var scoutedLocationsAvoidingTraps = scoutedLocationsAvoidingTrapsObject.ToList();
+                                item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
+                            }
+                            catch
+                            {
+                                _log.LogError("Something went wrong with trying to find a suitable trap replacement.  Telling the truth.");
+                            }
+                            
                         }
                         itemName = item.Name;
                     }
@@ -349,8 +359,16 @@ namespace LunacidAP
                 if (locationInfo.Classification.HasFlag(ItemFlags.Trap))
                 {
                     var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
-                    var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
-                    locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
+                    try
+                    {
+                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                        locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
+                    }
+                    catch
+                    {
+                        _log.LogError("Something went wrong with trying to find a suitable trap replacement.  Telling the truth.");
+                    }
+                    
                 }
                 var slotName = locationInfo.SlotName;
                 var itemName = locationInfo.Name;
