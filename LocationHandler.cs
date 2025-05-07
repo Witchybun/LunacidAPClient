@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static LunacidAP.Data.LunacidLocations;
 
 namespace LunacidAP
@@ -97,10 +98,8 @@ namespace LunacidAP
         private static LocationData DetermineGeneralPickupLocation(Item_Pickup_scr pickupObject)
         {
             var objectName = pickupObject.gameObject.name;
-            var sceneName = pickupObject.gameObject.scene.name;
+            var sceneName = SceneManager.GetActiveScene().name;  // Odd error with Umbra drop made me do this and I hate it.
             var objectLocation = pickupObject.transform.position;
-            _log.LogInfo($"{objectName}, {sceneName}, {objectLocation}");
-            _log.LogInfo($"Is this Christmas Present?  {sceneName == "HUB_01" && objectName == "PICKUP"}");
             if (sceneName == "HUB_01" && objectName == "Hallow_Candy")
             {
                 return new LocationData( 701, "Demi's Spooky Treats", "Hallow_Candy", new Vector3(-5.913f, 0f, -8.41f));
