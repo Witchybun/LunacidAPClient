@@ -78,7 +78,7 @@ namespace LunacidAP
             _log.LogInfo($"Connecting: {slotName}, {hostName}, {port}");
             IsConnecting = true;
             Authenticated = false;
-            var minimumVersion = new Version(0, 5, 0);
+            var minimumVersion = new Version(0, 6, 1);
             Session = ArchipelagoSessionFactory.CreateSession(hostName, port);
             var connectTask = Task.Run(Session.ConnectAsync);
             yield return new WaitUntil(() => connectTask.IsCompleted);
@@ -128,7 +128,7 @@ namespace LunacidAP
             }
             else if (int.Parse(gameVersion[2]) > int.Parse(archipelagoVersion[2]))
             {
-                var msg = $"The server's game was made for {SlotData.ClientVersion} but the game is newer.  Should be fine though.";
+                var msg = $"The server's game was made for {SlotData.ClientVersion}, but this game is {PluginInfo.PLUGIN_VERSION}.";
                 _log.LogWarning(msg);
                 //SendVisibleError(msg, "WARNING");
             }
