@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
@@ -5,6 +7,7 @@ using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace LunacidAP
@@ -12,8 +15,10 @@ namespace LunacidAP
     public class WeaponHandler
     {
         private static ManualLogSource _log;
-        private static string CurrentCastChild { get; set; } = "";
-        private static int CurrentElement { get; set; } = 0;
+        private static List<string> freeSpells = new()
+        {
+            "WARP_CAST", "BARRIER_CAST", "FLIGHT_CAST"
+        };
 
         public WeaponHandler(ManualLogSource log)
         {
@@ -153,6 +158,16 @@ namespace LunacidAP
             }
         }
 
+        [HarmonyPatch(typeof(Magic_scr), "Charging")]
+        [HarmonyPrefix]
+        private static void Charging_MakeImportantSpellsFree(Magic_scr __instance, float amount)
+        {
+            if (freeSpells.Contains(__instance.MAG_CHILD))
+            {
+                __instance.MAG_COST = 0;
+            }
+        }
+
         private static bool IsElementShuffled(string weaponName, out int element)
         {
             if (ConnectionData.Elements is null)
@@ -173,6 +188,26 @@ namespace LunacidAP
             _log.LogError($"The weapon {weaponName} was not in the element dictionary");
             element = -1;
             return false;
+        }
+
+        [HarmonyPatch(typeof(Weapon_scr), "Attack")]
+        [HarmonyPostfix]
+        private static void Attack_DrainStoredEXPInstead(Weapon_scr __instance)
+        {
+            if (!ArchipelagoClient.AP.SlotData.Levelsanity)
+            {
+                return;
+            }
+            if (__instance.special == 5)
+            {
+                if (__instance.Player.GetComponent<Player_Control_scr>().CON.GetComponent<SimpleMoon>().MOON_MULT >= 10f)
+                {
+                    decimal currentExp = __instance.Player.GetComponent<Player_Control_scr>().CON.CURRENT_PL_DATA.XP;
+                    var nearestHundred = Math.Ceiling(currentExp / 100) * 100;
+                    __instance.Player.GetComponent<Player_Control_scr>().CON.CURRENT_PL_DATA.XP = Convert.ToInt32(nearestHundred);
+                    ConnectionData.StoredExperience = Mathf.Max(0, ConnectionData.StoredExperience - 1);
+                }
+            }
         }
     }
 }

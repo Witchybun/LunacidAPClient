@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -143,6 +144,41 @@ namespace LunacidAP
             var reelWait = __instance.GetType().GetField("reel_wait", Flags);
             reelWait.SetValue(__instance, __instance.wait);
             return false;
+        }
+
+        [HarmonyPatch(typeof(Player_Poison), "Update")]
+        [HarmonyPostfix]
+        public static void Update_RemoveStoredXPInstead(Player_Poison __instance, ref float ___XP_DURP, ref CONTROL ___CON, ref int ___XP_DRAIN_slot)
+        {
+            if (!ArchipelagoClient.AP.SlotData.Levelsanity)
+            {
+                return;
+            }
+            if (___CON.CURRENT_PL_DATA.PLAYER_LVL > 99)
+            {
+                return; // drains should work on a level 100.
+            }
+            // Fix the normal experience drain.  Since you always get levels in packs of 100 we can just round back to the nearest 100.
+            decimal currentExp = ___CON.CURRENT_PL_DATA.XP;
+            var nearestHundred = Math.Ceiling(currentExp / 100) * 100;
+            ___CON.CURRENT_PL_DATA.XP = Convert.ToInt32(nearestHundred);
+            if (__instance.XP_DRAIN_DUR > 0f)
+            {
+                if (ConnectionData.StoredExperience > 0)
+                {
+                    ___XP_DURP += Time.deltaTime * 1.2f;
+                    if (___XP_DURP > 1f)
+                    {
+                        ConnectionData.StoredExperience -= Mathf.RoundToInt(___XP_DURP);
+                        ___XP_DURP = 0f;
+                    }
+                }
+                else
+                {
+                    ConnectionData.StoredExperience = 0;
+                }
+            }
+
         }
 
         [HarmonyPatch(typeof(Player_Poison), "Harm")]

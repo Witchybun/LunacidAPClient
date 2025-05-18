@@ -135,7 +135,7 @@ namespace LunacidAP
             ConnectionData.Seed = seed;
 
             RandomStatic = new System.Random(seed);
-            if (!reconnect && ConnectionData.ScoutedLocations.Count() == 0)
+            if (!reconnect)
             {
                 BuildLocationTable();
 
@@ -154,7 +154,8 @@ namespace LunacidAP
                 foreach (var item in scoutedInfo.Values)
                 {
                     int locationID = (int)item.LocationId;
-                    LocationTable[locationID] = new ArchipelagoItem(item, false);
+                    var received = IsLocationChecked(item.LocationId);
+                    LocationTable[locationID] = new ArchipelagoItem(item, received);
                 }
                 ConnectionData.ScoutedLocations = LocationTable;
             }
@@ -216,9 +217,9 @@ namespace LunacidAP
             {
                 Popup.POP($"<color=FFFF00>{msg}</color>", 1f, 1);
             }
-            
+
         }
-        
+
         public void SetUpGifting()
         {
             Gifting = new GiftingService(Session);
@@ -243,7 +244,7 @@ namespace LunacidAP
 
         public void PrepareGift(GiftVector giftVector, string slotName)
         {
-            StartCoroutine(SendGift(giftVector, slotName));   
+            StartCoroutine(SendGift(giftVector, slotName));
         }
 
         private IEnumerator SendGift(GiftVector giftVector, string slotName)
@@ -271,7 +272,7 @@ namespace LunacidAP
             {
                 _log.LogWarning($"Player {slotName} isn't accepting gifts.");
             }
-            
+
         }
 
         private void Session_SocketClosed(string _)
@@ -371,7 +372,7 @@ namespace LunacidAP
                 _deathLinkService = Session.CreateDeathLinkService();
                 _deathLinkService.OnDeathLinkReceived += DeathLinkReceieved;
             }
-             _deathLinkService.EnableDeathLink();
+            _deathLinkService.EnableDeathLink();
         }
 
         private void DeathLinkReceieved(DeathLink deathLink)
@@ -491,6 +492,112 @@ namespace LunacidAP
                     locations.Add((int)location.APLocationID);
                 }
             }
+            if (SlotData.Levelsanity)
+            {
+                var playerLevel = 0;
+                if (SlotData.StartingClass == 9)
+                {
+                    playerLevel = SlotData.CustomStats["Level"];
+                }
+                else
+                {
+                    switch (SlotData.StartingClass)
+                    {
+                        case 0:
+                            {
+                                playerLevel = 5;
+                                break;
+                            }
+                        case 1:
+                            {
+                                playerLevel = 10;
+                                break;
+                            }
+                        case 2:
+                            {
+                                playerLevel = 7;
+                                break;
+                            }
+                        case 3:
+                            {
+                                playerLevel = 9;
+                                break;
+                            }
+                        case 4:
+                            {
+                                playerLevel = 8;
+                                break;
+                            }
+                        case 5:
+                            {
+                                playerLevel = 6;
+                                break;
+                            }
+                        case 6:
+                            {
+                                playerLevel = 8;
+                                break;
+                            }
+                        case 7:
+                            {
+                                playerLevel = 9;
+                                break;
+                            }
+                        case 8:
+                            {
+                                playerLevel = 1;
+                                break;
+                            }
+                    }
+                }
+                while (playerLevel < 101)
+                {
+                    locations.Add(801 + playerLevel);
+                    playerLevel += 1;
+                }
+            }
+            if (SlotData.Bookworm)
+            {
+                foreach (var locationkvp in LunacidLocations.LoreLocations)
+                {
+                    foreach (var location in locationkvp.Value)
+                    {
+                        if (location.IgnoreLocationHandler == true)
+                        {
+                            continue;
+                        }
+                        locations.Add((int)location.APLocationID);
+                    }
+                }
+            }
+            if (SlotData.GrassSanity)
+            {
+                foreach (var locationkvp in LunacidLocations.GrassLocations)
+                {
+                    foreach (var location in locationkvp.Value)
+                    {
+                        if (location.IgnoreLocationHandler == true)
+                        {
+                            continue;
+                        }
+                        locations.Add((int)location.APLocationID);
+                    }
+                }
+            }
+            if (SlotData.Breakables)
+            {
+                foreach (var locationkvp in LunacidLocations.BreakLocations)
+                {
+                    foreach (var location in locationkvp.Value)
+                    {
+                        if (location.IgnoreLocationHandler == true)
+                        {
+                            continue;
+                        }
+                        locations.Add((int)location.APLocationID);
+                    }
+                }
+            }
 
             foreach (var id in locations)
             {
@@ -514,7 +621,7 @@ namespace LunacidAP
 
         public ArchipelagoItem SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
-            
+
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
             if (ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))

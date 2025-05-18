@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
@@ -46,7 +47,7 @@ namespace LunacidAP
                 AddFeatherToJailor(__instance);
             }
             var dropBoosts = ConnectionData.ReceivedItems.Where(x => x.Value.ItemName == "Text on Great Well Resourcefulness").Count();
-            float nothingWeightScalar = (float)Math.Max(0.75, 0.25*dropBoosts);
+            float nothingWeightScalar = (float)Math.Max(0.75, 0.25 * dropBoosts);
             var lOOTS = __instance.LOOTS;
             //NameEveryDrop(__instance.name, lOOTS);
             var nothingWeight = 0f;
@@ -63,7 +64,7 @@ namespace LunacidAP
             }
             var totalWeight = nothingWeight + normalizedNonemptyWeight;
             nothingWeight *= nothingWeightScalar;
-            var otherDropScalar = (float)((1-nothingWeightScalar)*totalWeight/(totalWeight - nothingWeight) + nothingWeightScalar);
+            var otherDropScalar = (float)((1 - nothingWeightScalar) * totalWeight / (totalWeight - nothingWeight) + nothingWeightScalar);
             normalizedNonemptyWeight = (int)(float)((totalWeight - nothingWeightScalar * nothingWeight) / (lOOTS.Length - 1));
             _log.LogInfo($"{nothingWeightScalar} with nothing weight {nothingWeight} vs {otherDropScalar} with {lOOTS.Length - 1} {normalizedNonemptyWeight}s.");
             int num3 = DetermineDrop(nothingWeight, normalizedNonemptyWeight, totalWeight, otherDropScalar, lOOTS, areDropsNormalized);
@@ -74,7 +75,7 @@ namespace LunacidAP
             var location = ConstructLocation(__instance.name, __instance.LOOTS[num3].ITEM.name);
             if (location == "FAIL" || location == "SETTING_DIFFERENCE" || location == "SAFE")
             {
-                DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position);
+                DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position, null);
                 return false;
             }
             var locationData = GetDropLocationData(location);
@@ -83,12 +84,10 @@ namespace LunacidAP
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
                 return false;
             }
-            var item = ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(locationData);
-            if (item.SlotName != ConnectionData.SlotName && !ArchipelagoClient.AP.IsLocationChecked(locationData))
-            {
-                var color = Colors.DetermineItemColor(item.Classification);
-                GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
-            }
+            _log.LogInfo("Placing AP info to drop from drop table check");
+            var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true);
+            DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position, archipelagoPickup);
             return false;
         }
 
@@ -214,10 +213,20 @@ namespace LunacidAP
 
         }
 
-        private static void DropItemOnFloor(GameObject loot, Vector3 position)
+        private static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
         {
             GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
             obj.SetActive(value: false);
+            if (archipelagoPickup is not null)
+            {
+                obj.AddComponent<ArchipelagoPickup>();
+                obj.GetComponent<ArchipelagoPickup>().LocationData = archipelagoPickup.LocationData;
+                obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;
+                obj.GetComponent<ArchipelagoPickup>().Collected = archipelagoPickup.Collected;
+                obj.GetComponent<ArchipelagoPickup>().CanBeRepeated = archipelagoPickup.CanBeRepeated;
+                var pickupObject = obj.GetComponent<Item_Pickup_scr>();
+                SwapperHandler.ReplaceModelWithAppropriateItem(pickupObject, archipelagoPickup.LocationData);
+            }
             obj.AddComponent<Place_on_Ground>();
             obj.GetComponent<Place_on_Ground>().LOOTED = true;
             obj.SetActive(value: true);
@@ -332,7 +341,7 @@ namespace LunacidAP
             var rotation = child.rotation;
             var newEnemy = GameObject.Instantiate(chosenEnemy, position, rotation, parent: child.parent);
             newEnemy.transform.localScale = child.localScale;
-            newEnemy.name = newEnemy.name.Replace("(Clone)","");
+            newEnemy.name = newEnemy.name.Replace("(Clone)", "");
             newEnemy.name = LunacidEnemies.CleanupName.Keys.Contains(newEnemy.name) ? LunacidEnemies.CleanupName[newEnemy.name] : newEnemy.name;
             var ai = newEnemy.GetComponent<AI_simple>();
             if (ai is not null)
@@ -370,7 +379,7 @@ namespace LunacidAP
                 return;
             }
             var enemy = __instance.transform;
-            var enemySpell = enemy.name.Replace("(Clone)","");
+            var enemySpell = enemy.name.Replace("(Clone)", "");
             if (LunacidEnemies.EnemySpells.Contains(enemySpell))
             {
                 enemy = EnemyCombatant;
@@ -410,7 +419,7 @@ namespace LunacidAP
             var castOverrideField = __instance.GetType().GetField("OVERRIDE", BindingFlags.Instance | BindingFlags.NonPublic);
             if (castOverrideField is not null)
             {
-                castOverride = (GameObject) castOverrideField.GetValue(__instance);
+                castOverride = (GameObject)castOverrideField.GetValue(__instance);
             }
             var overrideName = "";
             if (castOverride.name != "" && __instance.item == "")

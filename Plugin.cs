@@ -6,6 +6,7 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx;
 using BepInEx.Logging;
+using I2.Loc;
 using LunacidAP.Data;
 using Newtonsoft.Json.Linq;
 using TMPro;
@@ -37,6 +38,7 @@ namespace LunacidAP
         public EnemyHandler EnemyHandler { get; private set; }
         public QuenchHandler QuenchHandler { get; private set; }
         public AlkiHandler AlkiHandler { get; private set; }
+        public GrassBreakHandler GrassBreakHandler { get; private set; }
         public NewGameUI UI { get; private set; }
         public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
@@ -50,6 +52,12 @@ namespace LunacidAP
                 Log = new ManualLogSource("LunacidAP");
                 LOG = Log;
                 BepInEx.Logging.Logger.Sources.Add(Log);
+                var versionArray = LocalizationManager.GetVersion().Substring(0, 6).Split('.');
+                if (int.Parse(versionArray[0]) > 2 || int.Parse(versionArray[1]) > 8)
+                {
+                    Log.LogError("Your game is too old for this randomizer!  Update your game.");
+                    return;
+                }
                 Archipelago = new ArchipelagoClient();
                 ArchipelagoClient.Setup(Log);
                 GeneralTweaks = new GeneralTweaks(Log);
@@ -67,6 +75,7 @@ namespace LunacidAP
                 EnemyHandler = new EnemyHandler(Log);
                 QuenchHandler = new QuenchHandler(Log);
                 AlkiHandler = new AlkiHandler(Log);
+                GrassBreakHandler = new GrassBreakHandler(Log);
                 Colors = new Colors(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
@@ -118,6 +127,7 @@ namespace LunacidAP
                 UI.ModifyCharCreateForArchipelago();
             }
             CurrentSceneName = "";
+            GrassBreakHandler.AddArchipelagoData(sceneName);
             HubLevel = null;
         }
         private void AddSceneIfNotIncluded(string sceneName)

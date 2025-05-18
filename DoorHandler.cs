@@ -42,19 +42,6 @@ namespace LunacidAP
                 _log.LogError($"Could not find relevant door!");
                 return false;
             }
-            if (ArchipelagoClient.AP.SlotData.EntranceRandomizer)
-            {
-                var reversedEntrance = TeleportHandler.ReverseEntrance(entrance);
-                if (!LunacidDoors.EntranceToDoorKey.ContainsKey(entrance))
-                {
-                    if (!ConnectionData.Entrances.TryGetValue(entrance, out var _))
-                    {
-                        _log.LogWarning($"Tried to handle {entrance} and failed.");
-                        return true;
-                    }
-                    entrance = TeleportHandler.ReverseEntrance(ConnectionData.Entrances[entrance]);
-                }
-            }
             if (!LunacidDoors.EntranceToDoorKey.TryGetValue(entrance, out var key))
             {
                 return true;

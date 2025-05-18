@@ -5,6 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace LunacidAP
 {
@@ -15,6 +16,47 @@ namespace LunacidAP
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(TeleportHandler));
+        }
+
+        [HarmonyPatch(typeof(Act_Button_scr), "ACT")]
+        [HarmonyPrefix]
+        private static void ACT_SaveHollowBasinInformation(Act_Button_scr __instance)
+        {
+            if (ArchipelagoClient.AP.SlotData.StartingArea == 0)
+            {
+                return;
+            }
+            var parent = __instance.transform.parent;
+            var name = parent.name;
+            var scene = parent.gameObject.scene.name;
+            if (name == "CRYSTAL_STATION" && scene == "PITT_A1")
+            {
+                if (FlagHandler.LoadFlag(2).Substring(15, 1) != "1")
+                {
+                    FlagHandler.ModifyFlag(2, 16, 1);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Warp_Load), "OnEnable")]
+        [HarmonyPrefix]
+        private static void OnEnable_FixHollowBasinButton(Warp_Load __instance)
+        {
+            string zONE_ = __instance.CON.CURRENT_PL_DATA.ZONE_2;
+            int startingArea = ArchipelagoClient.AP.SlotData.StartingArea;
+            if (__instance.gameObject.scene.name == "HUB_01" && zONE_ == "1000000000000000")
+            {
+                __instance.CON.CURRENT_PL_DATA.ZONE_2 = WarpDestinations.StartingAreaDataToStartingSubstring[startingArea];
+                zONE_ = WarpDestinations.StartingAreaDataToStartingSubstring[startingArea];
+                ItemHandler.GiveLunacidItem("Spirit Warp", ItemFlags.Advancement, "The Crystal", false);
+            }
+            __instance.MAP_IMG[0].color = new Color(0.5f, 0.5f, 0.5f, 1);
+            __instance.STATIC_IMG[0].color = new Color(0.5608f, 0.6f, 0.698f, 0.8f);
+
+            var num = int.Parse(zONE_.Substring(15, 1));  // Store Hollow Basin data here.
+            __instance.BUTTONS[0].interactable = num == 1;
+            __instance.MAP_IMG[0].color = Color.Lerp(Color.gray, Color.white, num);
+            __instance.STATIC_IMG[0].color = Color.Lerp(__instance.COL[1], __instance.COL[0], num);
         }
 
         [HarmonyPatch(typeof(GOTO_LEVEL), "OnEnable")]
@@ -30,7 +72,7 @@ namespace LunacidAP
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
-            UpdateTraversedEntrancesAP(currentWarp, finalWarp);
+            //UpdateTraversedEntrancesAP(currentWarp, finalWarp);
 
             return true;
         }
@@ -64,28 +106,24 @@ namespace LunacidAP
             }
             if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
+                if (WarpDestinations.OneWayActualDestinations.TryGetValue(newEntrance, out var oneWayEntrance))
+                {
+                    return WarpDestinations.EntranceToWarp[oneWayEntrance];
+                }
                 return WarpDestinations.EntranceToWarp[newEntrance];
-            }
-            else if (ConnectionData.Entrances.TryGetValue(ReverseEntrance(entrance), out var newEntranceReversed))
-            {
-                return WarpDestinations.EntranceToWarp[newEntranceReversed];
             }
             _log.LogError($"Could not find warp for {entrance}!");
             return warpData;
-        }
-
-        private static void WarpToStartingSpotAfterIntro()
-        {
-            /*var warpData = WarpDestinations.StartingArea[];
-            var startingWarp = new GOTO_LEVEL{
-                LVL = 
-            }*/
         }
 
         private static bool AreTwoWarpsIdentical(WarpDestinations.WarpData unknownWarp, WarpDestinations.WarpData warpReference)
         {
             if (unknownWarp.Scene == warpReference.Scene && Vector3.Distance(unknownWarp.Position, warpReference.Position) < 1f)
             {
+                if (warpReference.ParentScene != "" && SceneManager.GetActiveScene().name != warpReference.ParentScene)
+                {
+                    return false;
+                }
                 return true;
             }
             return false;
@@ -110,13 +148,6 @@ namespace LunacidAP
             }
         }
 
-        public static string ReverseEntrance(string entrance)
-        {
-            var entranceArray = entrance.Split(new string[] { " to " }, StringSplitOptions.None);
-            var reversedEntrance = entranceArray[1] + " to " + entranceArray[0];
-            return reversedEntrance;
-        }
-
         private static void UpdateTraversedEntrancesAP(WarpDestinations.WarpData from, WarpDestinations.WarpData to)
         {
             var fromString = DetermineEntrance(from);
@@ -127,16 +158,14 @@ namespace LunacidAP
                 return;
             }
 
-            var toStringReverse = ReverseEntrance(toString);
-
             if (ConnectionData.TraversedEntrances.ContainsKey(fromString)
-                && ConnectionData.TraversedEntrances.ContainsKey(toStringReverse))
+                && ConnectionData.TraversedEntrances.ContainsKey(toString))
             {
                 return;
             }
 
-            ConnectionData.TraversedEntrances.Add(fromString, toStringReverse);
-            ConnectionData.TraversedEntrances.Add(toStringReverse, fromString);
+            ConnectionData.TraversedEntrances.Add(fromString, toString);
+            ConnectionData.TraversedEntrances.Add(toString, fromString);
 
             ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = ConnectionData.TraversedEntrances.ToArray();
         }

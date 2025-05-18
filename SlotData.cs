@@ -15,6 +15,7 @@ namespace LunacidAP
         private const string VERSION = "client_version";
         private const string CLASS_KEY = "starting_class";
         private const string ER_KEY = "entrance_randomization";
+        private const string LEVEL_KEY = "levelsanity";
         private const string EXP_KEY = "experience";
         private const string WEXP_KEY = "weapon_experience";
         private const string SWITCH_KEY = "switch_locks";
@@ -27,11 +28,15 @@ namespace LunacidAP
         private const string DROP_KEY = "dropsanity";
         private const string QUENCH_KEY = "quenchsanity";
         private const string ETNAS_KEY = "etnas_pupil";
+        private const string LORE_KEY = "bookworm";
+        private const string GRASS_KEY = "grasssanity";
+        private const string BREAK_KEY = "breakables";
         private const string NORM_DROP_KEY = "normalized_drops";
         private const string DL_KEY = "death_link";
         private const string RANDOM_ELE_KEY = "random_elements";
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
+        private const string START_AREA_KEY = "starting_area";
         private const string ENT_KEY = "entrances";
         private const string MONTH_KEY = "rolled_month";
         private const string CUSTOM_NAME_KEY = "created_class_name";
@@ -44,6 +49,7 @@ namespace LunacidAP
         public int Seed { get; private set; }
         public Goal Ending { get; private set; }
         public int StartingClass { get; private set; }
+        public int StartingArea { get; private set; }
         public bool EntranceRandomizer { get; private set; }
         public string ClientVersion { get; private set; }
         public bool EnemyRandomization { get; private set; }
@@ -51,10 +57,14 @@ namespace LunacidAP
         public Dropsanity Dropsanity { get; private set; }
         public bool Quenchsanity { get; private set; }
         public bool EtnasPupil { get; private set; }
+        public bool Bookworm { get; private set; }
         public bool NormalizedDrops { get; private set; }
         public bool Shopsanity { get; private set; }
         public bool Switchlock { get; private set; }
         public bool Doorlock { get; private set; }
+        public bool Levelsanity { get; private set; }
+        public bool GrassSanity { get; private set; }
+        public bool Breakables { get; private set; }
         public float ExperienceMultiplier { get; private set; }
         public float WExperienceMultiplier { get; private set; }
         public int RequiredCoins { get; private set; }
@@ -78,6 +88,7 @@ namespace LunacidAP
             EntranceRandomizer = GetSlotSetting(ER_KEY, false);
             Seed = GetSlotSetting(SEED_KEY, 0);
             ClientVersion = GetSlotSetting(VERSION, "0.0.0");
+            StartingArea = GetSlotSetting(START_AREA_KEY, 0);
             EnemyRandomization = GetSlotSetting(ENEMY_RANDO_KEY, false);
             Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
             Quenchsanity = GetSlotSetting(QUENCH_KEY, false);
@@ -86,6 +97,10 @@ namespace LunacidAP
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
             Doorlock = GetSlotSetting(DOOR_KEY, false);
+            Levelsanity = GetSlotSetting(LEVEL_KEY, false);
+            GrassSanity = GetSlotSetting(GRASS_KEY, false);
+            Breakables = GetSlotSetting(BREAK_KEY, false);
+            Bookworm = GetSlotSetting(LORE_KEY, false);
             ExperienceMultiplier = (float)GetSlotSetting(EXP_KEY, 100) / 100;
             WExperienceMultiplier = (float)GetSlotSetting(WEXP_KEY, 100) / 100;
             RequiredCoins = GetSlotSetting(COIN_KEY, 30);

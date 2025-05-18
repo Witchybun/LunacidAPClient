@@ -324,9 +324,14 @@ namespace LunacidAP
                             var pittObjects = GameObject.Find("THE_PIT_A1");
                             var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
                             var corruptKeyTrig = pittObjects.transform.GetChild(3).GetChild(0).GetChild(1).gameObject;
-                            if (woodenGate.activeSelf)
+                            woodenGate.transform.position = new Vector3(1.0661f, 4.9291f, -26.2029f);
+                            if (ReadFlagValue(2, 0) == 0)
                             {
-                                woodenGate.SetActive(value: false);
+                                foreach (Transform child in woodenGate.transform)
+                                {
+                                    GameObject.Destroy(child.gameObject.GetComponent<OBJ_HEALTH>());
+                                }
+
                             }
                             if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
                             {
@@ -347,6 +352,9 @@ namespace LunacidAP
                                 daDemiTwiggaUwu.Find("TRIGGER_POINT").gameObject.SetActive(true);
                                 daDemiTwiggaUwu.Find("TRIGGER_POINT").Find("AUTO").gameObject.SetActive(true);
                             }
+                            var demiHerself = daDemiTwiggaUwu.Find("Demi");
+                            demiHerself.transform.position = new Vector3(-2.7497f, 3.3072f, -20.9103f);
+                            demiHerself.transform.rotation = Quaternion.Euler(new Vector3(0f, 70f, 0f));
                             break;
                         }
                     case "CAS_1":

@@ -265,13 +265,7 @@ namespace LunacidAP
         private static void GiveEXP(string Name, string color, string player = "", bool self = false)
         {
             PopupCommand(0, Name, color, player, self);
-            var currentXP = Control.CURRENT_PL_DATA.XP;
-            if (currentXP/20 < 100)
-            {
-                Control.CURRENT_PL_DATA.XP += 100;
-                return;
-            }
-            Control.CURRENT_PL_DATA.XP += currentXP/20;
+            Control.CURRENT_PL_DATA.XP += 100;
         }
 
         private static void GiveDropBoost(string Name, string color, string player = "", bool self = false)

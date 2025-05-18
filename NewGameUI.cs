@@ -32,6 +32,18 @@ namespace LunacidAP
             {Dropsanity.Randomized, "RAN"}
         };
 
+        public static readonly Dictionary<int, int> StartingClassToLevel = new(){
+            {0, 5},
+            {1, 10},
+            {2, 7},
+            {3, 9},
+            {4, 8},
+            {5, 6},
+            {6, 8},
+            {7, 9},
+            {8, 1},
+        };
+
         public NewGameUI(ManualLogSource log)
         {
             _log = log;
@@ -264,6 +276,7 @@ namespace LunacidAP
                             var button = create.GetChild(11).GetComponent<UnityEngine.UI.Button>();
                             _log.LogInfo($"We were given {ArchipelagoClient.AP.SlotData.StartingClass}");
                             var classCount = Math.Min(8, ArchipelagoClient.AP.SlotData.StartingClass); // Random utilizes Forsaken's slot anyway.
+                            ConnectionData.StoredLevel = StartingClassToLevel[ArchipelagoClient.AP.SlotData.StartingClass];
                             while (count < classCount)
                             {
                                 button.onClick.Invoke();
@@ -338,15 +351,21 @@ namespace LunacidAP
             {
                 return;
             }
-            if (ArchipelagoClient.AP.SlotData.StartingClass != 9)
-            {
-                return;
-            }
             if (text2load != 0)
             {
                 return;
             }
-            __instance.TXT[1].text = "LEVEL " + __instance.CON.CURRENT_PL_DATA.PLAYER_LVL + ": " + ArchipelagoClient.AP.SlotData.CustomName.ToUpper();
+            var className = __instance.TXT[1].text.Split(' ')[2];
+            if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
+            {
+                className = ArchipelagoClient.AP.SlotData.CustomName.ToUpper();
+            }
+            var level = __instance.CON.CURRENT_PL_DATA.PLAYER_LVL.ToString();
+            if (ArchipelagoClient.AP.SlotData.Levelsanity)
+            {
+                level = level + " " + $"(Stored {ConnectionData.StoredLevel.ToString()})";
+            }
+            __instance.TXT[1].text = "LEVEL " + level + ": " + className;
 
         }
 

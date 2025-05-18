@@ -29,13 +29,15 @@ namespace LunacidAP
             }
             var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
             _log.LogInfo($"Saving to {savePath}...");
-
+            _log.LogInfo($"In SaveData.  Stored Level: {ConnectionData.StoredLevel}");
             var newAPSaveData = new APSaveData()
             {
                 SlotName = ConnectionData.SlotName,
                 HostName = ConnectionData.HostName,
                 Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
+                StoredLevel = ConnectionData.StoredLevel,
+                StoredExperience = ConnectionData.StoredExperience,
                 ItemColors = ConnectionData.ItemColors,
                 Symbols = ConnectionData.Index,
                 DeathLink = ConnectionData.DeathLink,
@@ -81,10 +83,11 @@ namespace LunacidAP
                     using StreamReader reader = new StreamReader(savePath);
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
-                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password,
+                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password, loadedSave.StoredLevel, loadedSave.StoredExperience,
                     loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
                     loadedSave.ItemColors, loadedSave.RandomEnemyData);
+                    _log.LogInfo($"We have {loadedSave.StoredLevel} vs {ConnectionData.StoredLevel}");
                     return;
                 }
 
@@ -106,6 +109,8 @@ namespace LunacidAP
         public string HostName;
         public int Port;
         public string Password;
+        public int StoredLevel;
+        public int StoredExperience;
         public int Seed;
         public int Symbols;
         public bool DeathLink;

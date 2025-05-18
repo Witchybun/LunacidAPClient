@@ -54,7 +54,7 @@ namespace LunacidAP
             }
             __instance.CON.EQ_WEP.cooling = 0f;
             __instance.CON.PAPPY.POP(item.Name + " CREATED", 1f, 7);
-            if (weaponToCheck == "DEATH SCYTHE")
+            if (weaponToCheck == "DEATH SCYTHE" || weaponToCheck == "BRITTLE ARMING SWORD")
             {
                 __instance.CON.RemoveItem(__instance.CON.EQ_WEP.name, __instance.CON.EQ_WEP.UPGRADE);
             }

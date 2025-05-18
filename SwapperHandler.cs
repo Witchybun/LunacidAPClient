@@ -21,12 +21,8 @@ namespace LunacidAP
             _log = log;
         }
 
-        public static void ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
+        public static ArchipelagoItem ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
-            if (LunacidLocations.LocationsThatImmediatelyReceive.Contains(locationData.APLocationName) || locationData.APLocationName.Contains("Daedalus Knowledge"))
-            {
-                return; // No need to swap models for locations you get dropped on top of you.
-            }
             var archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var locationItem = archipelagoItem.Name;
             if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
@@ -37,14 +33,14 @@ namespace LunacidAP
                     if (substitutedItem == "NULL")
                     {
                         HideItemModel(pickupObject);
-                        return;
+                        return archipelagoItem;
                     }
                     locationItem = substitutedItem;
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace non-Lunacid Item at {locationData.APLocationName}");
-                    return;
+                    return archipelagoItem;
                 }
             }
             if (locationItem.Contains("Silver"))
@@ -57,7 +53,7 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Money Item at {locationData.APLocationName}");
                 }
-                return;
+                return archipelagoItem;
             }
             if (LunacidItems.Materials.Contains(locationItem))
             {
@@ -69,11 +65,11 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Material Item at {locationData.APLocationName}");
                 }
-                return;
+                return archipelagoItem;
             }
             if (LunacidItems.Items.Contains(locationItem))
             {
-                if (LunacidItems.Vouchers.Contains(locationItem) || locationItem == "Deep Knowledge" || locationItem == "Angel Feather")
+                if (LunacidItems.Vouchers.Contains(locationItem) || locationItem == "Angel Feather")
                 {
                     locationItem = "Cloth Bandage";
                 }
@@ -133,7 +129,19 @@ namespace LunacidAP
                     _log.LogError($"Failed to replace Trap at {locationData.APLocationName}");
                 }
             }
-
+            if (locationItem == "Deep Knowledge")
+            {
+                locationItem = "Black Book";
+                try
+                {
+                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/");
+                }
+                catch
+                {
+                    _log.LogError($"Failed to replace Item at {locationData.APLocationName}");
+                }
+            }
+            return archipelagoItem;
         }
 
         private static void ReplaceItemGeneric(Item_Pickup_scr pickupObject, string locationItem, string resourceInfo)
@@ -274,7 +282,7 @@ namespace LunacidAP
 
         private static void ReplaceModelWithTrickyThing(Item_Pickup_scr pickupObject)
         {
-            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight"};
+            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight" };
             var random = new System.Random(ConnectionData.Seed + DateTime.Today.Day + pickupObject.gameObject.GetInstanceID()).Next(0, 6);
             var chosenTrick = trickyThings[random];
             var type = "";

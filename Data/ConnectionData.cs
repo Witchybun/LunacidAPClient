@@ -15,6 +15,8 @@ namespace LunacidAP.Data
         public static int Index {get; set;} = 0;
         public static bool DeathLink {get; set;} = false;
         public static int CheatedCount {get; set;} = 0;
+        public static int StoredLevel {get; set;} = 0;
+        public static int StoredExperience {get; set;} = 0;
         public static Dictionary<string, ReceivedItem> ReceivedItems {get; set;} = new Dictionary<string, ReceivedItem>(){};
         public static List<long> CompletedLocations {get; set;} = new List<long>(){};
         public static Dictionary<string, string> CommunionHints {get; set;} = new Dictionary<string, string>(){};
@@ -27,7 +29,7 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> ItemColors = new(){};
         public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new(){};
 
-        public static void WriteConnectionData(string hostName, int port, string slotName, string password, 
+        public static void WriteConnectionData(string hostName, int port, string slotName, string password, int storedLevel = 0, int storedExperience = 0,
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
         Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
@@ -38,8 +40,19 @@ namespace LunacidAP.Data
             SlotName = slotName;
             Password = password;
             Seed = seed;
-            Index = index;
             DeathLink = deathLink;
+            if (index > 0)
+            {
+                Index = index;
+            }
+            if (storedLevel > 0)
+            {
+                StoredLevel = storedLevel;
+            }
+            if (storedExperience > 0)
+            {
+                StoredExperience = storedExperience;
+            }
             if (cheatedCount > -1)
             {
                 CheatedCount = cheatedCount;
@@ -100,6 +113,8 @@ namespace LunacidAP.Data
             Index = 0;
             DeathLink = false;
             CheatedCount = 0;
+            StoredLevel = 5;
+            StoredExperience = 0;
             ReceivedItems = new Dictionary<string, ReceivedItem>(){};
             CompletedLocations = new List<long>(){};
             CommunionHints = new Dictionary<string, string>(){};
