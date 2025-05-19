@@ -21,8 +21,9 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool GiveXP_MultiplyIncomingXP(CONTROL __instance, int LEVELED_XP)
         {
+            var has_bangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3: 1;
             var givenXP = LEVELED_XP;
-            givenXP = Mathf.RoundToInt(givenXP * ArchipelagoClient.AP.SlotData.ExperienceMultiplier);
+            givenXP = Mathf.RoundToInt(givenXP * ArchipelagoClient.AP.SlotData.ExperienceMultiplier * has_bangle);
             if ((__instance.CURRENT_PL_DATA.PLAYER_LVL < 100 || ConnectionData.StoredLevel < 100) && ArchipelagoClient.AP.SlotData.Levelsanity)
             {
                 _log.LogInfo(givenXP);
@@ -52,7 +53,7 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void Attack_TryToBuffExp(Weapon_scr __instance)
         {
-            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier - 1; // the "damage" was already done, so this is the remainder
+            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier; // We need more exp sorry
             if (__instance.type == 0)
             {
                 if (__instance.special == 6)

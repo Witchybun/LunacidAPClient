@@ -17,7 +17,7 @@ namespace LunacidAP
         private static ManualLogSource _log;
         private static List<string> freeSpells = new()
         {
-            "WARP_CAST", "BARRIER_CAST", "FLIGHT_CAST"
+            "WARP_CAST", "BARRIER_CAST", "FLIGHT_CAST", "BRIDGE_CAST"
         };
 
         public WeaponHandler(ManualLogSource log)

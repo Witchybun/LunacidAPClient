@@ -106,11 +106,12 @@ namespace LunacidAP
             }
             if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
-                if (WarpDestinations.OneWayActualDestinations.TryGetValue(newEntrance, out var oneWayEntrance))
+                if (SceneManager.GetActiveScene().name == "HUB_01")
                 {
-                    return WarpDestinations.EntranceToWarp[oneWayEntrance];
+                    return warpData;
                 }
-                return WarpDestinations.EntranceToWarp[newEntrance];
+                _log.LogInfo($"Trying to go to {newEntrance}");
+                return WarpDestinations.EntranceItsActualWarpPosition[newEntrance];
             }
             _log.LogError($"Could not find warp for {entrance}!");
             return warpData;
@@ -133,7 +134,7 @@ namespace LunacidAP
         {
             try
             {
-                var knownWarp = WarpDestinations.EntranceToWarp.FirstOrDefault(x => AreTwoWarpsIdentical(unknownWarp, x.Value));
+                var knownWarp = WarpDestinations.EntranceToWhereItShouldLead.FirstOrDefault(x => AreTwoWarpsIdentical(unknownWarp, x.Value));
                 if (knownWarp.Key == null)
                 {
                     return "NULL";

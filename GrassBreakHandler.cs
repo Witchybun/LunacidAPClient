@@ -89,11 +89,19 @@ namespace LunacidAP
                     _log.LogError($"Couldn't find a position for {group.APLocationName}.");
                     continue;
                 }
-                var item = ConnectionData.ScoutedLocations[group.APLocationID];
-                gameObject.AddComponent<ArchipelagoPickup>();
-                gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
-                gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
-                gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                try
+                {
+                    var item = ConnectionData.ScoutedLocations[group.APLocationID];
+                    gameObject.AddComponent<ArchipelagoPickup>();
+                    gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
+                    gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
+                    gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                }
+                catch
+                {
+                    gameObject.AddComponent<ArchipelagoPickup>();
+                    _log.LogError("There's no actual location for this");
+                }
             }
         }
 
@@ -112,10 +120,12 @@ namespace LunacidAP
                     shortestDistance = Vector3.Distance(collider.transform.position, position);
                 }
             }
-            if (shortestDistance > 2f)
+            if (shortestDistance > 5f)
             {
+                _log.LogInfo("Found nothing.");
                 return null;
             }
+            _log.LogInfo($"Found something: {objectOfShortestDistance.name} at {objectOfShortestDistance.transform.position.x}, {objectOfShortestDistance.transform.position.y}, {objectOfShortestDistance.transform.position.z}");
             return objectOfShortestDistance;
         }
     }
