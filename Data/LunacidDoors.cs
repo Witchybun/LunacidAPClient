@@ -34,7 +34,7 @@ namespace LunacidAP.Data
             {"Queen's Throne Door (Castle Le Fanu Side)", "Queen's Throne Door Key"},
             {"Queen's Throne Door (Throne Chamber Side)", "Queen's Throne Door Key"},
             {"Secondary Door (Terminus Prison Side)", "Secondary Lock Key"},
-            {"Secondary Door (Forlorn Arena)", "Secondary Lock Key"},
+            {"Secondary Door (Forlorn Arena Side)", "Secondary Lock Key"},
             {"Forbidden Door (Terminus Prison Side)", "Forbidden Door Key"},
             {"Forbidden Door (Labyrinth of Ash Side)", "Forbidden Door Key"},
             {"Burning Hot Door (Castle Le Fanu Side)", "Burning Hot Key"},
@@ -118,7 +118,7 @@ namespace LunacidAP.Data
         };
 
         private static readonly Dictionary<string, Vector3> ArenaEntranceToDoor = new(){
-            {"Secondary Door (Forlorn Arena)", new Vector3(66f, 6f, 0f)},
+            {"Secondary Door (Forlorn Arena Side)", new Vector3(66f, 6f, 0f)},
             {"Sucsarian Door (Forlorn Arena Side)", new Vector3(-179.25f, 5.39f, 0f)}
         };
 

@@ -244,14 +244,6 @@ namespace LunacidAP
                         break;
                     }
                 }
-                if (sceneName == "PITT_A1" && __instance.gameObject.name == "LADDER")
-                {
-                    __instance.Slot = 13;
-                }
-                if (sceneName == "PITT_A1" && __instance.gameObject.name == "MIRAGE_WALL")
-                {
-                    __instance.Slot = 16;
-                }
                 for (int i = 0; i < sTATES.Length; i++)
                 {
                     errorData[1] = i.ToString();
@@ -341,6 +333,10 @@ namespace LunacidAP
                                 }
 
                             }
+                            var ladderSave = pittObjects.transform.GetChild(3).GetChild(6).gameObject.GetComponent<AREA_SAVED_ITEM>();
+                            ladderSave.Slot = 16;
+                            var mirageSave = pittObjects.transform.GetChild(3).GetChild(5).gameObject.GetComponent<AREA_SAVED_ITEM>();
+                            ladderSave.Slot = 16;
                             if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
                             {
                                 corruptKeyTrig.SetActive(true);  // Fallback for the corrupt key location
@@ -479,7 +475,7 @@ namespace LunacidAP
             var sceneName = SceneManager.GetActiveScene().name;
             if (sceneName == "PITT_A1" && __instance.gameObject.name == "LADDER")
             {
-                __instance.Slot = 13;
+                __instance.Slot = 16;
             }
             if (sceneName == "PITT_A1" && __instance.gameObject.name == "MIRAGE_WALL")
             {

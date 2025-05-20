@@ -276,7 +276,14 @@ namespace LunacidAP
                             var button = create.GetChild(11).GetComponent<UnityEngine.UI.Button>();
                             _log.LogInfo($"We were given {ArchipelagoClient.AP.SlotData.StartingClass}");
                             var classCount = Math.Min(8, ArchipelagoClient.AP.SlotData.StartingClass); // Random utilizes Forsaken's slot anyway.
-                            ConnectionData.StoredLevel = StartingClassToLevel[ArchipelagoClient.AP.SlotData.StartingClass];
+                            if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
+                            {
+                                ConnectionData.StoredLevel = ArchipelagoClient.AP.SlotData.CustomStats["Level"];
+                            }
+                            else
+                            {
+                                ConnectionData.StoredLevel = StartingClassToLevel[ArchipelagoClient.AP.SlotData.StartingClass];
+                            }
                             while (count < classCount)
                             {
                                 button.onClick.Invoke();
