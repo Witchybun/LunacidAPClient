@@ -24,10 +24,19 @@ namespace LunacidAP.Data
             if (!Collected)
             {
                 LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(LocationData, ArchipelagoItem);
+                if (ArchipelagoItem.SlotName != ConnectionData.SlotName)
+                {
+                    LocationHandler.SendMessageOnPickup(ArchipelagoItem);
+                }
+
             }
             else if (CanBeRepeated)
             {
                 ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(LocationData);
+                if (ArchipelagoItem.SlotName != ConnectionData.SlotName)
+                {
+                    LocationHandler.SendMessageOnPickup(ArchipelagoItem);
+                }
             }
         }
     }
