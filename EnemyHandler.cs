@@ -213,7 +213,7 @@ namespace LunacidAP
 
         }
 
-        private static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
+        public static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
         {
             GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
             obj.SetActive(value: false);
@@ -236,10 +236,14 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool NPC_SYS_InitializeEnemyPlacement(NPC_SYS __instance)
         {
-            if (__instance.FABS[0].name != "ABYSSAL DEMON")
+            if (!ArchipelagoClient.AP.SlotData.EnemyRandomization)
             {
-                return true;
+                return false;
             }
+            if (__instance.FABS[0].name != "ABYSSAL DEMON")
+                {
+                    return true;
+                }
             if (!EnemyPrefabs.Any())
             {
                 foreach (var item in __instance.FABS)
