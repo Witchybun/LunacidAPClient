@@ -226,8 +226,7 @@ namespace LunacidAP
                 errorData[4] = __instance.value.ToString();
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 var sceneName = __instance.gameObject.scene.name;
-                ModifyFlagDataForFlagSplits(__instance, sceneName)
-                _log.LogInfo($"Name: {__instance.name}, Zone: {__instance.Zone}, Slot: {__instance.Slot}, Value: {__instance.value}");
+                ModifyFlagDataForFlagSplits(__instance, sceneName);
                 __instance.current_string = ZoneDataPicker(__instance.Zone);
                 __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
                 var stateController = __instance.name;
