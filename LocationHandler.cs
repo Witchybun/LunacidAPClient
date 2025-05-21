@@ -29,11 +29,11 @@ namespace LunacidAP
 
         [HarmonyPatch(typeof(Item_Pickup_scr), "Start")]
         [HarmonyPrefix]
-        private static bool Start_MoveItemDeletionToCheckedLocations(Item_Pickup_scr __instance, ref POP_text_scr ___PAPPY)
+        private static bool Start_AttachArchipelagoComponentForLater(Item_Pickup_scr __instance)
         {
-            var objectName = __instance.gameObject.name;
-            var sceneName = __instance.gameObject.scene.name;
-            var itemType = __instance.type;
+            var gameObject = __instance.gameObject;
+            var objectName = gameObject.name;
+            var sceneName = gameObject.scene.name;
             if (objectName.Contains("(Clone)") && !IsCloneAPLocation(__instance))
             {
                 if (ArchipelagoClient.AP.SlotData.Quenchsanity)
@@ -52,10 +52,25 @@ namespace LunacidAP
             _popup = __instance.CON.PAPPY;
             if (__instance.inChest)
             {
-                __instance.GetComponent<SphereCollider>().enabled = false;
-                __instance.StartCoroutine("Delay");
+                var collider = __instance.GetComponent<SphereCollider>();
+                    if (collider is null)
+                    {
+                        _log.LogWarning("The chest's SphereCollider is null!");
+                    }
+                    else
+                    {
+                        __instance.GetComponent<SphereCollider>().enabled = false;
+                    }
+                try
+                {
+                    __instance.StartCoroutine("Delay");
+                }
+                catch
+                {
+                    _log.LogWarning("Could no call the Delay method for this chest.");
+                }
             }
-            if (__instance.gameObject.GetComponent<ArchipelagoPickup>() is not null)
+            if (gameObject.GetComponent<ArchipelagoPickup>() is not null)
             {
                 return true; //Its already handled.
             }
@@ -78,7 +93,7 @@ namespace LunacidAP
 
         [HarmonyPatch(typeof(LoreBlock), "ACT")]
         [HarmonyPrefix]
-        private static void ACT_SendLoreLocation(LoreBlock __instance)
+        private static bool ACT_SendLoreLocation(LoreBlock __instance)
         {
             var sceneName = SceneManager.GetActiveScene().name;
             var position = __instance.transform.position;
@@ -87,7 +102,7 @@ namespace LunacidAP
             float shortestDistance = 696969f;
             if (!LunacidLocations.LoreLocations.TryGetValue(sceneName, out var locations))
             {
-                return;
+                return true;
             }
             foreach (var group in locations)
             {
@@ -103,13 +118,28 @@ namespace LunacidAP
                 _log.LogWarning("Could not find valid location for this book.  Might not be randomized.");
                 _log.LogWarning($"Closest location: {locationOfShortestDistance.APLocationName}, Distance: {shortestDistance}");
                 _log.LogWarning($"Scene: {sceneName}, Location: {position.x}, {position.y}, {position.z}");
-                return;
+                return true;
             }
             _log.LogWarning($"Closest location: {locationOfShortestDistance.APLocationName}, Distance: {shortestDistance}");
             var item = ConnectionData.ScoutedLocations[locationOfShortestDistance.APLocationID];
+            if (item.Collected)
+            {
+                return true;
+            }
             _log.LogWarning($"Item is {item.Name}.  ID for location is {locationOfShortestDistance.APLocationID}.");
+            if (item.SlotName != ConnectionData.SlotName)
+            {
+                _log.LogInfo("Its not an item for you...");
+                if (!item.Collected)
+                {
+                    _log.LogInfo("Sending Message");
+                    SendMessageOnPickup(item);
+                }
+            }
             DetermineOwnerAndDirectlyGiveIfSelf(locationOfShortestDistance, item);
-            return;
+            
+            
+            return false;
         }
 
         private static bool CollectLocation(Item_Pickup_scr pickupObject)
@@ -128,9 +158,8 @@ namespace LunacidAP
             if (apData.LocationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
                 var actualName = TheDaedalusConundrum(pickupObject);
-                var apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
-                var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
-                DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
+                apData.LocationData = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
+                apData.ArchipelagoItem = ConnectionData.ScoutedLocations[apData.LocationData.APLocationID];
             }
             if (apData.Collected && !apData.CanBeRepeated)
             {
@@ -146,7 +175,11 @@ namespace LunacidAP
                 {
                     _popup.POP($"Item <color={color}>{apData.ArchipelagoItem.Name}</color> already found...", 1f, 1);
                 }
-                _popup.POP($"Found <color={color}>{apData.ArchipelagoItem.Name}</color> for {apData.ArchipelagoItem.SlotName}", 1f, 0);
+                else
+                {
+                    _popup.POP($"Found <color={color}>{apData.ArchipelagoItem.Name}</color> for {apData.ArchipelagoItem.SlotName}", 1f, 0);
+                }
+                
             }
             else if (apData.Collected)
             {
@@ -164,6 +197,20 @@ namespace LunacidAP
             pickupObject.gameObject.SetActive(false);
 
             return false;
+        }
+
+        public static void SendMessageOnPickup(ArchipelagoItem item)
+        {
+            var color = Colors.DetermineItemColor(item.Classification);
+            _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
+            _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+        }
+
+        public static void SendLevelMessageOnLevelUp(ArchipelagoItem item)
+        {
+            var color = Colors.DetermineItemColor(item.Classification);
+            _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
+            _popup.POP($"Level Up!  Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
         }
 
         private static LocationData DetermineGeneralPickupLocation(Item_Pickup_scr pickupObject)
@@ -307,7 +354,7 @@ namespace LunacidAP
         }
 
 
-        private static string TheDaedalusConundrum(Item_Pickup_scr instance)
+        public static string TheDaedalusConundrum(Item_Pickup_scr instance)
         {
             if (instance.Name == "FIRE WORM")
             {
