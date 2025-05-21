@@ -2,7 +2,6 @@
 ## Requirements
 
 You will need:
-- [BepInEx 5.4.22](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.22)
 - [Archipelago Client](https://github.com/ArchipelagoMW/Archipelago/releases/tag/0.4.4)
 - The .apworld packaged with this mod.
 - The mod itself.
