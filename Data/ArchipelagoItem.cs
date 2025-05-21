@@ -36,5 +36,16 @@ namespace LunacidAP.Data
             Classification = classification;
             Collected = collected;
         }
+
+        public ArchipelagoItem()
+        {
+            ID = -34;
+            Name = "NULL";
+            SlotID = -1;
+            SlotName = "NULL";
+            Game = "NULL";
+            Classification = ItemFlags.None;
+            Collected = false;
+        }
     }
 }
