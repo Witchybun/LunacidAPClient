@@ -191,25 +191,25 @@ namespace LunacidAP
                     CON.CURRENT_PL_DATA.ZONE_17 = current_string;
                     break;
                 case 18:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_18 = current_string;
                     break;
                 case 19:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_19 = current_string;
                     break;
                 case 20:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_20 = current_string;
                     break;
                 case 21:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_21 = current_string;
                     break;
                 case 22:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_22 = current_string;
                     break;
                 case 23:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_23 = current_string;
                     break;
                 case 24:
-                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    CON.CURRENT_PL_DATA.ZONE_24 = current_string;
                     break;
             }
         }
@@ -226,6 +226,8 @@ namespace LunacidAP
                 errorData[4] = __instance.value.ToString();
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 var sceneName = __instance.gameObject.scene.name;
+                ModifyFlagDataForFlagSplits(__instance, sceneName)
+                _log.LogInfo($"Name: {__instance.name}, Zone: {__instance.Zone}, Slot: {__instance.Slot}, Value: {__instance.value}");
                 __instance.current_string = ZoneDataPicker(__instance.Zone);
                 __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
                 var stateController = __instance.name;
@@ -244,6 +246,7 @@ namespace LunacidAP
                         break;
                     }
                 }
+
                 for (int i = 0; i < sTATES.Length; i++)
                 {
                     errorData[1] = i.ToString();
@@ -333,10 +336,6 @@ namespace LunacidAP
                                 }
 
                             }
-                            var ladderSave = pittObjects.transform.GetChild(3).GetChild(6).gameObject.GetComponent<AREA_SAVED_ITEM>();
-                            ladderSave.Slot = 16;
-                            var mirageSave = pittObjects.transform.GetChild(3).GetChild(5).gameObject.GetComponent<AREA_SAVED_ITEM>();
-                            ladderSave.Slot = 16;
                             if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
                             {
                                 corruptKeyTrig.SetActive(true);  // Fallback for the corrupt key location
@@ -460,6 +459,7 @@ namespace LunacidAP
             catch (Exception ex)
             {
                 _log.LogError($"Method {nameof(Load_RetainItemPickups)} has failed:");
+                _log.LogError($"Instance: {__instance.name}");
                 _log.LogError($"Name: {errorData[0]}, Iteration: {errorData[1]}, State Name: {errorData[2]}");
                 _log.LogError($"State Count: {errorData[3]}, Value: {errorData[4]}");
                 _log.LogError($"{ex}");
@@ -476,10 +476,7 @@ namespace LunacidAP
             if (sceneName == "PITT_A1" && __instance.gameObject.name == "LADDER")
             {
                 __instance.Slot = 16;
-            }
-            if (sceneName == "PITT_A1" && __instance.gameObject.name == "MIRAGE_WALL")
-            {
-                __instance.Slot = 16;
+                __instance.Zone = 24;
             }
         }
 
@@ -673,31 +670,41 @@ namespace LunacidAP
                     current_string = CON.CURRENT_PL_DATA.ZONE_16;
                     break;
                 case 17:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_17;
                     break;
                 case 18:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_18;
                     break;
                 case 19:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_19;
                     break;
                 case 20:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_20;
                     break;
                 case 21:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_21;
                     break;
                 case 22:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_22;
                     break;
                 case 23:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_23;
                     break;
                 case 24:
-                    current_string = CON.CURRENT_PL_DATA.ZONE_16;
+                    current_string = CON.CURRENT_PL_DATA.ZONE_24;
                     break;
             }
             return current_string;
+        }
+
+        private static void ModifyFlagDataForFlagSplits(AREA_SAVED_ITEM saveObject, string scene)
+        {
+            if (scene == "PITT_A1" && saveObject.gameObject.name == "LADDER")
+                {
+
+                    saveObject.Slot = 16;
+                    saveObject.Zone = 24;
+                }
         }
     }
 }
