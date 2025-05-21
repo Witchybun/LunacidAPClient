@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
@@ -72,7 +73,7 @@ namespace LunacidAP
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
-            //UpdateTraversedEntrancesAP(currentWarp, finalWarp);
+            UpdateTraversedEntrancesAP(currentWarp, eredWarp);
 
             return true;
         }
@@ -154,13 +155,13 @@ namespace LunacidAP
             var fromString = DetermineEntrance(from);
             var toString = DetermineEntrance(to);
 
-            if (fromString == "NULL" || toString == "NULL")
+            if (fromString == "NULL" || toString == "NULL" || fromString == toString)
             {
                 return;
             }
 
             if (ConnectionData.TraversedEntrances.ContainsKey(fromString)
-                && ConnectionData.TraversedEntrances.ContainsKey(toString))
+                || ConnectionData.TraversedEntrances.ContainsKey(toString))
             {
                 return;
             }
