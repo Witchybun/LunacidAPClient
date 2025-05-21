@@ -136,8 +136,7 @@ namespace LunacidAP
                 LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(location, item);
                 if (item.SlotName != ConnectionData.SlotName)
                 {
-                    var color = Colors.DetermineItemColor(item.Classification);
-                    _popup.POP($"Level Up!  Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+                    LocationHandler.SendLevelMessageOnLevelUp(item);
                 }
                 num -= 1;
                 ConnectionData.StoredExperience -= 100;
