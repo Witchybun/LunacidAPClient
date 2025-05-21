@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using UnityEngine;
@@ -23,7 +24,20 @@ namespace LunacidAP
 
         public static ArchipelagoItem ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
-            var archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var archipelagoItem = new ArchipelagoItem();
+            _log.LogInfo($"We have {pickupObject} and {locationData.APLocationName}");
+            if (locationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
+            {
+                _log.LogInfo("Figuring out the conundrum");
+                var actualName = LocationHandler.TheDaedalusConundrum(pickupObject);
+                var apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
+                archipelagoItem = ConnectionData.ScoutedLocations[apLocation.APLocationID];
+                return archipelagoItem;
+            }
+            else
+            {
+                archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            }
             var locationItem = archipelagoItem.Name;
             if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
             {
