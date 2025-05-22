@@ -25,7 +25,30 @@ namespace LunacidAP
 
         public static string DetermineItemColor(ItemFlags itemFlags)
         {
+            var colors = AllColorsToMix(itemFlags);
+            if (!colors.Any())
+            {
+                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
+                return isFillerAdded ? filler : FILLER_COLOR_DEFAULT; // Its filler
+            }
+            var mixedColors = RGBToHexConverter(ColorMixer(colors));
+            return mixedColors;
+        }
 
+        public static string GetGiftColor()
+        {
+            var isGiftAdded = ConnectionData.ItemColors.TryGetValue("Gift", out var gift);
+            return isGiftAdded ? gift : GIFT_COLOR_DEFAULT;
+        }
+
+        public static string GetCheatColor()
+        {
+            var isCheatAdded = ConnectionData.ItemColors.TryGetValue("Cheat", out var cheat);
+            return isCheatAdded ? cheat : CHEAT_COLOR_DEFAULT;
+        }
+
+        public static List<string> AllColorsToMix(ItemFlags itemFlags)
+        {
             var colors = new List<string>();
             var isProgressionAdded = ConnectionData.ItemColors.TryGetValue("Progression", out var progression);
             var isUsefulAdded = ConnectionData.ItemColors.TryGetValue("Unique", out var useful);
@@ -42,28 +65,10 @@ namespace LunacidAP
             {
                 colors.Add(isTrapAdded ? trap : TRAP_COLOR_DEFAULT);
             }
-            if (!colors.Any())
-            {
-                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
-                return isFillerAdded ? filler : FILLER_COLOR_DEFAULT; // Its filler
-            }
-            var mixedColors = ColorMixer(colors);
-            return mixedColors;
+            return colors;
         }
 
-        public static string GetGiftColor()
-        {
-            var isGiftAdded = ConnectionData.ItemColors.TryGetValue("Gift", out var gift);
-            return isGiftAdded ? gift : GIFT_COLOR_DEFAULT;
-        }
-
-        public static string GetCheatColor()
-        {
-            var isCheatAdded = ConnectionData.ItemColors.TryGetValue("Cheat", out var cheat);
-            return isCheatAdded ? cheat : CHEAT_COLOR_DEFAULT;
-        }
-
-        private static string ColorMixer(List<string> colors)
+        public static int[] ColorMixer(List<string> colors)
         {
             var colorRGBs = new List<int[]>();
             foreach (var color in colors)
@@ -90,7 +95,7 @@ namespace LunacidAP
             avgG /= count;
             avgB /= count;
             var averageRGB = new int[] { avgR, avgG, avgB };
-            return RGBToHexConverter(averageRGB);
+            return averageRGB;
         }
 
         private static int[] HexToRGBConverter(string hex)

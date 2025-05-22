@@ -33,6 +33,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool OnEnable_ModifyDrops_Prefix(Loot_scr __instance)
         {
+            _log.LogInfo("Dropping!");
             if ((ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off && __instance.name == "SANGUIS UMBRA") || __instance.name == "CENTAUR" || __instance.gameObject.scene.name == "TOWER")
             {
                 return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.

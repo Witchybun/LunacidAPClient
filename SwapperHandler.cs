@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using UnityEngine;
@@ -39,6 +40,8 @@ namespace LunacidAP
                 archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
             }
             var locationItem = archipelagoItem.Name;
+            var usedClassification = archipelagoItem.Classification.HasFlag(ItemFlags.Trap) ? ItemFlags.Advancement : archipelagoItem.Classification;
+            ChangeGlowToFlagColor(pickupObject.gameObject, usedClassification);
             if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
             {
                 try
@@ -89,36 +92,39 @@ namespace LunacidAP
                 }
                 try
                 {
-                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Item at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Weapons.Contains(locationItem))
             {
                 try
                 {
                     locationItem = locationItem.ToUpper();
-                    ReplaceItemGeneric(pickupObject, locationItem, "WEPS/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "WEPS/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Weapon at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Spells.Contains(locationItem))
             {
                 try
                 {
                     locationItem = locationItem.ToUpper();
-                    ReplaceItemGeneric(pickupObject, locationItem, "MAGIC/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "MAGIC/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Spell at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Keys.Contains(locationItem) || LunacidItems.Switches.Contains(locationItem))
             {
@@ -130,6 +136,7 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Switch or Key at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (archipelagoItem.Classification.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Trap))
             {
@@ -142,23 +149,25 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Trap at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (locationItem == "Deep Knowledge")
             {
                 locationItem = "Black Book";
                 try
                 {
-                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Item at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             return archipelagoItem;
         }
 
-        private static void ReplaceItemGeneric(Item_Pickup_scr pickupObject, string locationItem, string resourceInfo)
+        private static void ReplaceItemGeneric(Item_Pickup_scr pickupObject, string locationItem, string resourceInfo, ItemFlags classification)
         {
             GameObject resourceReference;
             Transform modelReference;
@@ -215,6 +224,38 @@ namespace LunacidAP
             HideItemModel(pickupObject);
             modelReference.gameObject.SetActive(true);
             GameObject.Destroy(resourceReference);
+        }
+
+        private static void ChangeGlowToFlagColor(GameObject pickupObject, ItemFlags classification)
+        {
+            var itemEff = pickupObject.transform.Find("ITEM_EFF");
+            if (itemEff is null)
+            {
+                _log.LogWarning($"There's no ITEM_EFF for {pickupObject.name}");
+                return;
+            }
+            var glow = itemEff.transform.Find("ITEM_FLARE");
+            if (glow is null)
+            {
+                _log.LogWarning($"There's no ITEM_FLARE for {pickupObject.name}");
+                var ashes = GameObject.Instantiate(Resources.Load("ITEMS/ASHES") as GameObject);
+                var ashesGlow = ashes.transform.GetChild(0).GetChild(1);
+                glow = GameObject.Instantiate(ashesGlow);
+                GameObject.Destroy(ashes);
+                glow.parent = itemEff.transform.parent;
+                glow.position = itemEff.transform.position;
+            }
+            var colors = Colors.AllColorsToMix(classification);
+            if (!colors.Any())
+            {
+                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
+                var fillerColor = isFillerAdded ? filler : Colors.FILLER_COLOR_DEFAULT; // Its filler
+                colors.Add(fillerColor);
+            }
+            var progressionColorInt = Colors.ColorMixer(colors);
+            var color = new Color(progressionColorInt[0]/255f, progressionColorInt[1]/255f, progressionColorInt[2]/255f, 1f);
+            var material = glow.GetComponent<ParticleSystemRenderer>().material;
+            material.color = color;
         }
 
         private static bool CanHandleSpecialCase(Item_Pickup_scr pickupObject, string locationItem, GameObject foundObject)
@@ -338,7 +379,7 @@ namespace LunacidAP
                         break;
                     }
             }
-            ReplaceItemGeneric(pickupObject, chosenTrick, type);
+            ReplaceItemGeneric(pickupObject, chosenTrick, type, ItemFlags.Advancement);
         }
 
         private static Transform FindModelCandidate(Item_Pickup_scr pickupObject)
