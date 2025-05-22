@@ -812,7 +812,6 @@ namespace LunacidAP.Data
                 new LocationData( 1953, "AT: Coffin 29 - (Vampire Tomb)", position: new Vector3(106.171211f, -24.7f, -72.9680252f)),
                 new LocationData( 1954, "AT: Coffin 30 - (Accursed Tomb)", position: new Vector3(85.2f, -7.17f, -24.74f)),
                 new LocationData( 1955, "AT: Coffin 31 - (Accursed Tomb)", position: new Vector3(79.6327f, -24.54f, 2.273028f)),
-                new LocationData( 1956, "AT: Coffin 32 - (Accursed Tomb)", position: new Vector3(48.0f, -10.0f, 3.0f)),
                 new LocationData( 1957, "AT: Coffin 33 - (Accursed Tomb)", position: new Vector3(179.006485f, -7.13f, -9.14f)),
                 new LocationData( 1958, "AT: Coffin 34 - (Vampire Tomb)", position: new Vector3(101.163574f, -24.814f, -66.53653f)),
                 new LocationData( 1959, "AT: Coffin 35 - (Vampire Tomb)", position: new Vector3(103.097122f, -25.06f, -71.98929f)),
