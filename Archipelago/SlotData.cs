@@ -82,6 +82,7 @@ namespace LunacidAP
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
             _log = log;
+            _log.LogInfo("Initializing Slot Data");
             _slotDataFields = slotDataFields;
             Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
             StartingClass = GetSlotSetting(CLASS_KEY, 0);
