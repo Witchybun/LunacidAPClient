@@ -25,6 +25,7 @@ namespace LunacidAP
     public class ArchipelagoClient : MonoBehaviour
     {
         public const string Game = "Lunacid";
+        public const string Version = "0.6.1";
         private static ManualLogSource _log;
         public static ArchipelagoClient AP;
         private static GameObject Obj;
@@ -65,7 +66,6 @@ namespace LunacidAP
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
         public readonly SortedDictionary<long, ArchipelagoItem> LocationTable = new() { };
         private static Queue<ReceivedItem> ItemsToProcess = new();
-        private bool processingItem = false;
 
         public static void Setup(ManualLogSource log)
         {
@@ -124,7 +124,7 @@ namespace LunacidAP
                             Game,
                             slotName,
                             ItemsHandlingFlags.AllItems, // TODO make sure to change this line
-                            new Version(PluginInfo.PLUGIN_VERSION),
+                            new Version(Version),
                             password: password,
                             requestSlotData: true, // ServerData.NeedSlotData
                             uuid: hostName + port.ToString()
@@ -146,22 +146,22 @@ namespace LunacidAP
         private void HandleConnectResult(LoginResult result, string slotName, string hostName, int port, string password, bool reconnect = false, int slotID = -1)
         {
             string outText;
-            _log.LogInfo("Handling connect result");
             if (result.Successful)
             {
                 var success = (LoginSuccessful)result;
                 if (!APVersionIsAcceptable(success.SlotData, out var apworldVersion))
                 {
-                    var outMes = $"Version mismatch.  APWorld: {apworldVersion}, Client: {PluginInfo.PLUGIN_VERSION}";
+                    var outMes = $"Version mismatch.  APWorld: {apworldVersion}, Client: {Version}";
                     Authenticated = false;
                     Disconnect();
                     IsConnecting = false;
+                    _log.LogError(outMes);
+                    return;
                 }
                 SlotData = new SlotData(success.SlotData, _log);
                 ConnectionData.WriteConnectionData(hostName, port, slotName, password);
                 int seed = SlotData.GetSlotSetting("seed", 0);
                 SlotID = success.Slot;
-                CommunionHint.DetermineHints(seed);
                 if (success.SlotData["death_link"].ToString() == "1")
                 {
                     ConnectionData.DeathLink = true;
@@ -193,6 +193,7 @@ namespace LunacidAP
                     }
                 }
                 BuildLocations(SlotData.Seed);
+                CommunionHint.DetermineHints(seed);
                 outText = $"Successfully connected to as {slotName}!";
                 //GrabAllTrapOrientedCutscenes();
                 Authenticated = true;
@@ -407,23 +408,10 @@ namespace LunacidAP
                 {
                     continue;
                 }
-                processingItem = true;
                 ItemHandler.GiveLunacidItem(item, isSelf, isCheated);
                 ConnectionData.ReceivedItems[item.Identifier] = item;
                 ConnectionData.Index++;
             }
-        }
-
-        private string GetHeaderFromItem(ItemInfo itemInfo)
-        {
-            if (itemInfo.LocationId < 0) return "X";
-            return itemInfo.Player.Slot.ToString();
-        }
-
-        private string GetFooterFromItem(ItemInfo itemInfo)
-        {
-            if (itemInfo.LocationId < 0) return cheatedCount.ToString();
-            return itemInfo.LocationId.ToString();
         }
 
         public void InitializeDeathLink()
@@ -762,7 +750,7 @@ namespace LunacidAP
         public bool IsInNormalGameState()
         {
             var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
-            return !processingItem && Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;
+            return Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;
         }
     }
 }
