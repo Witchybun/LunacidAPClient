@@ -12,7 +12,7 @@ namespace LunacidAP.Data
         public static string SlotName {get; set;} = "";
         public static int Seed {get; set;} = 0;
         public static string Password {get; set;} = "";
-        public static int Index {get; set;} = 0;
+        public static int Index {get; set;}
         public static bool DeathLink {get; set;} = false;
         public static int CheatedCount {get; set;} = 0;
         public static int StoredLevel {get; set;} = 0;

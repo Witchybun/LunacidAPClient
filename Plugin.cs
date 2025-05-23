@@ -129,6 +129,7 @@ namespace LunacidAP
             }
             CurrentSceneName = "";
             GrassBreakHandler.AddArchipelagoData(sceneName);
+            Cleanup();
             HubLevel = null;
         }
         private void AddSceneIfNotIncluded(string sceneName)
@@ -152,6 +153,22 @@ namespace LunacidAP
             {
                 ConnectionData.EnteredScenes.Add(newScene);
             }
+        }
+
+        private void Cleanup()
+        {
+            var objects = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "New Game Object");
+            var count = 0;
+            foreach (var item in objects)
+            {
+                if (item.transform.childCount == 0 && item.GetComponents(typeof(Component)).Length == 1)
+                {
+                    GameObject.Destroy(item);
+
+                    count += 1;
+                }
+            }
+            Log.LogInfo($"Deleted {count} null objects to save scene space");
         }
 
         private void CheckForVictory(string sceneName)
@@ -181,8 +198,8 @@ namespace LunacidAP
             {
                 CallForVictory();
             }
-            
-                
+
+
         }
 
         private void CallForVictory()

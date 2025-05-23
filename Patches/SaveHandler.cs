@@ -36,10 +36,10 @@ namespace LunacidAP
                 HostName = ConnectionData.HostName,
                 Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
+                Index = ConnectionData.Index,
                 StoredLevel = ConnectionData.StoredLevel,
                 StoredExperience = ConnectionData.StoredExperience,
                 ItemColors = ConnectionData.ItemColors,
-                Symbols = ConnectionData.Index,
                 DeathLink = ConnectionData.DeathLink,
                 CheatCount = ConnectionData.CheatedCount,
                 ObtainedItems = ConnectionData.ReceivedItems,
@@ -84,7 +84,7 @@ namespace LunacidAP
                     string text = reader.ReadToEnd();
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password, loadedSave.StoredLevel, loadedSave.StoredExperience,
-                    loadedSave.Seed, loadedSave.Symbols, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
+                    loadedSave.Seed, loadedSave.Index, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
                     loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
                     loadedSave.ItemColors, loadedSave.RandomEnemyData);
                     _log.LogInfo($"We have {loadedSave.StoredLevel} vs {ConnectionData.StoredLevel}");
@@ -109,10 +109,10 @@ namespace LunacidAP
         public string HostName;
         public int Port;
         public string Password;
+        public int Index;
         public int StoredLevel;
         public int StoredExperience;
         public int Seed;
-        public int Symbols;
         public bool DeathLink;
         public int CheatCount;
         public Dictionary<string, ReceivedItem> ObtainedItems;

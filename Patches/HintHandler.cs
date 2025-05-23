@@ -239,7 +239,6 @@ namespace LunacidAP
             }
             var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
             var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"];
-            _log.LogInfo(__instance.gameObject.name);
             if (__instance.gameObject.name == "Gar_DIALOG_ALT")
             {
                 __instance.LINES[0].value = $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory.";

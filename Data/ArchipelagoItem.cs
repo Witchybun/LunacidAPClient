@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
@@ -14,7 +15,7 @@ namespace LunacidAP.Data
         public string Game;
         public ItemFlags Classification;
         public bool Collected;
-        public ArchipelagoItem(ScoutedItemInfo item, bool received)
+        public ArchipelagoItem(ScoutedItemInfo item, bool collected)
         {
             ID = item.ItemId;
             Name = item.ItemName;
@@ -22,11 +23,11 @@ namespace LunacidAP.Data
             SlotName = ArchipelagoClient.AP.Session.Players.GetPlayerName(SlotID);
             Game = item.ItemGame;
             Classification = item.Flags;
-            Collected = received;
+            Collected = collected;
         }
 
         [JsonConstructor]
-        public ArchipelagoItem(long id, string name, int slotID, string slotName, string game, ItemFlags classification, bool collected)
+        public ArchipelagoItem(int index, long id, string name, int slotID, string slotName, string game, ItemFlags classification, bool collected)
         {
             ID = id;
             Name = name;

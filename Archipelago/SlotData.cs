@@ -77,7 +77,7 @@ namespace LunacidAP
         public Dictionary<string, int> CustomStats { get; private set; }
         public bool CustomMusic { get; private set; }
         public Dictionary<string, string> ItemColors { get; private set; }
-        public Dictionary<string, List<string>> ImportantItemLocations {get; private set;}
+        public Dictionary<string, List<string>> ImportantItemLocations { get; private set; }
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {

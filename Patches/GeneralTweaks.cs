@@ -81,6 +81,27 @@ namespace LunacidAP
             return;
         }
 
+        [HarmonyPatch(typeof(I2.Loc.LanguageSourceData), "TryGetTranslation")]
+        [HarmonyPrefix]
+        private static bool TryGetTranslation_AddSpecialCases(string term, out string Translation, string overrideLanguage = null, string overrideSpecialization = null, bool skipDisabled = false, bool allowCategoryMistmatch = false)
+        {
+            Translation = "";
+            switch (term)
+            {
+                case "Weapons/THORN":
+                    {
+                        Translation = "THORN";
+                        return false;
+                    }
+                case "Weapon Descriptions/THORN details":
+                    {
+                        Translation = "Sheryl the Crow's weapon, from a time before she even came to the Great Well.  It seems she has no use for it anymore.";
+                        return false;
+                    }
+            }
+            return true;
+        }
+
         [HarmonyPatch(typeof(Kill_Other), "Start")]
         [HarmonyPrefix]
         private static bool Start_KillPlayerNoSword(Kill_Other __instance)

@@ -168,7 +168,7 @@ namespace LunacidAP
             }
         }
 
-        private static bool IsElementShuffled(string weaponName, out int element)
+        public static bool IsElementShuffled(string weaponName, out int element)
         {
             if (ConnectionData.Elements is null)
             {

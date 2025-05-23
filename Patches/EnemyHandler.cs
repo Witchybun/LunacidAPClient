@@ -33,7 +33,6 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool OnEnable_ModifyDrops_Prefix(Loot_scr __instance)
         {
-            _log.LogInfo("Dropping!");
             if ((ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off && __instance.name == "SANGUIS UMBRA") || __instance.name == "CENTAUR" || __instance.gameObject.scene.name == "TOWER")
             {
                 return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.
@@ -67,7 +66,6 @@ namespace LunacidAP
             nothingWeight *= nothingWeightScalar;
             var otherDropScalar = (float)((1 - nothingWeightScalar) * totalWeight / (totalWeight - nothingWeight) + nothingWeightScalar);
             normalizedNonemptyWeight = (int)(float)((totalWeight - nothingWeightScalar * nothingWeight) / (lOOTS.Length - 1));
-            _log.LogInfo($"{nothingWeightScalar} with nothing weight {nothingWeight} vs {otherDropScalar} with {lOOTS.Length - 1} {normalizedNonemptyWeight}s.");
             int num3 = DetermineDrop(nothingWeight, normalizedNonemptyWeight, totalWeight, otherDropScalar, lOOTS, areDropsNormalized);
             if (__instance.LOOTS[num3].ITEM == null)
             {
@@ -85,7 +83,6 @@ namespace LunacidAP
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
                 return false;
             }
-            _log.LogInfo("Placing AP info to drop from drop table check");
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true);
             DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position, archipelagoPickup);
@@ -218,7 +215,7 @@ namespace LunacidAP
         {
             GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
             obj.SetActive(value: false);
-            if (archipelagoPickup is not null)
+            if (archipelagoPickup is not null && obj.GetComponent<ArchipelagoPickup>() is null)
             {
                 obj.AddComponent<ArchipelagoPickup>();
                 obj.GetComponent<ArchipelagoPickup>().LocationData = archipelagoPickup.LocationData;
@@ -268,7 +265,7 @@ namespace LunacidAP
                 var gameObjectWithChildren = GameObject.Find(LunacidEnemies.SceneToWorldObjectsName[scene]).transform;
                 if (!ConnectionData.RandomEnemyData.TryGetValue(scene, out var enemyData))
                 {
-                    _log.LogInfo($"Scene {scene} is not in the enemy data dictionary.");
+                    _log.LogWarning($"Scene {scene} is not in the enemy data dictionary.");
                     return true;
                 }
                 foreach (var childIndex in data.childPath)
@@ -398,7 +395,6 @@ namespace LunacidAP
                         _log.LogWarning($"Could not find enemy!");
                         return;
                     }
-                    _log.LogInfo($"{enemy.name} wasn't the parent, continuing.");
                     enemy = enemy.parent;
                 }
             }
@@ -415,7 +411,6 @@ namespace LunacidAP
         [HarmonyPostfix]
         private static void OnEnable_CollectSpellData(Spawn_on_enable __instance)
         {
-            _log.LogInfo($"Spell Item: {__instance.item}");
             if (__instance.item == "MAGIC/CAST/SILK_SPIT_CAST")
             {
                 return; //Its a Lunaga, they aren't shuffled.
@@ -449,7 +444,6 @@ namespace LunacidAP
                             _log.LogWarning($"Could not find enemy!");
                             return;
                         }
-                        _log.LogInfo($"{enemy.name} wasn't the parent, continuing.");
                         enemy = enemy.parent;
                         enemyName = LunacidEnemies.ModdedNameToPrefabName.Keys.Contains(enemy.name) ? LunacidEnemies.ModdedNameToPrefabName[enemy.name] : enemy.name;
                     }

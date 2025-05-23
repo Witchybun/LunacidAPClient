@@ -264,7 +264,7 @@ namespace LunacidAP
                     }
                     if (item is not null)
                     {
-                        var color = Colors.DetermineItemColor(item.Classification);
+                        var color = Colors.GetClassificationHex(item.Classification);
                         itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
                     }
                     var cost = " - <sprite=0>" + shopItem.cost.ToString();

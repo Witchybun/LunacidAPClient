@@ -100,7 +100,6 @@ namespace LunacidAP
 
         public void InitializeTraits()
         {
-            
             CloseTraitParser = new BKTreeCloseTraitParser<string>();
             foreach (var lunacidGiftItem in LunacidTraits.LunacidItemTraits)
             {

@@ -75,10 +75,14 @@ namespace LunacidAP
                 return true; //Its already handled.
             }
             __instance.gameObject.SetActive(!IsLocationCollected(apLocation));
-            __instance.gameObject.AddComponent<ArchipelagoPickup>();
-            __instance.gameObject.GetComponent<ArchipelagoPickup>().LocationData = apLocation;
-            __instance.gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
-            __instance.gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+            if (__instance.gameObject.GetComponent<ArchipelagoPickup>() is null)
+            {
+                __instance.gameObject.AddComponent<ArchipelagoPickup>();
+                __instance.gameObject.GetComponent<ArchipelagoPickup>().LocationData = apLocation;
+                __instance.gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
+                __instance.gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+            }
+            
             return false;
         }
 
@@ -129,10 +133,8 @@ namespace LunacidAP
             _log.LogWarning($"Item is {item.Name}.  ID for location is {locationOfShortestDistance.APLocationID}.");
             if (item.SlotName != ConnectionData.SlotName)
             {
-                _log.LogInfo("Its not an item for you...");
                 if (!item.Collected)
                 {
-                    _log.LogInfo("Sending Message");
                     SendMessageOnPickup(item);
                 }
             }
@@ -152,7 +154,6 @@ namespace LunacidAP
             }
             if (!pickupObject.TryGetComponent<ArchipelagoPickup>(out var apData))
             {
-                _log.LogInfo("This drop has no drop info associated with it.  You can have it.");
                 return true;
             }
             if (apData.LocationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
@@ -167,10 +168,9 @@ namespace LunacidAP
                 return false;
             }
             apData.SendLocation();
-            _log.LogInfo($"Is this already collected?  {apData.Collected}");
             if (apData.ArchipelagoItem.SlotName != ConnectionData.SlotName)
             {
-                var color = Colors.DetermineItemColor(apData.ArchipelagoItem.Classification);
+                var color = Colors.GetClassificationHex(apData.ArchipelagoItem.Classification);
                 if (apData.Collected && !apData.CanBeRepeated)
                 {
                     _popup.POP($"Item <color={color}>{apData.ArchipelagoItem.Name}</color> already found...", 1f, 1);
@@ -186,10 +186,9 @@ namespace LunacidAP
                 var isRepeatable = apData.ArchipelagoItem.Classification == ItemFlags.None ||
                 apData.ArchipelagoItem.Classification.HasFlag(ItemFlags.Trap) ||
                 LunacidItems.Materials.Contains(apData.ArchipelagoItem.Name);
-                _log.LogInfo($"Is this repeatable  {isRepeatable}");
                 if (!isRepeatable)
                 {
-                    var color = Colors.DetermineItemColor(apData.ArchipelagoItem.Classification);
+                    var color = Colors.GetClassificationHex(apData.ArchipelagoItem.Classification);
                     _popup.POP($"Item <color={color}>{apData.ArchipelagoItem.Name}</color> already found...", 1f, 1);
                 }
 
@@ -201,14 +200,14 @@ namespace LunacidAP
 
         public static void SendMessageOnPickup(ArchipelagoItem item)
         {
-            var color = Colors.DetermineItemColor(item.Classification);
+            var color = Colors.GetClassificationHex(item.Classification);
             _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
             _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
         }
 
         public static void SendLevelMessageOnLevelUp(ArchipelagoItem item)
         {
-            var color = Colors.DetermineItemColor(item.Classification);
+            var color = Colors.GetClassificationHex(item.Classification);
             _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
             _popup.POP($"Level Up!  Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
         }

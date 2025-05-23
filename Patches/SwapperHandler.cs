@@ -26,10 +26,8 @@ namespace LunacidAP
         public static ArchipelagoItem ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
             var archipelagoItem = new ArchipelagoItem();
-            _log.LogInfo($"We have {pickupObject} and {locationData.APLocationName}");
             if (locationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
-                _log.LogInfo("Figuring out the conundrum");
                 var actualName = LocationHandler.TheDaedalusConundrum(pickupObject);
                 var apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
                 archipelagoItem = ConnectionData.ScoutedLocations[apLocation.APLocationID];
@@ -238,22 +236,14 @@ namespace LunacidAP
             if (glow is null)
             {
                 _log.LogWarning($"There's no ITEM_FLARE for {pickupObject.name}");
-                var ashes = GameObject.Instantiate(Resources.Load("ITEMS/ASHES") as GameObject);
+                var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
                 var ashesGlow = ashes.transform.GetChild(0).GetChild(1);
                 glow = GameObject.Instantiate(ashesGlow);
-                GameObject.Destroy(ashes);
                 glow.parent = itemEff.transform.parent;
                 glow.position = itemEff.transform.position;
             }
-            var colors = Colors.AllColorsToMix(classification);
-            if (!colors.Any())
-            {
-                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
-                var fillerColor = isFillerAdded ? filler : Colors.FILLER_COLOR_DEFAULT; // Its filler
-                colors.Add(fillerColor);
-            }
-            var progressionColorInt = Colors.ColorMixer(colors);
-            var color = new Color(progressionColorInt[0]/255f, progressionColorInt[1]/255f, progressionColorInt[2]/255f, 1f);
+            var hexColor = Colors.GetClassificationHex(classification);
+            var color = Colors.HexToColorConverter(hexColor);
             var material = glow.GetComponent<ParticleSystemRenderer>().material;
             material.color = color;
         }

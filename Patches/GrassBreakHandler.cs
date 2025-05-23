@@ -34,8 +34,11 @@ namespace LunacidAP
             {
                 return true;
             }
-            _log.LogInfo($"Name: {__instance.name}, Type: {__instance.type}, DED: {__instance.DED}");
-            _log.LogInfo($"Drop is {archipelagoInfo.LocationData} with item {archipelagoInfo.ArchipelagoItem.Name}.  Was it collected?  {archipelagoInfo.ArchipelagoItem.Collected}");
+            if (archipelagoInfo.LocationData is null)
+            {
+                _log.LogInfo("The information is null.");
+                return true;
+            }
             // Its a grass/pot.  Drop the item on the floor.
             if (__instance.type == 2 && __instance.attack_controlled != -1)
             {
@@ -53,15 +56,11 @@ namespace LunacidAP
                     var loot = Resources.Load("ITEMS/ASHES") as GameObject;
                     GameObject.Destroy(dedThingObject.GetComponent<Loot_scr>());
                     GameObject.Instantiate(dedThingObject, __instance.transform.position, __instance.transform.rotation);
-                    loot.AddComponent<ArchipelagoPickup>();
-                    loot.GetComponent<ArchipelagoPickup>().LocationData = archipelagoInfo.LocationData;
-                    loot.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoInfo.ArchipelagoItem;
-                    loot.GetComponent<ArchipelagoPickup>().Collected = archipelagoInfo.ArchipelagoItem.Collected;
                     EnemyHandler.DropItemOnFloor(loot, __instance.transform.position, archipelagoInfo);
                 }
                 else
                 {
-                    
+
                     GameObject.Instantiate(dedThingObject, __instance.transform.position, __instance.transform.rotation);
                 }
             }
@@ -119,10 +118,14 @@ namespace LunacidAP
                     continue;
                 }
                 var item = ConnectionData.ScoutedLocations[group.APLocationID];
-                gameObject.AddComponent<ArchipelagoPickup>();
-                gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
-                gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
-                gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                
+                if (gameObject.GetComponent<ArchipelagoPickup>() is null)
+                {
+                    gameObject.AddComponent<ArchipelagoPickup>();
+                    gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
+                    gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
+                    gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                }
                 if (!item.Collected)
                 {
                     SetParticleSystemForObject(gameObject, item);
@@ -134,25 +137,15 @@ namespace LunacidAP
 
         private static void ConstructGlowObject()
         {
-            var ashes = GameObject.Instantiate(Resources.Load("ITEMS/ASHES") as GameObject);
+            var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
             var glow = ashes.transform.GetChild(0).GetChild(1);
             _glowObject = glow.gameObject;
-            GameObject.Destroy(ashes);
         }
 
         private static void SetParticleSystemForObject(GameObject gameObject, ArchipelagoItem item)
         {
-            var usedClassification = item.Classification.HasFlag(ItemFlags.Trap) ? ItemFlags.Advancement : item.Classification;
-            var colors = Colors.AllColorsToMix(usedClassification);
-            if (!colors.Any())
-            {
-                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
-                var fillerColor = isFillerAdded ? filler : Colors.FILLER_COLOR_DEFAULT; // Its filler
-                colors.Add(fillerColor);
-            }
-            var progressionColorInt = Colors.ColorMixer(colors);
-            var color = new Color(progressionColorInt[0] / 255f, progressionColorInt[1] / 255f, progressionColorInt[2] / 255f, 1f);
-            _log.LogInfo($"{gameObject} is given color {color.r}, {color.g}, {color.b}");
+            var hexColor = Colors.GetClassificationHex(item.Classification);
+            var color = Colors.HexToColorConverter(hexColor);
             var newGlow = GameObject.Instantiate(_glowObject);
             newGlow.transform.parent = gameObject.transform;
             newGlow.transform.position = gameObject.transform.position;
@@ -179,11 +172,21 @@ namespace LunacidAP
                     _log.LogError($"Couldn't find a position for {group.APLocationName}.");
                     continue;
                 }
+                if (sceneName == "SEWER_A1")
+                {
+                    if (group.APLocationName == "FM: Vase 16 - (The Fetid Mire)" || group.APLocationName == "FM: Vase 17 - (The Fetid Mire)")
+                    {
+                        gameObject.transform.position += new Vector3(-3f, 0f, 0f); // Move the pots out of the wall.
+                    }
+                }
                 var item = ConnectionData.ScoutedLocations[group.APLocationID];
-                gameObject.AddComponent<ArchipelagoPickup>();
-                gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
-                gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
-                gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                if (gameObject.GetComponent<ArchipelagoPickup>() is null)
+                {
+                    gameObject.AddComponent<ArchipelagoPickup>();
+                    gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
+                    gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
+                    gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                }
                 if (!item.Collected)
                 {
                     SetParticleSystemForObject(gameObject, item);
@@ -211,7 +214,6 @@ namespace LunacidAP
                 _log.LogInfo("Found nothing.");
                 return null;
             }
-            _log.LogInfo($"Found something: {objectOfShortestDistance.name} at {objectOfShortestDistance.transform.position.x}, {objectOfShortestDistance.transform.position.y}, {objectOfShortestDistance.transform.position.z}");
             return objectOfShortestDistance;
         }
     }

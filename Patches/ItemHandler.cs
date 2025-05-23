@@ -10,6 +10,7 @@ using I2.Loc;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace LunacidAP
 {
@@ -19,7 +20,7 @@ namespace LunacidAP
         private static POP_text_scr Popup;
         private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
-        private static List<string> _specialItems = new(){"Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring"};
+        private static List<string> _specialItems = new() { "Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring" };
 
         public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
         {
@@ -43,50 +44,45 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ItemLoad_CreateFakeKeys(Menus __instance)
         {
-            if (__instance.sub_menu != 6)
+            if (__instance.sub_menu == 6)
             {
-                return true;
+                var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
+                int EQ_SEL = (int)eqSelField.GetValue(__instance);
+                __instance.TXT[9].GetComponent<Animation>().Play();
+                __instance.TXT[10].GetComponent<Animation>().Play();
+                __instance.TXT[11].GetComponent<Animation>().Play();
+                int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
+                if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.ITEMS[num]))
+                {
+                    return true;
+                }
+                if (!_specialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
+                {
+                    return true;
+                }
+                int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
+                string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
+                if (itemName == "Great Well Doors Keyring")
+                {
+                    CreateDoorKeyInInventory(__instance, num3);
+                }
+                else if (itemName == "Great Well Switches Keyring")
+                {
+                    CreateSwitchKeyInInventory(__instance, num3);
+                }
+                /*else if (itemName == "Orb of a Lost Archipelago")
+                {
+                    CreateOrbInInventory(__instance, num3);
+                }*/
+                return false;
             }
-            var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-            int EQ_SEL = (int)eqSelField.GetValue(__instance);
-            __instance.TXT[9].GetComponent<Animation>().Play();
-            __instance.TXT[10].GetComponent<Animation>().Play();
-            __instance.TXT[11].GetComponent<Animation>().Play();
-            int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
-            if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.ITEMS[num]))
-            {
-                return true;
-            }
-            if (!_specialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
-            {
-                return true;
-            }
-            int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
-            string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
-            if (itemName == "Great Well Doors Keyring")
-            {
-                CreateDoorKeyInInventory(__instance, num3);
-            }
-            else if (itemName == "Great Well Switches Keyring")
-            {
-                CreateSwitchKeyInInventory(__instance, num3);
-            }
-            else if (itemName == "Orb of a Lost Archipelago")
-            {
-                CreateOrbInInventory(__instance, num3);
-            }
-            return false;
+            return true;
         }
 
         public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "")
         {
-            
-            if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
-            {
-                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                ApplyItemToInventory("Orb of a Lost Archipelago");
-            }
-            string color = Colors.DetermineItemColor(itemFlag);
+            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            string color = Colors.GetClassificationHex(itemFlag);
             if (overrideColor != "")
             {
                 color = overrideColor;
@@ -100,7 +96,8 @@ namespace LunacidAP
             if (type == 1 || type == 2)
             {
                 itemName = itemName.ToUpper();
-            }if (LunacidItems.FakeItems.Contains(itemName))
+            }
+            if (LunacidItems.FakeItems.Contains(itemName))
             {
                 PopupCommand(0, itemName, color, player, self);
                 return;
@@ -271,7 +268,7 @@ namespace LunacidAP
         private static void GiveDropBoost(string Name, string color, string player = "", bool self = false)
         {
             PopupCommand(0, Name, color, player, self);
-            
+
         }
 
         private static void ApplyItemToInventory(string Name)
@@ -524,7 +521,12 @@ namespace LunacidAP
             }
         }
 
-        private static void CreateOrbInInventory(Menus menu, int itemCount)
+        private static void FixThorn(Menus menu)
+        {
+
+        }
+
+        /*private static void CreateOrbInInventory(Menus menu, int itemCount)
         {
             GameObject obj = UnityEngine.Object.Instantiate(Resources.Load("ITEMS/" + "Dusty Crystal Orb")) as GameObject;
             var sceneName = menu.gameObject.scene.name;
@@ -546,7 +548,6 @@ namespace LunacidAP
                 foreach (var locationData in LunacidLocations.UniqueDropLocations)
                 {
                     var enemyName = locationData.APLocationName.Split(':')[0];
-                    _log.LogInfo($"Looking at {enemyName}");
                     if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
                     {
                         if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
@@ -658,7 +659,7 @@ namespace LunacidAP
                 var click = menu.GetType().GetMethod("Click", BindingFlags.Instance | BindingFlags.NonPublic);
                 click.Invoke(menu, new object[1] { 24 });
             }
-        }
+        }*/
 
         private static string ValueSuffix(int value)
         {

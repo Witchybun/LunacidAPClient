@@ -4,35 +4,25 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using UnityEngine;
 
 namespace LunacidAP
 {
     public class Colors
     {
-        public const string PROGRESSION_COLOR_DEFAULT = "#AF99EF";
-        public const string USEFUL_COLOR_DEFAULT = "#6D8BE8";
-        public const string FILLER_COLOR_DEFAULT = "#00EEEE";
-        public const string TRAP_COLOR_DEFAULT = "#FA8072";
+        public const string PROGUSEFUL_COLOR_DEFAULT = "FF8000";
+        public const string PROGRESSION_COLOR_DEFAULT = "#A335EE";
+        public const string USEFUL_COLOR_DEFAULT = "#0070DD";
+        public const string FILLER_COLOR_DEFAULT = "#1EFF00";
+        public const string TRAP_COLOR_DEFAULT = "#FF0000";
         public const string CHEAT_COLOR_DEFAULT = "#FF0000";
-        public const string GIFT_COLOR_DEFAULT = "#9DAE11";
+        public const string GIFT_COLOR_DEFAULT = "#FF8DA1";
 
         private static ManualLogSource _log;
 
         public Colors(ManualLogSource log)
         {
             _log = log;
-        }
-
-        public static string DetermineItemColor(ItemFlags itemFlags)
-        {
-            var colors = AllColorsToMix(itemFlags);
-            if (!colors.Any())
-            {
-                var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
-                return isFillerAdded ? filler : FILLER_COLOR_DEFAULT; // Its filler
-            }
-            var mixedColors = RGBToHexConverter(ColorMixer(colors));
-            return mixedColors;
         }
 
         public static string GetGiftColor()
@@ -47,58 +37,34 @@ namespace LunacidAP
             return isCheatAdded ? cheat : CHEAT_COLOR_DEFAULT;
         }
 
-        public static List<string> AllColorsToMix(ItemFlags itemFlags)
+        public static string GetClassificationHex(ItemFlags itemFlags)
         {
             var colors = new List<string>();
+            var isProgUsefulAdded = ConnectionData.ItemColors.TryGetValue("ProgUseful", out var proguseful);
             var isProgressionAdded = ConnectionData.ItemColors.TryGetValue("Progression", out var progression);
             var isUsefulAdded = ConnectionData.ItemColors.TryGetValue("Unique", out var useful);
             var isTrapAdded = ConnectionData.ItemColors.TryGetValue("Trap", out var trap);
-            if (itemFlags.HasFlag(ItemFlags.Advancement))
+            var isFillerAdded = ConnectionData.ItemColors.TryGetValue("Filler", out var filler);
+            if (itemFlags.HasFlag(ItemFlags.Advancement | ItemFlags.NeverExclude))
             {
-                colors.Add(isProgressionAdded ? progression : PROGRESSION_COLOR_DEFAULT);
+                return isProgUsefulAdded ? proguseful : PROGUSEFUL_COLOR_DEFAULT;
             }
-            if (itemFlags.HasFlag(ItemFlags.NeverExclude))
+            else if (itemFlags.HasFlag(ItemFlags.Advancement))
             {
-                colors.Add(isUsefulAdded ? useful : USEFUL_COLOR_DEFAULT);
+                return isProgressionAdded ? progression : PROGRESSION_COLOR_DEFAULT;
             }
-            if (itemFlags.HasFlag(ItemFlags.Trap))
+            else if (itemFlags.HasFlag(ItemFlags.NeverExclude))
             {
-                colors.Add(isTrapAdded ? trap : TRAP_COLOR_DEFAULT);
+                return isUsefulAdded ? useful : USEFUL_COLOR_DEFAULT;
             }
-            return colors;
+            else if (itemFlags.HasFlag(ItemFlags.Trap))
+            {
+                return isTrapAdded ? trap : TRAP_COLOR_DEFAULT;
+            }
+            return isFillerAdded ? filler : FILLER_COLOR_DEFAULT;
         }
 
-        public static int[] ColorMixer(List<string> colors)
-        {
-            var colorRGBs = new List<int[]>();
-            foreach (var color in colors)
-            {
-                colorRGBs.Add(HexToRGBConverter(color));
-            }
-            var count = colors.Count();
-            int avgR = 0;
-            int avgG = 0;
-            int avgB = 0;
-            for (var i = 0; i < colors.Count; i++)
-            {
-                avgR += colorRGBs[i][0];
-            }
-            for (var j = 0; j < count; j++)
-            {
-                avgG += colorRGBs[j][1];
-            }
-            for (var k = 0; k < count; k++)
-            {
-                avgB += colorRGBs[k][2];
-            }
-            avgR /= count;
-            avgG /= count;
-            avgB /= count;
-            var averageRGB = new int[] { avgR, avgG, avgB };
-            return averageRGB;
-        }
-
-        private static int[] HexToRGBConverter(string hex)
+        public static Color HexToColorConverter(string hex)
         {
             if (hex.IndexOf('#') != -1)
                 hex = hex.Replace("#", "");
@@ -106,7 +72,7 @@ namespace LunacidAP
             r = int.Parse(hex.Substring(0, 2), NumberStyles.AllowHexSpecifier);
             g = int.Parse(hex.Substring(2, 2), NumberStyles.AllowHexSpecifier);
             b = int.Parse(hex.Substring(4, 2), NumberStyles.AllowHexSpecifier);
-            return new int[] { r, g, b };
+            return new Color(r/255f, g/255f, b/255f, 1f);
         }
 
         private static string RGBToHexConverter(int[] rgb)

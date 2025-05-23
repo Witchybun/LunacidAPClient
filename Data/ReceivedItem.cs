@@ -6,6 +6,7 @@ namespace LunacidAP.Data
 { 
     public class ReceivedItem
     {
+        public int Index { get;  }
         public string Game { get; }
         public string Identifier { get; }
         public string LocationName { get; }
@@ -31,11 +32,12 @@ namespace LunacidAP.Data
             Classification = classification;
         }
 
-        public ReceivedItem(ItemInfo item)
+        public ReceivedItem(ItemInfo item, int index)
         {
+            Index = index;
             var playerName = ArchipelagoClient.AP.GetPlayerNameFromSlot(item.Player);
             Game = item.ItemGame;
-            Identifier = item.Player.Slot + "." + item.LocationId; 
+            Identifier = Index + "." + item.Player.Slot + "." + item.LocationId; 
             LocationName = item.LocationName;
             ItemName = item.ItemName;
             PlayerName = playerName;

@@ -596,19 +596,27 @@ namespace LunacidAP
         public static bool DoesPlayerHaveItem(string itemName)
         {
             CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            _log.LogInfo("1");
             var playerInventory = CON.CURRENT_PL_DATA.ITEMS;
-            for (var i = 0; i < 128; i++)
+            _log.LogInfo("2");
+            if (playerInventory is null)
             {
-                if (playerInventory[i] == "" || playerInventory[i] == null)
+                return false;
+            }
+            for (var i = 0; i < 128; i++)
+                {
+                _log.LogInfo($"We're at {i}.");
+                _log.LogInfo($"We have {playerInventory[i]}");
+                    if (playerInventory[i] == "" || playerInventory[i] == null)
                 {
                     return false;
                 }
-                if (StaticFuncs.REMOVE_NUMS(playerInventory[i]) == itemName)
-                {
-                    return true;
-                }
+                    if (StaticFuncs.REMOVE_NUMS(playerInventory[i]) == itemName)
+                    {
+                        return true;
+                    }
 
-            }
+                }
             return false;
         }
 
