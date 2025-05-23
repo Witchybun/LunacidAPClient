@@ -10,7 +10,7 @@ namespace LunacidAP
 {
     public class Colors
     {
-        public const string PROGUSEFUL_COLOR_DEFAULT = "FF8000";
+        public const string PROGUSEFUL_COLOR_DEFAULT = "#FF8000";
         public const string PROGRESSION_COLOR_DEFAULT = "#A335EE";
         public const string USEFUL_COLOR_DEFAULT = "#0070DD";
         public const string FILLER_COLOR_DEFAULT = "#1EFF00";
