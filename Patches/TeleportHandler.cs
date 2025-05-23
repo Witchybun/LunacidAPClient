@@ -73,7 +73,7 @@ namespace LunacidAP
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
-            UpdateTraversedEntrancesAP(currentWarp, eredWarp);
+            UpdateTraversedEntrancesAP(currentWarp);
 
             return true;
         }
@@ -149,12 +149,25 @@ namespace LunacidAP
             }
         }
 
-        private static void UpdateTraversedEntrancesAP(WarpDestinations.WarpData from, WarpDestinations.WarpData to)
+        private static void UpdateTraversedEntrancesAP(WarpDestinations.WarpData from)
         {
             var fromString = DetermineEntrance(from);
-            var toString = DetermineEntrance(to);
 
-            if (fromString == "NULL" || toString == "NULL" || fromString == toString)
+            if (fromString == "NULL")
+            {
+                return;
+            }
+
+            //_log.LogInfo("from: " + fromString);
+
+            if (!ConnectionData.Entrances.TryGetValue(fromString, out var toString))
+            {
+                //_log.LogError("to:   unknown");
+                return;
+            }
+            //_log.LogInfo("to:   " + toString);
+
+            if (toString == "NULL" || fromString == toString)
             {
                 return;
             }
