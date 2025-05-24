@@ -161,7 +161,25 @@ namespace LunacidAP
 
             if (!ConnectionData.ItemColors.Any())
             {
-                ConnectionData.ItemColors = ItemColors;
+                foreach (var color in ItemColors)
+                {
+                    if (Colors.IsColorInRightFormat(color.Value))
+                    {
+                        ConnectionData.ItemColors[color.Key] = color.Value;
+                    }
+                    else
+                    {
+                        if (Colors.DefaultColors.ContainsKey(color.Key))
+                            ConnectionData.ItemColors[color.Key] = Colors.DefaultColors[color.Key];
+                    }
+                }
+                foreach (var color in Colors.DefaultColors)
+                {
+                    if (!ConnectionData.ItemColors.ContainsKey(color.Key))
+                    {
+                        ConnectionData.ItemColors[color.Key] = color.Value;
+                    }
+                }
             }
 
         }

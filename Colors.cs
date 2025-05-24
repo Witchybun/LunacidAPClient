@@ -18,6 +18,16 @@ namespace LunacidAP
         public const string CHEAT_COLOR_DEFAULT = "#FF0000";
         public const string GIFT_COLOR_DEFAULT = "#FF8DA1";
 
+        public static readonly Dictionary<string, string> DefaultColors = new(){
+            {"ProgUseful", PROGUSEFUL_COLOR_DEFAULT},
+            {"Progression", PROGRESSION_COLOR_DEFAULT},
+            {"Useful", USEFUL_COLOR_DEFAULT},
+            {"Filler", FILLER_COLOR_DEFAULT},
+            {"Trap", TRAP_COLOR_DEFAULT},
+            {"Cheat", CHEAT_COLOR_DEFAULT},
+            {"Gift", GIFT_COLOR_DEFAULT},
+        };
+
         private static ManualLogSource _log;
 
         public Colors(ManualLogSource log)
@@ -75,27 +85,27 @@ namespace LunacidAP
             return new Color(r/255f, g/255f, b/255f, 1f);
         }
 
-        private static string RGBToHexConverter(int[] rgb)
+        public static bool IsColorInRightFormat(string color)
         {
-            string first, second, third = "";
-            first = rgb[0].ToString("X");
-            if (first.Length == 1)
+            var firstChar = color[0];
+            var theRest = color.Substring(1);
+            if (firstChar != '#')
             {
-                first = "0" + first;
+                return false;
             }
-            second = rgb[1].ToString("X");
-            if (second.Length == 1)
+            if (!int.TryParse(theRest, out var _))
             {
-                second = "0" + second;
+                return false;
             }
-            third = rgb[2].ToString("X");
-            if (third.Length == 1)
+            try
             {
-                third = "0" + third;
+                _ = HexToColorConverter(color);
             }
-            var finalString = "#" + first + second + third;
-            return finalString;
+            catch
+            {
+                return false;
+            }
+            return true;
         }
-
     }
 }
