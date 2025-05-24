@@ -247,8 +247,7 @@ namespace LunacidAP
 
         private static void GiveSilver(string Name, string player = "", bool self = false)
         {
-            var currencyMultiplier = DetermineRandomAmount(Name);
-            var currencyAmount = (10 * currencyMultiplier).ToString();
+            var currencyAmount = DetermineRandomAmount(Name).ToString();
             PopupCommand(0, currencyAmount, "white", player, self);
             Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
         }
@@ -406,24 +405,9 @@ namespace LunacidAP
         private static int DetermineRandomAmount(string Name)
         {
             var random = new System.Random(Name.GetHashCode() + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute);
-            var chosenValue = random.Next(0, 100);
-            if (chosenValue < 30)
-            {
-                return 1;
-            }
-            else if (chosenValue < 60)
-            {
-                return 2;
-            }
-            else if (chosenValue < 80)
-            {
-                return 3;
-            }
-            else if (chosenValue < 90)
-            {
-                return 4;
-            }
-            return 5;
+            var chosenValue = (int)Math.Sqrt(random.Next(0, 400));
+
+            return chosenValue == 0 ? 1 : chosenValue;
         }
 
         private static void GiveDoor(string Name, string color, string player = "", bool self = false)
