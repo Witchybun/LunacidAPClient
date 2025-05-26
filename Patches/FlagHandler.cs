@@ -469,14 +469,28 @@ namespace LunacidAP
 
         [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
         [HarmonyPrefix]
-        private static void Save_SaveDifferentValueForThings(AREA_SAVED_ITEM __instance)
+        private static bool Save_SaveDifferentValueForThings(AREA_SAVED_ITEM __instance)
         {
-            var sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName == "PITT_A1" && __instance.gameObject.name == "LADDER")
+            if (__instance.Zone == 15 && __instance.Slot == 3)
             {
-                __instance.Slot = 16;
-                __instance.Zone = 24;
+                return false; // Stop the Jotunn's death from keeping the entire area always flooded.
             }
+            var sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName == "PITT_A1")
+            {
+                if (__instance.gameObject.name == "LADDER")
+                {
+                    __instance.Slot = 16;
+                    __instance.Zone = 24;
+                }
+                else if (__instance.gameObject.name == "LEVER_GATE1")
+                {
+                    __instance.Slot = 14;
+                    __instance.Zone = 24;
+                }
+            }
+            return true;
+            
         }
 
         public static void RefreshSceneEntities(string itemName)
@@ -702,12 +716,21 @@ namespace LunacidAP
 
         private static void ModifyFlagDataForFlagSplits(AREA_SAVED_ITEM saveObject, string scene)
         {
-            if (scene == "PITT_A1" && saveObject.gameObject.name == "LADDER")
+            if (scene == "PITT_A1")
+            {
+                if (saveObject.gameObject.name == "LADDER")
                 {
 
                     saveObject.Slot = 16;
                     saveObject.Zone = 24;
                 }
+                else if (saveObject.gameObject.name == "LEVER_GATE1")
+                {
+                    saveObject.Slot = 14;
+                    saveObject.Zone = 24;
+                }
+            }
+            
         }
     }
 }
