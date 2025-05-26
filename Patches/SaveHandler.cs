@@ -27,7 +27,13 @@ namespace LunacidAP
             {
                 Directory.CreateDirectory(dir);
             }
+            var backupPath = Path.Combine(dir, $"Save{Save_Slot}.json.bak");
             var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
+            if (File.Exists(backupPath))
+            {
+                File.Delete(backupPath);
+            }
+            File.Move(savePath, backupPath);
             _log.LogInfo($"Saving to {savePath}...");
             _log.LogInfo($"In SaveData.  Stored Level: {ConnectionData.StoredLevel}");
             var newAPSaveData = new APSaveData()
