@@ -23,9 +23,9 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool GiveXP_MultiplyIncomingXP(CONTROL __instance, int LEVELED_XP)
         {
-            var has_bangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3: 1;
+            var has_bangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3 : 1;
             var givenXP = LEVELED_XP;
-            var multiplier = Math.Max(12, has_bangle * ArchipelagoClient.AP.SlotData.ExperienceMultiplier);
+            var multiplier = Math.Min(12, has_bangle * ArchipelagoClient.AP.SlotData.ExperienceMultiplier);
             givenXP = Mathf.RoundToInt(givenXP * multiplier);
             if ((__instance.CURRENT_PL_DATA.PLAYER_LVL < 100 || ConnectionData.StoredLevel < 100) && ArchipelagoClient.AP.SlotData.Levelsanity)
             {
@@ -52,59 +52,21 @@ namespace LunacidAP
             return false;
         }
 
-        [HarmonyPatch(typeof(Weapon_scr), "Attack")]
+        [HarmonyPatch(typeof(CONTROL), "OnSwap")]
         [HarmonyPostfix]
-        private static void Attack_TryToBuffExp(Weapon_scr __instance)
+        private static void OnSwap_ModifyWeaponGrowth(CONTROL __instance)
         {
-            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier * 3; // We need more exp sorry
-            if (__instance.name.Contains("BRITTLE ARMING SWORD"))
+            if (__instance.EQ_WEP is null)
             {
-                additionalExp = 1f; // It breaks too quickly.
+                return;
             }
-            if (__instance.type == 0)
+            if (__instance.EQ_WEP.WEP_XP > 99f)
             {
-                if (__instance.special == 6)
-                {
-                    __instance.WEP_XP += 1f * additionalExp;
-                }
-                int num = __instance.WEP_ELEMENT;
-                if (num > 7)
-                {
-                    switch (num)
-                    {
-                        case 8:
-                            num = 5;
-                            break;
-                        case 9:
-                            num = 0;
-                            break;
-                        case 10:
-                            num = 2;
-                            break;
-                        case 11:
-                            num = 5;
-                            break;
-                    }
-                }
-                if (__instance.gameObject.GetComponent<OBJ_HEALTH>() != null && __instance.gameObject.GetComponent<OBJ_HEALTH>().type < 4 && __instance.WEP_XP > -1f && __instance.WEP_XP < 99f)
-                {
-                    __instance.WEP_XP += (__instance.WEP_XP += __instance.WEP_GROWTH * __instance.gameObject.GetComponent<OBJ_HEALTH>().Damage_Mult[num] * (__instance.USED_WEP_DAMAGE / __instance.WEP_DAMAGE)) * additionalExp;
-                }
+                __instance.EQ_WEP.WEP_XP = 99f;
             }
-            if (__instance.type == 1)
-            {
-                if (__instance.WEP_XP > -1f && __instance.WEP_XP < 99f)
-                {
-                    __instance.WEP_XP += __instance.WEP_GROWTH * (__instance.USED_WEP_DAMAGE / __instance.WEP_DAMAGE) * additionalExp;
-                }
-            }
-            if (__instance.WEP_XP > 99f)
-            {
-                __instance.WEP_XP = 99f;
-            }
-
+            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier;
+            __instance.EQ_WEP.WEP_GROWTH *= additionalExp;
         }
-
 
         public static void StoreXP(int LEVELED_XP, bool ST, float PLAYER_L, float MOON_MULT)
         {
