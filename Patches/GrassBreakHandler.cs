@@ -144,7 +144,13 @@ namespace LunacidAP
 
         private static void SetParticleSystemForObject(GameObject gameObject, ArchipelagoItem item)
         {
-            var hexColor = Colors.GetClassificationHex(item.Classification);
+            var flag = item.Classification;
+            if (item.Classification.HasFlag(ItemFlags.Trap))
+            {
+                var choices = new List<ItemFlags>() {ItemFlags.Advancement | ItemFlags.NeverExclude, ItemFlags.Advancement, ItemFlags.NeverExclude, ItemFlags.None };
+                flag = choices[ArchipelagoClient.AP.RandomStatic.Next(choices.Count() - 1)];
+            }
+            var hexColor = Colors.GetClassificationHex(flag);
             var color = Colors.HexToColorConverter(hexColor);
             var newGlow = GameObject.Instantiate(_glowObject);
             newGlow.transform.parent = gameObject.transform;
