@@ -82,7 +82,7 @@ namespace LunacidAP
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
             }
-            
+            __instance.gameObject.SetActive(!item.Collected);
             return false;
         }
 
@@ -99,6 +99,10 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool ACT_SendLoreLocation(LoreBlock __instance)
         {
+            if (!ArchipelagoClient.AP.SlotData.Bookworm)
+            {
+                return true;
+            }
             var sceneName = SceneManager.GetActiveScene().name;
             var position = __instance.transform.position;
             LocationData locationOfShortestDistance = new();
@@ -201,8 +205,15 @@ namespace LunacidAP
         public static void SendMessageOnPickup(ArchipelagoItem item)
         {
             var color = Colors.GetClassificationHex(item.Classification);
-            _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
-            _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+            try
+            {
+                _popup = GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
+                _popup.POP($"Found <color={color}>{item.Name}</color> for {item.SlotName}", 1f, 0);
+            }
+            catch
+            {
+                _log.LogError("Popup was null.  Its fine, the check still sent.");
+            }
         }
 
         public static void SendLevelMessageOnLevelUp(ArchipelagoItem item)
