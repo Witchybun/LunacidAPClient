@@ -7,6 +7,7 @@ using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Data;
+using LunacidAP.Data.ArchipelagoGiftingCases;
 using UnityEngine;
 using static LunacidAP.Data.LunacidEnemies;
 using static LunacidAP.Data.LunacidLocations;
@@ -84,8 +85,18 @@ namespace LunacidAP
                 return false;
             }
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
+            if ((item.Collected && !isRepeatable))
+            {
+                if (!StardewValleyGifts.IsStardewItemGiftable(item.Name))
+                {
+                    return false;
+                }
+            }
             var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true);
-            DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position, archipelagoPickup);
+            _log.LogInfo($"We're dropping the item {__instance.LOOTS[num3].ITEM.name} on the floor");
+            var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
+            DropItemOnFloor(ashes, __instance.gameObject.transform.position, archipelagoPickup);
             return false;
         }
 
@@ -214,9 +225,14 @@ namespace LunacidAP
         public static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
         {
             GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
+            // idk why but one particular mushroom gets items misplaced.
             obj.SetActive(value: false);
             if (archipelagoPickup is not null && obj.GetComponent<ArchipelagoPickup>() is null)
             {
+                if (archipelagoPickup.LocationData.APLocationName == "YF: Mushroom 46 - (Yosei Forest Lower Path Secret)")
+                {
+                    obj.transform.position = new Vector3(-260.4886f, -21.0825f, -167.9378f);
+                }
                 obj.AddComponent<ArchipelagoPickup>();
                 obj.GetComponent<ArchipelagoPickup>().LocationData = archipelagoPickup.LocationData;
                 obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;
