@@ -247,7 +247,7 @@ namespace LunacidAP
                             try
                             {
                                 var scoutedLocationsAvoidingTraps = scoutedLocationsAvoidingTrapsObject.ToList();
-                                item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
+                                item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count()) - 1];
                             }
                             catch
                             {
