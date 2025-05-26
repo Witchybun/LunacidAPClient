@@ -405,7 +405,15 @@ namespace LunacidAP
         private static int DetermineRandomAmount(string Name)
         {
             var random = new System.Random(Name.GetHashCode() + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute);
-            var chosenValue = (int)Math.Sqrt(random.Next(0, 400));
+            var chosenValue = 1;
+            if (Name == "Silver")
+            {
+                chosenValue = (int)Math.Sqrt(random.Next(0, 400));
+            }
+            else
+            {
+                chosenValue = (int)Math.Sqrt(random.Next(0, 25));
+            }
 
             return chosenValue == 0 ? 1 : chosenValue;
         }
