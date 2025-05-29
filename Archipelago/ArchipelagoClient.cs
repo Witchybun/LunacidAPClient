@@ -399,16 +399,18 @@ namespace LunacidAP
                     cheatedCount += 1;
                 }
                 if (item.Index < ConnectionData.Index)
-                    {
-                        continue;
-                    }
+                {
+                    continue;
+                }
                 var isSelf = item.PlayerName == ConnectionData.SlotName;
                 var isCheated = item.LocationId < 0;
+                var isLevelLocation = item.LocationName.Contains("Reach Level");
+                var isSelfLevelLocation = isLevelLocation && isSelf;
                 if (ConnectionData.ReceivedItems.ContainsKey(item.Identifier))
                 {
                     continue;
                 }
-                ItemHandler.GiveLunacidItem(item, isSelf, isCheated);
+                ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
                 ConnectionData.ReceivedItems[item.Identifier] = item;
                 ConnectionData.Index++;
             }

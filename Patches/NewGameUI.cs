@@ -142,12 +142,12 @@ namespace LunacidAP
                     ConnectionData.WriteConnectionData();
                     SaveHandler.SaveData(saveSlot);
                 }
-            }
-            else if (which == 28 && __instance.current_query == 6) // Trying to load save fully but connection isn't made yet
-            {
-                if (!ArchipelagoClient.AP.Authenticated)
+                else if (__instance.current_query == 6) // Trying to load save fully but connection isn't made yet
                 {
-                    return false;
+                    if (!ArchipelagoClient.AP.Authenticated)
+                    {
+                        return false;
+                    }
                 }
             }
             else if (which == 29 && __instance.current_query == 6) // Say no to a load at menu
@@ -261,7 +261,7 @@ namespace LunacidAP
                         }
                         else if (ArchipelagoClient.AP.Authenticated && PortEntry.activeSelf)
                         {
-                            
+
                             var names = create.Find("Labels");
                             names.GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "NAME";
                             names.Find("B").GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "BEAUTY";
@@ -417,7 +417,7 @@ namespace LunacidAP
             control.CURRENT_PL_DATA.PLAYER_H = control.PLAYER_MAX_HP;
             control.CURRENT_PL_DATA.PLAYER_B = control.PLAYER_MAX_HP;
             control.CURRENT_PL_DATA.PLAYER_M = control.PLAYER_MAX_MP;
-			control.CURRENT_PL_DATA.PLAYER_L = 0f;
+            control.CURRENT_PL_DATA.PLAYER_L = 0f;
 
 
             control.NORMAL_MULT = statData["Normal Res"] / 100f;
