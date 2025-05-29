@@ -86,11 +86,14 @@ namespace LunacidAP
             }
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
-            if ((item.Collected && !isRepeatable))
+            if (item.Collected)
             {
-                if (!StardewValleyGifts.IsStardewItemGiftable(item.Name))
+                var result = ArchipelagoClient.AP.Gifting.CanGiftToPlayer(item.SlotID);
                 {
-                    return false;
+                    if (!result.CanGift)
+                    {
+                        return false;
+                    }
                 }
             }
             var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true);
