@@ -121,7 +121,6 @@ namespace LunacidAP
                 CheckForVictory(sceneName);
                 CheckForDeath(sceneName);
                 AddSceneIfNotIncluded(sceneName);
-                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "Current Scene"] = sceneName;
             }
             if (sceneName == "CHAR_CREATE")
             {
