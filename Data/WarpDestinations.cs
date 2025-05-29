@@ -122,9 +122,44 @@ namespace LunacidAP.Data
             {9, "1000000001000000"}, // Ash
         };
 
-        public static readonly Dictionary<string, string> OneWayActualDestinations = new(){
-            {"Great Well Surface", "Wing's Rest Ceiling"},
-            {"Tower of Abyss", "Enter Coffin"},
+        public static readonly Dictionary<string, string> DefaultEntrances = new()
+        {
+            {"Sewers Door (Hollow Basin Side)", "Sewers Door (The Fetid Mire Side)"},
+            {"Sewers Door (The Fetid Mire Side)", "Sewers Door (Hollow Basin Side)"},
+            {"Rickety Bridge Door (Yosei Forest Side)", "Rickety Bridge Door (Hollow Basin Side)"},
+            {"Rickety Bridge Door (Hollow Basin Side)", "Rickety Bridge Door (Yosei Forest Side)"},
+            {"Broken Steps Door (Forbidden Archives Side)", "Broken Steps Door (Hollow Basin Side)"},
+            {"Broken Steps Door (Hollow Basin Side)", "Broken Steps Door (Forbidden Archives Side)"},
+            {"Library Exit Door (Laetus Chasm Side)", "Library Exit Door (Forbidden Archives Side)"},
+            {"Library Exit Door (Forbidden Archives Side)", "Library Exit Door (Laetus Chasm Side)"},
+            {"Surface Door (Great Well Surface Side)", "Surface Door (Laetus Chasm Side)"},
+            {"Surface Door (Laetus Chasm Side)", "Surface Door (Great Well Surface Side)"},
+            {"Treetop Door (Forest Canopy Path)", "Treetop Door (Yosei Forest Side)"},
+            {"Treetop Door (Yosei Forest Side)", "Treetop Door (Forest Canopy Path)"},
+            {"Sewers Sea Door (Sanguine Sea Side)", "Sewers Sea Door (The Fetid Mire Side)"},
+            {"Sewers Sea Door (The Fetid Mire Side)", "Sewers Sea Door (Sanguine Sea Side)"},
+            {"Accursed Door (Accursed Tomb Side)", "Accursed Door (Sanguine Sea Side)"},
+            {"Accursed Door (Sanguine Sea Side)", "Accursed Door (Accursed Tomb Side)"},
+            {"Tomb Secret Door (Yosei Forest Side)", "Tomb Secret Door (Accursed Tomb Side)"},
+            {"Tomb Secret Door (Accursed Tomb Side)", "Tomb Secret Door (Yosei Forest Side)"},
+            {"Castle Doors (Castle Le Fanu Side)", "Castle Doors (Sanguine Sea Side)"},
+            {"Castle Doors (Sanguine Sea Side)", "Castle Doors (Castle Le Fanu Side)"},
+            {"Light Accursed Door (Sealed Ballroom Side)", "Light Accursed Door (Castle Le Fanu Side)"},
+            {"Light Accursed Door (Castle Le Fanu Side)", "Light Accursed Door (Sealed Ballroom Side)"},
+            {"Burning Hot Door (Boiling Grotto Side)", "Burning Hot Door (Castle Le Fanu Side)"},
+            {"Burning Hot Door (Castle Le Fanu Side)", "Burning Hot Door (Boiling Grotto Side)"},
+            {"Prison Main Door (Terminus Prison Side)", "Prison Main Door (Throne Chamber Side)"},
+            {"Prison Main Door (Throne Chamber Side)", "Prison Main Door (Terminus Prison Side)"},
+            {"Secondary Door (Forlorn Arena Side)", "Secondary Door (Terminus Prison Side)"},
+            {"Secondary Door (Terminus Prison Side)", "Secondary Door (Forlorn Arena Side)"},
+            {"Forbidden Door (Labyrinth of Ash Side)", "Forbidden Door (Terminus Prison Side)"},
+            {"Forbidden Door (Terminus Prison Side)", "Forbidden Door (Labyrinth of Ash Side)"},
+            {"Climb Rope Out Of Battlefield", "Jump from Castle Le Fanu Walls"},
+            {"Jump from Castle Le Fanu Walls", "Climb Rope Out Of Battlefield"},
+            {"Queen's Throne Door (Throne Chamber Side)", "Queen's Throne Door (Castle Le Fanu Side)"},
+            {"Queen's Throne Door (Castle Le Fanu Side)", "Queen's Throne Door (Throne Chamber Side)"},
+            {"Surface Floor Holes", "Hollow Basin Ceiling"},
+            {"Hollow Basin Ceiling", "Surface Floor Holes"},
         };
     }
 }

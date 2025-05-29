@@ -161,10 +161,10 @@ namespace LunacidAP
             //_log.LogInfo("from: " + fromString);
 
             if (!ConnectionData.Entrances.TryGetValue(fromString, out var toString))
-            {
-                //_log.LogError("to:   unknown");
-                return;
-            }
+                {
+                    //_log.LogError("to:   unknown");
+                    return;
+                }
             //_log.LogInfo("to:   " + toString);
 
             if (toString == "NULL" || fromString == toString)

@@ -129,14 +129,23 @@ namespace LunacidAP
                     ConnectionData.Elements.Add(newKey, data.Value);
                 }
             }
-            var entranceData = GetSlotSetting(ENT_KEY, "");
-            foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(entranceData))
+            if (EntranceRandomizer)
             {
-                if (!ConnectionData.Entrances.ContainsKey(data.Key))
+                var entranceData = GetSlotSetting(ENT_KEY, "");
+                foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(entranceData))
                 {
-                    ConnectionData.Entrances.Add(data.Key, data.Value);
+                    if (!ConnectionData.Entrances.ContainsKey(data.Key))
+                    {
+                        ConnectionData.Entrances.Add(data.Key, data.Value);
+                    }
                 }
             }
+            else
+            {
+                ConnectionData.Entrances = WarpDestinations.DefaultEntrances;
+            }
+
+
             if (EnemyRandomization)
             {
                 if (ConnectionData.RandomEnemyData.Any())
