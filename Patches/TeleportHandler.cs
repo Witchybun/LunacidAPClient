@@ -69,7 +69,19 @@ namespace LunacidAP
 
             var finalWarp = FixWarps(eredWarp);
 
-            __instance.LVL = finalWarp.Scene;
+            _log.LogInfo($"{__instance.gameObject.scene.name} to {finalWarp.Scene}");
+            if (__instance.gameObject.scene.name == "HUB_01" && finalWarp.Scene == "PITT_B1")
+            {
+                // Stop the player from leaving if they haven't checked the crystal yet.  
+                if (FlagHandler.LoadFlag(2).Substring(15, 1) != "1")
+                {
+                    var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                    control.PAPPY.POP("The crystal beckons...", 1f, 1);
+                    return false;
+                }
+            }
+
+                __instance.LVL = finalWarp.Scene;
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
