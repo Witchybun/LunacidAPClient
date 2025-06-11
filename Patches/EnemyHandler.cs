@@ -228,14 +228,9 @@ namespace LunacidAP
         public static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
         {
             GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
-            // idk why but one particular mushroom gets items misplaced.
             obj.SetActive(value: false);
             if (archipelagoPickup is not null && obj.GetComponent<ArchipelagoPickup>() is null)
             {
-                if (archipelagoPickup.LocationData.APLocationName == "YF: Mushroom 46 - (Yosei Forest Lower Path Secret)")
-                {
-                    obj.transform.position = new Vector3(-260.4886f, -21.0825f, -167.9378f);
-                }
                 obj.AddComponent<ArchipelagoPickup>();
                 obj.GetComponent<ArchipelagoPickup>().LocationData = archipelagoPickup.LocationData;
                 obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;

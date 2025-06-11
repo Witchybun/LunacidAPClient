@@ -56,7 +56,8 @@ namespace LunacidAP
                     var loot = Resources.Load("ITEMS/ASHES") as GameObject;
                     GameObject.Destroy(dedThingObject.GetComponent<Loot_scr>());
                     GameObject.Instantiate(dedThingObject, __instance.transform.position, __instance.transform.rotation);
-                    EnemyHandler.DropItemOnFloor(loot, __instance.transform.position, archipelagoInfo);
+                    var finalPosition = FixPositionInEdgeCase(archipelagoInfo.LocationData.APLocationName, __instance.transform.position);
+                    EnemyHandler.DropItemOnFloor(loot, finalPosition, archipelagoInfo);
                 }
                 else
                 {
@@ -85,6 +86,20 @@ namespace LunacidAP
                     break;
             }
             return false;
+        }
+
+        private static Vector3 FixPositionInEdgeCase(string locationName, Vector3 originalPosition)
+        {
+            if (locationName == "YF: Mushroom 46 - (Yosei Forest Lower Path Secret)")
+            {
+                return new Vector3(-260.4886f, -20.0825f, -167.9378f);
+            }
+            else if (locationName == "FlA: Fiddlehead 15 - (Temple of Earth)")
+            {
+                _log.LogInfo("Fixing the Fiddlehead");
+                return new Vector3(46.4224f, 13.02f, 201.6953f);
+            }
+            return originalPosition;
         }
 
         public static void AddArchipelagoData(string sceneName)
