@@ -150,11 +150,18 @@ namespace LunacidAP
 
         private static bool CollectLocation(Item_Pickup_scr pickupObject)
         {
+            // I believe I added this exception because the AP pickup component isn't added fast enough?
             if (pickupObject.gameObject.name == "WEPON")
             {
-                var apLocation = new LocationData(130, "FbA: uwu", "WEPON", new Vector3(-2.1f, -18.2f, 32.1f));
+                var apLocation = LunacidLocations.APLocationData["ARCHIVES"].First(x => x.GameObjectName == "WEPON");
                 var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
                 DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
+                if (item.SlotName != ConnectionData.SlotName)
+                {
+                    SendMessageOnPickup(item);
+                }
+                pickupObject.gameObject.SetActive(false);
+                return false;
             }
             if (!pickupObject.TryGetComponent<ArchipelagoPickup>(out var apData))
             {
