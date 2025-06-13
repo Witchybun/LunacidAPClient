@@ -1127,6 +1127,7 @@ namespace LunacidAP.Data
             new LocationData( 582, "Infested Corpse: Bones Drop" ),
             new LocationData( 583, "Infested Corpse: Antidote Drop" ),
             new LocationData( 709, "Headless Horseman: Cavalry Saber Drop"),
+            new LocationData( 584, "Skeleton: Large Silver Drop" ),
         };
 
         public static readonly List<LocationData> ShopLocations = new(){

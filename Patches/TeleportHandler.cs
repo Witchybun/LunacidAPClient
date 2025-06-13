@@ -73,7 +73,7 @@ namespace LunacidAP
             if (__instance.gameObject.scene.name == "HUB_01" && finalWarp.Scene == "PITT_B1")
             {
                 // Stop the player from leaving if they haven't checked the crystal yet.  
-                if (FlagHandler.LoadFlag(2).Substring(15, 1) != "1")
+                if (FlagHandler.LoadFlag(2).Substring(0, 1) != "1")
                 {
                     var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                     control.PAPPY.POP("The crystal beckons...", 1f, 1);
