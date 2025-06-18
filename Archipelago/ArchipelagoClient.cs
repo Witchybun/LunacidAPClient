@@ -170,13 +170,15 @@ namespace LunacidAP
                 SetUpGifting();
                 MuseHandler.InitializeChosenSongs(seed);
                 RandomStatic = new System.Random(seed);
+                var unverifiedLocations = ConnectionData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
+                Session.Locations.CompleteLocationChecks(unverifiedLocations);
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
-                {
-                    if (!ConnectionData.CompletedLocations.Contains(locationID))
                     {
-                        ConnectionData.CompletedLocations.Add(locationID);
+                        if (!ConnectionData.CompletedLocations.Contains(locationID))
+                        {
+                            ConnectionData.CompletedLocations.Add(locationID);
+                        }
                     }
-                }
 
                 // Connection successful
                 ConnectionData.WriteConnectionData(hostName, port, slotName, password);

@@ -4,6 +4,6 @@ namespace LunacidAP
     {
         public const string PLUGIN_GUID = "LunacidAP";
         public const string PLUGIN_NAME = "LunacidAP";
-        public const string PLUGIN_VERSION = "0.9.6";
+        public const string PLUGIN_VERSION = "0.9.7";
     }
 }
