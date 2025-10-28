@@ -56,6 +56,7 @@ namespace LunacidAP
                 TraversedEntrances = ConnectionData.TraversedEntrances,
                 ScoutedLocations = ConnectionData.ScoutedLocations,
                 EnteredScenes = ConnectionData.EnteredScenes,
+                BoughtItems = ConnectionData.BoughtItems,
                 ReceivedGifts = ConnectionData.ReceivedGifts,
                 RandomEnemyData = ConnectionData.RandomEnemyData,
             };
@@ -91,8 +92,8 @@ namespace LunacidAP
                     var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
                     ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password, loadedSave.StoredLevel, loadedSave.StoredExperience,
                     loadedSave.Seed, loadedSave.Index, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.ReceivedGifts,
-                    loadedSave.ItemColors, loadedSave.RandomEnemyData);
+                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.BoughtItems,
+                    loadedSave.ReceivedGifts, loadedSave.ItemColors, loadedSave.RandomEnemyData);
                     _log.LogInfo($"We have {loadedSave.StoredLevel} vs {ConnectionData.StoredLevel}");
                     return;
                 }
@@ -129,6 +130,7 @@ namespace LunacidAP
         public Dictionary<string, string> TraversedEntrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
         public List<string> EnteredScenes;
+        public HashSet<string> BoughtItems;
         public List<ReceivedGift> ReceivedGifts;
         public Dictionary<string, string> ItemColors;
         public Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData;

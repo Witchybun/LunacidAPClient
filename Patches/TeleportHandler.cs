@@ -66,7 +66,6 @@ namespace LunacidAP
         {
             var currentWarp = new WarpDestinations.WarpData(__instance.LVL, __instance.POS, __instance.ROT);
             var eredWarp = HandleEntranceRandomizer(currentWarp);
-
             var finalWarp = FixWarps(eredWarp);
 
             _log.LogInfo($"{__instance.gameObject.scene.name} to {finalWarp.Scene}");
@@ -80,12 +79,13 @@ namespace LunacidAP
                     return false;
                 }
             }
-
-                __instance.LVL = finalWarp.Scene;
+            else
+            {
+                UpdateTraversedEntrancesAP(currentWarp);
+            }
+            __instance.LVL = finalWarp.Scene;
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
-
-            UpdateTraversedEntrancesAP(currentWarp);
 
             return true;
         }
@@ -170,14 +170,14 @@ namespace LunacidAP
                 return;
             }
 
-            //_log.LogInfo("from: " + fromString);
+            _log.LogInfo("from: " + fromString);
 
             if (!ConnectionData.Entrances.TryGetValue(fromString, out var toString))
-                {
-                    //_log.LogError("to:   unknown");
-                    return;
-                }
-            //_log.LogInfo("to:   " + toString);
+            {
+                _log.LogError("to:   unknown");
+                return;
+            }
+            _log.LogInfo("to:   " + toString);
 
             if (toString == "NULL" || fromString == toString)
             {

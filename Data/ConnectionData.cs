@@ -25,6 +25,7 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> TraversedEntrances { get; set; } = new() { };
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
         public static List<string> EnteredScenes = new(){};
+        public static HashSet<string> BoughtItems = new(){};
         public static List<ReceivedGift> ReceivedGifts = new(){};
         public static Dictionary<string, string> ItemColors = new(){};
         public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new(){};
@@ -32,7 +33,7 @@ namespace LunacidAP.Data
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, int storedLevel = 0, int storedExperience = 0,
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
-        Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, List<ReceivedGift> receivedGifts = null, 
+        Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, HashSet<string> boughtItems = null, List<ReceivedGift> receivedGifts = null, 
         Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
             HostName = hostName;
@@ -89,6 +90,10 @@ namespace LunacidAP.Data
             {
                 EnteredScenes = enteredScenes;
             }
+            if (boughtItems is not null)
+            {
+                BoughtItems = boughtItems;
+            }
             if (receivedGifts is not null)
             {
                 ReceivedGifts = receivedGifts;
@@ -123,6 +128,7 @@ namespace LunacidAP.Data
             TraversedEntrances = new(){};
             ScoutedLocations = new(){};
             EnteredScenes = new(){};
+            BoughtItems = new(){};
             ReceivedGifts = new(){};
             ItemColors = new(){};
             RandomEnemyData = new(){};

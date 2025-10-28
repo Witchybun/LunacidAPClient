@@ -313,26 +313,33 @@ namespace LunacidAP
         {
             var sceneName = __instance.gameObject.scene.name;
             __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
+            var objectName = __instance.INV[which].OBJ.name;
+
+            if (ShopLocations.All(x => x.GameObjectName == __instance.INV[which].OBJ.name) ||
+                __instance.INV[which].cost > __instance.CON.CURRENT_PL_DATA.GOLD)
             {
                 return true;
             }
-            if (LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
-            __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
+            
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
-                var objectName = __instance.INV[which].OBJ.name;
-                var apLocation = DetermineShopLocation(sceneName, objectName);
-                var location = +apLocation.APLocationID;
-                var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
-                var slotNameofItemOwner = locationInfo.SlotName;
-                if (ConnectionData.SlotName != slotNameofItemOwner)
-                {
-                    var itemName = locationInfo.Name;
-                    __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
-                }
-                ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
-                ConnectionData.CompletedLocations.Add(location);
+                ConnectionData.BoughtItems.Add(objectName);
+                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = ConnectionData.BoughtItems.ToArray();
+                
+                return true;
             }
+            
+            var apLocation = DetermineShopLocation(sceneName, objectName);
+            var location = +apLocation.APLocationID;
+            var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
+            var slotNameofItemOwner = locationInfo.SlotName;
+            if (ConnectionData.SlotName != slotNameofItemOwner)
+            {
+                var itemName = locationInfo.Name;
+                __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
+            }
+            ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
+            ConnectionData.CompletedLocations.Add(location);
             return true;
         }
 
