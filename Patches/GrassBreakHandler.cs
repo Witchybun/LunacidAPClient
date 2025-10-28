@@ -67,19 +67,19 @@ namespace LunacidAP
             }
             if (__instance.type == 3)
             {
-                Object.Destroy(__instance.MOM);
+                UnityEngine.Object.Destroy(__instance.MOM);
             }
             switch (__instance.dest_type)
             {
                 case 0:
-                    Object.Destroy(__instance.gameObject);
+                    UnityEngine.Object.Destroy(__instance.gameObject);
                     break;
                 case 1:
                     __instance.transform.localScale = Vector3.zero;
                     __instance.gameObject.SetActive(value: false);
                     break;
                 case 2:
-                    Object.Instantiate(Resources.Load(__instance.DED), __instance.transform.position, __instance.transform.rotation,
+                    UnityEngine.Object.Instantiate(Resources.Load(__instance.DED), __instance.transform.position, __instance.transform.rotation,
                     __instance.transform.parent);
                     __instance.transform.localScale = Vector3.zero;
                     __instance.gameObject.SetActive(value: false);

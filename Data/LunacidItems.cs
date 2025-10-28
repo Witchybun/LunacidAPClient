@@ -210,7 +210,8 @@ namespace LunacidAP.Data
             {"WIND_CUT_CAST", "WIND SLICER"},
             {"LUCID_CAST", "LUCID BLADE"},
             {"FANG_CAST", "SERPENT FANG"},
-            {"LIGHTBLADE_CAST", "SHINING BLADE"}
+            {"LIGHTBLADE_CAST", "SHINING BLADE"},
+            {"PUMP_CAST", "PUMPKIN POP"}
 
         };
 

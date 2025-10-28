@@ -904,7 +904,7 @@ namespace LunacidAP.Data
             {"CAVE", new(){
                 new LocationData( 966, "ST: Calamis Diary 1", position: new Vector3(-387.407f, 12.344f, -165.64f)),
                 new LocationData( 967, "ST: Calamis Diary 2", position: new Vector3(-385.74f, 12.3309994f, -171.5f)),
-                new LocationData( 968, "BG: Calamis Diary 3", position: new Vector3(-326.311f, 20.326f, -200.274f)),
+                new LocationData( 968, "ST: Calamis Diary 3", position: new Vector3(-326.311f, 20.326f, -200.274f)),
                 new LocationData( 969, "BG: Gravestones of Sir Jeff and Sir David", position: new Vector3(-2.62091446f, 1.312f, -191.9895f)),
                 new LocationData( 970, "BG: Story of Sir Hicket", position: new Vector3(-89.22f, 8.324f, -140.11f)),
                 new LocationData( 971, "ST: Calamis Diary 4", position: new Vector3(-380.91f, 20.324f, -103.43f)),

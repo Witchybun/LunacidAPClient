@@ -131,6 +131,7 @@ namespace LunacidAP.Data
             {"GOLD_5", "Small Silver"},
             {"GOLD_10", "Medium Silver"},
             {"GOLD_25", "Large Silver"},
+            {"SABER_PICKUP", "Cavalry Saber"}
         };
 
         public static readonly Dictionary<string, List<string>> EnemyToScenes = new(){

@@ -4,10 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>LunacidAP</AssemblyName>
     <Description>Randomizer for Archipelago</Description>
-    <Version>0.9.7</Version>
+    <Version>0.9.10</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,13 +28,13 @@
 
   <ItemGroup>
 	  <Reference Include="Assembly-CSharp">
-		  <HintPath>/mnt/GameCollectionDos/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Assembly-CSharp.dll</HintPath>
+		  <HintPath>/mnt/115b93af-9f3b-43c4-a778-48dcab29caf0/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Assembly-CSharp.dll</HintPath>
 	  </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>/mnt/GameCollectionDos/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>/mnt/115b93af-9f3b-43c4-a778-48dcab29caf0/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>/mnt/GameCollectionDos/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/UnityEngine.UI.dll</HintPath>
+      <HintPath>/mnt/115b93af-9f3b-43c4-a778-48dcab29caf0/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>  
 

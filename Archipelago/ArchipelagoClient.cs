@@ -123,10 +123,10 @@ namespace LunacidAP
                         Session.TryConnectAndLogin(
                             Game,
                             slotName,
-                            ItemsHandlingFlags.AllItems, // TODO make sure to change this line
+                            ItemsHandlingFlags.AllItems,
                             new Version(Version),
                             password: password,
-                            requestSlotData: true, // ServerData.NeedSlotData
+                            requestSlotData: true, 
                             uuid: hostName + port.ToString()
                         ),
                         slotName, hostName, port, password, reconnect, slotID));
@@ -389,7 +389,7 @@ namespace LunacidAP
             }
             while (true)
             {
-                if (ArchipelagoClient.ItemsToProcess.Count() == 0)
+                if (!ArchipelagoClient.ItemsToProcess.Any())
                 {
                     break;
                 }

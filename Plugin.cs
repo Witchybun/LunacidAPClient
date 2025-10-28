@@ -19,10 +19,10 @@ namespace LunacidAP
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        public ManualLogSource Log { get; private set; }
+        private ManualLogSource Log { get; set; }
         public GeneralTweaks GeneralTweaks { get; private set; }
         public ArchipelagoClient Archipelago { get; private set; }
-        public LogicHelper LunacidLogic { get; private set; }
+        private LogicHelper LunacidLogic { get; set; }
         public static ManualLogSource LOG { get; private set; }
         public LocationHandler LocationHandler { get; private set; }
         public ItemHandler ItemHandler { get; private set; }
@@ -39,11 +39,11 @@ namespace LunacidAP
         public QuenchHandler QuenchHandler { get; private set; }
         public AlkiHandler AlkiHandler { get; private set; }
         public GrassBreakHandler GrassBreakHandler { get; private set; }
-        public NewGameUI UI { get; private set; }
+        private NewGameUI UI { get; set; }
         public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
-        private string CurrentSceneName;
-        private GameObject HubLevel;
+        private string _currentSceneName;
+        private GameObject _hubLevel;
         private void Awake()
         {
             try
@@ -126,10 +126,10 @@ namespace LunacidAP
             {
                 UI.ModifyCharCreateForArchipelago();
             }
-            CurrentSceneName = "";
+            _currentSceneName = "";
             GrassBreakHandler.AddArchipelagoData(sceneName);
             Cleanup();
-            HubLevel = null;
+            _hubLevel = null;
         }
         private void AddSceneIfNotIncluded(string sceneName)
         {
@@ -275,19 +275,19 @@ namespace LunacidAP
             {
                 StartCoroutine(ArchipelagoClient.AP.ReceiveDeathLink(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
             }
-            if (CurrentSceneName == "")
+            if (_currentSceneName == "")
             {
-                CurrentSceneName = SceneManager.GetActiveScene().name;
+                _currentSceneName = SceneManager.GetActiveScene().name;
             }
-            if (CurrentSceneName != "HUB_01")
+            if (_currentSceneName != "HUB_01")
             {
                 return;
             }
-            if (HubLevel is null)
+            if (_hubLevel is null)
             {
-                HubLevel = GameObject.Find("LEVEL");
+                _hubLevel = GameObject.Find("LEVEL");
             }
-            GeneralTweaks.EnsureAftermathAfterKill(HubLevel.transform);
+            GeneralTweaks.EnsureAftermathAfterKill(_hubLevel.transform);
         }
     }
 }

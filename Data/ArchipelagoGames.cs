@@ -68,6 +68,7 @@ namespace LunacidAP.Data
             {"Mega Man 2", "a robotic boy with myriad of powers"},
             {"Yacht Dice", "a group of dice"},
             {"TUNIC", "a tiny fox"},
+            {"Madou Monogatari Hanamaru Daiyouchienji", "a young girl"},
             // Unsupported
             {"Lunacid", "an outcast"},
             {"Wario Land 4", "a plump, greedy man"},
@@ -218,7 +219,8 @@ namespace LunacidAP.Data
             {"Hammerwatch", "storming the castle of Hammerwatch."},
             {"Cave Story", "a floating island amongst the clouds."},
             {"Anodyne", "within the depths of their own psyche."},
-            {"Flipwitch Forbidden Sex Hex", "from the sexual lands surrounding Spirit City."}
+            {"Flipwitch Forbidden Sex Hex", "from the sexual lands surrounding Spirit City."},
+            {"Madou Monogatari Hanamaru Daiyouchienji", "from a small town near a magical tower."},
         };
 
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)
