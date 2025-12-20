@@ -21,6 +21,8 @@ namespace LunacidAP.Data
         public static List<long> CompletedLocations {get; set;} = new List<long>(){};
         public static Dictionary<string, string> CommunionHints {get; set;} = new Dictionary<string, string>(){};
         public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
+        public static Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData { get; set; } = new();
+        public static Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData { get; set; } = new();
         public static Dictionary<string, string> Entrances {get; set;} = new (){};
         public static Dictionary<string, string> TraversedEntrances { get; set; } = new() { };
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};

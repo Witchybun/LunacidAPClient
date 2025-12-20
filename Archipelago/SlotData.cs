@@ -34,6 +34,7 @@ namespace LunacidAP.Archipelago
         private const string NORM_DROP_KEY = "normalized_drops";
         private const string DL_KEY = "death_link";
         private const string RANDOM_ELE_KEY = "random_elements";
+        private const string RANDOM_WEP_STAT_KEY = "random_equip_stats";
         private const string ELE_DICT_KEY = "elements";
         private const string WALL_KEY = "secret_door_lock";
         private const string START_AREA_KEY = "starting_area";
@@ -70,6 +71,7 @@ namespace LunacidAP.Archipelago
         public int RequiredCoins { get; private set; }
         public bool DeathLink { get; private set; }
         public bool RandomElements { get; private set; }
+        public RandomEquip RandomEquipStats { get; private set; }
         public bool FalseWalls { get; private set; }
         public int RolledMonth { get; private set; }
         public string CustomName { get; private set; }
@@ -108,6 +110,7 @@ namespace LunacidAP.Archipelago
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
+            RandomEquipStats = GetSlotSetting(RANDOM_WEP_STAT_KEY, RandomEquip.Off);
             FalseWalls = GetSlotSetting(WALL_KEY, false);
             RolledMonth = GetSlotSetting(MONTH_KEY, 1);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
@@ -178,8 +181,8 @@ namespace LunacidAP.Archipelago
                     }
                     else
                     {
-                        if (Colors.DefaultColors.ContainsKey(color.Key))
-                            ConnectionData.ItemColors[color.Key] = Colors.DefaultColors[color.Key];
+                        if (Colors.DefaultColors.TryGetValue(color.Key, out var defaultColor))
+                            ConnectionData.ItemColors[color.Key] = defaultColor;
                     }
                 }
                 foreach (var color in Colors.DefaultColors)
@@ -195,22 +198,27 @@ namespace LunacidAP.Archipelago
 
         private Goal GetSlotSetting(string key, Goal defaultValue)
         {
-            return (Goal)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Goal), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
+            return (Goal)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(Goal), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private Dropsanity GetSlotSetting(string key, Dropsanity defaultValue)
         {
-            return (Dropsanity)(_slotDataFields.ContainsKey(key) ? Enum.Parse(typeof(Dropsanity), _slotDataFields[key].ToString()) : GetSlotDefaultValue(key, defaultValue));
+            return (Dropsanity)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(Dropsanity), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
+        }
+
+        private RandomEquip GetSlotSetting(string key, RandomEquip defaultValue)
+        {
+            return (RandomEquip)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(RandomEquip), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
         }
 
         private string GetSlotSetting(string key, string defaultValue)
         {
-            return _slotDataFields.ContainsKey(key) ? _slotDataFields[key].ToString() : GetSlotDefaultValue(key, defaultValue);
+            return _slotDataFields.TryGetValue(key, out var field) ? field.ToString() : GetSlotDefaultValue(key, defaultValue);
         }
 
         public int GetSlotSetting(string key, int defaultValue)
         {
-            return _slotDataFields.ContainsKey(key) ? (int)(long)_slotDataFields[key] : GetSlotDefaultValue(key, defaultValue);
+            return _slotDataFields.TryGetValue(key, out var field) ? (int)(long)field : GetSlotDefaultValue(key, defaultValue);
         }
 
         public bool GetSlotSetting(string key, bool defaultValue)
@@ -260,5 +268,12 @@ namespace LunacidAP.Archipelago
         Off = 0,
         Unique = 1,
         Randomized = 2,
+    }
+
+    public enum RandomEquip
+    {
+        Off = 0,
+        Shuffled = 1,
+        Randomized = 2
     }
 }

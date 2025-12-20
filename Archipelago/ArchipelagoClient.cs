@@ -195,6 +195,7 @@ namespace LunacidAP.Archipelago
                 }
                 BuildLocations(SlotData.Seed);
                 CommunionHint.DetermineHints(seed);
+                RandomizeEquipData(seed);
                 outText = $"Successfully connected to as {slotName}!";
                 //GrabAllTrapOrientedCutscenes();
                 Authenticated = true;
@@ -758,6 +759,100 @@ namespace LunacidAP.Archipelago
         {
             var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
             return Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;
+        }
+        
+        public void RandomizeEquipData(int seed)
+        {
+            var random = new System.Random(seed);
+            if (ConnectionData.RandomizedWeaponData.Any() && ConnectionData.RandomizedSpellData.Any()) return;
+            switch (SlotData.RandomEquipStats)
+            {
+                case RandomEquip.Off:
+                {
+                    ConnectionData.RandomizedWeaponData = LunacidEquipStats.UsableWeaponData;
+                    ConnectionData.RandomizedSpellData = LunacidEquipStats.UsableMagicData;
+                    break;
+                }
+                case RandomEquip.Shuffled:
+                {
+                    var copiedWeaponData = LunacidEquipStats.UsableWeaponData;
+                    var copiedMagicData = LunacidEquipStats.UsableAttackMagicData;
+                    var copiedSupportMagicData = LunacidEquipStats.UsableSupportMagicData;
+                    foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
+                    {
+                        var chosenKey = copiedWeaponData.Keys.ToList()[random.Next(copiedWeaponData.Count)];
+                        var chosenWeapon = copiedWeaponData[chosenKey];
+                        copiedWeaponData.Remove(chosenKey);
+                        ConnectionData.RandomizedWeaponData[weapon] = chosenWeapon;
+                    }
+                    foreach (var spell in LunacidEquipStats.UsableMagicData.Keys)
+                    {
+                        var chosenKey = copiedMagicData.Keys.ToList()[random.Next(copiedMagicData.Count)];
+                        var chosenMagic = copiedMagicData[chosenKey];
+                        copiedMagicData.Remove(chosenKey);
+                        ConnectionData.RandomizedSpellData[spell] = chosenMagic;
+                    }
+                    foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
+                    {
+                        var chosenKey = copiedSupportMagicData.Keys.ToList()[random.Next(copiedSupportMagicData.Count)];
+                        var chosenSupportMagic = copiedSupportMagicData[chosenKey];
+                        copiedSupportMagicData.Remove(chosenKey);
+                        ConnectionData.RandomizedSpellData[spell] = chosenSupportMagic;
+                    }
+                    break;
+                }
+                case RandomEquip.Randomized:
+                {
+                    var weaponCount = LunacidEquipStats.UsableWeaponData.Count;
+                    var magicCount = LunacidEquipStats.UsableMagicData.Count;
+                    var supportMagicCount =  LunacidEquipStats.UsableSupportMagicData.Count;
+                    foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
+                    {
+                        var damage = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)].Damage;
+                        var speed = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                            .Speed;
+                        var guard = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                            .Guard;
+                        var backstep = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                            .Backstep;
+                        var thrust = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                            .Thrust;
+                        var weaponData = new LunacidEquipStats.WeaponData(damage, speed, guard, backstep, thrust);
+                        ConnectionData.RandomizedWeaponData[weapon] = weaponData;
+                    }
+
+                    foreach (var spell in LunacidEquipStats.UsableAttackMagicData.Keys)
+                    {
+                        var damage = LunacidEquipStats.UsableAttackMagicData.Values.ToList()[random.Next(magicCount)].Damage;
+                        var castChoice =
+                            LunacidEquipStats.UsableMagicData.Values.ToList()[
+                                random.Next(magicCount + supportMagicCount)];
+                        var castTime = castChoice.CastTime;
+                        var minCastTime =  castChoice.MinCastTime;
+                        var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
+                            random.Next(magicCount + supportMagicCount)].Cost;
+                        var spellData = new LunacidEquipStats.SpellData(damage, castTime, minCastTime, cost);
+                        ConnectionData.RandomizedSpellData[spell] = spellData;
+                    }
+
+                    foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
+                    {
+                        var castChoice =
+                            LunacidEquipStats.UsableMagicData.Values.ToList()[
+                                random.Next(magicCount + supportMagicCount)];
+                        var castTime = castChoice.CastTime;
+                        var minCastTime =  castChoice.MinCastTime;
+                        var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
+                            random.Next(magicCount + supportMagicCount)].Cost;
+                        var spellData = new LunacidEquipStats.SpellData(0, castTime, minCastTime, cost);
+                        ConnectionData.RandomizedSpellData[spell] = spellData;
+                    }
+
+                    break;
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
