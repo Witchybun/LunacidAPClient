@@ -34,7 +34,8 @@ namespace LunacidAP.Data
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, int storedLevel = 0, int storedExperience = 0,
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
-        Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, string> entrances = null,
+        Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, LunacidEquipStats.WeaponData> randomWeaponData = null, 
+        Dictionary<string, LunacidEquipStats.SpellData> randomSpellData = null, Dictionary<string, string> entrances = null,
         Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, HashSet<string> boughtItems = null, List<ReceivedGift> receivedGifts = null, 
         Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
@@ -75,6 +76,16 @@ namespace LunacidAP.Data
             if (elements is not null)
             {
                 Elements = elements;
+            }
+
+            if (randomWeaponData is not null)
+            {
+                RandomizedWeaponData = randomWeaponData;
+            }
+
+            if (randomSpellData is not null)
+            {
+                RandomizedSpellData = randomSpellData;
             }
             if (entrances is not null)
             {
@@ -122,18 +133,20 @@ namespace LunacidAP.Data
             CheatedCount = 0;
             StoredLevel = 5;
             StoredExperience = 0;
-            ReceivedItems = new Dictionary<string, ReceivedItem>(){};
-            CompletedLocations = new List<long>(){};
-            CommunionHints = new Dictionary<string, string>(){};
-            Elements = new(){};
-            Entrances = new(){};
-            TraversedEntrances = new(){};
-            ScoutedLocations = new(){};
-            EnteredScenes = new(){};
-            BoughtItems = new(){};
-            ReceivedGifts = new(){};
-            ItemColors = new(){};
-            RandomEnemyData = new(){};
+            ReceivedItems = new Dictionary<string, ReceivedItem>();
+            CompletedLocations = new List<long>();
+            CommunionHints = new Dictionary<string, string>();
+            Elements = new Dictionary<string, string>();
+            RandomizedWeaponData = new Dictionary<string, LunacidEquipStats.WeaponData>();
+            RandomizedSpellData = new Dictionary<string, LunacidEquipStats.SpellData>();
+            Entrances = new Dictionary<string, string>();
+            TraversedEntrances = new Dictionary<string, string>();
+            ScoutedLocations = new SortedDictionary<long, ArchipelagoItem>();
+            EnteredScenes = new List<string>();
+            BoughtItems = new HashSet<string>();
+            ReceivedGifts = new List<ReceivedGift>();
+            ItemColors = new Dictionary<string, string>();
+            RandomEnemyData = new Dictionary<string, List<RandomizedEnemyData>>();
         }
 
         public static readonly Dictionary<int, string> ClassEnumToName = new(){

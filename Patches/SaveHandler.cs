@@ -55,6 +55,8 @@ namespace LunacidAP.Patches
                 CheckedLocations = ConnectionData.CompletedLocations,
                 CommunionHints = ConnectionData.CommunionHints,
                 Elements = ConnectionData.Elements,
+                RandomizedWeaponData = ConnectionData.RandomizedWeaponData,
+                RandomizedSpellData = ConnectionData.RandomizedSpellData,
                 Entrances = ConnectionData.Entrances,
                 TraversedEntrances = ConnectionData.TraversedEntrances,
                 ScoutedLocations = ConnectionData.ScoutedLocations,
@@ -105,7 +107,8 @@ namespace LunacidAP.Patches
                 var sDS = JsonConvert.DeserializeObject<SlotDataSave>(text);
                 ConnectionData.WriteConnectionData(cDS.HostName, cDS.Port, cDS.SlotName, cDS.Password, sDS.StoredLevel, sDS.StoredExperience,
                     sDS.Seed, sDS.Index, sDS.DeathLink, sDS.CheatCount, sDS.ObtainedItems, sDS.CheckedLocations, 
-                    sDS.CommunionHints, sDS.Elements, sDS.Entrances, sDS.TraversedEntrances, sDS.ScoutedLocations, sDS.EnteredScenes, sDS.BoughtItems,
+                    sDS.CommunionHints, sDS.Elements, sDS.RandomizedWeaponData, sDS.RandomizedSpellData, 
+                    sDS.Entrances, sDS.TraversedEntrances, sDS.ScoutedLocations, sDS.EnteredScenes, sDS.BoughtItems,
                     sDS.ReceivedGifts, sDS.ItemColors, sDS.RandomEnemyData);
 
             }
@@ -139,6 +142,8 @@ namespace LunacidAP.Patches
         public List<long> CheckedLocations;
         public Dictionary<string, string> CommunionHints;
         public Dictionary<string, string> Elements;
+        public Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData;
+        public Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData;
         public Dictionary<string, string> Entrances;
         public Dictionary<string, string> TraversedEntrances;
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
