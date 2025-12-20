@@ -234,7 +234,7 @@ namespace LunacidAP
         // Thanks aihodge from the wild internet unity forums for this banger
         private IEnumerator GetCustomAudio()
         {
-            var dir = Application.dataPath.Replace("LUNACID_Data", "") + "CustomMusic/";
+            var dir = Path.Combine(Path.Combine(Paths.PluginPath, "LunacidAP"), "CustomMusic");
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);

@@ -22,26 +22,29 @@ namespace LunacidAP.Patches
 
         public static void SaveData(int Save_Slot)
         {
-            var dir = Application.absoluteURL + "ArchSaves/";
+            var mainDir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "Saves");
+            if (!Directory.Exists(mainDir))
+            {
+                Directory.CreateDirectory(mainDir);
+            }
+
+            var dir = Path.Combine(mainDir, $"Save{Save_Slot}");
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
             }
-            var backupPath = Path.Combine(dir, $"Save{Save_Slot}.json.bak");
-            var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
-            if (File.Exists(backupPath))
-            {
-                File.Delete(backupPath);
-                File.Move(savePath, backupPath);
-            }
-            _log.LogInfo($"Saving to {savePath}...");
-            _log.LogInfo($"In SaveData.  Stored Level: {ConnectionData.StoredLevel}");
-            var newAPSaveData = new APSaveData()
+            var savePath = Path.Combine(dir, "ConnectionData.json");
+            var slotPath = Path.Combine(dir, "SlotData.json");
+            var newConnectionData = new ConnectionDataSave()
             {
                 SlotName = ConnectionData.SlotName,
                 HostName = ConnectionData.HostName,
                 Port = ConnectionData.Port,
                 Password = ConnectionData.Password,
+            };
+            var newSlotData = new SlotDataSave()
+            {
+
                 Index = ConnectionData.Index,
                 StoredLevel = ConnectionData.StoredLevel,
                 StoredExperience = ConnectionData.StoredExperience,
@@ -62,10 +65,12 @@ namespace LunacidAP.Patches
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
             {
-                newAPSaveData.Seed = ArchipelagoClient.AP.SlotData.Seed;
+                newSlotData.Seed = ArchipelagoClient.AP.SlotData.Seed;
             }
-            string json = JsonConvert.SerializeObject(newAPSaveData);
+            string json = JsonConvert.SerializeObject(newConnectionData);
             File.WriteAllText(savePath, json);
+            json = JsonConvert.SerializeObject(newSlotData);
+            File.WriteAllText(slotPath, json);
             _log.LogInfo("Save complete!");
         }
 
@@ -73,32 +78,35 @@ namespace LunacidAP.Patches
         {
             try
             {
-                
                 if (ArchipelagoClient.IsInGame)
                 {
                     return; // Don't keep spam loading in situations it isn't relevant; causes data loss.
                 }
                 _log.LogInfo($"Reading save {Save_Slot}");
-                var dir = Application.absoluteURL + "ArchSaves/";
-                if (!Directory.Exists(dir))
+                var mainDir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "Saves");
+                if (!Directory.Exists(mainDir))
                 {
-                    Directory.CreateDirectory(dir);
-                }
-                var savePath = Path.Combine(dir, $"Save{Save_Slot}.json");
-                if (File.Exists(savePath))
-                {
-                    using StreamReader reader = new StreamReader(savePath);
-                    string text = reader.ReadToEnd();
-                    var loadedSave = JsonConvert.DeserializeObject<APSaveData>(text);
-                    ConnectionData.WriteConnectionData(loadedSave.HostName, loadedSave.Port, loadedSave.SlotName, loadedSave.Password, loadedSave.StoredLevel, loadedSave.StoredExperience,
-                    loadedSave.Seed, loadedSave.Index, loadedSave.DeathLink, loadedSave.CheatCount, loadedSave.ObtainedItems, loadedSave.CheckedLocations, 
-                    loadedSave.CommunionHints, loadedSave.Elements, loadedSave.Entrances, loadedSave.TraversedEntrances, loadedSave.ScoutedLocations, loadedSave.EnteredScenes, loadedSave.BoughtItems,
-                    loadedSave.ReceivedGifts, loadedSave.ItemColors, loadedSave.RandomEnemyData);
-                    _log.LogInfo($"We have {loadedSave.StoredLevel} vs {ConnectionData.StoredLevel}");
-                    return;
+                    _log.LogError("There is no save directory; are you loading a vanilla save?");
                 }
 
-                _log.LogError("SAVE not found");
+                var dir = Path.Combine(mainDir, $"Save{Save_Slot}");
+                var savePath = Path.Combine(dir, "ConnectionData.json");
+                var slotPath = Path.Combine(dir, "SlotData.json");
+                if (!File.Exists(savePath) || !File.Exists(slotPath))
+                {
+                    _log.LogError("SAVE not found");
+                    return;
+                }
+                using var connectionReader = new StreamReader(savePath);
+                var text = connectionReader.ReadToEnd();
+                var cDS = JsonConvert.DeserializeObject<ConnectionDataSave>(text);
+                using var slotReader = new StreamReader(slotPath);
+                text = slotReader.ReadToEnd();
+                var sDS = JsonConvert.DeserializeObject<SlotDataSave>(text);
+                ConnectionData.WriteConnectionData(cDS.HostName, cDS.Port, cDS.SlotName, cDS.Password, sDS.StoredLevel, sDS.StoredExperience,
+                    sDS.Seed, sDS.Index, sDS.DeathLink, sDS.CheatCount, sDS.ObtainedItems, sDS.CheckedLocations, 
+                    sDS.CommunionHints, sDS.Elements, sDS.Entrances, sDS.TraversedEntrances, sDS.ScoutedLocations, sDS.EnteredScenes, sDS.BoughtItems,
+                    sDS.ReceivedGifts, sDS.ItemColors, sDS.RandomEnemyData);
 
             }
             catch (Exception ex)
@@ -110,12 +118,17 @@ namespace LunacidAP.Patches
 
     }
 
-    internal class APSaveData
+    internal class ConnectionDataSave
     {
         public string SlotName;
         public string HostName;
         public int Port;
         public string Password;
+    }
+
+    internal class SlotDataSave
+    {
+        
         public int Index;
         public int StoredLevel;
         public int StoredExperience;

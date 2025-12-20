@@ -54,7 +54,7 @@ namespace LunacidAP.Patches
 
         public static void InitializeTrackInfo()
         {
-            var dir = Application.absoluteURL + "CustomMusic/";
+            var dir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "CustomMusic");
             if (!Directory.Exists(dir))
             {
                 Directory.CreateDirectory(dir);
