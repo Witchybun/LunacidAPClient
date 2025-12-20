@@ -292,15 +292,15 @@ namespace LunacidAP.Patches
             }
             else
             {
-                if (LunacidLocations.InitialVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Initial Offerings Voucher"))
+                if (InitialVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Initial Offerings Voucher"))
                 {
                     return 0;
                 }
-                if (LunacidLocations.GoldenVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Golden Armor Voucher"))
+                if (GoldenVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Golden Armor Voucher"))
                 {
                     return 0;
                 }
-                if (LunacidLocations.DreamerVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Dreamer Voucher"))
+                if (DreamerVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Dreamer Voucher"))
                 {
                     return 0;
                 }
@@ -358,7 +358,7 @@ namespace LunacidAP.Patches
                 var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
                 int EQ_SEL = (int)eqSelField.GetValue(__instance);
                 var objectName = __instance.SHOP.INV[EQ_SEL].OBJ.name;
-                if (!ShopLocations.Any(x => x.GameObjectName == objectName))
+                if (ShopLocations.All(x => x.GameObjectName != objectName))
                 {
                     return;
                 }
@@ -385,15 +385,16 @@ namespace LunacidAP.Patches
                 var gameName = locationInfo.Game;
                 var gameNameLength = gameName.Length;
                 gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
-                if (!ArchipelagoGames.GameToProtagonist.TryGetValue(gameName, out string protag))
+                var blurb = "";
+                if (!ArchipelagoGames.GameData.TryGetValue(gameName, out var gameData))
                 {
-                    protag = "an unknown entity";
+                    blurb = ArchipelagoGames.GameData["Generic"].Blurb;
                 }
-                if (!ArchipelagoGames.GameToItemBlurb.TryGetValue(gameName, out string blurb))
+                else
                 {
-                    blurb = "an unknown land amongst the archipelagos.";
+                    blurb = gameData.Blurb;
                 }
-                var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\nA curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
+                var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\n{blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
                 __instance.TXT[56].text = itemName.ToUpper();
                 __instance.TXT[50].text = totalBlurb;
                 __instance.ITEMS[26].SetActive(value: false);

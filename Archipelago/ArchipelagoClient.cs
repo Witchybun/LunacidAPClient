@@ -172,12 +172,12 @@ namespace LunacidAP.Archipelago
                 var unverifiedLocations = ConnectionData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
                 Session.Locations.CompleteLocationChecks(unverifiedLocations);
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
+                {
+                    if (!ConnectionData.CompletedLocations.Contains(locationID))
                     {
-                        if (!ConnectionData.CompletedLocations.Contains(locationID))
-                        {
-                            ConnectionData.CompletedLocations.Add(locationID);
-                        }
+                        ConnectionData.CompletedLocations.Add(locationID);
                     }
+                }
 
                 // Connection successful
                 ConnectionData.WriteConnectionData(hostName, port, slotName, password);
@@ -230,36 +230,40 @@ namespace LunacidAP.Archipelago
         private void BuildLocations(int seed)
         {
             if (ConnectionData.Seed != seed)
+            {
+                BuildLocationTable();
+                // Scout unchecked locations
+                var uncheckedLocationIDs = from locationID in LocationTable.Keys select locationID;
+                var locations = Session.Locations.AllLocations;
+                foreach (var location in uncheckedLocationIDs)
                 {
-                    BuildLocationTable();
-                    // Scout unchecked locations
-                    var uncheckedLocationIDs = from locationID in LocationTable.Keys select locationID;
-                    var locations = Session.Locations.AllLocations;
-                    foreach (var location in uncheckedLocationIDs)
+                    if (locations.Contains(location))
                     {
-                        if (locations.Contains(location))
-                        {
-                            continue;
-                        }
-                        _log.LogWarning($"There's a location you're trying to scout that isn't there!  Location: {location}");
+                        continue;
                     }
-                    Task<Dictionary<long, ScoutedItemInfo>> scoutedInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
-                    //Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
-                    if (scoutedInfoTask.IsFaulted)
-                    {
-                        _log.LogError(scoutedInfoTask.Exception.GetBaseException().Message);
-                        return;
-                    }
-                    var scoutedInfo = scoutedInfoTask.Result;
-
-                    foreach (var item in scoutedInfo.Values)
-                    {
-                        int locationID = (int)item.LocationId;
-                        bool collected = ConnectionData.CompletedLocations.Contains(locationID);
-                        LocationTable[locationID] = new ArchipelagoItem(item, collected);
-                    }
-                    ConnectionData.ScoutedLocations = LocationTable;
+                    _log.LogWarning($"There's a location you're trying to scout that isn't there!  Location: {location}");
                 }
+                Task<Dictionary<long, ScoutedItemInfo>> scoutedInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
+                //Task<LocationInfoPacket> locationInfoTask = Task.Run(async () => await Session.Locations.ScoutLocationsAsync(false, uncheckedLocationIDs.ToArray()));
+                if (scoutedInfoTask.IsFaulted)
+                {
+                    _log.LogError(scoutedInfoTask.Exception.GetBaseException().Message);
+                    return;
+                }
+                var scoutedInfo = scoutedInfoTask.Result;
+
+                foreach (var item in scoutedInfo.Values)
+                {
+                    int locationID = (int)item.LocationId;
+                    bool collected = ConnectionData.CompletedLocations.Contains(locationID);
+                    LocationTable[locationID] = new ArchipelagoItem(item, collected);
+                    if (!ArchipelagoGames.GameData.ContainsKey(item.ItemGame))
+                    {
+                        ArchipelagoGames.ConstructNewGameData(item.ItemGame);
+                    }
+                }
+                ConnectionData.ScoutedLocations = LocationTable;
+            }    
         }
 
         // Need to figure this out; A lot of stuff isn't initialized when its best to serve this method.

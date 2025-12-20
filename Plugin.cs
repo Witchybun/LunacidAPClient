@@ -85,6 +85,7 @@ namespace LunacidAP
                 LivingGateHandler = new LivingGateHandler(Log);
                 MuseHandler = new MuseHandler(Log);
                 StoreCustomAudio();
+                ArchipelagoGames.ConstructData();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch (Exception ex)
