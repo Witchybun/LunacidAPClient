@@ -1,6 +1,7 @@
-using System;
 using UnityEngine;
+using LunacidAP.Archipelago;
 using static LunacidAP.Data.LunacidLocations;
+using LunacidAP.Patches;
 
 namespace LunacidAP.Data
 {

@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class CommunionHint
     {

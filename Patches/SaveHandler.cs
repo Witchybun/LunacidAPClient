@@ -1,15 +1,15 @@
 using System;
 using System.IO;
-using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
 using System.Collections.Generic;
 using BepInEx.Logging;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using static LunacidAP.Data.LunacidGifts;
 using static LunacidAP.Data.LunacidEnemies;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class SaveHandler
     {

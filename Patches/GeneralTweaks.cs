@@ -2,12 +2,13 @@ using System;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class GeneralTweaks
     {

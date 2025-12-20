@@ -6,7 +6,7 @@ using LunacidAP.Data;
 using Newtonsoft.Json;
 using static LunacidAP.Data.LunacidEnemies;
 
-namespace LunacidAP
+namespace LunacidAP.Archipelago
 {
     public class SlotData
     {

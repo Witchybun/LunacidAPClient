@@ -1,10 +1,10 @@
-using System.Runtime.InteropServices;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class AlkiHandler
     {

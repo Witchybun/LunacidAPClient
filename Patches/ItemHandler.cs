@@ -7,12 +7,12 @@ using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using I2.Loc;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class ItemHandler
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using BepInEx.Logging;
 using LunacidAP.Data;
 
-namespace LunacidAP
+namespace LunacidAP.Archipelago
 {
     public class LogicHelper
     {

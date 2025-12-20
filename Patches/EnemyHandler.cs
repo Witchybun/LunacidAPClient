@@ -1,18 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
-using LunacidAP.Data.ArchipelagoGiftingCases;
 using UnityEngine;
 using static LunacidAP.Data.LunacidEnemies;
 using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class EnemyHandler
     {

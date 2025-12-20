@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class NewGameUI
     {

@@ -1,19 +1,13 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class GrassBreakHandler
     {

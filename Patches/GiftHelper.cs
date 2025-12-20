@@ -9,12 +9,13 @@ using Archipelago.Gifting.Net.Utilities.CloseTraitParser;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using LunacidAP.Data.ArchipelagoGiftingCases;
 using UnityEngine;
 using static LunacidAP.Data.LunacidGifts;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class GiftHelper
     {

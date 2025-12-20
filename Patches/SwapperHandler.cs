@@ -7,7 +7,7 @@ using LunacidAP.Data;
 using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class SwapperHandler
     {
@@ -136,7 +136,7 @@ namespace LunacidAP
                 }
                 return archipelagoItem;
             }
-            if (archipelagoItem.Classification.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Trap))
+            if (archipelagoItem.Classification.HasFlag(ItemFlags.Trap))
             {
                 try
                 {

@@ -1,9 +1,10 @@
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using UnityEngine;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class LivingGateHandler
     {

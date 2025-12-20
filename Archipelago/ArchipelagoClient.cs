@@ -6,6 +6,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using LunacidAP.Patches;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
@@ -15,12 +16,10 @@ using Archipelago.MultiClient.Net.Models;
 using Archipelago.Gifting.Net.Service;
 using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using static LunacidAP.Data.LunacidGifts;
-using Newtonsoft.Json.Linq;
 using System.Threading;
 using Archipelago.MultiClient.Net.Helpers;
-using System.Security.Cryptography.X509Certificates;
 
-namespace LunacidAP
+namespace LunacidAP.Archipelago
 {
     public class ArchipelagoClient : MonoBehaviour
     {

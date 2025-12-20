@@ -4,13 +4,13 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class WeaponHandler
     {

@@ -3,11 +3,12 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class FlagHandler
     {

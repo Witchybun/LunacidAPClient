@@ -1,18 +1,14 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Networking;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class MuseHandler
     {

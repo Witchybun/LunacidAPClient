@@ -1,5 +1,6 @@
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
+using LunacidAP.Archipelago;
 using Newtonsoft.Json;
 
 namespace LunacidAP.Data

@@ -4,10 +4,11 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine.SceneManagement;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class ReadDialogueHelper
     {

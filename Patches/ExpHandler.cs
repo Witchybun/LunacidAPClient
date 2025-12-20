@@ -1,13 +1,12 @@
 using System;
-using System.Runtime.InteropServices.ComTypes;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
-using TMPro;
 using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class ExpHandler
     {
