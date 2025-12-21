@@ -4,11 +4,14 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using I2.Loc;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace LunacidAP.Patches
 {
@@ -29,7 +32,7 @@ namespace LunacidAP.Patches
         // Kudos to Tesseract for suggesting this instead.
         [HarmonyPatch(typeof(CONTROL), "OnSwap")]
         [HarmonyPostfix]
-        private static void OnSwap_ModifyWeaponElement(CONTROL __instance)
+        private static void OnSwap_ModifyWeaponStats(CONTROL __instance)
         {
             if (__instance.EQ_WEP is null)
             {
@@ -46,7 +49,25 @@ namespace LunacidAP.Patches
                     }
                 }
             }
-            if (weaponName == "THORN" || weaponName == "GHOST SWORD")
+
+            if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
+            {
+                if (!ConnectionData.RandomizedWeaponData.TryGetValue(weaponName, out var data))
+                {
+                    _log.LogWarning($"Could not find data for {weaponName}");
+                }
+                else
+                {
+                    // Recalculate damage with new value.
+                    __instance.EQ_WEP.WEP_DAMAGE = GetRealDamageForWeapon(__instance, data.Damage, __instance.EQ_WEP);
+                    // The rest doesn't need this.
+                    __instance.EQ_WEP.WEP_COOLDOWN = data.Speed;
+                    __instance.EQ_WEP.WEP_GUARD = data.Guard;
+                    __instance.EQ_WEP.WEP_BACKSTEP = data.Backstep;
+                    __instance.EQ_WEP.WEP_WEIGHT = data.Thrust;
+                }
+            }
+            if (weaponName is "THORN" or "GHOST SWORD")
             {
                 var currentWeapon = __instance.EQ_WEP.gameObject;
                 var oldHand = currentWeapon.transform.Find("HAND");
@@ -55,8 +76,7 @@ namespace LunacidAP.Patches
                 {
                     relevantWeapon = (GameObject)Resources.Load("WEPS/REPLICA SWORD");
                 }
-                var newHand = GameObject.Instantiate(relevantWeapon.transform.Find("HAND"));
-                newHand.parent = oldHand.parent;
+                var newHand = Object.Instantiate(relevantWeapon.transform.Find("HAND"), oldHand.parent, true);
                 newHand.localPosition = oldHand.localPosition;
                 newHand.localRotation = oldHand.localRotation;
                 newHand.localScale = oldHand.localScale;
@@ -64,34 +84,102 @@ namespace LunacidAP.Patches
             }
         }
 
-        // Kudos to Tesseract for suggesting this instead.
-        [HarmonyPatch(typeof(Break_from_parent), "Start")]
-        [HarmonyPostfix]
-        private static void Start_ModifyRangedElement(Break_from_parent __instance)
+        private static float GetRealDamageForWeapon(CONTROL control, float damage, Weapon_scr weapon)
         {
-            if (!ArchipelagoClient.AP.SlotData.RandomElements)
+            if (weapon.type == 0 && weapon.special != 14)
             {
-                return;
+                damage *= StaticFuncs.calcStat(5, control.CURRENT_PL_DATA.PLAYER_STR, null);
             }
-            var castName = __instance.name.Replace("(Clone)", "");
-            var componentsInChildren = __instance.GetComponentsInChildren(typeof(Damage_Trigger), true);
-            if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
+            else if (weapon.type == 1 || weapon.special == 14)
             {
-                foreach (Damage_Trigger trigger in componentsInChildren.Cast<Damage_Trigger>())
-                {
-                    trigger.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
-                }
+                damage *= StaticFuncs.calcStat(5, control.CURRENT_PL_DATA.PLAYER_DEX, null);
             }
-            else
-            {
-                _log.LogWarning($"Could not change element for {castName}");
-            }
-
+            return damage;
         }
 
+        [HarmonyPatch(typeof(CONTROL), "EQMagic")]
+        [HarmonyPostfix]
+        private static void EQMagic_ModifyEquippedSpell(CONTROL __instance)
+        {
+            if (!string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG1) && __instance.CURRENT_PL_DATA.MAG1 != "EMPTY")
+            {
+                if (!ConnectionData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
+                {
+                    _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
+                }
+                else
+                {
+                    __instance.EQ_MAG1.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+                    __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime;
+                    __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+                    __instance.EQ_MAG1.MAG_COST = data.Cost;
+                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
+                    {
+                        __instance.EQ_MAG2.MAG_COST = 0;
+                    }
+                    if (ArchipelagoClient.AP.SlotData.RandomElements)
+                    {
+                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element))
+                        {
+                            __instance.EQ_MAG1.MAG_ELEM = LunacidItems.ElementToID[element];
+                        }
+                    }
+                    __instance.EQ_MAG1.SetValues();
+                }
+            }
+
+            if (string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG2) ||
+                __instance.CURRENT_PL_DATA.MAG2 == "EMPTY") return;
+            {
+                if (!ConnectionData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
+                {
+                    _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
+                }
+                else
+                {
+                    __instance.EQ_MAG2.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
+                    __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG2.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
+                    __instance.EQ_MAG2.MAG_COST = data.Cost;
+                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
+                    {
+                        __instance.EQ_MAG2.MAG_COST = 0;
+                    }
+                    if (ArchipelagoClient.AP.SlotData.RandomElements)
+                    {
+                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element))
+                        {
+                            __instance.EQ_MAG2.MAG_ELEM = LunacidItems.ElementToID[element];
+                        }
+                    }
+
+                    __instance.EQ_MAG2.SetValues();
+                }
+            }
+        }
+
+        private static float GetRealDamageForSpell(CONTROL control, float damage)
+        {
+            damage *= StaticFuncs.calcStat(6, control.CURRENT_PL_DATA.PLAYER_INT, null);
+            if (control.CURRENT_PL_DATA.PLAYER_CLASS.ToUpper() != "UNDEAD" || !control.EQ_MAG2.MAG_BL) return damage;
+            damage *= 2f;
+            return damage;
+        }
+
+        private static float GetRealCastTimeForSpell(CONTROL control, float castTime, float minCastTime)
+        {
+            castTime -= StaticFuncs.calcStat(7, control.CURRENT_PL_DATA.PLAYER_INT, null);
+            if (castTime < minCastTime)
+            {
+                castTime = minCastTime;
+            }
+            return castTime;
+        }
+        
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
-        private static void ItemLoad_FixElementInMenu(Menus __instance)
+        private static void ItemLoad_FixStatsInMenu(Menus __instance)
         {
             var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
             int EQ_SEL = (int)eqSelField.GetValue(__instance);
@@ -104,29 +192,34 @@ namespace LunacidAP.Patches
                         {
                             break;
                         }
-                        int result2 = -1;
+
                         GameObject gameObject2;
-                        if (int.TryParse(__instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(__instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2, 2), out result2))
+                        if (int.TryParse(__instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(__instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2, 2), out _))
                         {
-                            gameObject2 = UnityEngine.Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(0, __instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2))) as GameObject;
+                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(0, __instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2))) as GameObject;
                         }
                         else
                         {
-                            gameObject2 = UnityEngine.Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num])) as GameObject;
+                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num])) as GameObject;
                         }
-                        Weapon_scr component2 = gameObject2.GetComponent<Weapon_scr>();
-                        Sprite elementSprite;
-                        var nameWithoutClone = component2.name.Replace("(Clone)", "");
-                        if (IsElementShuffled(nameWithoutClone, out var element))
+
+                        if (gameObject2 != null)
                         {
-                            elementSprite = __instance.ELEM[element];
+                            Weapon_scr component2 = gameObject2.GetComponent<Weapon_scr>();
+                            var nameWithoutClone = component2.name.Replace("(Clone)", "");
+                            var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component2.WEP_ELEMENT];
+                            __instance.TXT[9].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
+                            var statData = ConnectionData.RandomizedWeaponData[nameWithoutClone];
+                            var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                            var trueDamage = GetRealDamageForWeapon(CON, statData.Damage, component2);
+                            __instance.TXT[10].text = trueDamage.ToString("F0") + "\n" + 
+                                                      Mathf.Round(10f * (1f / statData.Speed)) + "\n" + 
+                                                      component2.WEP_REACH + "\n" + 
+                                                      (100f - statData.Guard * 100f) + "%\n" + 
+                                                      statData.Backstep + "\n" + statData.Thrust;
                         }
-                        else
-                        {
-                            elementSprite = __instance.ELEM[component2.WEP_ELEMENT];
-                        }
-                        __instance.TXT[9].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
-                        UnityEngine.Object.Destroy(gameObject2);
+
+                        Object.Destroy(gameObject2);
                         break;
                     }
                 case 5:
@@ -135,24 +228,30 @@ namespace LunacidAP.Patches
                         {
                             break;
                         }
-                        GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load("MAGIC/" + __instance.CON.CURRENT_PL_DATA.SPELLS[num])) as GameObject;
-                        Magic_scr component = gameObject.GetComponent<Magic_scr>();
-                        Sprite elementSprite;
-                        var nameWithoutClone = component.name.Replace("(Clone)", "");
-                        if (nameWithoutClone == "BLOOD STRIKE")
+                        var gameObject = Object.Instantiate(Resources.Load("MAGIC/" + __instance.CON.CURRENT_PL_DATA.SPELLS[num])) as GameObject;
+                        if (gameObject != null)
                         {
-                            break; // To keep the original flavor of this spell which denotes it as blood
+                            var component = gameObject.GetComponent<Magic_scr>();
+                            var nameWithoutClone = component.name.Replace("(Clone)", "");
+                            var statData = ConnectionData.RandomizedSpellData[nameWithoutClone];
+                            var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
+                            __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = statData.Cost.ToString();
+                            var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                            var castTime = GetRealCastTimeForSpell(CON, statData.CastTime, statData.MinCastTime);
+                            __instance.TXT[23].transform.GetChild(num6 + 1).GetComponent<TextMeshProUGUI>().text = castTime > 0.3f ? castTime.ToString("F2") : LocalizationManager.GetTranslation("Spells/Instant");
+
+                            var damage = GetRealDamageForSpell(CON, statData.Damage);
+                            __instance.TXT[23].transform.GetChild(num6 + 2).GetComponent<TextMeshProUGUI>().text = damage.ToString("F2").Substring(0, damage.ToString("F2").Length - 3);
+
+                            if (nameWithoutClone == "BLOOD STRIKE")
+                            {
+                                break; // To keep the original flavor of this spell which denotes it as blood
+                            }
+                            var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component.MAG_ELEM];
+                            __instance.TXT[22].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
                         }
-                        if (IsElementShuffled(nameWithoutClone, out var element))
-                        {
-                            elementSprite = __instance.ELEM[element];
-                        }
-                        else
-                        {
-                            elementSprite = __instance.ELEM[component.MAG_ELEM];
-                        }
-                        __instance.TXT[22].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
-                        UnityEngine.Object.Destroy(gameObject);
+
+                        Object.Destroy(gameObject);
                         break;
                     }
             }
@@ -168,7 +267,7 @@ namespace LunacidAP.Patches
             }
         }
 
-        public static bool IsElementShuffled(string weaponName, out int element)
+        private static bool IsElementShuffled(string weaponName, out int element)
         {
             if (ConnectionData.Elements is null)
             {

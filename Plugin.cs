@@ -86,6 +86,7 @@ namespace LunacidAP
                 MuseHandler = new MuseHandler(Log);
                 StoreCustomAudio();
                 ArchipelagoGames.ConstructData();
+                LunacidEquipStats.InitializeEquipStatLookups();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
             catch (Exception ex)

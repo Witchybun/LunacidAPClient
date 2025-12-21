@@ -393,13 +393,13 @@ namespace LunacidAP.Archipelago
             }
             while (true)
             {
-                if (!ArchipelagoClient.ItemsToProcess.Any())
+                if (!ItemsToProcess.Any())
                 {
                     break;
                 }
                 // Reflects the old method in OnItemReceived
                 // If we can get a better UI made, this can be toned down some.
-                var item = ArchipelagoClient.ItemsToProcess.Dequeue();
+                var item = ItemsToProcess.Dequeue();
                 if (item.LocationId < 0)
                 {
                     cheatedCount += 1;
@@ -764,7 +764,7 @@ namespace LunacidAP.Archipelago
         public void RandomizeEquipData(int seed)
         {
             var random = new System.Random(seed);
-            if (ConnectionData.RandomizedWeaponData.Any() && ConnectionData.RandomizedSpellData.Any()) return;
+            if (ConnectionData.RandomizedWeaponData.Count > 0 && ConnectionData.RandomizedSpellData.Count > 0) return;
             switch (SlotData.RandomEquipStats)
             {
                 case RandomEquip.Off:
@@ -803,9 +803,12 @@ namespace LunacidAP.Archipelago
                 }
                 case RandomEquip.Randomized:
                 {
+                    var count = 0;
                     var weaponCount = LunacidEquipStats.UsableWeaponData.Count;
                     var magicCount = LunacidEquipStats.UsableMagicData.Count;
-                    var supportMagicCount =  LunacidEquipStats.UsableSupportMagicData.Count;
+                    var attackMagicCount = LunacidEquipStats.UsableAttackMagicData.Count;
+                    count += 1;
+                    _log.LogInfo(count);
                     foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
                     {
                         var damage = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)].Damage;
@@ -823,29 +826,39 @@ namespace LunacidAP.Archipelago
 
                     foreach (var spell in LunacidEquipStats.UsableAttackMagicData.Keys)
                     {
-                        var damage = LunacidEquipStats.UsableAttackMagicData.Values.ToList()[random.Next(magicCount)].Damage;
+                        _log.LogInfo($"Handling {spell}.  First, damage.");
+                        var damage = LunacidEquipStats.UsableAttackMagicData.Values.ToList()[random.Next(attackMagicCount)].Damage;
+                        _log.LogInfo($"We got {damage}.  Next, we need to determine cast time.");
                         var castChoice =
                             LunacidEquipStats.UsableMagicData.Values.ToList()[
-                                random.Next(magicCount + supportMagicCount)];
+                                random.Next(magicCount)];
+                        _log.LogInfo("Found a choice");
                         var castTime = castChoice.CastTime;
+                        _log.LogInfo($"Cast time is {castTime}");
                         var minCastTime =  castChoice.MinCastTime;
+                        _log.LogInfo($"Min cast time is {minCastTime}.  Next, cost.");
                         var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
-                            random.Next(magicCount + supportMagicCount)].Cost;
+                            random.Next(magicCount)].Cost;
+                        _log.LogInfo($"Got {cost}.  Now to package it.");
                         var spellData = new LunacidEquipStats.SpellData(damage, castTime, minCastTime, cost);
                         ConnectionData.RandomizedSpellData[spell] = spellData;
+                        count += 1;
+                        _log.LogInfo(count);
                     }
-
+                    _log.LogInfo("Done with Attack Magic");
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
                     {
                         var castChoice =
                             LunacidEquipStats.UsableMagicData.Values.ToList()[
-                                random.Next(magicCount + supportMagicCount)];
+                                random.Next(magicCount)];
                         var castTime = castChoice.CastTime;
                         var minCastTime =  castChoice.MinCastTime;
                         var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
-                            random.Next(magicCount + supportMagicCount)].Cost;
+                            random.Next(magicCount)].Cost;
                         var spellData = new LunacidEquipStats.SpellData(0, castTime, minCastTime, cost);
                         ConnectionData.RandomizedSpellData[spell] = spellData;
+                        count += 1;
+                        _log.LogInfo(count);
                     }
 
                     break;
@@ -853,6 +866,10 @@ namespace LunacidAP.Archipelago
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+            _log.LogInfo("Done with Support Magic");
+            
+            _log.LogInfo(ConnectionData.RandomizedWeaponData.Count);
+            _log.LogInfo(ConnectionData.RandomizedSpellData.Count);
         }
     }
 }
