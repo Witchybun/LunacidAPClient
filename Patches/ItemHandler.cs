@@ -20,7 +20,7 @@ namespace LunacidAP.Patches
         private static POP_text_scr Popup;
         private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
-        private static List<string> _specialItems = new() { "Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring" };
+        private static readonly List<string> SpecialItems = new() { "Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring" };
 
         public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
         {
@@ -34,9 +34,15 @@ namespace LunacidAP.Patches
         private static void GetTranslation_UseCustomNameWhenApplicable(string Term, ref string __result, bool FixForRTL = true, int maxLineLengthForRTL = 0, bool ignoreRTLnumbers = true, bool applyParameters = false, GameObject localParametersRoot = null, string overrideLanguage = null, bool allowLocalizedParameters = true)
         {
             var itemNoHeader = Term.Replace("Items/", "");
-            if (_specialItems.Contains(itemNoHeader))
+            if (SpecialItems.Contains(itemNoHeader))
             {
                 __result = itemNoHeader;
+            }
+
+            if (LunacidEquipStats.EquipmentLookup.ContainsKey(itemNoHeader))
+            {
+                var element = ConnectionData.Elements[itemNoHeader];
+                __result = LunacidEquipStats.ChangeNameBasedOnElement(itemNoHeader, element);
             }
         }
 
@@ -47,7 +53,7 @@ namespace LunacidAP.Patches
             if (__instance.sub_menu == 6)
             {
                 var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-                int EQ_SEL = (int)eqSelField.GetValue(__instance);
+                var EQ_SEL = (int)eqSelField.GetValue(__instance);
                 __instance.TXT[9].GetComponent<Animation>().Play();
                 __instance.TXT[10].GetComponent<Animation>().Play();
                 __instance.TXT[11].GetComponent<Animation>().Play();
@@ -56,7 +62,7 @@ namespace LunacidAP.Patches
                 {
                     return true;
                 }
-                if (!_specialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
+                if (!SpecialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
                 {
                     return true;
                 }
@@ -202,6 +208,8 @@ namespace LunacidAP.Patches
         {
             try
             {
+                var element = ConnectionData.Elements[Name];
+                Name = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
                 PopupCommand(1, Name, color, player, self, isSelfLevelLocation);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
                 for (int j = 0; j < 128; j++)
@@ -227,6 +235,8 @@ namespace LunacidAP.Patches
         {
             try
             {
+                var element = ConnectionData.Elements[Name];
+                Name = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
                 PopupCommand(2, Name, color, player, self, isSelfLevelLocation);
                 for (int k = 0; k < 128; k++)
                 {
@@ -366,11 +376,10 @@ namespace LunacidAP.Patches
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
                 {
                     Control.CURRENT_PL_DATA.MATER[i] = actualName + ValueSuffix(bundleSize);  // Used Alt_Name previously
-                    i = 999;
                 }
                 else
                 {
-                    if (!(Control.CURRENT_PL_DATA.MATER[i].Substring(0, Control.CURRENT_PL_DATA.MATER[i].Length - 2) == actualName))  // Used Alt_Name previously
+                    if (Control.CURRENT_PL_DATA.MATER[i].Substring(0, Control.CURRENT_PL_DATA.MATER[i].Length - 2) != actualName)  // Used Alt_Name previously
                     {
                         continue;
                     }
@@ -389,8 +398,9 @@ namespace LunacidAP.Patches
                     {
                         Control.CURRENT_PL_DATA.MATER[i] = actualName + num;  // Used Alt_Name previously
                     }
-                    i = 999;
                 }
+
+                i = 999;
             }
         }
 

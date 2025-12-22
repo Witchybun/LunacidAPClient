@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LunacidAP.Data
 {
@@ -176,6 +177,9 @@ namespace LunacidAP.Data
             {"Ice and Poison", 10},
             {"Dark and Fire", 11}
         };
+
+        public static readonly Dictionary<int, string> IDToElement =
+            ElementToID.ToDictionary(x => x.Value, x => x.Key);
 
         public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
             "COIN_PICKUP", "ENKEY_PICKUP"

@@ -218,7 +218,7 @@ namespace LunacidAP.Patches
                                                       (100f - statData.Guard * 100f) + "%\n" + 
                                                       statData.Backstep + "\n" + statData.Thrust;
                         }
-
+                        
                         Object.Destroy(gameObject2);
                         break;
                     }
