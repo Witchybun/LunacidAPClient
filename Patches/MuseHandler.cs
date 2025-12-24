@@ -72,6 +72,8 @@ namespace LunacidAP.Patches
             {
                 LunacidMusic.FileToTitle[track.Key] = track.Value;
             }
+
+            reader.Close();
         }
 
         public static void InitializeChosenSongs(int seed)

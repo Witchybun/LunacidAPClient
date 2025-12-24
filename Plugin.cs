@@ -40,6 +40,7 @@ namespace LunacidAP
         public QuenchHandler QuenchHandler { get; private set; }
         public AlkiHandler AlkiHandler { get; private set; }
         public GrassBreakHandler GrassBreakHandler { get; private set; }
+        public RandoOptionsMaker RandoOptionsMaker { get; private set;  }
         private NewGameUI UI { get; set; }
         public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
@@ -77,6 +78,7 @@ namespace LunacidAP
                 QuenchHandler = new QuenchHandler(Log);
                 AlkiHandler = new AlkiHandler(Log);
                 GrassBreakHandler = new GrassBreakHandler(Log);
+                RandoOptionsMaker = new RandoOptionsMaker(Log);
                 Colors = new Colors(Log);
                 FlagHandler.Awake(Log);
                 CommunionHint.Awake(Log);
@@ -109,10 +111,12 @@ namespace LunacidAP
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
             if (sceneName == "MainMenu")
             {
-                var versionLabel = GameObject.Find("PLAYER").transform.Find("Canvas").Find("HUD").Find("ROOT").Find("MAIN").Find("version_label");
+                var versionLabel = GameObject.Find("PLAYER/Canvas/HUD/ROOT/MAIN/version_label").transform;
                 versionLabel.position = new Vector3(-75.0263f, -20.5211f, -262.409f);
                 var gameVersion = versionLabel.GetComponent<TextMeshProUGUI>().text;
                 versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
+                var textBox = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(5).gameObject;
+                RandoOptionsMaker.CreatePortModificationSetting(textBox);
             }
             if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {

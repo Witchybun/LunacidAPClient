@@ -803,22 +803,19 @@ namespace LunacidAP.Archipelago
                 }
                 case RandomEquip.Randomized:
                 {
-                    var count = 0;
                     var weaponCount = LunacidEquipStats.UsableWeaponData.Count;
                     var magicCount = LunacidEquipStats.UsableMagicData.Count;
                     var attackMagicCount = LunacidEquipStats.UsableAttackMagicData.Count;
-                    count += 1;
-                    _log.LogInfo(count);
+                    var weaponList = LunacidEquipStats.UsableWeaponData.Values.ToList();
                     foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
                     {
-                        var damage = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)].Damage;
-                        var speed = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
-                            .Speed;
-                        var guard = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                        var damage = weaponList[random.Next(weaponCount)].Damage;
+                        var speed = weaponList[random.Next(weaponCount)].Speed;
+                        var guard = weaponList[random.Next(weaponCount)]
                             .Guard;
-                        var backstep = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                        var backstep = weaponList[random.Next(weaponCount)]
                             .Backstep;
-                        var thrust = LunacidEquipStats.UsableWeaponData.Values.ToList()[random.Next(weaponCount)]
+                        var thrust = weaponList[random.Next(weaponCount)]
                             .Thrust;
                         var weaponData = new LunacidEquipStats.WeaponData(damage, speed, guard, backstep, thrust);
                         ConnectionData.RandomizedWeaponData[weapon] = weaponData;
@@ -826,26 +823,17 @@ namespace LunacidAP.Archipelago
 
                     foreach (var spell in LunacidEquipStats.UsableAttackMagicData.Keys)
                     {
-                        _log.LogInfo($"Handling {spell}.  First, damage.");
                         var damage = LunacidEquipStats.UsableAttackMagicData.Values.ToList()[random.Next(attackMagicCount)].Damage;
-                        _log.LogInfo($"We got {damage}.  Next, we need to determine cast time.");
                         var castChoice =
                             LunacidEquipStats.UsableMagicData.Values.ToList()[
                                 random.Next(magicCount)];
-                        _log.LogInfo("Found a choice");
                         var castTime = castChoice.CastTime;
-                        _log.LogInfo($"Cast time is {castTime}");
                         var minCastTime =  castChoice.MinCastTime;
-                        _log.LogInfo($"Min cast time is {minCastTime}.  Next, cost.");
                         var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
                             random.Next(magicCount)].Cost;
-                        _log.LogInfo($"Got {cost}.  Now to package it.");
                         var spellData = new LunacidEquipStats.SpellData(damage, castTime, minCastTime, cost);
                         ConnectionData.RandomizedSpellData[spell] = spellData;
-                        count += 1;
-                        _log.LogInfo(count);
                     }
-                    _log.LogInfo("Done with Attack Magic");
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
                     {
                         var castChoice =
@@ -857,8 +845,6 @@ namespace LunacidAP.Archipelago
                             random.Next(magicCount)].Cost;
                         var spellData = new LunacidEquipStats.SpellData(0, castTime, minCastTime, cost);
                         ConnectionData.RandomizedSpellData[spell] = spellData;
-                        count += 1;
-                        _log.LogInfo(count);
                     }
 
                     break;
@@ -866,10 +852,6 @@ namespace LunacidAP.Archipelago
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            _log.LogInfo("Done with Support Magic");
-            
-            _log.LogInfo(ConnectionData.RandomizedWeaponData.Count);
-            _log.LogInfo(ConnectionData.RandomizedSpellData.Count);
         }
     }
 }

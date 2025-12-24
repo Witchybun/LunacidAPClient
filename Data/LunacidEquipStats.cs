@@ -45,6 +45,7 @@ public static class LunacidEquipStats
     public static readonly Dictionary<string, SpellData> UsableMagicData = new();
     public static readonly Dictionary<string, SpellData> UsableAttackMagicData = new();
     public static readonly Dictionary<string, SpellData> UsableSupportMagicData = new();
+    public static readonly Dictionary<string, Color> SpellColors = new();
 
     public static void InitializeEquipStatLookups()
     {
@@ -76,6 +77,22 @@ public static class LunacidEquipStats
                 UsableSupportMagicData[spell.name] = spellData;
             }
         }
+        GatherSpellColors();
+    }
+
+    private static void GatherSpellColors()
+    {
+        var earthStrike = Resources.Load<GameObject>("MAGIC/EARTH STRIKE");
+        SpellColors["Normal"] = earthStrike.GetComponent<Magic_scr>().MAG_COLOR;
+        var flameSpear = Resources.Load<GameObject>("MAGIC/FLAME SPEAR");
+        SpellColors["Fire"] = flameSpear.GetComponent<Magic_scr>().MAG_COLOR;
+        var iceSpear = Resources.Load<GameObject>("MAGIC/ICE SPEAR");
+        SpellColors["Ice"] = iceSpear.GetComponent<Magic_scr>().MAG_COLOR;
+        var lightning = Resources.Load<GameObject>("MAGIC/LIGHTNING");
+        SpellColors["Light"] = lightning.GetComponent<Magic_scr>().MAG_COLOR;
+        var darkSkull =  Resources.Load<GameObject>("MAGIC/DARK SKULL");
+        SpellColors["Dark"] = darkSkull.GetComponent<Magic_scr>().MAG_COLOR;
+        
     }
     
     public class EquipAlternatives

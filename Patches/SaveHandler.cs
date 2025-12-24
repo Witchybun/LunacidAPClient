@@ -110,6 +110,8 @@ namespace LunacidAP.Patches
                     sDS.CommunionHints, sDS.Elements, sDS.RandomizedWeaponData, sDS.RandomizedSpellData, 
                     sDS.Entrances, sDS.TraversedEntrances, sDS.ScoutedLocations, sDS.EnteredScenes, sDS.BoughtItems,
                     sDS.ReceivedGifts, sDS.ItemColors, sDS.RandomEnemyData);
+                slotReader.Close();
+                connectionReader.Close();
 
             }
             catch (Exception ex)

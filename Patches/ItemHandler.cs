@@ -39,10 +39,15 @@ namespace LunacidAP.Patches
                 __result = itemNoHeader;
             }
 
-            if (LunacidEquipStats.EquipmentLookup.ContainsKey(itemNoHeader))
+            var weaponNoHeader = Term.Replace("Weapons/", "");
+            var magicNoHeader = Term.Replace("Spells/", "");
+            if (LunacidEquipStats.EquipmentLookup.ContainsKey(weaponNoHeader) && ConnectionData.Elements.TryGetValue(weaponNoHeader, out var element1))
             {
-                var element = ConnectionData.Elements[itemNoHeader];
-                __result = LunacidEquipStats.ChangeNameBasedOnElement(itemNoHeader, element);
+                __result = LunacidEquipStats.ChangeNameBasedOnElement(weaponNoHeader, element1);
+            }
+            else if (LunacidEquipStats.EquipmentLookup.ContainsKey(magicNoHeader) && ConnectionData.Elements.TryGetValue(magicNoHeader, out var element2))
+            {
+                __result = LunacidEquipStats.ChangeNameBasedOnElement(magicNoHeader, element2);
             }
         }
 
@@ -209,8 +214,8 @@ namespace LunacidAP.Patches
             try
             {
                 var element = ConnectionData.Elements[Name];
-                Name = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
-                PopupCommand(1, Name, color, player, self, isSelfLevelLocation);
+                var newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
+                PopupCommand(1, newName, color, player, self, isSelfLevelLocation);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
                 for (int j = 0; j < 128; j++)
                 {
@@ -236,8 +241,8 @@ namespace LunacidAP.Patches
             try
             {
                 var element = ConnectionData.Elements[Name];
-                Name = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
-                PopupCommand(2, Name, color, player, self, isSelfLevelLocation);
+                var newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
+                PopupCommand(2, newName, color, player, self, isSelfLevelLocation);
                 for (int k = 0; k < 128; k++)
                 {
                     if (Control.CURRENT_PL_DATA.SPELLS[k] == "" || Control.CURRENT_PL_DATA.SPELLS[k] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.SPELLS[k]) == Name)

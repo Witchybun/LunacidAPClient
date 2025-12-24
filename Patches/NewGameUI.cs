@@ -8,6 +8,8 @@ using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Object = UnityEngine.Object;
+
 namespace LunacidAP.Patches
 {
     public class NewGameUI
@@ -55,34 +57,31 @@ namespace LunacidAP.Patches
         public void ModifyCharCreateForArchipelago()
         {
 
-            var create = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
+            var create = Object.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
             var textField = create.GetChild(6).gameObject;
 
-            HostEntry = GameObject.Instantiate(textField);
+            HostEntry = GameObject.Instantiate(textField, create, true);
             HostEntry.name = "Host";
             var hostInputComponent = HostEntry.GetComponent<TMP_InputField>();
             hostInputComponent.placeholder.GetComponent<TMP_Text>().text = "input hostname";
             hostInputComponent.characterLimit = 30;
             HostEntry.transform.position = new Vector3(62.0523f, 14.18f, -66.08f);
-            HostEntry.transform.SetParent(create);
             HostEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
 
-            PortEntry = GameObject.Instantiate(textField);
+            PortEntry = Object.Instantiate(textField, create, true);
             PortEntry.name = "Port";
             var portInputComponent = PortEntry.GetComponent<TMP_InputField>();
             portInputComponent.placeholder.GetComponent<TMP_Text>().text = "input port";
             portInputComponent.characterLimit = 30;
             PortEntry.transform.position = new Vector3(62.0523f, 14.081f, -66.08f);
-            PortEntry.transform.SetParent(create);
             PortEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
 
-            PasswordEntry = GameObject.Instantiate(textField);
+            PasswordEntry = Object.Instantiate(textField, create, true);
             PasswordEntry.name = "Password";
             var passwordInputComponent = PasswordEntry.GetComponent<TMP_InputField>();
             passwordInputComponent.placeholder.GetComponent<TMP_Text>().text = "input password";
             passwordInputComponent.characterLimit = 30;
             PasswordEntry.transform.position = new Vector3(62.0523f, 13.9689f, -66.08f);
-            PasswordEntry.transform.SetParent(create);
             PasswordEntry.transform.localScale = new Vector3(1f, 0.8f, 1f);
         }
 
@@ -194,7 +193,7 @@ namespace LunacidAP.Patches
         [HarmonyPostfix]
         private static void Click_FixDueToPronouns_Postfix(int which, Menus __instance)
         {
-            if (which == 83 || which == 84)
+            if (which is 83 or 84)
             {
                 FixConnectionInfoDisplay();
             }
@@ -224,8 +223,8 @@ namespace LunacidAP.Patches
             {
                 case "CHAR_CREATE":
                     {
-                        var create = GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
-                        if (!ArchipelagoClient.AP.Authenticated && GameObject.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
+                        var create = Object.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2);
+                        if (!ArchipelagoClient.AP.Authenticated && Object.FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(18).gameObject.activeSelf)
                         {
                             var names = create.Find("Labels");
                             names.GetComponent<TextMeshProUGUI>().GetComponent<TMP_Text>().text = "SLOT NAME";

@@ -60,8 +60,10 @@ namespace LunacidAP.Patches
                 {
                     // Recalculate damage with new value.
                     __instance.EQ_WEP.WEP_DAMAGE = GetRealDamageForWeapon(__instance, data.Damage, __instance.EQ_WEP);
-                    // The rest doesn't need this.
                     __instance.EQ_WEP.WEP_COOLDOWN = data.Speed;
+                    __instance.EQ_WEP.cooling = data.Speed * 1.25f;
+                    __instance.EQ_WEP.cooling2 = data.Speed * __instance.EQ_WEP.CHARGE_SPEED;
+                    // The rest doesn't need this.
                     __instance.EQ_WEP.WEP_GUARD = data.Guard;
                     __instance.EQ_WEP.WEP_BACKSTEP = data.Backstep;
                     __instance.EQ_WEP.WEP_WEIGHT = data.Thrust;
@@ -120,10 +122,13 @@ namespace LunacidAP.Patches
                     }
                     if (ArchipelagoClient.AP.SlotData.RandomElements)
                     {
-                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element))
+                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                         {
-                            __instance.EQ_MAG1.MAG_ELEM = LunacidItems.ElementToID[element];
+                            __instance.EQ_MAG1.MAG_ELEM = numId;
+                            __instance.EQ_MAG1.MAG_COLOR = LunacidEquipStats.SpellColors[element];
                         }
+
+                        
                     }
                     __instance.EQ_MAG1.SetValues();
                 }
@@ -148,9 +153,10 @@ namespace LunacidAP.Patches
                     }
                     if (ArchipelagoClient.AP.SlotData.RandomElements)
                     {
-                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element))
+                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                         {
-                            __instance.EQ_MAG2.MAG_ELEM = LunacidItems.ElementToID[element];
+                            __instance.EQ_MAG2.MAG_ELEM = numId;
+                            __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
                         }
                     }
 
@@ -254,16 +260,6 @@ namespace LunacidAP.Patches
                         Object.Destroy(gameObject);
                         break;
                     }
-            }
-        }
-
-        [HarmonyPatch(typeof(Magic_scr), "Charging")]
-        [HarmonyPrefix]
-        private static void Charging_MakeImportantSpellsFree(Magic_scr __instance, float amount)
-        {
-            if (freeSpells.Contains(__instance.MAG_CHILD))
-            {
-                __instance.MAG_COST = 0;
             }
         }
 
