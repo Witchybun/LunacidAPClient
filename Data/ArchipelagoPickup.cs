@@ -11,13 +11,15 @@ namespace LunacidAP.Data
         public ArchipelagoItem ArchipelagoItem;
         public bool Collected;
         public bool CanBeRepeated;
+        public Vector3 Position;
 
-        public ArchipelagoPickup(LocationData locationData, ArchipelagoItem archipelagoItem, bool collected, bool canBeRepeated)
+        public ArchipelagoPickup(LocationData locationData, ArchipelagoItem archipelagoItem, bool collected, bool canBeRepeated, Vector3 position)
         {
             LocationData = locationData;
             ArchipelagoItem = archipelagoItem;
             Collected = collected;
             CanBeRepeated = canBeRepeated;
+            Position = position;
         }
 
         public void SendLocation()

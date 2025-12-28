@@ -22,9 +22,13 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool GiveXP_MultiplyIncomingXP(CONTROL __instance, int LEVELED_XP)
         {
-            var has_bangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3 : 1;
+            if (ArchipelagoClient.AP.SlotData.ForceNoEXP)
+            {
+                return false;
+            }
+            var hasBangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3 : 1;
             var givenXP = LEVELED_XP;
-            var multiplier = Math.Min(12, has_bangle * ArchipelagoClient.AP.SlotData.ExperienceMultiplier);
+            var multiplier = Math.Min(12, hasBangle * Plugin.randoSettings.ExpRate/100f);
             givenXP = Mathf.RoundToInt(givenXP * multiplier);
             if ((__instance.CURRENT_PL_DATA.PLAYER_LVL < 100 || ConnectionData.StoredLevel < 100) && ArchipelagoClient.AP.SlotData.Levelsanity)
             {
@@ -63,11 +67,11 @@ namespace LunacidAP.Patches
             {
                 __instance.EQ_WEP.WEP_XP = 99f;
             }
-            var additionalExp = ArchipelagoClient.AP.SlotData.WExperienceMultiplier;
+            var additionalExp = Plugin.randoSettings.WexpRate/100f;
             __instance.EQ_WEP.WEP_GROWTH *= additionalExp;
         }
 
-        public static void StoreXP(int LEVELED_XP, bool ST, float PLAYER_L, float MOON_MULT)
+        private static void StoreXP(int LEVELED_XP, bool ST, float PLAYER_L, float MOON_MULT)
         {
             if (ST)
             {
@@ -86,7 +90,7 @@ namespace LunacidAP.Patches
             }
         }
 
-        public static void SendLevelLocations()
+        private static void SendLevelLocations()
         {
             if (ConnectionData.StoredLevel >= 100)
             {

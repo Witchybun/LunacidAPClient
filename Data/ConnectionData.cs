@@ -32,6 +32,8 @@ namespace LunacidAP.Data
         public static Dictionary<string, string> ItemColors = new(){};
         public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new(){};
 
+        
+
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, int storedLevel = 0, int storedExperience = 0,
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
         Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, LunacidEquipStats.WeaponData> randomWeaponData = null, 

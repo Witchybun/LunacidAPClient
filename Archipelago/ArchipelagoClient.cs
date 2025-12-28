@@ -444,10 +444,10 @@ namespace LunacidAP.Archipelago
         {
             if (IsCurrentlyDeathLinked)
             {
-                IsCurrentlyDeathLinked = false;
                 return;
             }
-            var deathLink = new DeathLink(ConnectionData.SlotName, "perished in the Great Well");
+            IsCurrentlyDeathLinked = true;  // Done to avoid spamming as the game itself calls die repeatedly.
+            var deathLink = new DeathLink(ConnectionData.SlotName, $"{ConnectionData.SlotName} perished in the Great Well!");
             _deathLinkService.SendDeathLink(deathLink);
         }
 
@@ -462,8 +462,8 @@ namespace LunacidAP.Archipelago
                 }
                 var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                IsCurrentlyDeathLinked = true;
                 you.Die();
-                IsCurrentlyDeathLinked = false;
             }
             catch
             {
@@ -474,20 +474,20 @@ namespace LunacidAP.Archipelago
         private void BuildLocationTable()
         {
             List<int> locations = new();
-            foreach (var region in LunacidLocations.APLocationData)
+            foreach (var region in APLocationData)
             {
                 foreach (var location in region.Value)
                 {
-                    var allowedList = new List<string>() { "TOWER", "ARENA2" };
-                    if (SlotData.RolledMonth != 12 && LunacidLocations.ChristmasLocations.Contains(location.APLocationName))
+                    var allowedList = new List<string> { "TOWER", "ARENA2" };
+                    if (SlotData.RolledMonth != 12 && ChristmasLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
-                    if (location.IgnoreLocationHandler == true && !allowedList.Contains(region.Key))
+                    if (location.IgnoreLocationHandler && !allowedList.Contains(region.Key))
                     {
                         continue;
                     }
-                    if (SlotData.RolledMonth != 10 && LunacidLocations.SpookyLocations.Contains(location.APLocationName))
+                    if (SlotData.RolledMonth != 10 && SpookyLocations.Contains(location.APLocationName))
                     {
                         continue;
                     }
@@ -496,9 +496,9 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Shopsanity)
             {
-                foreach (var location in LunacidLocations.ShopLocations)
+                foreach (var location in ShopLocations)
                 {
-                    if (location.IgnoreLocationHandler == true)
+                    if (location.IgnoreLocationHandler)
                     {
                         continue;
                     }
@@ -507,9 +507,9 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Dropsanity != Dropsanity.Off)
             {
-                foreach (var location in LunacidLocations.UniqueDropLocations)
+                foreach (var location in UniqueDropLocations)
                 {
-                    if (location.IgnoreLocationHandler == true)
+                    if (location.IgnoreLocationHandler)
                     {
                         continue;
                     }
@@ -518,9 +518,9 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Dropsanity == Dropsanity.Randomized)
             {
-                foreach (var location in LunacidLocations.OtherDropLocations)
+                foreach (var location in OtherDropLocations)
                 {
-                    if (location.IgnoreLocationHandler == true)
+                    if (location.IgnoreLocationHandler)
                     {
                         continue;
                     }
@@ -529,9 +529,9 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Quenchsanity)
             {
-                foreach (var location in LunacidLocations.QuenchLocation)
+                foreach (var location in QuenchLocation)
                 {
-                    if (location.IgnoreLocationHandler == true)
+                    if (location.IgnoreLocationHandler)
                     {
                         continue;
                     }
@@ -540,9 +540,9 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.EtnasPupil)
             {
-                foreach (var location in LunacidLocations.AlkiLocation)
+                foreach (var location in AlkiLocation)
                 {
-                    if (location.IgnoreLocationHandler == true)
+                    if (location.IgnoreLocationHandler)
                     {
                         continue;
                     }
@@ -615,11 +615,11 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Bookworm)
             {
-                foreach (var locationkvp in LunacidLocations.LoreLocations)
+                foreach (var locationkvp in LoreLocations)
                 {
                     foreach (var location in locationkvp.Value)
                     {
-                        if (location.IgnoreLocationHandler == true)
+                        if (location.IgnoreLocationHandler)
                         {
                             continue;
                         }
@@ -629,11 +629,11 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.GrassSanity)
             {
-                foreach (var locationkvp in LunacidLocations.GrassLocations)
+                foreach (var locationkvp in GrassLocations)
                 {
                     foreach (var location in locationkvp.Value)
                     {
-                        if (location.IgnoreLocationHandler == true)
+                        if (location.IgnoreLocationHandler)
                         {
                             continue;
                         }
@@ -643,11 +643,11 @@ namespace LunacidAP.Archipelago
             }
             if (SlotData.Breakables)
             {
-                foreach (var locationkvp in LunacidLocations.BreakLocations)
+                foreach (var locationkvp in BreakLocations)
                 {
                     foreach (var location in locationkvp.Value)
                     {
-                        if (location.IgnoreLocationHandler == true)
+                        if (location.IgnoreLocationHandler)
                         {
                             continue;
                         }
@@ -809,7 +809,7 @@ namespace LunacidAP.Archipelago
                     var weaponList = LunacidEquipStats.UsableWeaponData.Values.ToList();
                     foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
                     {
-                        var damage = weaponList[random.Next(weaponCount)].Damage;
+                        var damage = Math.Max(1, weaponList[random.Next(weaponCount)].Damage); // Avoid a 0 damage scenario.  From where idk.
                         var speed = weaponList[random.Next(weaponCount)].Speed;
                         var guard = weaponList[random.Next(weaponCount)]
                             .Guard;

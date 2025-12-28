@@ -30,7 +30,7 @@ namespace LunacidAP.Patches
             {
                 return true; // Don't randomize music in non-ingame scenarios.
             }
-            if (!ArchipelagoClient.AP.SlotData.CustomMusic)
+            if (!Plugin.randoSettings.PlayCustomMusic)
             {
                 return true; // Randomized music is off, don't change anything.
             }
@@ -88,7 +88,7 @@ namespace LunacidAP.Patches
                 _log.LogInfo("No music found. Keeping stuff the same.");
                 return;
             }
-            if (possibleSongs.Count() == 0)
+            if (!possibleSongs.Any())
             {
                 return;
             }

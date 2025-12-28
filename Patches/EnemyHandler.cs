@@ -46,12 +46,12 @@ namespace LunacidAP.Patches
             {
                 AddFeatherToJailor(__instance);
             }
-            var dropBoosts = ConnectionData.ReceivedItems.Where(x => x.Value.ItemName == "Text on Great Well Resourcefulness").Count();
+            var dropBoosts = ConnectionData.ReceivedItems.Count(x => x.Value.ItemName == "Text on Great Well Resourcefulness");
             float nothingWeightScalar = (float)Math.Max(0.75, 0.25 * dropBoosts);
             var lOOTS = __instance.LOOTS;
             //NameEveryDrop(__instance.name, lOOTS);
             var nothingWeight = 0f;
-            var areDropsNormalized = ArchipelagoClient.AP.SlotData.NormalizedDrops;
+            var areDropsNormalized = Plugin.randoSettings.IsNormalized;
             var normalizedNonemptyWeight = 0;
             for (int i = 0; i < lOOTS.Length; i++)
             {
@@ -84,7 +84,6 @@ namespace LunacidAP.Patches
                 return false;
             }
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
-            var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
             if (item.Collected)
             {
                 var result = ArchipelagoClient.AP.Gifting.CanGiftToPlayer(item.SlotID);
@@ -95,7 +94,7 @@ namespace LunacidAP.Patches
                     }
                 }
             }
-            var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true);
+            var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true, __instance.gameObject.transform.position);
             _log.LogInfo($"We're dropping the item {__instance.LOOTS[num3].ITEM.name} on the floor");
             var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
             DropItemOnFloor(ashes, __instance.gameObject.transform.position, archipelagoPickup);

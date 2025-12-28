@@ -73,6 +73,7 @@ namespace LunacidAP.Patches
             File.WriteAllText(savePath, json);
             json = JsonConvert.SerializeObject(newSlotData);
             File.WriteAllText(slotPath, json);
+            Plugin.SaveCustomRandoSettings();
             _log.LogInfo("Save complete!");
         }
 

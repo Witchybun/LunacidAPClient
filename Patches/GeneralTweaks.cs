@@ -82,6 +82,13 @@ namespace LunacidAP.Patches
             return;
         }
 
+        [HarmonyPatch(typeof(Player_Control_scr), "Die")]
+        [HarmonyPostfix]
+        private static void Die_FalsifyDLTag()
+        {
+            ArchipelagoClient.AP.SendDeathLink();
+        }
+
         [HarmonyPatch(typeof(I2.Loc.LanguageSourceData), "TryGetTranslation")]
         [HarmonyPrefix]
         private static bool TryGetTranslation_AddSpecialCases(string term, out string Translation, string overrideLanguage = null, string overrideSpecialization = null, bool skipDisabled = false, bool allowCategoryMistmatch = false)

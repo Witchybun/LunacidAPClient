@@ -27,11 +27,7 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool Check_CheckEndingScenarioForAP(Ending_Switch __instance)
         {
-            bool flag = true;
-            if (ArchipelagoClient.AP.SlotData.Ending.HasFlag(Goal.EndingA))
-            {
-                flag = false;
-            }
+            bool flag = !ArchipelagoClient.AP.SlotData.Ending.HasFlag(Goal.EndingA);
             if (!ArchipelagoClient.AP.WasItemReceived("White VHS Tape"))
             {
                 flag = false;
@@ -106,7 +102,10 @@ namespace LunacidAP.Patches
             var flagData = LunacidFlags.ItemToFlag[Name].Flag;
             if (Name == "Progressive Vampiric Symbol")
             {
-                ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Index));
+                var slotValue = 1;
+                if (DoesPlayerHaveItem("Vampiric Symbol (W)")) slotValue += 1;
+                if (DoesPlayerHaveItem("Vampiric Symbol (A)")) slotValue += 1;
+                ModifyFlag(24, Math.Min(3, slotValue), Math.Min(3, slotValue));
                 return;
             }
             if (!DoesPlayerHaveItem(Name) && Name != "Skull of Josiah")
@@ -477,67 +476,75 @@ namespace LunacidAP.Patches
                 return false; // Stop the Jotunn's death from keeping the entire area always flooded.
             }
             var sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName == "PITT_A1")
+            switch (sceneName)
             {
-                if (__instance.gameObject.name == "LADDER")
+                case "PITT_A1":
                 {
-                    __instance.Slot = 16;
-                    __instance.Zone = 24;
+                    if (__instance.gameObject.name == "LADDER")
+                    {
+                        __instance.Slot = 16;
+                        __instance.Zone = 24;
+                    }
+                    else if (__instance.gameObject.name == "LEVER_GATE1")
+                    {
+                        __instance.Slot = 14;
+                        __instance.Zone = 24;
+                    }
+
+                    break;
                 }
-                else if (__instance.gameObject.name == "LEVER_GATE1")
+                case "CAS_1":
                 {
-                    __instance.Slot = 14;
-                    __instance.Zone = 24;
+                    break;
+                }
+                case "ARCHIVES":
+                {
+                    break;
                 }
             }
             return true;
             
         }
 
-        public static void RefreshSceneEntities(string itemName)
+        private static void RefreshSceneEntities(string itemName)
         {
             var sceneName = SceneManager.GetActiveScene().name;
+            Transform map = GameObject.Find(sceneName).transform;
             switch (itemName)
             {
-                case "Progressive Vampiric Symbol":
+                case "Vampiric Symbol (W)":
+                {
+                    var casDoor = map.GetChild(7).GetChild(10);
+                    casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
+                    casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
+                    break;
+                }
+                case "Vampiric Symbol (A)":
+                {
+                    if (sceneName == "ARCHIVES")
                     {
-                        var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.ItemId) == "Progressive Vampiric Symbol");
-                        Transform map = GameObject.Find(sceneName).transform;
-                        if (sceneName == "ARCHIVES")
-                        {
-                            map.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
-                            break;
-                        }
-                        switch (receivedCount)
-                        {
-                            case 1:
-                                {
-                                    var casDoor = map.GetChild(7).GetChild(10);
-                                    casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    var casDoor2 = map.GetChild(7).GetChild(13);
-                                    foreach (Transform child in casDoor2)
-                                    {
-                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    }
-                                    break;
-                                }
-                            case 3:
-                                {
-                                    var casDoor2 = map.GetChild(7).GetChild(13);
-                                    foreach (Transform child in casDoor2)
-                                    {
-                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    }
-                                    break;
-                                }
-                        }
-                        break;
+                        map.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
                     }
+                    else
+                    {
+                        var casDoor2 = map.GetChild(7).GetChild(13);
+                        foreach (Transform child in casDoor2)
+                        {
+                            child.GetComponent<AREA_SAVED_ITEM>().Load();
+                        }
+                    }
+
+                    break;
+                }
+                    case "Vampiric Symbol (E)":
+                {
+                    var casDoor2 = map.GetChild(7).GetChild(13);
+                    foreach (Transform child in casDoor2)
+                    {
+                        child.GetComponent<AREA_SAVED_ITEM>().Load();
+                    }
+                    break;
+            }
                 case "VHS Tape":
                     {
                         // The effect really isn't felt in the same map anyway.
@@ -617,17 +624,17 @@ namespace LunacidAP.Patches
                 return false;
             }
             for (var i = 0; i < 128; i++)
-                {
-                    if (playerInventory[i] == "" || playerInventory[i] == null)
+            {
+                if (playerInventory[i] == "" || playerInventory[i] == null)
                 {
                     return false;
                 }
-                    if (StaticFuncs.REMOVE_NUMS(playerInventory[i]) == itemName)
-                    {
-                        return true;
-                    }
-
+                if (StaticFuncs.REMOVE_NUMS(playerInventory[i]) == itemName)
+                {
+                    return true;
                 }
+
+            }
             return false;
         }
 
@@ -717,21 +724,85 @@ namespace LunacidAP.Patches
 
         private static void ModifyFlagDataForFlagSplits(AREA_SAVED_ITEM saveObject, string scene)
         {
-            if (scene == "PITT_A1")
+            switch (scene)
             {
-                if (saveObject.gameObject.name == "LADDER")
+                case "PITT_A1":
                 {
+                    switch (saveObject.gameObject.name)
+                    {
+                        case "LADDER":
+                            saveObject.Slot = 16;
+                            saveObject.Zone = 24;
+                            break;
+                        case "LEVER_GATE1":
+                            saveObject.Slot = 14;
+                            saveObject.Zone = 24;
+                            break;
+                    }
 
-                    saveObject.Slot = 16;
-                    saveObject.Zone = 24;
+                    break;
                 }
-                else if (saveObject.gameObject.name == "LEVER_GATE1")
+                case "CAS_1":
                 {
-                    saveObject.Slot = 14;
-                    saveObject.Zone = 24;
+                    switch (saveObject.gameObject.name)
+                    {
+                        case "CAS_DOOR":
+                        {
+                            saveObject.Slot = 1;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER":  // Front door to Castle Le Fanu or a door deeper inside.
+                        {
+                            if (saveObject.transform.parent.name == "CAS_DOOR")
+                            {
+                                saveObject.Slot = 1;
+                                saveObject.Zone = 24;
+                                break;
+                            }
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER2":
+                        {
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VEr3":
+                        {
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER4":
+                        {
+                            saveObject.Slot = 3;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER5":
+                        {
+                            saveObject.Slot = 3;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                    }
+                    break;
                 }
+                case "ARCHIVES":
+                {
+                    if (saveObject.name == "KY_VER")
+                    {
+                        saveObject.Slot = 2;
+                        saveObject.Zone = 24;
+                    }
+
+                    break;
+                }
+                    
             }
-            
         }
     }
 }

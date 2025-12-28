@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using BepInEx.Logging;
@@ -5,12 +6,21 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace LunacidAP.Patches;
 
 public class RandoOptionsMaker
 {
     private static ManualLogSource _log;
+
+    private static Dictionary<Plugin.RandoSettings.Colors, string> ColorSettingToName = new()
+    {
+        {Plugin.RandoSettings.Colors.Archipelago, "[Archipelago]"},
+        {Plugin.RandoSettings.Colors.Multiworldgg, "[MultiworldGG]"},
+        {Plugin.RandoSettings.Colors.Custom, "[Custom]"},
+    };
+    
     public RandoOptionsMaker(ManualLogSource log)
     {
         _log = log;
@@ -38,12 +48,89 @@ public class RandoOptionsMaker
         slot3.transform.GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>().text = "SLOT 3";
     }
 
+    public static void CreateInGameRandoSettings(Transform baseParent)
+    {
+        var leftSideParent = baseParent.Find("LABELS1");
+        var rightSideParent = baseParent.Find("LABELS2");
+        var settingNameParent = baseParent.Find("Settings");
+        rightSideParent.Find("E").gameObject.SetActive(false);
+        // Create EXP Slider
+        var expName = Object.Instantiate(rightSideParent.Find("D"), rightSideParent, true);
+        Object.Destroy(expName.GetComponent<I2.Loc.Localize>());  // DIE
+        expName.position = new Vector3(expName.position.x -0.4f, expName.position.y - 5f, expName.position.z);
+        expName.name = "EXP Name";
+        expName.GetComponent<TextMeshProUGUI>().text = "EXP Multiplier";
+        var expSlider = Object.Instantiate(baseParent.Find("MUSE_SLIDER"), baseParent, true);
+        expSlider.position = new Vector3(expSlider.position.x, expSlider.position.y - 21f, expSlider.position.z + 2f);
+        expSlider.name = "EXP Slider";
+        var expSliderData = expSlider.GetComponent<Slider>();
+        expSliderData.onValueChanged.m_PersistentCalls.m_Calls[0].arguments.intArgument = 100;
+        expSliderData.maxValue = 400;
+        expSliderData.minValue = 0;
+        expSliderData.SetValueWithoutNotify(Plugin.randoSettings.ExpRate);
+        // Create WEXP Slider
+        var wexpName = Object.Instantiate(expName, rightSideParent, true);
+        wexpName.position = new Vector3(wexpName.position.x - 2f, wexpName.position.y - 5f, wexpName.position.z);
+        wexpName.name = "WEXP Name";
+        wexpName.GetComponent<TextMeshProUGUI>().text = "WEXP Multiplier";
+        var wexpSlider = Object.Instantiate(expSlider, baseParent, true);
+        wexpSlider.position = new Vector3(wexpSlider.position.x - 2f, wexpSlider.position.y - 5f, wexpSlider.position.z);
+        wexpSlider.name = "WEXP Slider";
+        var wexpSliderData = wexpSlider.GetComponent<Slider>();
+        wexpSliderData.onValueChanged.m_PersistentCalls.m_Calls[0].arguments.intArgument = 101;
+        wexpSliderData.SetValueWithoutNotify(Plugin.randoSettings.WexpRate);
+        // Normalized Drops Button
+        var normalName = Object.Instantiate(wexpName, rightSideParent, true);
+        normalName.position = new Vector3(normalName.position.x, normalName.position.y - 5f, normalName.position.z);
+        normalName.name = "Normal Drops Name";
+        normalName.GetComponent<TextMeshProUGUI>().text = "Normalize Drops";
+        var normalStateName = Object.Instantiate(settingNameParent.Find("H"), settingNameParent, true);
+        normalStateName.position = new Vector3(normalStateName.position.x -4f, normalStateName.position.y - 14.5f, normalStateName.position.z);
+        normalStateName.name = "Normal Drops Setting Name";
+        var stateText = Plugin.randoSettings.IsNormalized ? "[On]" : "[Off]";
+        normalStateName.GetComponent<TextMeshProUGUI>().text = stateText;
+        var normalButton = Object.Instantiate(baseParent.Find("leg_button"), baseParent, true);
+        normalButton.position = new Vector3(normalButton.position.x, normalButton.position.y - 14, normalButton.position.z);
+        normalButton.name = "Normal Drops Button";
+        var normalButtonData =  normalButton.GetComponent<Button>();
+        normalButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 102;
+        // Item Colors Button
+        var colorName = Object.Instantiate(leftSideParent.Find("G"), leftSideParent, true);
+        Object.Destroy(colorName.GetComponent<I2.Loc.Localize>());  // DIE
+        colorName.position = new Vector3(colorName.position.x, colorName.position.y - 5f, colorName.position.z);
+        colorName.name = "Color Name";
+        colorName.GetComponent<TextMeshProUGUI>().text = "Item Colors";
+        var colorStateName = Object.Instantiate(settingNameParent.Find("E"), settingNameParent, true);
+        colorStateName.position = new Vector3(colorStateName.position.x, colorStateName.position.y -15f, colorStateName.position.z);
+        colorStateName.name = "Color State";
+        colorStateName.GetComponent<TextMeshProUGUI>().text = ColorSettingToName[Plugin.randoSettings.ItemColors];
+        var colorButton = Object.Instantiate(baseParent.Find("feet_button"), baseParent, true);
+        colorButton.position = new Vector3(colorButton.position.x, colorButton.position.y - 15.5f, colorButton.position.z);
+        colorButton.name = "Color Button";
+        var colorButtonData = colorButton.GetComponent<Button>();
+        colorButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 103;
+        // Custom Music Button
+        var musicName = Object.Instantiate(colorName, leftSideParent, true);
+        musicName.position = new Vector3(musicName.position.x, musicName.position.y - 5f, musicName.position.z);
+        musicName.name = "music Name";
+        musicName.GetComponent<TextMeshProUGUI>().text = "Custom Music";
+        var musicStateName = Object.Instantiate(colorStateName, settingNameParent, true);
+        musicStateName.position = new Vector3(musicStateName.position.x, musicStateName.position.y -5f, musicStateName.position.z);
+        musicStateName.name = "Music State";
+        musicStateName.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.PlayCustomMusic ? "[On]" : "[Off]";
+        var musicButton = Object.Instantiate(colorButton, baseParent, true);
+        musicButton.position = new Vector3(musicButton.position.x, musicButton.position.y - 5f, musicButton.position.z);
+        musicButton.name = "Music Button";
+        var musicButtonData = musicButton.GetComponent<Button>();
+        musicButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 104;
+    }
+
     private static void LoadPortValues()
     {
         if (!GameObject.Find("PLAYER/Canvas/HUD/ROOT/SETTINGS/LABELS1").GetComponent<TextMeshProUGUI>().text
-                .Contains("SLOT DATA"))
+                .Contains("SAVE PORTS"))
         {
-            GameObject.Find("PLAYER/Canvas/HUD/ROOT/SETTINGS/LABELS1").GetComponent<TextMeshProUGUI>().text += "\n\n SLOT DATA";
+            GameObject.Find("PLAYER/Canvas/HUD/ROOT/SETTINGS/LABELS1").GetComponent<TextMeshProUGUI>().text += "\n\n SAVE PORTS";
         }
         var mainDir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "Saves");
         if (!Directory.Exists(mainDir)) return;
@@ -68,7 +155,6 @@ public class RandoOptionsMaker
             var connectionInfo2 = Path.Combine(slot2Dir, "ConnectionData.json");
             if (File.Exists(connectionInfo2))
             {
-                _log.LogInfo("Connection 2 exists");
                 using var connectionReader2 = new StreamReader(connectionInfo2);
                 var text2 = connectionReader2.ReadToEnd();
                 var cDS2 = JsonConvert.DeserializeObject<ConnectionDataSave>(text2);
@@ -150,6 +236,56 @@ public class RandoOptionsMaker
         connectionReader3.Close();
         File.WriteAllText(connectionInfo3, json3);
     }
+
+    [HarmonyPatch(typeof(Menus), "Click")]
+    [HarmonyPrefix]
+    private static bool Click_AddNewSettingFunctionality(Menus __instance, int which)
+    {
+        switch (which)
+        {
+            case 100:
+            {
+                var expSlider = GameObject.Find("PLAYER/Canvas/HUD/MAIN/menu4/EXP Slider");
+                Plugin.randoSettings.ExpRate = (int) expSlider.GetComponent<Slider>().value;
+                return false;
+            }
+            case 101:
+            {
+                var wexpSlider = GameObject.Find("PLAYER/Canvas/HUD/MAIN/menu4/WEXP Slider");
+                Plugin.randoSettings.WexpRate = (int) wexpSlider.GetComponent<Slider>().value;
+                return false;
+            }
+            case 102:
+            {
+                Plugin.randoSettings.IsNormalized = !Plugin.randoSettings.IsNormalized;
+                var normalSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings")
+                    .Find("Normal Drops Setting Name");
+                normalSetting.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.IsNormalized ? "[On]" : "[Off]";
+                return false;
+            }
+            case 103:
+            {
+                var intLookup = (int)Plugin.randoSettings.ItemColors;
+                var newLookup = (intLookup + 1) % 3;
+                Plugin.randoSettings.ItemColors = (Plugin.RandoSettings.Colors)newLookup;
+                var colorSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings")
+                    .Find("Color State");
+                colorSetting.GetComponent<TextMeshProUGUI>().text = ColorSettingToName[Plugin.randoSettings.ItemColors];
+                return false;
+            }
+            case 104:
+            {
+                Plugin.randoSettings.PlayCustomMusic = !Plugin.randoSettings.PlayCustomMusic;
+                var normalSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings")
+                    .Find("Music State");
+                normalSetting.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.PlayCustomMusic ? "[On]" : "[Off]";
+                return false;
+            }
+                
+        }
+
+        return true;
+    }
     
     [HarmonyPatch(typeof(Menus), "Click")]
     [HarmonyPostfix]
@@ -157,7 +293,7 @@ public class RandoOptionsMaker
     {
         if (__instance.current_menu != 3) return;
         if (__instance.sub_menu != 3) return;
-        if (which == 19 && __instance.current_menu == 3 && __instance.sub_menu == 3) SavePortValues();
+        if (which == 19) SavePortValues();
     }
 
     [HarmonyPatch(typeof(Menus), "LoadSub")]

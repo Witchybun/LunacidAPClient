@@ -16,8 +16,6 @@ namespace LunacidAP.Archipelago
         private const string CLASS_KEY = "starting_class";
         private const string ER_KEY = "entrance_randomization";
         private const string LEVEL_KEY = "levelsanity";
-        private const string EXP_KEY = "experience";
-        private const string WEXP_KEY = "weapon_experience";
         private const string SWITCH_KEY = "switch_locks";
         private const string DOOR_KEY = "door_locks";
         private const string COIN_KEY = "required_strange_coin";
@@ -31,7 +29,6 @@ namespace LunacidAP.Archipelago
         private const string LORE_KEY = "bookworm";
         private const string GRASS_KEY = "grasssanity";
         private const string BREAK_KEY = "breakables";
-        private const string NORM_DROP_KEY = "normalized_drops";
         private const string DL_KEY = "death_link";
         private const string RANDOM_ELE_KEY = "random_elements";
         private const string RANDOM_WEP_STAT_KEY = "random_equip_stats";
@@ -43,9 +40,8 @@ namespace LunacidAP.Archipelago
         private const string CUSTOM_NAME_KEY = "created_class_name";
         private const string CUSTOM_DESC_KEY = "created_class_description";
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
-        private const string CUSTOM_COLORS_KEY = "item_colors";
-        private const string CUSTOM_MUSIC_KEY = "custom_music";
         private const string IMPORTANT_ITEM_KEY = "item_spots";
+        private const string LEVEL_CHALLENGE_KEY = "force_no_exp";
         private Dictionary<string, object> _slotDataFields;
         public int Seed { get; private set; }
         public Goal Ending { get; private set; }
@@ -59,15 +55,15 @@ namespace LunacidAP.Archipelago
         public bool Quenchsanity { get; private set; }
         public bool EtnasPupil { get; private set; }
         public bool Bookworm { get; private set; }
-        public bool NormalizedDrops { get; private set; }
+        //public bool NormalizedDrops { get; private set; }
         public bool Shopsanity { get; private set; }
         public bool Switchlock { get; private set; }
         public bool Doorlock { get; private set; }
         public bool Levelsanity { get; private set; }
         public bool GrassSanity { get; private set; }
         public bool Breakables { get; private set; }
-        public float ExperienceMultiplier { get; private set; }
-        public float WExperienceMultiplier { get; private set; }
+        //public float ExperienceMultiplier { get; private set; }
+        //public float WExperienceMultiplier { get; private set; }
         public int RequiredCoins { get; private set; }
         public bool DeathLink { get; private set; }
         public bool RandomElements { get; private set; }
@@ -77,9 +73,8 @@ namespace LunacidAP.Archipelago
         public string CustomName { get; private set; }
         public string CustomDescription { get; private set; }
         public Dictionary<string, int> CustomStats { get; private set; }
-        public bool CustomMusic { get; private set; }
-        public Dictionary<string, string> ItemColors { get; private set; }
         public Dictionary<string, List<string>> ImportantItemLocations { get; private set; }
+        public bool ForceNoEXP { get; private set; }
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -96,7 +91,6 @@ namespace LunacidAP.Archipelago
             Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
             Quenchsanity = GetSlotSetting(QUENCH_KEY, false);
             EtnasPupil = GetSlotSetting(ETNAS_KEY, false);
-            NormalizedDrops = GetSlotSetting(NORM_DROP_KEY, false);
             Shopsanity = GetSlotSetting(SHOP_KEY, false);
             Switchlock = GetSlotSetting(SWITCH_KEY, false);
             Doorlock = GetSlotSetting(DOOR_KEY, false);
@@ -104,26 +98,23 @@ namespace LunacidAP.Archipelago
             GrassSanity = GetSlotSetting(GRASS_KEY, false);
             Breakables = GetSlotSetting(BREAK_KEY, false);
             Bookworm = GetSlotSetting(LORE_KEY, false);
-            ExperienceMultiplier = (float)GetSlotSetting(EXP_KEY, 100) / 100;
-            WExperienceMultiplier = (float)GetSlotSetting(WEXP_KEY, 100) / 100;
             RequiredCoins = GetSlotSetting(COIN_KEY, 30);
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
+            _log.LogInfo("Halfway done.");
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             RandomEquipStats = GetSlotSetting(RANDOM_WEP_STAT_KEY, RandomEquip.Off);
             FalseWalls = GetSlotSetting(WALL_KEY, false);
             RolledMonth = GetSlotSetting(MONTH_KEY, 1);
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
             CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
-            CustomMusic = GetSlotSetting(CUSTOM_MUSIC_KEY, false);
+            ForceNoEXP = GetSlotSetting(LEVEL_CHALLENGE_KEY, false);
             var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
             CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
-            var itemColors = GetSlotSetting(CUSTOM_COLORS_KEY, "");
-            ItemColors = JsonConvert.DeserializeObject<Dictionary<string, string>>(itemColors);
             var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
             var itemSpots = GetSlotSetting(IMPORTANT_ITEM_KEY, "");
             ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(itemSpots);
-
+            _log.LogInfo("Finished getting slot settings, building dictionaries");
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
@@ -169,29 +160,6 @@ namespace LunacidAP.Archipelago
                     }
                 }
 
-            }
-
-            if (!ConnectionData.ItemColors.Any())
-            {
-                foreach (var color in ItemColors)
-                {
-                    if (Colors.IsColorInRightFormat(color.Value))
-                    {
-                        ConnectionData.ItemColors[color.Key] = color.Value;
-                    }
-                    else
-                    {
-                        if (Colors.DefaultColors.TryGetValue(color.Key, out var defaultColor))
-                            ConnectionData.ItemColors[color.Key] = defaultColor;
-                    }
-                }
-                foreach (var color in Colors.DefaultColors)
-                {
-                    if (!ConnectionData.ItemColors.ContainsKey(color.Key))
-                    {
-                        ConnectionData.ItemColors[color.Key] = color.Value;
-                    }
-                }
             }
 
         }

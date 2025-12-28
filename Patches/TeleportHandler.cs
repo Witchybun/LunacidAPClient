@@ -86,6 +86,7 @@ namespace LunacidAP.Patches
             __instance.POS = finalWarp.Position;
             __instance.ROT = finalWarp.Rotation;
 
+            LocationHandler.Pickups.Clear();
             return true;
         }
 

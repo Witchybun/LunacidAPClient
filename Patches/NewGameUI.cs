@@ -305,7 +305,7 @@ namespace LunacidAP.Patches
                             create.GetChild(20).gameObject.SetActive(value: true);
                             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}";
                             create.GetChild(21).gameObject.SetActive(value: true);
-                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
+                            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{Death()}";
                             create.GetChild(8).gameObject.SetActive(value: true);
                             create.GetChild(9).gameObject.SetActive(value: true);
                             create.GetChild(17).gameObject.SetActive(value: true);
@@ -388,7 +388,7 @@ namespace LunacidAP.Patches
             create.GetChild(16).GetComponent<TextMeshProUGUI>().text = "ETNA\nQUENCH\nNORMDROP\nDEATH";
             create.GetChild(19).GetComponent<TextMeshProUGUI>().text = $"{Ending()}\n{Shopsanity()}\n{Drops()}\n{Switchlock()}\n{Doorlock()}";
             create.GetChild(20).GetComponent<TextMeshProUGUI>().text = $"{Secretdoor()}\n{(ER())}\n{Elements()}\n{RequiredCoins()}";
-            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{NormalizedDrops()}\n{Death()}";
+            create.GetChild(21).GetComponent<TextMeshProUGUI>().text = $"{Etna()}\n{Quench()}\n{Death()}";
 
         }
 
@@ -474,11 +474,6 @@ namespace LunacidAP.Patches
         private static string RequiredCoins()
         {
             return ArchipelagoClient.AP.SlotData.RequiredCoins.ToString();
-        }
-
-        private static string NormalizedDrops()
-        {
-            return ArchipelagoClient.AP.SlotData.NormalizedDrops ? "Y" : "N";
         }
 
         private static string Death()

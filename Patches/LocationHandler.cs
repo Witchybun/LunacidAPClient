@@ -18,6 +18,7 @@ namespace LunacidAP.Patches
         private static POP_text_scr _popup;
         private static ManualLogSource _log;
         private static int _currentFloor = 0;
+        public static List<ArchipelagoPickup> Pickups = new List<ArchipelagoPickup>();
 
 
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -82,6 +83,9 @@ namespace LunacidAP.Patches
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().LocationData = apLocation;
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                __instance.gameObject.GetComponent<ArchipelagoPickup>().Position =
+                    __instance.gameObject.transform.position;
+                Pickups.Add(__instance.gameObject.GetComponent<ArchipelagoPickup>());
             }
             __instance.gameObject.SetActive(!item.Collected);
             return false;
@@ -168,6 +172,7 @@ namespace LunacidAP.Patches
             {
                 return true;
             }
+            Pickups.Remove(apData);
             if (apData.LocationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
                 var actualName = TheDaedalusConundrum(pickupObject);

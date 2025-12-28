@@ -316,7 +316,7 @@ namespace LunacidAP.Patches
             Useable_Item[] eQ_ITEMS = Control.EQ_ITEMS;
             foreach (Useable_Item useable_Item in eQ_ITEMS)
             {
-                if (!(useable_Item.ITEM_NAME == Name.Replace(" ", "_")))
+                if (useable_Item.ITEM_NAME != Name.Replace(" ", "_"))
                 {
                     continue;
                 }
@@ -339,7 +339,7 @@ namespace LunacidAP.Patches
                 }
                 else
                 {
-                    if (!(StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) == Name))
+                    if (StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) != Name)
                     {
                         continue;
                     }
