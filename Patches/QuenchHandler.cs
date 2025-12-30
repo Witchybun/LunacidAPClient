@@ -51,7 +51,7 @@ namespace LunacidAP.Patches
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
             {
-                LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
+                LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData);
             }
             __instance.CON.EQ_WEP.cooling = 0f;
             __instance.CON.PAPPY.POP(item.Name + " CREATED", 1f, 7);

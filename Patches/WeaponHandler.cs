@@ -20,7 +20,7 @@ namespace LunacidAP.Patches
         private static ManualLogSource _log;
         private static List<string> freeSpells = new()
         {
-            "WARP_CAST", "BARRIER_CAST", "FLIGHT_CAST", "BRIDGE_CAST"
+            "SPIRIT WARP", "ROCK BRIDGE", "ICARIAN FLIGHT", "BARRIER", "COFFIN"
         };
 
         public WeaponHandler(ManualLogSource log)
@@ -116,9 +116,9 @@ namespace LunacidAP.Patches
                     __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime;
                     __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
                     __instance.EQ_MAG1.MAG_COST = data.Cost;
-                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
+                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
                     {
-                        __instance.EQ_MAG2.MAG_COST = 0;
+                        __instance.EQ_MAG1.MAG_COST = 0;
                     }
                     if (ArchipelagoClient.AP.SlotData.RandomElements)
                     {
@@ -163,6 +163,32 @@ namespace LunacidAP.Patches
                     __instance.EQ_MAG2.SetValues();
                 }
             }
+        }
+        
+        // Kudos to Tesseract for suggesting this instead.
+        // Still necessary as some ranged attacks are still default element otherwise.
+        [HarmonyPatch(typeof(Break_from_parent), "Start")]
+        [HarmonyPostfix]
+        private static void Start_ModifyRangedElement(Break_from_parent __instance)
+        {
+            if (!ArchipelagoClient.AP.SlotData.RandomElements)
+            {
+                return;
+            }
+            var castName = __instance.name.Replace("(Clone)", "");
+            var componentsInChildren = __instance.GetComponentsInChildren(typeof(Damage_Trigger), true);
+            if (LunacidItems.CastToWeapon.TryGetValue(castName, out string weapon))
+            {
+                foreach (Damage_Trigger trigger in componentsInChildren.Cast<Damage_Trigger>())
+                {
+                    trigger.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
+                }
+            }
+            else
+            {
+                _log.LogWarning($"Could not change element for {castName}");
+            }
+
         }
 
         private static float GetRealDamageForSpell(CONTROL control, float damage)
@@ -241,7 +267,7 @@ namespace LunacidAP.Patches
                             var nameWithoutClone = component.name.Replace("(Clone)", "");
                             var statData = ConnectionData.RandomizedSpellData[nameWithoutClone];
                             var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
-                            __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = statData.Cost.ToString();
+                            __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = freeSpells.Contains(nameWithoutClone) ? "0" : statData.Cost.ToString();
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                             var castTime = GetRealCastTimeForSpell(CON, statData.CastTime, statData.MinCastTime);
                             __instance.TXT[23].transform.GetChild(num6 + 1).GetComponent<TextMeshProUGUI>().text = castTime > 0.3f ? castTime.ToString("F2") : LocalizationManager.GetTranslation("Spells/Instant");

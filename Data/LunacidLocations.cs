@@ -1311,8 +1311,9 @@ namespace LunacidAP.Data
                     new LocationData( 101, "YF: Room Defended by Blood Plant", "EARTH_STRIKE", new Vector3(-274.7f, -32.4f, -176.2f)),
                     new LocationData( 102, "YF: Patchouli's Canopy Offer", "ENKEY_PICKUP", new Vector3(-57.9f, -16.8f, -116.1f)),
                     new LocationData( 103, "YF: Patchouli's Reward", "EARTH_ELIXIR_PICKUP", new Vector3(-57.9f, -16.8f, -116.3f)),
+                    new LocationData( 104, "YF: Remains Of Adventurer in Blood Plant's Insides", "RUSTED_SWORD_PICKUP", new Vector3(-32.8174f, 0.7036f, -25.9274f)),
                     new LocationData( 752, "Patchouli's Yuletide Offering", "NOGG_PICKUP", new Vector3(-53.968f, -15.6588f, -116.677f)),
-                    new LocationData( 703, "Patchouli's Poisoned Treats", "Hallow_Candy", new Vector3(-62.833f, -16.769f, -119.37f))
+                    new LocationData( 703, "Patchouli's Poisoned Treats", "Hallow_Candy", new Vector3(-62.833f, -16.769f, -119.37f)),
                 }
             },
             {
@@ -1393,7 +1394,7 @@ namespace LunacidAP.Data
             {
                 "PITT_B1", // Great Well Surface
                 new(){
-                    new LocationData( 188, "GWS: Demi's Gift", "CRYSTAL_SHARD_PICKUP", new Vector3(-10.1f, 1.6f, -4.6f))
+                    new LocationData( 188, "GWS: Demi's Gift", "CRYSTAL_SHARD_PICKUP", new Vector3(-10.1f, 1.6f, -4.6f)),
                 }
             },
             {

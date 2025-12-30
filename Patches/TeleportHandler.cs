@@ -12,6 +12,7 @@ namespace LunacidAP.Patches
     public class TeleportHandler
     {
         private static ManualLogSource _log;
+        public static bool IsSwappingScenes;
         public TeleportHandler(ManualLogSource log)
         {
             _log = log;
@@ -63,6 +64,7 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool OnEnable_AlterWarpBasedOnER(GOTO_LEVEL __instance)
         {
+            IsSwappingScenes = true;
             var currentWarp = new WarpDestinations.WarpData(__instance.LVL, __instance.POS, __instance.ROT);
             var eredWarp = HandleEntranceRandomizer(currentWarp);
             var finalWarp = FixWarps(eredWarp);

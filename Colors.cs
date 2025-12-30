@@ -104,15 +104,11 @@ namespace LunacidAP
             {
                 return ColorLookup[Plugin.randoSettings.ItemColors]["Progression"];
             }
-            else if (itemFlags.HasFlag(ItemFlags.NeverExclude))
+            if (itemFlags.HasFlag(ItemFlags.NeverExclude))
             {
                 return ColorLookup[Plugin.randoSettings.ItemColors]["Useful"];
             }
-            else if (itemFlags.HasFlag(ItemFlags.Trap))
-            {
-                return ColorLookup[Plugin.randoSettings.ItemColors]["Trap"];
-            }
-            return ColorLookup[Plugin.randoSettings.ItemColors]["Filler"];
+            return itemFlags.HasFlag(ItemFlags.Trap) ? ColorLookup[Plugin.randoSettings.ItemColors]["Trap"] : ColorLookup[Plugin.randoSettings.ItemColors]["Filler"];
         }
 
         public static Color HexToColorConverter(string hex)

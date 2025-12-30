@@ -14,6 +14,7 @@ namespace LunacidAP.Patches
     {
         private static ManualLogSource _log;
         public static Dictionary<string, AudioClip> storedSongs = new();
+        public static Dictionary<string, AudioClip> storedSounds = new();
         public static Dictionary<string, string> randomizedSongs = new();
 
         public MuseHandler(ManualLogSource log)

@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using I2.Loc;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using static LunacidAP.Data.LunacidEnemies;
 using static LunacidAP.Data.LunacidLocations;
+using Object = UnityEngine.Object;
+using Random = System.Random;
 
 namespace LunacidAP.Patches
 {
@@ -21,6 +25,8 @@ namespace LunacidAP.Patches
         private static List<string> barredEnemies = new(){
             "MILK SNAIL_2", "RAT", "SKELETON_HURT", "LVG_OBJ", "Starved VP_Hurt", "ANKOU", "HOMUNCULUS", "SPECTRE", "ABYSSAL DEMON"
         };
+
+        public static GameObject RatPrefab;
         private static string magicCast = "MAGIC/CAST/";
         private static Transform EnemyCombatant { get; set; }
         public EnemyHandler(ManualLogSource log)
@@ -246,50 +252,54 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool NPC_SYS_InitializeEnemyPlacement(NPC_SYS __instance)
         {
-            if (!ArchipelagoClient.AP.SlotData.EnemyRandomization)
-            {
-                return false;
-            }
             if (__instance.FABS[0].name != "ABYSSAL DEMON")
-                {
-                    return true;
-                }
+            { 
+                return true;
+            }
             if (!EnemyPrefabs.Any())
             {
                 foreach (var item in __instance.FABS)
                 {
                     if (barredEnemies.Contains(item.name))
                     {
+                        if (item.name == "RAT")
+                        {
+                            RatPrefab = item;
+                        }
                         continue;
                     }
                     EnemyPrefabs[item.name] = item;
                 }
             }
+            if (!ArchipelagoClient.AP.SlotData.EnemyRandomization)
+            {
+                return false;
+            }
             var scene = __instance.gameObject.scene.name;
-            if (!LunacidEnemies.BaseEnemyPositionData.TryGetValue(__instance.gameObject.scene.name, out var enemyPositionData))
+            if (!BaseEnemyPositionData.TryGetValue(__instance.gameObject.scene.name, out var enemyPositionData))
             {
                 return true;
             }
-            var random = new System.Random(ConnectionData.Seed);
+            var random = new Random(ConnectionData.Seed);
             EnemyPrefabKeys = EnemyPrefabs.Keys.ToList();
             foreach (var data in enemyPositionData)
             {
-                var gameObjectWithChildren = GameObject.Find(LunacidEnemies.SceneToWorldObjectsName[scene]).transform;
+                var gameObjectWithChildren = GameObject.Find(SceneToWorldObjectsName[scene]).transform;
                 if (!ConnectionData.RandomEnemyData.TryGetValue(scene, out var enemyData))
                 {
                     _log.LogWarning($"Scene {scene} is not in the enemy data dictionary.");
                     return true;
                 }
-                foreach (var childIndex in data.childPath)
+                foreach (var childIndex in data.ChildPath)
                 {
                     gameObjectWithChildren = gameObjectWithChildren.GetChild(childIndex);
                 }
-                foreach (var affectedChild in data.affectedChildren)
+                foreach (var affectedChild in data.AffectedChildren)
                 {
-                    var chosenEnemy = TryGetEnemy(data.groupName, affectedChild, enemyData, random);
+                    var chosenEnemy = TryGetEnemy(data.GroupName, affectedChild, enemyData, random);
                     var givenChild = gameObjectWithChildren.GetChild(affectedChild);
                     var isBlessed = false;
-                    if (data.groupName == "MainPrison")
+                    if (data.GroupName == "MainPrison")
                     {
                         if (affectedChild == 14)
                         {
@@ -306,18 +316,18 @@ namespace LunacidAP.Patches
         {
             foreach (var enemy in enemyData)
             {
-                if (enemy.enemyName == "Lunaga")
+                if (enemy.EnemyName == "Lunaga")
                 {
                     continue; // remove later; they weren't in the list oops.
                 }
-                if (enemy.groupName == groupName && enemy.affectedChild == child)
+                if (enemy.GroupName == groupName && enemy.AffectedChild == child)
                 {
-                    if (LunacidEnemies.APWorldNameToGameName.TryGetValue(enemy.enemyName, out var gameName))
+                    if (APWorldNameToGameName.TryGetValue(enemy.EnemyName, out var gameName))
                     {
                         return gameName;
                     }
-                    var capitalizedName = enemy.enemyName.ToUpper();
-                    if (enemy.enemyName == "Rat")
+                    var capitalizedName = enemy.EnemyName.ToUpper();
+                    if (enemy.EnemyName == "Rat")
                     {
                         return "RAT2";
                     }
@@ -353,16 +363,16 @@ namespace LunacidAP.Patches
             }
             var position = child.position;
             var rotation = child.rotation;
-            var newEnemy = GameObject.Instantiate(chosenEnemy, position, rotation, parent: child.parent);
+            var newEnemy = Object.Instantiate(chosenEnemy, position, rotation, parent: child.parent);
             newEnemy.transform.localScale = child.localScale;
             newEnemy.name = newEnemy.name.Replace("(Clone)", "");
-            newEnemy.name = LunacidEnemies.CleanupName.Keys.Contains(newEnemy.name) ? LunacidEnemies.CleanupName[newEnemy.name] : newEnemy.name;
+            newEnemy.name = CleanupName.Keys.Contains(newEnemy.name) ? CleanupName[newEnemy.name] : newEnemy.name;
             var ai = newEnemy.GetComponent<AI_simple>();
             if (ai is not null)
             {
                 var childai = child.GetComponent<AI_simple>();
                 ai.BAR = childai.BAR;
-                ai.health = Math.Max(ai.health, ai.health_max) * LunacidEnemies.SceneToAverageLevel[scene] / ai.Level;
+                ai.health = Math.Max(ai.health, ai.health_max) * SceneToAverageLevel[scene] / ai.Level;
                 ai.health_max = ai.health;
                 ai.Level = childai.Level; // keep the exp amounts of the old enemy.
             }
@@ -388,13 +398,13 @@ namespace LunacidAP.Patches
             {
                 return;
             }
-            if (!LunacidEnemies.SceneToWorldObjectsName.Keys.ToList().Contains(__instance.gameObject.scene.name))
+            if (!SceneToWorldObjectsName.Keys.ToList().Contains(__instance.gameObject.scene.name))
             {
                 return;
             }
             var enemy = __instance.transform;
             var enemySpell = enemy.name.Replace("(Clone)", "");
-            if (LunacidEnemies.EnemySpells.Contains(enemySpell))
+            if (EnemySpells.Contains(enemySpell))
             {
                 enemy = EnemyCombatant;
             }
@@ -402,9 +412,9 @@ namespace LunacidAP.Patches
             {
                 while (!EnemyPrefabKeys.Contains(enemy.name))
                 {
-                    if (LunacidEnemies.WorldObjects.Contains(enemy.name))
+                    if (WorldObjects.Contains(enemy.name))
                     {
-                        _log.LogWarning($"Could not find enemy!");
+                        _log.LogWarning("Could not find enemy!");
                         return;
                     }
                     enemy = enemy.parent;
@@ -416,7 +426,7 @@ namespace LunacidAP.Patches
             }
             var scene = __instance.gameObject.scene.name;
             var enemyLevel = enemy.GetComponent<AI_simple>().Level;
-            __instance.power = Math.Min(150, Math.Max(10, __instance.power * (float)(LunacidEnemies.SceneToAverageLevel[scene] / enemyLevel)));
+            __instance.power = Math.Min(150, Math.Max(10, __instance.power * (SceneToAverageLevel[scene] / enemyLevel)));
         }
 
         [HarmonyPatch(typeof(Spawn_on_enable), "OnEnable")]
@@ -445,19 +455,19 @@ namespace LunacidAP.Patches
             var castItemNoParents = __instance.item.Replace(magicCast, "");
             try
             {
-                if (LunacidEnemies.EnemySpells.Contains(castItemNoParents) || LunacidEnemies.EnemySpells.Contains(overrideName))
+                if (EnemySpells.Contains(castItemNoParents) || EnemySpells.Contains(overrideName))
                 {
                     var enemy = __instance.transform;
-                    var enemyName = LunacidEnemies.ModdedNameToPrefabName.Keys.Contains(enemy.name) ? LunacidEnemies.ModdedNameToPrefabName[enemy.name] : enemy.name;
+                    var enemyName = ModdedNameToPrefabName.Keys.Contains(enemy.name) ? ModdedNameToPrefabName[enemy.name] : enemy.name;
                     while (!EnemyPrefabKeys.Contains(enemyName))
                     {
-                        if (LunacidEnemies.WorldObjects.Contains(enemy.name))
+                        if (WorldObjects.Contains(enemy.name))
                         {
-                            _log.LogWarning($"Could not find enemy!");
+                            _log.LogWarning("Could not find enemy!");
                             return;
                         }
                         enemy = enemy.parent;
-                        enemyName = LunacidEnemies.ModdedNameToPrefabName.Keys.Contains(enemy.name) ? LunacidEnemies.ModdedNameToPrefabName[enemy.name] : enemy.name;
+                        enemyName = ModdedNameToPrefabName.Keys.Contains(enemy.name) ? ModdedNameToPrefabName[enemy.name] : enemy.name;
                     }
                     EnemyCombatant = enemy;
                 }
@@ -466,6 +476,68 @@ namespace LunacidAP.Patches
             {
                 _log.LogWarning($"Could not find spell data for {__instance.name}");
             }
+        }
+
+        [HarmonyPatch(typeof(Analyz_NPC), "OnTriggerEnter")]
+        [HarmonyPrefix]
+        private static bool OnTriggerEnter_DisplayEnemyDropsIfDropsanity(Analyz_NPC __instance, Collider other, ref POP_text_scr ___PAPPY)
+        {
+            if (other.gameObject.GetComponent<OBJ_HEALTH>() == null || other.gameObject.GetComponent<OBJ_HEALTH>().MOM == null || !(other.gameObject.GetComponent<OBJ_HEALTH>().MOM.GetComponent<AI_simple>() != null))
+            {
+                return false;
+            }
+		    if (__instance.COM)
+		    {
+                __instance.NPC_NAME = other.GetComponent<OBJ_HEALTH>().MOM.gameObject.name.ToUpper().Replace(" ", "");
+			    var text = "";
+			    var streamReader = new StreamReader(Application.dataPath + "/Resources/TXT/" + PlayerPrefs.GetString("LANG", "ENG") + "/COMM.txt");
+			    var text2 = streamReader.ReadToEnd();
+			    streamReader.Close();
+			    var array = text2.Split("|"[0]);
+			    for (var i = 0; i < array.Length; i++)
+                {
+                    if (!array[i].ToUpper().Contains(__instance.NPC_NAME)) continue;
+                    text = array[i + 1].Replace("\n", "");
+                    i = 999;
+                }
+                ___PAPPY.POP(text, 1f, 13);
+			    Debug.Log(__instance.NPC_NAME);
+			    Debug.Log(text);
+			    __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+		    }
+            else
+            {
+                var analysisMethod = __instance.GetType().GetMethod("Analysis", BindingFlags.Instance | BindingFlags.NonPublic);
+                analysisMethod.Invoke(__instance, new object[] { other.GetComponent<OBJ_HEALTH>().MOM });
+                var text3 = "";
+                text3 = __instance.NPC_NAME + "\nHealth: " + __instance.NPC_H.ToString("F0") + "\n" + 
+                        LocalizationManager.GetTranslation("NORMAL") + ": " + (__instance.NORMAL_MULT * 100f).ToString("F0") + "%   " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData62") + ": " + (__instance.FIRE_MULT * 100f).ToString("F0") + "%\n" + 
+                        LocalizationManager.GetTranslation("Manual/ManualData63") + ": " + (__instance.ICE_MULT * 100f).ToString("F0") + "%   " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData64") + ": " + (__instance.POISON_MULT * 100f).ToString("F0") + "%\n" + 
+                        LocalizationManager.GetTranslation("Manual/ManualData65") + ": " + (__instance.LIGHT_MULT * 100f).ToString("F0") + "%  " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData66") + ": " + (__instance.DARK_MULT * 100f).ToString("F0") + "%";
+                text3 += "\n";
+                if (ArchipelagoClient.AP.SlotData.Dropsanity != Dropsanity.Off)
+                {
+                    if (EnemyInternalNameToLocationIDs.TryGetValue(__instance.NPC_NAME, out var ids))
+                    {
+                        foreach (var id in ids)
+                        {
+                            if (!ConnectionData.ScoutedLocations.TryGetValue(id, out var archipelagoItem))
+                            {
+                                continue;
+                            }
+                            var locationName = ArchipelagoClient.AP.GetLocationNameFromID(id);
+                            var color = Colors.GetClassificationHex(archipelagoItem.Classification);
+                            text3 += $"{locationName}: <color={color}>{archipelagoItem.Name}</color>\n";
+                        }
+                    }
+                }
+                ___PAPPY.POP(text3, 1f, 12);
+            }
+            Object.Destroy(__instance.gameObject);
+            return false;
         }
     }
 }

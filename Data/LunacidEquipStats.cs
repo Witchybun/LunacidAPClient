@@ -291,7 +291,7 @@ public static class LunacidEquipStats
                 {"Ice and Poison", "URANUS"},
                 {"Dark and Fire", "VENUS"}
             }) },
-        { "OBSIDIAN SEAL", new EquipAlternatives("& SEAL", 
+        { "OBSIDIAN SEAL", new EquipAlternatives("% SEAL", 
             new Dictionary<string, string>
             {
                 { "Normal", "IRON" },

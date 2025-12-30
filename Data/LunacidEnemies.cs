@@ -134,64 +134,7 @@ namespace LunacidAP.Data
             {"SABER_PICKUP", "Cavalry Saber"}
         };
 
-        public static readonly Dictionary<string, List<string>> EnemyToScenes = new(){
-            {"Snail", new List<string>(){"PITT_A1"}},
-            {"Milk Snail", new List<string>(){"PITT_A1", "ARCHIVES"}},
-            {"Shulker", new List<string>(){"PITT_A1"}},
-            {"Mummy", new List<string>(){"PITT_A1"}},
-            {"Mummy Knight", new List<string>(){"PITT_A1"}},
-            {"Necronomicon", new List<string>(){"ARCHIVES"}},
-            {"Enlightened One", new List<string>(){"ARCHIVES"}},
-            {"Chimera", new List<string>(){"ARCHIVES"}},
-            {"Rat", new List<string>(){"SEWER_A1", "PRISON"}},
-            {"Hemalith", new List<string>(){"LAKE"}},
-            {"Great Bat", new List<string>(){"CAS_1"}},
-            {"Rat King", new List<string>(){"SEWER_A1", "HAUNT", "PRISON"}},
-            {"Rat Queen", new List<string>(){"SEWER_A1", "PRISON"}},
-            {"Slime Skeleton", new List<string>(){"SEWER_A1"}},
-            {"Skeleton", new List<string>(){"SEWER_A1", "CAVE", "HAUNT", "PRISON"}},
-            {"Slime", new List<string>(){"SEWER_A1"}},
-            {"Devil Slime", new List<string>(){"SEWER_A1"}},
-            {"Lunaga", new List<string>(){"FOREST_A1"}},
-            {"Kodama", new List<string>(){"FOREST_A1"}},
-            {"Yakul", new List<string>(){"FOREST_A1"}},
-            {"Venus", new List<string>(){"FOREST_A1", "FOREST_B1", "ARENA"}},
-            {"Neptune", new List<string>(){"FOREST_A1", "FOREST_B1"}},
-            {"Unilateralis", new List<string>(){"FOREST_B1"}},
-            {"Tillandsia", new List<string>(){"FOREST_B1"}},
-            {"Mimic", new List<string>(){"CAVE"}},
-            {"Mare", new List<string>(){"HAUNT"}},
-            {"Mi-Go", new List<string>(){"HAUNT"}},
-            {"Phantom", new List<string>(){"CAS_1", "CAS_3", "HAUNT"}},
-            {"Cursed Painting", new List<string>(){"HAUNT", "CAS_1"}},
-            {"Malformed", new List<string>(){"HAUNT", "CAS_1"}},
-            {"Poltergeist", new List<string>(){"CAS_1"}},
-            {"Giant Bat", new List<string>(){"CAS_1"}},
-            {"Vampire Page", new List<string>(){"CAS_1"}},
-            {"Vampire", new List<string>(){"CAS_1"}},
-            {"Malformed Horse", new List<string>(){"CAS_3"}},
-            {"Hallowed Husk", new List<string>(){"CAS_3"}},
-            {"Ikurr'ilb", new List<string>(){"CAVE"}},
-            {"Obsidian Skeleton", new List<string>(){"CAVE", "PRISON", "VOID"}},
-            {"Serpent", new List<string>(){"CAVE"}},
-            {"Anpu", new List<string>(){"CAVE"}},
-            {"Embalmed", new List<string>(){"CAVE"}},
-            {"Jailor", new List<string>(){"PRISON"}},
-            {"Lupine Skeleton", new List<string>(){"PRISON"}},
-            {"Giant Skeleton", new List<string>(){"PRISON"}},
-            {"Sucsarian", new List<string>(){"ARENA"}},
-            {"Ceres", new List<string>(){"ARENA"}},
-            {"Vesta", new List<string>(){"ARENA"}},
-            {"Gloom Wood", new List<string>(){"ARENA"}},
-            {"Cetea", new List<string>(){"VOID"}},
-            {"Abyssal Demon", new List<string>(){"LAKE", "HAUNT"}},
-            {"Cerritulus Lunam", new List<string>(){"PRISON"}},
-            {"Sanguis Umbra", new List<string>(){"CAS_PITT"}},
-            {"Infested Corpse", new List<string>(){"PRISON"}},
-            {"Headless Horseman", new List<string>(){"SEWER_A1"}}
-        };
-
-        public static Dictionary<string, string> APWorldNameToGameName = new(){
+        public static readonly Dictionary<string, string> APWorldNameToGameName = new(){
             {"Milk Snail", "MILK_SNAIL"},
             {"Mummy Knight", "MUMMY_KNIGHT"},
             {"Necronomicon", "Necronomicon"},
@@ -209,7 +152,7 @@ namespace LunacidAP.Data
             {"Poltergeist", "Poltergeist"}
         };
 
-        public static Dictionary<string, string> ModdedNameToPrefabName = new(){
+        public static readonly Dictionary<string, string> ModdedNameToPrefabName = new(){
             {"MILK SNAIL", "MILK_SNAIL"},
             {"MUMMY KNIGHT", "MUMMY_KNIGHT"},
             {"Embalmed", "MUMMY_BANDAGED"}
@@ -217,29 +160,29 @@ namespace LunacidAP.Data
 
         public class EnemyLocationData
         {
-            public string groupName;
-            public int[] childPath;
-            public int[] affectedChildren;
+            public readonly string GroupName;
+            public readonly int[] ChildPath;
+            public readonly int[] AffectedChildren;
 
             public EnemyLocationData(string name, int[] path, int[] affected)
             {
-                groupName = name;
-                childPath = path;
-                affectedChildren = affected;
+                GroupName = name;
+                ChildPath = path;
+                AffectedChildren = affected;
             }
         }
 
         public class RandomizedEnemyData
         {
-            public string groupName;
-            public int affectedChild;
-            public string enemyName;
+            public readonly string GroupName;
+            public readonly int AffectedChild;
+            public readonly string EnemyName;
 
             public RandomizedEnemyData(string name, int affected, string enemy)
             {
-                groupName = name;
-                affectedChild = affected;
-                enemyName = enemy;
+                GroupName = name;
+                AffectedChild = affected;
+                EnemyName = enemy;
             }
         }
 
@@ -293,6 +236,14 @@ namespace LunacidAP.Data
             {"Anpu_Sword", "Anpu"},
             {"MILK_SNAIL", "MILK SNAIL"},
             {"RAT2", "RAT"}
+        };
+
+        public static readonly Dictionary<string, List<int>> EnemyInternalNameToLocationIDs = new()
+        {
+            { "SNAIL", new() { 401, 451, 452, 453 } },
+            { "MILK SNAIL", new() { 405, 454, 455, 456} },
+            { "SHULKER", new() { 457, 458 } },
+            { "MUMMY", new() {  } },
         };
 
         public static readonly Dictionary<string, List<EnemyLocationData>> BaseEnemyPositionData = new(){

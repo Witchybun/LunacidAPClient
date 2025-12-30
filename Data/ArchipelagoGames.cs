@@ -51,7 +51,7 @@ namespace LunacidAP.Data
             }
         }
         
-        public static APGameData ConstructNewGameData(string game)
+        public static void ConstructNewGameData(string game)
         {
             var text = Path.Combine(Path.Combine(Paths.PluginPath, "LunacidAP"), "GamesData");
             if (!Directory.Exists(text))
@@ -59,11 +59,15 @@ namespace LunacidAP.Data
                 Directory.CreateDirectory(text);
             }
             var text2 = Path.Combine(text, $"{game}.json");
-            APGameData apGameData = new APGameData(game, "An item from an unknown original, not yet documented", new Dictionary<string, string>());
+            if (!File.Exists(text2))
+            {
+                return;
+            }
+            var apGameData = new APGameData(game, "An item from an unknown original, not yet documented", new Dictionary<string, string>());
             var text3 = JsonConvert.SerializeObject(apGameData);
             File.WriteAllText(text2, text3);
             Plugin.LOG.LogInfo($"Created new data entry for {game}.");
-            return apGameData;
+            return;
         }
         
         public static string KeywordToItem(ArchipelagoItem archipelagoItem)

@@ -91,9 +91,6 @@ namespace LunacidAP.Patches
         {
             var eqSlot2Field = __instance.GetType().GetField("EQ_SLOT2", BindingFlags.Instance | BindingFlags.NonPublic);
             var EQ_SLOT2 = (int)eqSlot2Field.GetValue(__instance);
-            var eqselField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-            var EQ_SEL = (int)eqselField.GetValue(__instance);
-            var loadTextMethod = __instance.GetType().GetMethod("LoadText", BindingFlags.Instance | BindingFlags.NonPublic);
             if (which == 51 && (__instance.current_query == 6 || __instance.current_query == 0)) // Loading a save from main menu
             {
                 var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);

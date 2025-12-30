@@ -148,7 +148,8 @@ namespace LunacidAP
             }
             _currentSceneName = "";
             GrassBreakHandler.AddArchipelagoData(sceneName);
-            GetInformationAboutScene();
+            TeleportHandler.IsSwappingScenes = false;
+            //GetInformationAboutScene();
             Cleanup();
             _hubLevel = null;
         }
@@ -216,32 +217,6 @@ namespace LunacidAP
 
         private void GetInformationAboutScene()
         {
-            var stateItems = GameObject.FindObjectsOfType(typeof(AREA_SAVED_ITEM)) as AREA_SAVED_ITEM[];
-            var zoneLookup = new Dictionary<string, List<int>>();
-            foreach (var item in stateItems)
-            {
-                if (item.Zone != 7 && item.Slot != 6)
-                {
-                    continue;
-                }
-                LOG.LogInfo(
-                    $"Object {item.name} will look for Zone {item.Zone} at position {item.Slot} for value {item.value}");
-                if (!zoneLookup.ContainsKey(item.name))
-                {
-                    zoneLookup.Add(item.name, new List<int>());
-                }
-
-                if (!zoneLookup[item.name].Contains(item.value))
-                {
-                    zoneLookup[item.name].Add(item.value);
-                }
-                
-            }
-
-            foreach (var kvp in zoneLookup)
-            {
-                Log.LogInfo($"In the end, Zone {kvp.Key} has {string.Join(" ", kvp.Value)}");
-            }
         }
 
         private void CheckForVictory(string sceneName)
@@ -251,28 +226,24 @@ namespace LunacidAP
                 return;
             }
             var anyEndingScenes = new List<string>() { "END_E", "END_B", "END_A", "WhatWillBeAtTheEnd" };
-            if (sceneName == "END_E" && ArchipelagoClient.AP.HasGoal(Goal.EndingE))
+            switch (sceneName)
             {
-                CallForVictory();
-            }
-            else if (sceneName == "END_B" && ArchipelagoClient.AP.HasGoal(Goal.EndingB))
-            {
-                CallForVictory();
-            }
-            else if (sceneName == "END_A" && ArchipelagoClient.AP.HasGoal(Goal.EndingA))
-            {
-                CallForVictory();
-            }
-            else if (sceneName == "WhatWillBeAtTheEnd" && ArchipelagoClient.AP.HasGoal(Goal.EndingCD))
-            {
-                CallForVictory();
-            }
-            else if (anyEndingScenes.Contains(sceneName) && ArchipelagoClient.AP.SlotData.Ending == Goal.AnyEnding) // Done because its zero.
-            {
-                CallForVictory();
-            }
+                case "END_E" when ArchipelagoClient.AP.HasGoal(Goal.EndingE):
+                case "END_B" when ArchipelagoClient.AP.HasGoal(Goal.EndingB):
+                case "END_A" when ArchipelagoClient.AP.HasGoal(Goal.EndingA):
+                case "WhatWillBeAtTheEnd" when ArchipelagoClient.AP.HasGoal(Goal.EndingCD):
+                    CallForVictory();
+                    break;
+                default:
+                {
+                    if (anyEndingScenes.Contains(sceneName) && ArchipelagoClient.AP.SlotData.Ending == Goal.AnyEnding) // Done because its zero.
+                    {
+                        CallForVictory();
+                    }
 
-
+                    break;
+                }
+            }
         }
 
         private void CallForVictory()
@@ -306,33 +277,59 @@ namespace LunacidAP
             {
                 Directory.CreateDirectory(dir);
             }
+            var soundsDir = Path.Combine(Path.Combine(Paths.PluginPath, "LunacidAP"), "ItemSEFiles");
             var songs = Directory.GetFiles(dir, "*.mp3", SearchOption.AllDirectories).ToList();
+            var sounds = Directory.GetFiles(soundsDir, "*.mp3", SearchOption.AllDirectories).ToList();
             foreach (var song in songs)
             {
-                var songName = song.Replace(dir, "").Replace(".mp3", "");
-                using (var uwr = UnityWebRequestMultimedia.GetAudioClip("file://" + song, AudioType.MPEG))
+                var songName = song.Replace(dir, "").Replace(".mp3", "").Substring(1);
+                using var uwr = UnityWebRequestMultimedia.GetAudioClip("file://" + song, AudioType.MPEG);
+                ((DownloadHandlerAudioClip)uwr.downloadHandler).streamAudio = true;
+
+                yield return uwr.SendWebRequest();
+
+                if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError)
                 {
-                    ((DownloadHandlerAudioClip)uwr.downloadHandler).streamAudio = true;
+                    Debug.LogError(uwr.error);
+                    yield break;
+                }
 
-                    yield return uwr.SendWebRequest();
+                DownloadHandlerAudioClip dlHandler = (DownloadHandlerAudioClip)uwr.downloadHandler;
 
-                    if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError)
+                if (dlHandler.isDone)
+                {
+                    AudioClip audioClip = dlHandler.audioClip;
+
+                    if (audioClip != null)
                     {
-                        Debug.LogError(uwr.error);
-                        yield break;
+                        MuseHandler.storedSongs[songName] = DownloadHandlerAudioClip.GetContent(uwr);
+
                     }
+                }
+            }
+            foreach (var sound in sounds)
+            {
+                var songName = sound.Replace(soundsDir, "").Replace(".mp3", "").Substring(1);
+                using var uwr = UnityWebRequestMultimedia.GetAudioClip("file://" + sound, AudioType.MPEG);
+                ((DownloadHandlerAudioClip)uwr.downloadHandler).streamAudio = true;
 
-                    DownloadHandlerAudioClip dlHandler = (DownloadHandlerAudioClip)uwr.downloadHandler;
+                yield return uwr.SendWebRequest();
 
-                    if (dlHandler.isDone)
+                if (uwr.result == UnityWebRequest.Result.ConnectionError || uwr.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    Debug.LogError(uwr.error);
+                    yield break;
+                }
+
+                DownloadHandlerAudioClip dlHandler = (DownloadHandlerAudioClip)uwr.downloadHandler;
+
+                if (dlHandler.isDone)
+                {
+                    AudioClip audioClip = dlHandler.audioClip;
+
+                    if (audioClip != null)
                     {
-                        AudioClip audioClip = dlHandler.audioClip;
-
-                        if (audioClip != null)
-                        {
-                            MuseHandler.storedSongs[songName] = DownloadHandlerAudioClip.GetContent(uwr);
-
-                        }
+                        MuseHandler.storedSounds[songName] = DownloadHandlerAudioClip.GetContent(uwr);
                     }
                 }
             }

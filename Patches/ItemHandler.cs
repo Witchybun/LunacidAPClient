@@ -161,7 +161,7 @@ namespace LunacidAP.Patches
                         return;
                     }
             }
-            if (itemName.Contains(" Trap"))
+            if (LunacidItems.Traps.Contains(itemName))
             {
                 GiveTrap(itemName, color, player, self);
                 return;
@@ -213,10 +213,18 @@ namespace LunacidAP.Patches
         {
             try
             {
-                var element = ConnectionData.Elements[Name];
-                var newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
-                PopupCommand(1, newName, color, player, self, isSelfLevelLocation);
+                _log.LogInfo(Name);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
+                var newName = Name;
+                if (ConnectionData.Elements.TryGetValue(Name, out var element))
+                {
+                    newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
+                }
+                else
+                {
+                    _log.LogWarning($"Weapon {Name} has no element?");
+                }
+                PopupCommand(1, newName, color, player, self, isSelfLevelLocation);
                 for (int j = 0; j < 128; j++)
                 {
                     if (Control.CURRENT_PL_DATA.WEPS[j] == "" || Control.CURRENT_PL_DATA.WEPS[j] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.WEPS[j]) == Name)
@@ -446,7 +454,7 @@ namespace LunacidAP.Patches
         private static void GiveTrap(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
         {
             PopupCommand(4, Name, color, player, self, isSelfLevelLocation);
-            Control.PL.Poison.Harm(LunacidItems.TrapToHarm[Name], 10.0f);
+            TrapHandler.AddTrap(Name);
         }
 
         private static void CreateDoorKeyInInventory(Menus menu, int itemCount)

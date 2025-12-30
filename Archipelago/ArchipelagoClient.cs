@@ -37,7 +37,7 @@ namespace LunacidAP.Archipelago
         public SlotData SlotData { get; private set; }
         public GiftingService Gifting { get; private set; }
         private GiftHelper giftHelper { get; set; }
-        public const long LOCATION_INIT_ID = 0;
+        private TrapHandler _trapHandler { get; set; }
 
         private bool _connected;
         public bool Authenticated
@@ -198,6 +198,16 @@ namespace LunacidAP.Archipelago
                 RandomizeEquipData(seed);
                 outText = $"Successfully connected to as {slotName}!";
                 //GrabAllTrapOrientedCutscenes();
+                _trapHandler = new TrapHandler();
+                StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
+                StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
+                StartCoroutine(_trapHandler.DropRatsWhenPossible());
+                StartCoroutine(_trapHandler.CursePlayerWhenPossible());
+                StartCoroutine(_trapHandler.BlindPlayerWhenPossible());
+                StartCoroutine(_trapHandler.SlowPlayerWhenPossible());
+                StartCoroutine(_trapHandler.DrainManaOfPlayerWhenPossible());
+                StartCoroutine(_trapHandler.DrainXPOfPlayerWhenPossible());
+                StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
                 Authenticated = true;
             }
             else
@@ -667,20 +677,21 @@ namespace LunacidAP.Archipelago
 
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
-            if (ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
+            if (AP.IsLocationChecked(locationData.APLocationID))
             {
                 if (item.SlotName == ConnectionData.SlotName && isRepeatable)
                 {
                     ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
                     return item;
                 }
-                else if (GiftHelper.GiftItemToOtherPlayer(item))
+
+                if (GiftHelper.GiftItemToOtherPlayer(item))
                 {
                     return item;
                 }
                 return null;
             }
-            LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData, item);
+            LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(locationData);
             return item;
 
         }

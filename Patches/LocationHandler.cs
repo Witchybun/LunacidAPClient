@@ -147,7 +147,7 @@ namespace LunacidAP.Patches
                     SendMessageOnPickup(item);
                 }
             }
-            DetermineOwnerAndDirectlyGiveIfSelf(locationOfShortestDistance, item);
+            DetermineOwnerAndDirectlyGiveIfSelf(locationOfShortestDistance);
             
             
             return false;
@@ -158,9 +158,9 @@ namespace LunacidAP.Patches
             // I believe I added this exception because the AP pickup component isn't added fast enough?
             if (pickupObject.gameObject.name == "WEPON")
             {
-                var apLocation = LunacidLocations.APLocationData["ARCHIVES"].First(x => x.GameObjectName == "WEPON");
+                var apLocation = APLocationData["ARCHIVES"].First(x => x.GameObjectName == "WEPON");
                 var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
-                DetermineOwnerAndDirectlyGiveIfSelf(apLocation, item);
+                DetermineOwnerAndDirectlyGiveIfSelf(apLocation);
                 if (item.SlotName != ConnectionData.SlotName)
                 {
                     SendMessageOnPickup(item);
@@ -265,12 +265,12 @@ namespace LunacidAP.Patches
             {
                 if (Vector3.Distance(objectLocation, new Vector3(60.22f, -10f, -168.66f)) < 2f)
                 {
-                    var item1Location = string.Format("TA: Floor {0} Item 1", TheTowerDNumberDilemma(pickupObject).ToString());
+                    var item1Location = $"TA: Floor {TheTowerDNumberDilemma(pickupObject).ToString()} Item 1";
                     return APLocationData["TOWER"].First(x => x.APLocationName == item1Location);
                 }
                 else if (Vector3.Distance(objectLocation, new Vector3(59.878f, -10f, -174.863f)) < 2f)
                 {
-                    var item2Location = string.Format("TA: Floor {0} Item 2", TheTowerDNumberDilemma(pickupObject).ToString());
+                    var item2Location = $"TA: Floor {TheTowerDNumberDilemma(pickupObject).ToString()} Item 2";
                     return APLocationData["TOWER"].First(x => x.APLocationName == item2Location);
                 }
             }
@@ -323,11 +323,6 @@ namespace LunacidAP.Patches
             return locationOfShortestDistance;
         }
 
-        public static LocationData DetermineAPLocation(GameObject gameObject, int type)
-        {
-            return DetermineTypicalPickupLocation(gameObject.scene.name, gameObject.name, gameObject.transform.position, type);
-        }
-
         private static LocationData DetermineClonePickupLocation(string sceneName, string objectName, Vector3 objectPosition)
         {
             var cleanedName = objectName.Replace("(Clone)", "");
@@ -337,7 +332,7 @@ namespace LunacidAP.Patches
                     {
                         if (Vector3.Distance(objectPosition, new Vector3(68.0f, -9.5f, -172.0f)) < 2f)
                         {
-                            var towerLocation = string.Format("TA: Floor {0} Chest", _currentFloor.ToString());
+                            var towerLocation = $"TA: Floor {_currentFloor.ToString()} Chest";
                             return APLocationData["TOWER"].First(x => x.APLocationName == towerLocation);
                         }
                         return new LocationData();
@@ -414,7 +409,7 @@ namespace LunacidAP.Patches
             return;
         }
 
-        public static bool DetermineOwnerAndDirectlyGiveIfSelf(LocationData location, ArchipelagoItem item)
+        public static void DetermineOwnerAndDirectlyGiveIfSelf(LocationData location)
         {
             _popup = _popup = GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY; // Though done before, other calls might not catch it.
             if (ArchipelagoClient.AP.Authenticated) // If someone else's item an online, do the usual
@@ -440,7 +435,6 @@ namespace LunacidAP.Patches
                 ConnectionData.CompletedLocations.Add(location.APLocationID);
                 ConnectionData.ScoutedLocations[location.APLocationID].Collected = true;
             }
-            return false;
         }
 
 

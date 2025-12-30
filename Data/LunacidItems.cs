@@ -126,65 +126,10 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> Traps = new(){
-            "Bleed Trap", "Poison Trap", "Curse Trap", "Slowness Trap", "Blindness Trap", "Mana Drain Trap", "XP Drain Trap",
+            "Bleed Trap", "Poison Trap", "Curse Trap", "Slowness Trap", "Blindness Trap", "Mana Drain Trap", "XP Drain Trap", 
+            "Rat Gang", "Date With Death Trap",
         };
-
-        public static readonly Dictionary<string, int> MaterialNames = new(){
-            { "Opal", 0 },
-            { "Fire Opal", 2 },
-            { "Ocean Bone Shard", 4},
-            { "Ocean Bone Shell", 6 },
-            { "Onyx", 8},
-            { "Obsidian", 10 },
-            { "Snowflake Obsidian", 12 },
-            { "Yellow Morel", 14 },
-            { "Destroying Angel Mushroom", 16 },
-            { "Lotus Seed Pod", 18 },
-            { "Ashes", 20 },
-            { "Ectoplasm", 30 },
-            { "Ikurr'ilb Root", 32 },
-            { "Vampiric Ashes", 34 },
-            { "Bones", 36 },
-            { "Bloodweed", 38 },
-            { "Moon Petal", 40 },
-            { "Fool's Gold", 42 },
-            { "Fire Coral", 44 },
-            { "Fiddlehead", 46 },
-            { "Fractured Death", 48 },
-            { "Fractured Life", 50 },
-            { "Broken Sword", 52 },
-        };
-
-        public static readonly Dictionary<string, int> TrapToHarm = new(){
-            {"Bleed Trap", 0},
-            {"Poison Trap", 1},
-            {"Curse Trap", 2},
-            {"Slowness Trap", 4},
-            {"Blindness Trap", 5},
-            {"Mana Drain Trap", 6},
-            {"XP Drain Trap", 7}
-        };
-
-        public static readonly Dictionary<string, int> ElementToID = new(){
-            {"Normal", 0},
-            {"Fire", 1},
-            {"Ice", 2},
-            {"Poison", 3},
-            {"Light", 4},
-            {"Dark", 5},
-            {"Dark and Light", 8},
-            {"Normal and Fire", 9},
-            {"Ice and Poison", 10},
-            {"Dark and Fire", 11}
-        };
-
-        public static readonly Dictionary<int, string> IDToElement =
-            ElementToID.ToDictionary(x => x.Value, x => x.Key);
-
-        public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
-            "COIN_PICKUP", "ENKEY_PICKUP"
-        };
-
+        
         public static Dictionary<string, string> CastToWeapon = new(){
             {"ARROW_CAST", "ELFEN BOW"},
             {"TWISTED_STAFF_CAST", "TWISTED STAFF"},
@@ -217,6 +162,52 @@ namespace LunacidAP.Data
             {"LIGHTBLADE_CAST", "SHINING BLADE"},
             {"PUMP_CAST", "PUMPKIN POP"}
 
+        };
+
+        public static readonly Dictionary<string, int> MaterialNames = new(){
+            { "Opal", 0 },
+            { "Fire Opal", 2 },
+            { "Ocean Bone Shard", 4},
+            { "Ocean Bone Shell", 6 },
+            { "Onyx", 8},
+            { "Obsidian", 10 },
+            { "Snowflake Obsidian", 12 },
+            { "Yellow Morel", 14 },
+            { "Destroying Angel Mushroom", 16 },
+            { "Lotus Seed Pod", 18 },
+            { "Ashes", 20 },
+            { "Ectoplasm", 30 },
+            { "Ikurr'ilb Root", 32 },
+            { "Vampiric Ashes", 34 },
+            { "Bones", 36 },
+            { "Bloodweed", 38 },
+            { "Moon Petal", 40 },
+            { "Fool's Gold", 42 },
+            { "Fire Coral", 44 },
+            { "Fiddlehead", 46 },
+            { "Fractured Death", 48 },
+            { "Fractured Life", 50 },
+            { "Broken Sword", 52 },
+        };
+
+        public static readonly Dictionary<string, int> ElementToID = new(){
+            {"Normal", 0},
+            {"Fire", 1},
+            {"Ice", 2},
+            {"Poison", 3},
+            {"Light", 4},
+            {"Dark", 5},
+            {"Dark and Light", 8},
+            {"Normal and Fire", 9},
+            {"Ice and Poison", 10},
+            {"Dark and Fire", 11}
+        };
+
+        public static readonly Dictionary<int, string> IDToElement =
+            ElementToID.ToDictionary(x => x.Value, x => x.Key);
+
+        public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
+            "COIN_PICKUP", "ENKEY_PICKUP"
         };
 
         public static Dictionary<string, string> ItemToPickup = new(){

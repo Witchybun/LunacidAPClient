@@ -7,30 +7,30 @@ namespace LunacidAP.Data
 {
     public static class ConnectionData
     {
-        public static string HostName {get; set;} = "";
-        public static int Port {get; set;} = 0;
-        public static string SlotName {get; set;} = "";
-        public static int Seed {get; set;} = 0;
-        public static string Password {get; set;} = "";
+        public static string HostName {get; private set;} = "";
+        public static int Port {get; private set;}
+        public static string SlotName {get; private set;} = "";
+        public static int Seed {get; private set;}
+        public static string Password {get; private set;} = "";
         public static int Index {get; set;}
-        public static bool DeathLink {get; set;} = false;
-        public static int CheatedCount {get; set;} = 0;
-        public static int StoredLevel {get; set;} = 0;
-        public static int StoredExperience {get; set;} = 0;
-        public static Dictionary<string, ReceivedItem> ReceivedItems {get; set;} = new Dictionary<string, ReceivedItem>(){};
-        public static List<long> CompletedLocations {get; set;} = new List<long>(){};
-        public static Dictionary<string, string> CommunionHints {get; set;} = new Dictionary<string, string>(){};
-        public static Dictionary<string, string> Elements {get; set;} = new (StringComparer.OrdinalIgnoreCase){};
+        public static bool DeathLink {get; set;}
+        public static int CheatedCount {get; private set;}
+        public static int StoredLevel {get; set;}
+        public static int StoredExperience {get; set;}
+        public static Dictionary<string, ReceivedItem> ReceivedItems {get; private set;} = new();
+        public static List<long> CompletedLocations {get; private set;} = new();
+        public static Dictionary<string, string> CommunionHints {get; set;} = new();
+        public static Dictionary<string, string> Elements {get; private set;} = new (StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData { get; set; } = new();
         public static Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData { get; set; } = new();
-        public static Dictionary<string, string> Entrances {get; set;} = new (){};
-        public static Dictionary<string, string> TraversedEntrances { get; set; } = new() { };
-        public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new(){};
-        public static List<string> EnteredScenes = new(){};
-        public static HashSet<string> BoughtItems = new(){};
-        public static List<ReceivedGift> ReceivedGifts = new(){};
-        public static Dictionary<string, string> ItemColors = new(){};
-        public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new(){};
+        public static Dictionary<string, string> Entrances {get; set;} = new ();
+        public static Dictionary<string, string> TraversedEntrances { get; private set; } = new();
+        public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new();
+        public static List<string> EnteredScenes = new();
+        public static HashSet<string> BoughtItems = new();
+        public static List<ReceivedGift> ReceivedGifts = new();
+        public static Dictionary<string, string> ItemColors = new();
+        public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new();
 
         
 
