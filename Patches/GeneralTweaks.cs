@@ -67,25 +67,20 @@ namespace LunacidAP.Patches
         [HarmonyPostfix]
         private static void Start_SendLucidCheck(Boss __instance)
         {
-            var lucidID = ArchipelagoClient.AP.GetLocationIDFromName("CF: Calamis' Weapon of Choice");
-            __instance.CON ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            var popup = __instance.CON.PAPPY;
-            var locationInfo = ArchipelagoClient.AP.ScoutLocation(lucidID);
-            var itemInfo = locationInfo.Name;
-            var slotNameofItemOwner = locationInfo.SlotName;
-            ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(lucidID);
-            ConnectionData.CompletedLocations.Add(lucidID);
-            if (ConnectionData.SlotName != slotNameofItemOwner)
+            var locationData = new LunacidLocations.LocationData(319, "CF: Calamis' Weapon of Choice", ignoreLocationHandler: true);
+            var archipelagoItem = ConnectionData.ScoutedLocations[319];
+            LocationHandler.SendLocationCoveringPatchouliCase(locationData);
+            if (archipelagoItem.SlotName != ConnectionData.SlotName)
             {
-                popup.POP($"Found {itemInfo} for {slotNameofItemOwner}", 1f, 0);
+                LocationHandler.SendMessageOnPickup(archipelagoItem);
             }
-            return;
         }
 
         [HarmonyPatch(typeof(Player_Control_scr), "Die")]
         [HarmonyPostfix]
         private static void Die_FalsifyDLTag()
         {
+            if (!ConnectionData.DeathLink) return;
             ArchipelagoClient.AP.SendDeathLink();
         }
 
@@ -110,30 +105,50 @@ namespace LunacidAP.Patches
             return true;
         }
 
-        [HarmonyPatch(typeof(Kill_Other), "Start")]
+        //No Sword For you Lol
+        [HarmonyPatch(typeof(Boss), "Start")]
         [HarmonyPrefix]
-        private static bool Start_KillPlayerNoSword(Kill_Other __instance)
+        private static bool Start_KillPlayerNoSword(Boss __instance, ref Vector3 ___START_POS, ref string[] ___KEEP, ref Animation ___ANIM, ref Coroutine ___ROUT)
         {
-            if (__instance.name != "SHOT_B2")
-            {
-                return true;
-            }
+            ___START_POS = __instance.transform.position;
+            ___KEEP = new string[10];
+            ___KEEP[0] = __instance.CON.CURRENT_PL_DATA.WEP1;
+            ___KEEP[1] = __instance.CON.CURRENT_PL_DATA.WEP2;
+            ___KEEP[2] = __instance.CON.CURRENT_PL_DATA.ITEM1;
+            ___KEEP[3] = __instance.CON.CURRENT_PL_DATA.ITEM2;
+            ___KEEP[4] = __instance.CON.CURRENT_PL_DATA.ITEM3;
+            ___KEEP[5] = __instance.CON.CURRENT_PL_DATA.ITEM4;
+            ___KEEP[6] = __instance.CON.CURRENT_PL_DATA.ITEM5;
+            ___KEEP[7] = __instance.CON.CURRENT_PL_DATA.MAG1;
+            ___KEEP[8] = __instance.CON.CURRENT_PL_DATA.MAG2;
             var calamisItem = ConnectionData.ScoutedLocations[LucidID].Name;
-            if (!ArchipelagoClient.AP.WasItemReceived("Lucid Blade") && calamisItem != "Lucid Blade")
-            {
-                var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
-                you.Die();    
-                return false;
-            }
-            return true;
+            var cantFight = !ArchipelagoClient.AP.WasItemReceived("Lucid Blade") && calamisItem != "Lucid Blade";
+            __instance.CON.CURRENT_PL_DATA.WEP1 = cantFight ? null : "LUCID BLADE";
+            __instance.CON.CURRENT_PL_DATA.WEP2 = cantFight ? null : "LUCID BLADE";
+            __instance.CON.CURRENT_PL_DATA.ITEM1 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM2 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM3 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM4 = null;
+            __instance.CON.CURRENT_PL_DATA.ITEM5 = null;
+            __instance.CON.CURRENT_PL_DATA.MAG1 = null;
+            __instance.CON.CURRENT_PL_DATA.MAG2 = null;
+            __instance.CON.PL.GOD = !cantFight;
+            __instance.CON.Current_Gameplay_State = 1;
+            __instance.CON.OpenMenu();
+            __instance.CON.EQITEMS();
+            __instance.CON.EQMagic();
+            ___ANIM = __instance.transform.GetChild(0).GetComponent<Animation>();
+            
+            if (!cantFight) __instance.StartCoroutine("Regen");
+            ___ROUT = __instance.StartCoroutine("GO");
+            return false;
         }
 
         [HarmonyPatch(typeof(Boss), "End")]
         [HarmonyPrefix]
-        private static bool End_ReturnWithoutLucid(Boss __instance)
+        private static bool End_ReturnWithoutLucid(Boss __instance, ref string[] ___KEEP)
         {
-            string[] KEEP = (string[])__instance.GetType().GetField("KEEP", Flags).GetValue(__instance);
-            _kept = KEEP;
+            _kept = ___KEEP;
             __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
             __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
             try

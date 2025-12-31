@@ -3,9 +3,11 @@ using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using UnityEngine.SceneManagement;
 using static LunacidAP.Data.LunacidGifts;
 using static LunacidAP.Data.LunacidEnemies;
 
@@ -76,7 +78,7 @@ namespace LunacidAP.Patches
             Plugin.SaveCustomRandoSettings();
             _log.LogInfo("Save complete!");
         }
-
+        
         public static void ReadSave(int Save_Slot)
         {
             try

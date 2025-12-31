@@ -147,7 +147,7 @@ namespace LunacidAP.Patches
                     SendMessageOnPickup(item);
                 }
             }
-            DetermineOwnerAndDirectlyGiveIfSelf(locationOfShortestDistance);
+            SendLocationCoveringPatchouliCase(locationOfShortestDistance);
             
             
             return false;
@@ -160,7 +160,7 @@ namespace LunacidAP.Patches
             {
                 var apLocation = APLocationData["ARCHIVES"].First(x => x.GameObjectName == "WEPON");
                 var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
-                DetermineOwnerAndDirectlyGiveIfSelf(apLocation);
+                SendLocationCoveringPatchouliCase(apLocation);
                 if (item.SlotName != ConnectionData.SlotName)
                 {
                     SendMessageOnPickup(item);
@@ -409,7 +409,7 @@ namespace LunacidAP.Patches
             return;
         }
 
-        public static void DetermineOwnerAndDirectlyGiveIfSelf(LocationData location)
+        public static void SendLocationCoveringPatchouliCase(LocationData location)
         {
             _popup = _popup = GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY; // Though done before, other calls might not catch it.
             if (ArchipelagoClient.AP.Authenticated) // If someone else's item an online, do the usual

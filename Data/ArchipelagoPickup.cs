@@ -26,7 +26,7 @@ namespace LunacidAP.Data
         {
             if (!Collected)
             {
-                LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(LocationData);
+                LocationHandler.SendLocationCoveringPatchouliCase(LocationData);
                 if (ArchipelagoItem.SlotName != ConnectionData.SlotName)
                 {
                     LocationHandler.SendMessageOnPickup(ArchipelagoItem);

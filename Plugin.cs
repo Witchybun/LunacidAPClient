@@ -149,7 +149,6 @@ namespace LunacidAP
             _currentSceneName = "";
             GrassBreakHandler.AddArchipelagoData(sceneName);
             TeleportHandler.IsSwappingScenes = false;
-            //GetInformationAboutScene();
             Cleanup();
             _hubLevel = null;
         }
@@ -213,10 +212,6 @@ namespace LunacidAP
             var mainDir = Path.Combine(Path.Combine(Paths.PluginPath, "LunacidAP"), "RandoSettings.json");
             var text = JsonConvert.SerializeObject(randoSettings);
             File.WriteAllText(mainDir, text);
-        }
-
-        private void GetInformationAboutScene()
-        {
         }
 
         private void CheckForVictory(string sceneName)

@@ -216,7 +216,7 @@ namespace LunacidAP.Patches
 
             var locationList = ConnectionData.ScoutedLocations.Keys.ToList();
             var locationCount = locationList.Count();
-            var chosenLocations = new List<long>() { };
+            var chosenLocations = new List<long>();
             foreach (var creature in unusedCreatures)
             {
                 var chosenLocation = locationList[random.Next(0, locationCount - 1)];
@@ -225,6 +225,7 @@ namespace LunacidAP.Patches
                     chosenLocation = locationList[random.Next(0, locationCount - 1)];
                 }
                 var locationInfo = ConnectionData.ScoutedLocations[chosenLocation];
+                chosenLocations.Add(chosenLocation);
                 CreatureHints[creature] = string.Format(CreatureToHint[creature], ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation), locationInfo.Name);
             }
         }
@@ -233,21 +234,16 @@ namespace LunacidAP.Patches
         [HarmonyPostfix]
         private static void LOAD_MakeGarratHintForYou(CutScene_Dialog __instance)
         {
-            if (__instance.npc_name != "GARRAT THE HOUND")
+            if (__instance.npc_name == "GARRAT THE HOUND")
             {
-                return;
+                __instance.talk_speed *= 1.5f; // Make sure all of it actually gets said.
+                var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
+                var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"];
+                __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
+                    $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
             }
-            var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
-            var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"];
-            if (__instance.gameObject.name == "Gar_DIALOG_ALT")
-            {
-                __instance.LINES[0].value = $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory.";
-            }
-            else
-            {
-                __instance.LINES[0].value = $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
-            }
-            return;
+            _log.LogInfo($"The NPC is {__instance.npc_name}");
+            _log.LogInfo(__instance.gameObject.name);
         }
     }
 

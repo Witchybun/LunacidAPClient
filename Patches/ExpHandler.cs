@@ -103,7 +103,7 @@ namespace LunacidAP.Patches
                 ConnectionData.StoredLevel += 1;
                 var location = new LocationData(800 + ConnectionData.StoredLevel, $"Reach Level {ConnectionData.StoredLevel}");
                 var item = ConnectionData.ScoutedLocations[location.APLocationID];
-                LocationHandler.DetermineOwnerAndDirectlyGiveIfSelf(location);
+                LocationHandler.SendLocationCoveringPatchouliCase(location);
                 if (item.SlotName != ConnectionData.SlotName)
                 {
                     LocationHandler.SendLevelMessageOnLevelUp(item);
