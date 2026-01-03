@@ -178,6 +178,7 @@ namespace LunacidAP.Patches
                 var actualName = TheDaedalusConundrum(pickupObject);
                 apData.LocationData = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
                 apData.ArchipelagoItem = ConnectionData.ScoutedLocations[apData.LocationData.APLocationID];
+                apData.Collected = false; // Perhaps when the dummy location is repeated, its possible this is "true" and won't send.  Safe to do.
             }
             if (apData.Collected && !apData.CanBeRepeated)
             {
@@ -374,19 +375,13 @@ namespace LunacidAP.Patches
 
         public static string TheDaedalusConundrum(Item_Pickup_scr instance)
         {
-            if (instance.Name == "FIRE WORM")
+            return instance.Name switch
             {
-                return "FbA: Daedalus Knowledge (First)";
-            }
-            else if (instance.Name == "BESTIAL COMMUNION")
-            {
-                return "FbA: Daedalus Knowledge (Second)";
-            }
-            else if (instance.Name == "MOON BEAM")
-            {
-                return "FbA: Daedalus Knowledge (Third)";
-            }
-            return "";
+                "FIRE WORM" => "FbA: Daedalus Knowledge (First)",
+                "BESTIAL COMMUNION" => "FbA: Daedalus Knowledge (Second)",
+                "MOON BEAM" => "FbA: Daedalus Knowledge (Third)",
+                _ => ""
+            };
         }
 
         [HarmonyPatch(typeof(Load_Area), "OnTriggerEnter")]
