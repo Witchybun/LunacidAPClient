@@ -333,6 +333,10 @@ namespace LunacidAP.Patches
             var apLocation = DetermineShopLocation(sceneName, objectName);
             var location = +apLocation.APLocationID;
             var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
+            if (locationInfo is null)
+            {
+                return true;  // Likely not a location
+            }
             var slotNameofItemOwner = locationInfo.SlotName;
             if (ConnectionData.SlotName != slotNameofItemOwner)
             {
