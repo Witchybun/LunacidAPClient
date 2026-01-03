@@ -27,8 +27,8 @@ namespace LunacidAP
         private static readonly Dictionary<string, string> MultiworldGGColors = new()
         {
             {"Progression", "#FFC500"},
-            {"Useful", "#6D8BE8"},
-            {"Filler", "#00EEEE"},
+            {"Useful", "#AFD75F"},
+            {"Filler", "#B2B2B2"},
             {"Trap", "#FA8072"},
             {"Cheat", "#FF0000"},
             {"Gift", "#FF8DA1"},
