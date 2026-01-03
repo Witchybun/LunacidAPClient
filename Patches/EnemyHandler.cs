@@ -350,7 +350,7 @@ namespace LunacidAP.Patches
             return "NULL";
         }
 
-        public static void SwapEnemy(Transform child, string scene, string chosenEnemyName, bool isBlessed)
+        private static void SwapEnemy(Transform child, string scene, string chosenEnemyName, bool isBlessed)
         {
             if (chosenEnemyName == "NULL")
             {
