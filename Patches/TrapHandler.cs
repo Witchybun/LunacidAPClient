@@ -264,9 +264,7 @@ public class TrapHandler
             while (SceneManager.GetActiveScene().name == "DETHLAND")
             {
                 yield return null;
-                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             }
-            yield return new WaitForSeconds(10f);
             con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             TrapCounts["Date With Death Trap"] -= 1;
             var component = con.MENU.ITEMS[20].GetComponent<GOTO_LEVEL>();
@@ -274,6 +272,7 @@ public class TrapHandler
             component.POS = new Vector3(0f, 1f, 0f);
             component.ROT = 0f;
             component.gameObject.SetActive(value: true);
+            yield return new WaitForSeconds(15f);
         }
     }
     
