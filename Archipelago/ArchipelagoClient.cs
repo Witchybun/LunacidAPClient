@@ -195,8 +195,6 @@ namespace LunacidAP.Archipelago
                 BuildLocations(SlotData.Seed);
                 CommunionHint.DetermineHints(seed);
                 RandomizeEquipData(seed);
-                outText = $"Successfully connected to as {slotName}!";
-                //GrabAllTrapOrientedCutscenes();
                 _trapHandler = new TrapHandler();
                 StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
                 StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
@@ -417,6 +415,11 @@ namespace LunacidAP.Archipelago
                     cheatedCount += 1;
                 }
                 if (item.Index < ConnectionData.Index)
+                {
+                    continue;
+                }
+                // I wanna get rid of this so friggen bad.
+                if (ConnectionData.ReceivedItems.ContainsKey(item.Identifier))
                 {
                     continue;
                 }
