@@ -46,7 +46,7 @@ namespace LunacidAP
         public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
         
-        public static RandoSettings randoSettings = new RandoSettings(100, 100, false, false, RandoSettings.Colors.Archipelago);
+        public static RandoSettings randoSettings = new RandoSettings(100, 100, false, false, RandoSettings.Colors.Archipelago, false);
         private string _currentSceneName;
         private GameObject _hubLevel;
         private void Awake()
@@ -123,6 +123,7 @@ namespace LunacidAP
                 versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
                 var textBox = FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(5).gameObject;
                 RandoOptionsMaker.CreatePortModificationSetting(textBox);
+                ConnectionData.WriteConnectionData();
             }
             if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {
@@ -358,6 +359,7 @@ namespace LunacidAP
             public bool IsNormalized { get; set; }
             public bool PlayCustomMusic { get; set; }
             public Colors ItemColors { get; set; }
+            public bool AutoHint { get; set; }
             public enum Colors
             {
                 Archipelago = 0,
@@ -365,13 +367,14 @@ namespace LunacidAP
                 Custom = 2
             }
 
-            public RandoSettings(int expRate, int wexpRate, bool playCustomMusic, bool isNormalized, Colors itemColors)
+            public RandoSettings(int expRate, int wexpRate, bool playCustomMusic, bool isNormalized, Colors itemColors, bool autoHint)
             {
                 ExpRate = expRate;
                 WexpRate = wexpRate;
                 IsNormalized = isNormalized;
                 PlayCustomMusic = playCustomMusic;
                 ItemColors = itemColors;
+                AutoHint = autoHint;
             }
         }
     }

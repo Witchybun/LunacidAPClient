@@ -169,31 +169,27 @@ namespace LunacidAP.Patches
 
         private static void NameEveryDrop(string mobName, Loot_scr.Reward[] rewards)
         {
+            var count = 0;
             foreach (var reward in rewards)
             {
                 var name = "";
-                if (reward.ITEM is null)
-                {
-                    name = "NULL";
-                }
-                else
-                {
-                    name = reward.ITEM.name;
-                }
-                _log.LogInfo($"{mobName} drops {name}");
+                name = reward.ITEM is null ? "NULL" : reward.ITEM.name;
+                _log.LogInfo($"{mobName} drops {name} with weight {reward.CHANCE}");
+                count += reward.CHANCE;
             }
+            _log.LogInfo($"Total chance is {count}!");
         }
 
         private static LocationData GetDropLocationData(string location)
         {
-            foreach (var locationData in LunacidLocations.UniqueDropLocations)
+            foreach (var locationData in UniqueDropLocations)
             {
                 if (locationData.APLocationName == location)
                 {
                     return locationData;
                 }
             }
-            foreach (var locationData in LunacidLocations.OtherDropLocations)
+            foreach (var locationData in OtherDropLocations)
             {
                 if (locationData.APLocationName == location)
                 {
@@ -205,12 +201,12 @@ namespace LunacidAP.Patches
 
         private static string ConstructLocation(string enemyObjectName, string itemObjectName)
         {
-            if (!LunacidEnemies.NamesToGameObject.TryGetValue(enemyObjectName, out var enemyName))
+            if (!NamesToGameObject.TryGetValue(enemyObjectName, out var enemyName))
             {
                 _log.LogWarning($"Enemy {enemyObjectName} is not in the Dictionary.");
                 return "FAIL";
             }
-            if (!LunacidEnemies.ObjectToLocationSuffix.TryGetValue(itemObjectName, out var itemName))
+            if (!ObjectToLocationSuffix.TryGetValue(itemObjectName, out var itemName))
             {
                 _log.LogWarning($"Item {itemObjectName} is not in the Dictionary");
                 return "FAIL";
@@ -231,7 +227,7 @@ namespace LunacidAP.Patches
 
         public static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
         {
-            GameObject obj = UnityEngine.Object.Instantiate(loot, position, Quaternion.identity);
+            GameObject obj = Object.Instantiate(loot, position, Quaternion.identity);
             obj.SetActive(value: false);
             if (archipelagoPickup is not null && obj.GetComponent<ArchipelagoPickup>() is null)
             {
@@ -529,7 +525,30 @@ namespace LunacidAP.Patches
                                 continue;
                             }
                             var locationName = ArchipelagoClient.AP.GetLocationNameFromID(id);
+                            _log.LogInfo($"Item status:  AutoHint?: {Plugin.randoSettings.AutoHint}.  Has flag?: {archipelagoItem.Classification.HasFlag(ItemFlags.Advancement)}");
+                            if (Plugin.randoSettings.AutoHint && archipelagoItem.Classification.HasFlag(ItemFlags.Advancement))
+                            {
+                                ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, id);
+                            }
                             var color = Colors.GetClassificationHex(archipelagoItem.Classification);
+                            switch (id)
+                            {
+                                case 406:
+                                    text3 += "(IF AXE)\n";
+                                    break;
+                                case 411:
+                                    text3 += "(IF KHOPESH)\n";
+                                    break;
+                                case 412:
+                                    text3 += "(IF SICKLE)\n";
+                                    break;
+                                case 416:
+                                    text3 += "(IF SPEAR)\n";
+                                    break;
+                                case 417:
+                                    text3 += "(IF SPEAR)\n";
+                                    break;
+                            }
                             text3 += $"{locationName}: <color={color}>{archipelagoItem.Name}</color>\n";
                         }
                     }

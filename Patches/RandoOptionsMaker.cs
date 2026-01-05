@@ -123,6 +123,20 @@ public class RandoOptionsMaker
         musicButton.name = "Music Button";
         var musicButtonData = musicButton.GetComponent<Button>();
         musicButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 104;
+        // Auto Hint Toggle
+        var autoHintName = Object.Instantiate(musicName, leftSideParent, true);
+        autoHintName.position = new Vector3(autoHintName.position.x, autoHintName.position.y - 5f, autoHintName.position.z);
+        autoHintName.name = "Auto Hint Name";
+        autoHintName.GetComponent<TextMeshProUGUI>().text = "Auto Hint";
+        var autoHintStateName = Object.Instantiate(musicStateName, settingNameParent, true);
+        autoHintStateName.position = new Vector3(autoHintStateName.position.x, autoHintStateName.position.y -5f, autoHintStateName.position.z);
+        autoHintStateName.name = "Auto Hint State";
+        autoHintStateName.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.AutoHint ? "[On]" : "[Off]";
+        var autoHintButton = Object.Instantiate(musicButton, baseParent, true);
+        autoHintButton.position = new Vector3(autoHintButton.position.x, autoHintButton.position.y - 5f, autoHintButton.position.z);
+        autoHintButton.name = "Auto Hint Button";
+        var autoHintButtonData = autoHintButton.GetComponent<Button>();
+        autoHintButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 105;
     }
 
     private static void LoadPortValues()
@@ -281,7 +295,11 @@ public class RandoOptionsMaker
                 normalSetting.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.PlayCustomMusic ? "[On]" : "[Off]";
                 return false;
             }
-                
+            case 105:
+                Plugin.randoSettings.AutoHint = !Plugin.randoSettings.AutoHint;
+                var hintSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings").Find("Auto Hint State");
+                hintSetting.GetComponent<TextMeshProUGUI>().text = Plugin.randoSettings.AutoHint ? "[On]" : "[Off]";
+                return false;
         }
 
         return true;

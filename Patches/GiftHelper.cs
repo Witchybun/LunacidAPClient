@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Archipelago.Gifting.Net.Versioning.Gifts;
@@ -21,61 +22,75 @@ namespace LunacidAP.Patches
     {
         private ManualLogSource _log;
         private System.Random random = new(DateTime.Now.Second);
-        public bool HandlingGifts = false;
         private ICloseTraitParser<string> CloseTraitParser {get; set;}
         public GiftHelper(ManualLogSource log)
         {
             _log = log;
+            LunacidTraits.DesiredTraits = LunacidTraits.GetDesiredTraits();
         }
 
         
 
         public IEnumerator HandleIncomingGifts()
         {
-            if (ArchipelagoClient.AP.Session is null || !ArchipelagoClient.AP.IsInNormalGameState())
+            while (ArchipelagoClient.AP.allowCoroutines)
             {
-                yield return new WaitForSeconds(10f);
-            }
-            var giftsTask = Task.Run(ArchipelagoClient.AP.Gifting.GetAllGiftsAndEmptyGiftBoxAsync);
-            yield return new WaitUntil(() => giftsTask.IsCompleted);
-            if (giftsTask.IsFaulted)
-            {
-                _log.LogError(giftsTask.Exception.GetBaseException().Message);
-                yield break;
-            }
-            var gifts = giftsTask.Result;
-            foreach (var giftPair in gifts)
-            {
-                var gift = giftPair.Value;
-                if (gift.IsRefund || WasGiftReceivedBefore(gift))
+                while (!ArchipelagoClient.GiftsToProcess.Any() || ArchipelagoClient.AP.Session is null)
+                {
+                    if (!ArchipelagoClient.AP.allowCoroutines)
+                    {
+                        ArchipelagoClient.GiftsToProcess.Clear();
+                        yield break;
+                    }
+                    yield return new WaitForSeconds(1f);
+                }
+                while (!ArchipelagoClient.AP.IsInNormalGameState())
+                {
+                    yield return new WaitForSeconds(1f);
+                }
+                var gift = ArchipelagoClient.GiftsToProcess.Dequeue();
+                ArchipelagoClient.AP.Gifting.RemoveGiftFromGiftBox(gift.ID);
+                if (gift.IsRefund)
                 {
                     continue; // You never send things which are Lunacid oriented anyway, so let them die.
                 }
-                var receivedGift = new ReceivedGift(gift.ItemName, gift.ID);
-                ConnectionData.ReceivedGifts.Add(receivedGift);
+                if (gift.Traits.Any(x => x.Trait == "OthersGift"))
+                {
+                    GiveRandomLunacidItem(gift);
+                    yield return new WaitForSeconds(1f);
+                    continue;
+                }
                 if (IsLunacidItem(gift, out var isTrap))
                 {
                     ItemHandler.GiveLunacidItem(gift, isTrap);
+                    yield return new WaitForSeconds(1f);
                     continue;
                 }
                 HandleGiftingByTrait(gift);
-
+                yield return new WaitForSeconds(1f);
             }
+            
         }
 
-        private bool WasGiftReceivedBefore(Gift gift)
+        private void GiveRandomLunacidItem(Gift gift)
         {
-            foreach (var receivedGift in ConnectionData.ReceivedGifts)
+            var isTrap = gift.Traits.Any(x => x.Trait == "Trap");
+            var player = ArchipelagoClient.AP.Session.Players.GetPlayerName(gift.SenderSlot);
+            if (isTrap)
             {
-                if (receivedGift.ID == gift.ID)
-                {
-                    return true;
-                }
+                var trapCount = LunacidItems.Traps.Count;
+                var chosenTrap = LunacidItems.Traps[UnityEngine.Random.Range(0, trapCount)];
+                ItemHandler.GiveLunacidItem(chosenTrap, ItemFlags.Trap, player, false, Colors.GetGiftColor(), false, true);
+                return;
             }
-            return false;
-        }
+            var giftChoices = LunacidItems.Filler.Concat(LunacidItems.Materials).ToList();
+            var itemCount = giftChoices.Count;
+            var chosenItem = giftChoices[UnityEngine.Random.Range(0, itemCount)];
+            ItemHandler.GiveLunacidItem(chosenItem, ItemFlags.None, player, false, Colors.GetGiftColor(), false, true);
 
-        private bool IsLunacidItem(Gift gift, out bool isTrap)
+        }
+        
+        private static bool IsLunacidItem(Gift gift, out bool isTrap)
         {
             if (LunacidItems.Filler.Contains(gift.ItemName) || LunacidItems.Materials.Contains(gift.ItemName))
             {
@@ -96,7 +111,7 @@ namespace LunacidAP.Patches
             var closestItem = ClosestLunacidItem(gift);
             var itemFlag = LunacidItems.Traps.Contains(closestItem) ? ItemFlags.Trap : ItemFlags.None;
             var player = ArchipelagoClient.AP.GetPlayerNameFromSlot(gift.SenderSlot);
-            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, false, overrideColor: Colors.GetGiftColor());
+            ItemHandler.GiveLunacidItem(closestItem, itemFlag, player, overrideColor: Colors.GetGiftColor(), isGift: true);
         }
 
         public void InitializeTraits()
@@ -110,23 +125,22 @@ namespace LunacidAP.Patches
 
         private string ClosestLunacidItem(Gift gift)
         {
+            if (gift.IsRefund && gift.Traits.Any(x => x.Trait == "OthersGift"))
+            {
+                return "The Weight of the Dream (Nothing)";
+            }
             if (CloseTraitParser is null)
             {
                 InitializeTraits();
             }
+
+            if (CloseTraitParser == null) return "The Weight of the Dream (Nothing)";
             var matches = CloseTraitParser.FindClosestAvailableGift(gift.Traits);
             if (!matches.Any())
             {
                 return "Silver";
             }
-            else if (matches.Count() == 1)
-            {
-                return matches[0];
-            }
-            else
-            {
-                return matches[random.Next(matches.Count())];
-            }
+            return matches.Count() == 1 ? matches[0] : matches[random.Next(matches.Count())];
         }
 
         public static bool GiftItemToOtherPlayer(ArchipelagoItem item)
@@ -160,6 +174,65 @@ namespace LunacidAP.Patches
             var packagedGift = new GiftVector(madeUpItem, giftTraits);
             ArchipelagoClient.AP.PrepareGift(packagedGift, slotName);
             return true;
+        }
+
+        public static IEnumerator GiftRandomGiftToRandomPlayer(string itemName)
+        {
+            Plugin.LOG.LogInfo("Starting to give random gift.");
+            bool isTrap = itemName.Contains("Patchouli's Gift");
+            var allPlayers = ArchipelagoClient.AP.Session.Players.AllPlayers.Select(x => x.Slot).ToList();
+            allPlayers.Remove(ArchipelagoClient.AP.SlotID);
+            Plugin.LOG.LogInfo($"We have {allPlayers.Count} players.");
+            if (!allPlayers.Any())
+            {
+                yield break;
+            }
+
+            var giftablePlayers = new List<int>();
+            foreach (var player in allPlayers)
+            {
+                var canGiftTask = ArchipelagoClient.AP.Gifting.CanGiftToPlayerAsync(player);
+                yield return new WaitUntil(() => canGiftTask.IsCompleted);
+                if (canGiftTask.IsFaulted)
+                {
+                    continue;
+                }
+
+                if (canGiftTask.Result.CanGift)
+                {
+                    giftablePlayers.Add(player);
+                }
+            }
+            Plugin.LOG.LogInfo($"Do we have any players we could possibly gift to?  {giftablePlayers.Count}");
+            if (!giftablePlayers.Any())
+            {
+                yield break;
+            }
+            var count = giftablePlayers.Count;
+            var chosenPlayer = giftablePlayers[UnityEngine.Random.Range(0, count-1)];
+            Plugin.LOG.LogInfo("Seeing if we can use OthersGift or not.");
+            var acceptableTraits = ArchipelagoClient.AP.Gifting.GetAcceptedTraits(chosenPlayer, LunacidTraits.DesiredTraits); // Simple enough to just base it off our own traits, they're pretty generic.
+            if (!acceptableTraits.Any())
+            {
+                acceptableTraits = ArchipelagoClient.AP.Gifting.GetDesiredTraits(chosenPlayer);  // If the list is empty that must mean not only do they have a desired trait list it doesn't include any of ours.
+            }
+            var acceptableCount = acceptableTraits.Traits.Length;
+            var randomTrait = acceptableTraits.Traits[UnityEngine.Random.Range(0, acceptableCount)];
+            var randomGiftTrait = new List<GiftTrait>
+            {
+                new("OthersGift"),
+                new(randomTrait)
+            };
+            if (isTrap)
+            {
+                randomGiftTrait.Add(new GiftTrait(GiftFlag.Trap));
+            }
+            var finalRandomArray =  randomGiftTrait.ToArray();
+            var amount = UnityEngine.Random.Range(1, 11);
+            var giftItem = new GiftItem(itemName, amount, 1);
+            var playerName = ArchipelagoClient.AP.Session.Players.GetPlayerName(chosenPlayer);
+            ArchipelagoClient.AP.Gifting.SendGift(giftItem, finalRandomArray, playerName);
+            
         }
     }
 }

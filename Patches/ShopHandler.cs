@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -256,6 +258,10 @@ namespace LunacidAP.Patches
                             }
                             
                         }
+                        if (Plugin.randoSettings.AutoHint && item.Classification.HasFlag(ItemFlags.Advancement))
+                        {
+                            ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, (int)location.APLocationID);
+                        }
                         itemName = item.Name;
                     }
                     var itemNameCondensed = CommunionHint.GetSuitableStringLength(itemName, 22);
@@ -315,7 +321,11 @@ namespace LunacidAP.Patches
             var sceneName = __instance.gameObject.scene.name;
             __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
             var objectName = __instance.INV[which].OBJ.name;
-
+            if (ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                var amount = -__instance.INV[which].cost;
+                ArchipelagoClient.AP.SendRingLinkPacket(amount);
+            }
             if (ShopLocations.All(x => x.GameObjectName == __instance.INV[which].OBJ.name) ||
                 __instance.INV[which].cost > __instance.CON.CURRENT_PL_DATA.GOLD)
             {

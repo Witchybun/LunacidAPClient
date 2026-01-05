@@ -42,6 +42,7 @@ namespace LunacidAP.Archipelago
         private const string CUSTOM_CLASS_KEY = "created_class_stats";
         private const string IMPORTANT_ITEM_KEY = "item_spots";
         private const string LEVEL_CHALLENGE_KEY = "force_no_exp";
+        private const string RING_LINK_KEY = "silver_link";
         private Dictionary<string, object> _slotDataFields;
         public int Seed { get; private set; }
         public Goal Ending { get; private set; }
@@ -73,8 +74,9 @@ namespace LunacidAP.Archipelago
         public string CustomName { get; private set; }
         public string CustomDescription { get; private set; }
         public Dictionary<string, int> CustomStats { get; private set; }
-        public Dictionary<string, List<string>> ImportantItemLocations { get; private set; }
+        public Dictionary<string, List<List<string>>> ImportantItemLocations { get; private set; }
         public bool ForceNoEXP { get; private set; }
+        public bool RingLink { get; private set; }
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
@@ -109,11 +111,13 @@ namespace LunacidAP.Archipelago
             CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
             CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
             ForceNoEXP = GetSlotSetting(LEVEL_CHALLENGE_KEY, false);
+            RingLink = GetSlotSetting(RING_LINK_KEY, false);
             var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
             CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
             var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
             var itemSpots = GetSlotSetting(IMPORTANT_ITEM_KEY, "");
-            ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(itemSpots);
+            _log.LogInfo("Can we fucking get the item locations...");
+            ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<List<string>>>>(itemSpots);
             _log.LogInfo("Finished getting slot settings, building dictionaries");
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {

@@ -8,6 +8,7 @@ namespace LunacidAP.Data.ArchipelagoGiftingCases
     public class StardewValleyGifts
     {
         private const string STARDEW_RESOURCE_PREFIX = "Resource Pack: ";
+        private const string QI_GEMS = "Qi Gems";
         private static readonly List<string> NonResourceWhitelist = new()
         {
             "Joja Cola", "Magic Rock Candy", "Golden Egg", "Taro Tuber", "Coffee Bean", "Tulib Bulb", "Mushroom Tree Seed", "Galaxy Soul", "Fairy Dust", 
@@ -26,11 +27,13 @@ namespace LunacidAP.Data.ArchipelagoGiftingCases
             {
                 return true;
             }
-            else if (NonResourceWhitelist.Contains(itemName))
+
+            if (NonResourceWhitelist.Contains(itemName))
             {
                 return true;
             }
-            else if (SeedSuffixes.Contains(itemName.Split(' ').Last()))
+
+            if (SeedSuffixes.Contains(itemName.Split(' ').Last()))
             {
                 return true;
             }
@@ -48,6 +51,15 @@ namespace LunacidAP.Data.ArchipelagoGiftingCases
                 var itemNameArray = noResourcePrefixName.Split(' ');
                 amount = Math.Max(int.Parse(itemNameArray[0]) / 4, 1); // Its farmable, lets not give the other player too much.
                 actualName = string.Join(" ", itemNameArray.Skip(1));
+            }
+
+            if (itemName.Contains(QI_GEMS))
+            {
+                if (!int.TryParse(itemName.Split(' ')[0], out amount))
+                {
+                    amount = 1;
+                }
+                actualName = "Qi Gems";
             }
             return actualName;
         }

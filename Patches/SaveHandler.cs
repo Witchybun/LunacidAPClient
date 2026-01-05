@@ -64,7 +64,6 @@ namespace LunacidAP.Patches
                 ScoutedLocations = ConnectionData.ScoutedLocations,
                 EnteredScenes = ConnectionData.EnteredScenes,
                 BoughtItems = ConnectionData.BoughtItems,
-                ReceivedGifts = ConnectionData.ReceivedGifts,
                 RandomEnemyData = ConnectionData.RandomEnemyData,
             };
             if (ArchipelagoClient.AP.Authenticated && (ConnectionData.Seed == 0))
@@ -112,7 +111,7 @@ namespace LunacidAP.Patches
                     sDS.Seed, sDS.Index, sDS.DeathLink, sDS.CheatCount, sDS.ObtainedItems, sDS.CheckedLocations, 
                     sDS.CommunionHints, sDS.Elements, sDS.RandomizedWeaponData, sDS.RandomizedSpellData, 
                     sDS.Entrances, sDS.TraversedEntrances, sDS.ScoutedLocations, sDS.EnteredScenes, sDS.BoughtItems,
-                    sDS.ReceivedGifts, sDS.ItemColors, sDS.RandomEnemyData);
+                    sDS.ItemColors, sDS.RandomEnemyData);
                 slotReader.Close();
                 connectionReader.Close();
 
@@ -122,6 +121,27 @@ namespace LunacidAP.Patches
                 _log.LogError($"Failed to parse json for save {Save_Slot}");
                 _log.LogError($"{ex}");
             }
+        }
+
+        public static int GetSaveSeed(int slot)
+        {
+            var mainDir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "Saves");
+            if (!Directory.Exists(mainDir))
+            {
+                _log.LogError("There is no save directory; are you loading a vanilla save?");
+            }
+
+            var dir = Path.Combine(mainDir, $"Save{slot}");
+            var savePath = Path.Combine(dir, "ConnectionData.json");
+            var slotPath = Path.Combine(dir, "SlotData.json");
+            if (!File.Exists(savePath) || !File.Exists(slotPath))
+            {
+                return 0;
+            }
+            using var slotReader = new StreamReader(slotPath);
+            var text = slotReader.ReadToEnd();
+            var sDS = JsonConvert.DeserializeObject<SlotDataSave>(text);
+            return sDS.Seed;
         }
 
     }
@@ -145,7 +165,7 @@ namespace LunacidAP.Patches
         public int CheatCount;
         public Dictionary<string, ReceivedItem> ObtainedItems;
         public List<long> CheckedLocations;
-        public Dictionary<string, string> CommunionHints;
+        public Dictionary<string, CreatureHintData> CommunionHints;
         public Dictionary<string, string> Elements;
         public Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData;
         public Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData;
@@ -154,7 +174,6 @@ namespace LunacidAP.Patches
         public SortedDictionary<long, ArchipelagoItem> ScoutedLocations;
         public List<string> EnteredScenes;
         public HashSet<string> BoughtItems;
-        public List<ReceivedGift> ReceivedGifts;
         public Dictionary<string, string> ItemColors;
         public Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData;
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LunacidAP.Patches;
 using static LunacidAP.Data.LunacidEnemies;
 using static LunacidAP.Data.LunacidGifts;
 
@@ -19,7 +20,7 @@ namespace LunacidAP.Data
         public static int StoredExperience {get; set;}
         public static Dictionary<string, ReceivedItem> ReceivedItems {get; private set;} = new();
         public static List<long> CompletedLocations {get; private set;} = new();
-        public static Dictionary<string, string> CommunionHints {get; set;} = new();
+        public static Dictionary<string, CreatureHintData> CommunionHints {get; set;} = new();
         public static Dictionary<string, string> Elements {get; private set;} = new (StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData { get; set; } = new();
         public static Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData { get; set; } = new();
@@ -28,7 +29,6 @@ namespace LunacidAP.Data
         public static SortedDictionary<long, ArchipelagoItem> ScoutedLocations = new();
         public static List<string> EnteredScenes = new();
         public static HashSet<string> BoughtItems = new();
-        public static List<ReceivedGift> ReceivedGifts = new();
         public static Dictionary<string, string> ItemColors = new();
         public static Dictionary<string, List<RandomizedEnemyData>> RandomEnemyData = new();
 
@@ -36,9 +36,9 @@ namespace LunacidAP.Data
 
         public static void WriteConnectionData(string hostName, int port, string slotName, string password, int storedLevel = 0, int storedExperience = 0,
         int seed = 0, int index = 0, bool deathLink = false, int cheatedCount = -1, Dictionary<string, ReceivedItem> receivedItems = null, List<long> completedLocations = null, 
-        Dictionary<string, string> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, LunacidEquipStats.WeaponData> randomWeaponData = null, 
+        Dictionary<string, CreatureHintData> communionHints = null, Dictionary<string, string> elements = null, Dictionary<string, LunacidEquipStats.WeaponData> randomWeaponData = null, 
         Dictionary<string, LunacidEquipStats.SpellData> randomSpellData = null, Dictionary<string, string> entrances = null,
-        Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, HashSet<string> boughtItems = null, List<ReceivedGift> receivedGifts = null, 
+        Dictionary<string, string> traversedEntrances = null, SortedDictionary<long, ArchipelagoItem> scouts = null, List<string> enteredScenes = null, HashSet<string> boughtItems = null, 
         Dictionary<string, string> itemColors = null, Dictionary<string, List<RandomizedEnemyData>> randomEnemyData = null)
         {
             HostName = hostName;
@@ -109,10 +109,6 @@ namespace LunacidAP.Data
             {
                 BoughtItems = boughtItems;
             }
-            if (receivedGifts is not null)
-            {
-                ReceivedGifts = receivedGifts;
-            }
             if (itemColors is not null)
             {
                 ItemColors = itemColors;
@@ -137,7 +133,7 @@ namespace LunacidAP.Data
             StoredExperience = 0;
             ReceivedItems = new Dictionary<string, ReceivedItem>();
             CompletedLocations = new List<long>();
-            CommunionHints = new Dictionary<string, string>();
+            CommunionHints = new Dictionary<string, CreatureHintData>();
             Elements = new Dictionary<string, string>();
             RandomizedWeaponData = new Dictionary<string, LunacidEquipStats.WeaponData>();
             RandomizedSpellData = new Dictionary<string, LunacidEquipStats.SpellData>();
@@ -146,7 +142,6 @@ namespace LunacidAP.Data
             ScoutedLocations = new SortedDictionary<long, ArchipelagoItem>();
             EnteredScenes = new List<string>();
             BoughtItems = new HashSet<string>();
-            ReceivedGifts = new List<ReceivedGift>();
             ItemColors = new Dictionary<string, string>();
             RandomEnemyData = new Dictionary<string, List<RandomizedEnemyData>>();
         }

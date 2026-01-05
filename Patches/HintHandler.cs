@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Archipelago;
@@ -53,7 +54,7 @@ namespace LunacidAP.Patches
             { "TILLANDSIA", "The wind blows so well at {0}.  Not even {1} stops it blowing past me.  It feels like home..." },
         };
 
-        private static Dictionary<string, string> CreatureHints { get; set; }
+        private static Dictionary<string, CreatureHintData> CreatureHints { get; set; }
 
         public static void Awake(ManualLogSource log)
         {
@@ -104,13 +105,21 @@ namespace LunacidAP.Patches
             {
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 PAPPY = CON.PAPPY;
-                var text = ConnectionData.CommunionHints[__instance.NPC_NAME];
-                /*if (!hintData.AlreadyHinted) // Lets turn off automatic hinting for now, for flair's sake.
-                {
-                    ArchipelagoClient.AP.ScoutLocation(locationID, isProgression);
-                }*/
+                var hintInfo = ConnectionData.CommunionHints[__instance.NPC_NAME];
+                var text = hintInfo.Message;
                 if (ArchipelagoClient.AP.WasItemReceived("Bestial Mastery"))
                 {
+                    _log.LogInfo($"Do we have AutoHint? {Plugin.randoSettings.AutoHint}");
+                    if (Plugin.randoSettings.AutoHint)
+                    {
+                        var player = hintInfo.Player;
+                        var important = hintInfo.Important;
+                        var location = hintInfo.LocationId;
+                        if (important)
+                        {
+                            ArchipelagoClient.AP.Session.Hints.CreateHints(player, HintStatus.Unspecified, location);
+                        }
+                    }
                     PAPPY.POP(text, 5f, 16);
                 }
                 else
@@ -136,10 +145,6 @@ namespace LunacidAP.Patches
                 {
                     _log.LogError("Child is null");
                 }
-                if (__instance.transform.GetChild(0).gameObject is null)
-                {
-                    _log.LogError("Child GameObject is null");
-                }
                 _log.LogError(ex.Message);
                 return true;
             }
@@ -150,7 +155,7 @@ namespace LunacidAP.Patches
             var length = phrase.Length;
             if (length > size)
             {
-                if (phrase.Any(x => Char.IsWhiteSpace(x)))
+                if (phrase.Any(Char.IsWhiteSpace))
                 {
                     var phraseArray = phrase.Split(' ');
                     var shortestPhrase = "";
@@ -185,7 +190,7 @@ namespace LunacidAP.Patches
             var dictionaryToManipulate = ArchipelagoClient.AP.SlotData.ImportantItemLocations;
             dictionaryToManipulate.Remove("Lucid Blade");
             var random = new System.Random(seed);
-            dictionaryToManipulate.OrderBy(x => random.Next()).ToDictionary(item => item.Key, item => item.Value);
+            dictionaryToManipulate = dictionaryToManipulate.OrderBy(x => random.Next()).ToDictionary(item => item.Key, item => item.Value);
             var unusedCreatures = CreatureToHint.Keys.ToList();
             foreach (var item in dictionaryToManipulate)
             {
@@ -195,12 +200,13 @@ namespace LunacidAP.Patches
                     if (!unusedCreatures.Any())
                     {
                         ConnectionData.CommunionHints = CreatureHints;
-                        return;
+                        break;
                     }
                     var chosenCreature = unusedCreatures[random.Next(0, unusedCreatures.Count() - 1)];
                     unusedCreatures.Remove(chosenCreature);
-                    var message = string.Format(CreatureToHint[chosenCreature], location, item.Key);
-                    CreatureHints[chosenCreature] = message;
+                    var locationName = location[0];
+                    var message = string.Format(CreatureToHint[chosenCreature], locationName, item.Key);
+                    CreatureHints[chosenCreature] = new CreatureHintData(message, int.Parse(location[1]), int.Parse(location[2]), true);
                 }
             }
             if (unusedCreatures.Any())
@@ -224,9 +230,10 @@ namespace LunacidAP.Patches
                 {
                     chosenLocation = locationList[random.Next(0, locationCount - 1)];
                 }
+                var important = ConnectionData.ScoutedLocations[chosenLocation].Classification.HasFlag(ItemFlags.Advancement);
                 var locationInfo = ConnectionData.ScoutedLocations[chosenLocation];
                 chosenLocations.Add(chosenLocation);
-                CreatureHints[creature] = string.Format(CreatureToHint[creature], ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation), locationInfo.Name);
+                CreatureHints[creature] = new CreatureHintData(string.Format(CreatureToHint[creature], ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation), locationInfo.Name),ArchipelagoClient.AP.SlotID, (int)chosenLocation, important);
             }
         }
 
@@ -244,6 +251,22 @@ namespace LunacidAP.Patches
             }
             _log.LogInfo($"The NPC is {__instance.npc_name}");
             _log.LogInfo(__instance.gameObject.name);
+        }
+    }
+
+    public class CreatureHintData
+    {
+        public readonly string Message;
+        public readonly int Player;
+        public readonly int LocationId;
+        public readonly bool Important;
+
+        public CreatureHintData(string message, int player, int locationId, bool important)
+        {
+            Message = message;
+            Player = player;
+            LocationId = locationId;
+            Important = important;
         }
     }
 

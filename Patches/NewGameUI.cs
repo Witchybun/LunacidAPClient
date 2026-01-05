@@ -87,18 +87,14 @@ namespace LunacidAP.Patches
 
         [HarmonyPatch(typeof(Menus), "Click")]
         [HarmonyPrefix]
-        private static bool Click_GatherData(int which, Menus __instance)
+        private static bool Click_GatherData(int which, Menus __instance, ref int ___EQ_SLOT, ref int ___EQ_SLOT2)
         {
-            var eqSlot2Field = __instance.GetType().GetField("EQ_SLOT2", BindingFlags.Instance | BindingFlags.NonPublic);
-            var EQ_SLOT2 = (int)eqSlot2Field.GetValue(__instance);
             if (which == 51 && (__instance.current_query == 6 || __instance.current_query == 0)) // Loading a save from main menu
             {
-                var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
-                var EQ_SLOT = (int)eqSlotField.GetValue(__instance);
-                PlayerPrefs.SetInt("CURRENT_SAVE", EQ_SLOT);
-                var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT);
+                PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);
+                var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
                 _currentSave = saveSlot;
-                if (EQ_SLOT2 != 10 && !StaticFuncs.IS_NULL(OfferSaveInfo(__instance.CON, saveSlot))) // Some menu instances are similar but not quite
+                if (___EQ_SLOT2 != 10 && !StaticFuncs.IS_NULL(OfferSaveInfo(__instance.CON, saveSlot))) // Some menu instances are similar but not quite
                 {
                     SaveHandler.ReadSave(saveSlot);
                     ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot);
@@ -131,10 +127,8 @@ namespace LunacidAP.Patches
                 }
                 else if (__instance.current_query == 5) // deleting a save
                 {
-                    var eqSlotField = __instance.GetType().GetField("EQ_SLOT", BindingFlags.Instance | BindingFlags.NonPublic);
-                    var EQ_SLOT = (int)eqSlotField.GetValue(__instance);
-                    PlayerPrefs.SetInt("CURRENT_SAVE", EQ_SLOT);
-                    var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", EQ_SLOT);
+                    PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);
+                    var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
                     _currentSave = saveSlot;
                     ConnectionData.WriteConnectionData();
                     SaveHandler.SaveData(saveSlot);
@@ -145,11 +139,17 @@ namespace LunacidAP.Patches
                     {
                         return false;
                     }
+                    var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
+                    if (SaveHandler.GetSaveSeed(saveSlot) != ArchipelagoClient.AP.SlotData.Seed)
+                    {
+                        return false;
+                    }
                 }
             }
             else if (which == 29 && __instance.current_query == 6) // Say no to a load at menu
             {
                 ArchipelagoClient.AP.Disconnect();
+                ConnectionData.WriteConnectionData();
             }
             else if (which == 37)
             {

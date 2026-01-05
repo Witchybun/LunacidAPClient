@@ -13,12 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Archipelago.Gifting.Net" Version="0.4.3" />
+    <PackageReference Include="Archipelago.Gifting.Net" Version="0.4.4" />
     <PackageReference Include="Archipelago.MultiClient.Net" Version="6.7.0" />
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UnityEngine.Modules" Version="2020.3.4" IncludeAssets="compile" />
 
   </ItemGroup>
@@ -36,6 +35,9 @@
     <Reference Include="UnityEngine.UI">
       <HintPath>/mnt/115b93af-9f3b-43c4-a778-48dcab29caf0/SteamLibrary/steamapps/common/Lunacid/LUNACID_Data/Managed/UnityEngine.UI.dll</HintPath>
     </Reference>
+      <Reference Include="Newtonsoft.Json">
+          <HintPath>/mnt/115b93af-9f3b-43c4-a778-48dcab29caf0/SteamLibrary/steamapps/common/Lunacid/BepInEx/plugins/LunacidAP/Newtonsoft.Json.dll</HintPath>
+      </Reference>
   </ItemGroup>  
 
 </Project>

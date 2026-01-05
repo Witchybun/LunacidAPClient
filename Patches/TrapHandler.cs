@@ -34,13 +34,23 @@ public class TrapHandler
     
     public IEnumerator BleedPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["Bleed Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Bleed Trap"] <= 0)
+
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Bleed Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -59,13 +69,22 @@ public class TrapHandler
 
     public IEnumerator PoisonPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["Poison Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Poison Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Poison Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -84,13 +103,22 @@ public class TrapHandler
 
     public IEnumerator CursePlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["Curse Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Curse Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Curse Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -109,13 +137,22 @@ public class TrapHandler
     
     public IEnumerator SlowPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["Slowness Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Slowness Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Slowness Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -134,13 +171,23 @@ public class TrapHandler
     
     public IEnumerator BlindPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            
+            while (TrapCounts["Blindness Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Blindness Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Blindness Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -159,13 +206,22 @@ public class TrapHandler
     
     public IEnumerator DrainManaOfPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["Mana Drain Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Mana Drain Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Mana Drain Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -184,13 +240,22 @@ public class TrapHandler
     
     public IEnumerator DrainXPOfPlayerWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            while (TrapCounts["XP Drain Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["XP Drain Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["XP Drain Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -209,22 +274,39 @@ public class TrapHandler
     
     public IEnumerator DropRatsWhenPossible()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
-            {
-                yield return null;
-            }
+            
             while (TrapCounts["Rat Gang"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
             while (_isRatTrapped)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-
             while (EnemyHandler.RatPrefab is null)
+            {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
+                yield return null;
+            }
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Rat Gang"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }
@@ -245,13 +327,23 @@ public class TrapHandler
 
     public IEnumerator GoDateDeathWhenNotDoingSoAlready()
     {
-        while (true)
+        while (ArchipelagoClient.AP.allowCoroutines)
         {
-            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            
+            while (TrapCounts["Date With Death Trap"] <= 0)
             {
+                if (!ArchipelagoClient.AP.allowCoroutines)
+                {
+                    yield break;
+                }
                 yield return null;
             }
-            while (TrapCounts["Date With Death Trap"] <= 0)
+            if (!ArchipelagoClient.AP.allowCoroutines)
+            {
+                TrapCounts["Date With Death Trap"] = 0;
+                yield break;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
             {
                 yield return null;
             }

@@ -18,6 +18,10 @@ using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using static LunacidAP.Data.LunacidGifts;
 using System.Threading;
 using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Packets;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Object = System.Object;
 
 namespace LunacidAP.Archipelago
 {
@@ -38,6 +42,7 @@ namespace LunacidAP.Archipelago
         public GiftingService Gifting { get; private set; }
         private GiftHelper giftHelper { get; set; }
         private TrapHandler _trapHandler { get; set; }
+        public int CurrentRingLinkUuid { get; set; }
 
         private bool _connected;
         public bool Authenticated
@@ -64,6 +69,8 @@ namespace LunacidAP.Archipelago
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
         private readonly SortedDictionary<long, ArchipelagoItem> _locationTable = new() { };
         private static readonly Queue<ReceivedItem> ItemsToProcess = new();
+        public static readonly Queue<Gift> GiftsToProcess = new();
+        public bool allowCoroutines; // Can be set to false in order to cleanly kill the coroutines initialized upon connecting.
 
         public static void Setup(ManualLogSource log)
         {
@@ -196,6 +203,15 @@ namespace LunacidAP.Archipelago
                 CommunionHint.DetermineHints(seed);
                 RandomizeEquipData(seed);
                 _trapHandler = new TrapHandler();
+                allowCoroutines = true;
+                CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
+                _log.LogInfo("Starting RingLink");
+                if (SlotData.RingLink)
+                {
+                    Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
+                    Session.Socket.PacketReceived += RingLink_OnValueChanged;
+                }
+                _log.LogInfo("Done");
                 StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
                 StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
                 StartCoroutine(_trapHandler.DropRatsWhenPossible());
@@ -206,6 +222,7 @@ namespace LunacidAP.Archipelago
                 StartCoroutine(_trapHandler.DrainXPOfPlayerWhenPossible());
                 StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
                 StartCoroutine(HandleQueuedItems());
+                StartCoroutine(giftHelper.HandleIncomingGifts());
                 Authenticated = true;
             }
             else
@@ -234,6 +251,19 @@ namespace LunacidAP.Archipelago
             }
             version = "";
             return true;
+        }
+
+        public void SendRingLinkPacket(int amount)
+        {
+            var packet = new BouncePacket{
+                Tags = new List<string> { "RingLink" },
+                Data = new Dictionary<string, JToken> {
+                    {"time", (double)DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+                    {"source", CurrentRingLinkUuid},
+                    {"amount",  amount},
+                }
+            };
+            Session.Socket.SendPacketAsync(packet);
         }
 
         private void BuildLocations(int seed)
@@ -297,7 +327,7 @@ namespace LunacidAP.Archipelago
             Gifting = new GiftingService(Session);
             giftHelper = new GiftHelper(_log);
             giftHelper.InitializeTraits();
-            Gifting.OpenGiftBox();
+            Gifting.OpenGiftBox(false, LunacidTraits.DesiredTraits);
             Gifting.OnNewGift += Gifting_WhenGiftWasReceived;
             Gifting.CheckGiftBox();
         }
@@ -309,9 +339,7 @@ namespace LunacidAP.Archipelago
 
         public void Gifting_WhenGiftWasReceived(Gift incomingGift)
         {
-            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            Popup = Control.PAPPY;
-            StartCoroutine(giftHelper.HandleIncomingGifts());
+            GiftsToProcess.Enqueue(incomingGift);
         }
 
         public void PrepareGift(GiftVector giftVector, string slotName)
@@ -380,6 +408,11 @@ namespace LunacidAP.Archipelago
                 _log.LogInfo($"Disconnecting.");
             }
             _deathLinkService = null;
+            allowCoroutines = false;
+            if (SceneManager.GetActiveScene().name == "MainMenu")
+            {
+                ConnectionData.WriteConnectionData();
+            }
             Session = null;
             Authenticated = false;
         }
@@ -398,14 +431,18 @@ namespace LunacidAP.Archipelago
 
         private IEnumerator HandleQueuedItems()
         {
-            while (true)
+            while (allowCoroutines)
             {
-                
-                while (!IsInNormalGameState())
+                while (!ItemsToProcess.Any())
                 {
+                    if (!allowCoroutines)
+                    {
+                        ItemsToProcess.Clear();
+                        yield break;
+                    }
                     yield return null;
                 }
-                while (!ItemsToProcess.Any())
+                while (!IsInNormalGameState())
                 {
                     yield return null;
                 }
@@ -659,15 +696,58 @@ namespace LunacidAP.Archipelago
                 _locationTable[id] = null;
             }
         }
+        
+        private void RingLink_OnValueChanged(ArchipelagoPacketBase packet)
+        {
+            if (packet is not BouncePacket packetBounce)
+            {
+                return;
+            }
+            if (!packetBounce.Tags.Contains("RingLink"))
+            {
+                return;
+            }
+            _log.LogInfo("Got rings.");
+            var data = packetBounce.Data;
+            var uuid = (int)data["source"];
+            _log.LogInfo($"We have {uuid} vs {CurrentRingLinkUuid}");
+            if (uuid == CurrentRingLinkUuid)
+            {
+                return;
+            }
+            var amount = (int)data["amount"];
+            _log.LogInfo($"We were given {amount}");
+            StartCoroutine(UpdateGameSilverWhenPossible(amount));
+        }
+
+        private IEnumerator UpdateGameSilverWhenPossible(int amount)
+        {
+            _log.LogInfo("1");
+            while (!IsInNormalGameState())
+            {
+                _log.LogInfo("Waiting...");
+                if (!allowCoroutines)
+                {
+                    yield break;
+                }
+                
+                yield return new WaitForSeconds(1f);
+            }
+            _log.LogInfo("Attempt to change gold.");
+            var con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            con.CURRENT_PL_DATA.GOLD = Math.Max(0, con.CURRENT_PL_DATA.GOLD + amount);
+        }
 
         public ArchipelagoItem SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
 
             var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
-            if (AP.IsLocationChecked(locationData.APLocationID))
+            if (IsLocationChecked(locationData.APLocationID))
             {
-                if (item.SlotName != ConnectionData.SlotName || !isRepeatable)
+                if (item.SlotName == ConnectionData.SlotName && !isRepeatable)
+                    return item;
+                if (item.SlotName != ConnectionData.SlotName)
                     return GiftHelper.GiftItemToOtherPlayer(item) ? item : null;
                 ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
                 return item;
@@ -752,6 +832,11 @@ namespace LunacidAP.Archipelago
         {
             var isInEnding = new List<string>() { "WhatWillBeAtTheEnd", "END_A", "END_B", "END_E" }.Contains(SceneManager.GetActiveScene().name);
             return Control.LOADED && IsInGame && !isInEnding && GameObject.Find("PLAYER") is not null && Control.Current_Gameplay_State == 0;
+        }
+
+        public void SendRandomGiftViaAsync(string itemName)
+        {
+            StartCoroutine(GiftHelper.GiftRandomGiftToRandomPlayer(itemName));
         }
         
         public void RandomizeEquipData(int seed)

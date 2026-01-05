@@ -1,12 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngineInternal.Input;
 
 namespace LunacidAP.Patches
 {
@@ -142,6 +147,39 @@ namespace LunacidAP.Patches
             if (!cantFight) __instance.StartCoroutine("Regen");
             ___ROUT = __instance.StartCoroutine("GO");
             return false;
+        }
+
+        [HarmonyPatch(typeof(Item_Pickup_scr), "Pickup")]
+        [HarmonyPostfix]
+        private static void Pickup_SendRingLinkIfOn(Item_Pickup_scr __instance)
+        {
+            if (!ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                return;
+            }
+
+            if (__instance.type != 2)
+            {
+                return;
+            }
+            var amount = int.Parse(__instance.Name);
+            ArchipelagoClient.AP.SendRingLinkPacket(amount);
+        }
+
+        [HarmonyPatch(typeof(Money_Damage), "OnTriggerEnter")]
+        [HarmonyPostfix]
+        private static void OnTriggerEnter_AlsoMakePeopleLoseMoney(Money_Damage __instance, ref int ___scaled_power)
+        {
+            if (!ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                return;
+            }
+            if (__instance.REG_DAMAGE.power> 0)
+            {
+                return;
+            }
+            var amount = -___scaled_power;
+            ArchipelagoClient.AP.SendRingLinkPacket(amount);
         }
 
         [HarmonyPatch(typeof(Boss), "End")]

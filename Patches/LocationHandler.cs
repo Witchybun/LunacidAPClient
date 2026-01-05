@@ -189,11 +189,7 @@ namespace LunacidAP.Patches
             if (apData.ArchipelagoItem.SlotName != ConnectionData.SlotName)
             {
                 var color = Colors.GetClassificationHex(apData.ArchipelagoItem.Classification);
-                if (apData.Collected && !apData.CanBeRepeated)
-                {
-                    _popup.POP($"Item <color={color}>{apData.ArchipelagoItem.Name}</color> already found...", 1f, 1);
-                }
-                else
+                if (!apData.Collected)
                 {
                     _popup.POP($"Found <color={color}>{apData.ArchipelagoItem.Name}</color> for {apData.ArchipelagoItem.SlotName}", 1f, 0);
                 }

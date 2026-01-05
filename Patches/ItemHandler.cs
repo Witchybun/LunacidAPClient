@@ -4,11 +4,13 @@ using System.Linq;
 using System.Reflection;
 using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
 using I2.Loc;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -90,7 +92,7 @@ namespace LunacidAP.Patches
             return true;
         }
 
-        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "", bool isSelfLevelLocation = false)
+        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "", bool isSelfLevelLocation = false, bool isGift = false)
         {
             Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
             string color = Colors.GetClassificationHex(itemFlag);
@@ -110,7 +112,7 @@ namespace LunacidAP.Patches
             }
             if (LunacidItems.FakeItems.Contains(itemName))
             {
-                PopupCommand(0, itemName, color, player, self, isSelfLevelLocation);
+                PopupCommand(0, itemName, color, player, self, isSelfLevelLocation, isGift);
                 return;
             }
             if (itemName == "Deep Knowledge")
@@ -137,17 +139,17 @@ namespace LunacidAP.Patches
                     }
                 case 0:
                     {
-                        GiveSilver(itemName, player, self, isSelfLevelLocation);
+                        GiveSilver(itemName, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case 4:
                     {
-                        GiveItem(itemName, color, player, self, isSelfLevelLocation);
+                        GiveItem(itemName, color, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case 3:
                     {
-                        GiveMaterial(itemName, color, player, self, isSelfLevelLocation);
+                        GiveMaterial(itemName, color, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case -1:
@@ -163,7 +165,14 @@ namespace LunacidAP.Patches
             }
             if (LunacidItems.Traps.Contains(itemName))
             {
-                GiveTrap(itemName, color, player, self);
+                GiveTrap(itemName, color, player, self, isSelfLevelLocation, isGift);
+                return;
+            }
+
+            if (itemName.Contains("for a Stranger"))
+            {
+                ArchipelagoClient.AP.SendRandomGiftViaAsync(itemName);
+                PopupCommand(3, itemName, color, player, self, isSelfLevelLocation, isGift);
                 return;
             }
             _log.LogError($"Supplied item {itemName} was not caught by any of the given cases");
@@ -198,15 +207,34 @@ namespace LunacidAP.Patches
             GiveLunacidItem(gift.ItemName, ItemFlags.None, playerName, false);
         }
 
-        private static void PopupCommand(int sprite, string Name, string color, string player, bool self, bool isSelfLevelLocation = false)
+        private static void PopupCommand(int sprite, string Name, string color, string player, bool self, bool isSelfLevelLocation = false, bool isGift = false)
         {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             Popup = Control.PAPPY;
-            var levelUp = isSelfLevelLocation ? "Level Up!  " : "";
+            var finalText = "";
+            if (isGift)
+            {
+                finalText = $"{player} GIFTED  YOU A <color={color}>{Name}</color>, HOW NICE!";
+                Popup?.POP(finalText, 1f, 0);
+                return;
+            }
+            if (isSelfLevelLocation)
+            {
+                finalText += "Level Up!  ";
+            }
             if (self)
-                Popup?.POP($"{levelUp}<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED", 1f, 0);
+            {
+                finalText += $"<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED";
+                Popup?.POP($"{finalText}<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED", 1f, 0);
+            }
             else
-                Popup?.POP($"<color={color}>{Name}</color> <sprite={sprite}> RECEIVED FROM {player}", 1f, 0);
+            {
+                finalText += $"<color={color}>{Name}</color> <sprite={sprite}> RECEIVED FROM {player}";
+            }
+            Popup?.POP(finalText, 1f, 0);
+                
+                
+            
         }
 
         private static void GiveWeapon(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
@@ -269,16 +297,21 @@ namespace LunacidAP.Patches
 
         }
 
-        private static void GiveSilver(string Name, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        private static void GiveSilver(string Name, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
             var currencyAmount = DetermineRandomAmount(Name).ToString();
-            PopupCommand(0, currencyAmount, "white", player, self, isSelfLevelLocation);
-            Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
+            PopupCommand(0, currencyAmount, "white", player, self, isSelfLevelLocation, isGift);
+            var amount = int.Parse(currencyAmount);
+            if (ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                ArchipelagoClient.AP.SendRingLinkPacket(amount);
+            }
+            Control.CURRENT_PL_DATA.GOLD += amount;
         }
 
-        private static void GiveItem(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        private static void GiveItem(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
-            PopupCommand(4, Name, color, player, self, isSelfLevelLocation);
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation, isGift);
             ApplyItemToInventory(Name);
         }
 
@@ -371,7 +404,7 @@ namespace LunacidAP.Patches
             }
         }
 
-        private static void GiveMaterial(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        private static void GiveMaterial(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
             if (!LunacidItems.MaterialNames.Keys.Contains(Name))
             {
@@ -383,7 +416,7 @@ namespace LunacidAP.Patches
                 bundleSize = 1;
             }
             var actualName = LunacidItems.MaterialNames[Name].ToString();
-            PopupCommand(3, Name, color, player, self, isSelfLevelLocation);
+            PopupCommand(3, Name, color, player, self, isSelfLevelLocation, isGift);
             for (int i = 0; i < 128; i++)
             {
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
@@ -451,9 +484,9 @@ namespace LunacidAP.Patches
             }
         }
 
-        private static void GiveTrap(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        private static void GiveTrap(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
-            PopupCommand(4, Name, color, player, self, isSelfLevelLocation);
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation, isGift);
             TrapHandler.AddTrap(Name);
         }
 
