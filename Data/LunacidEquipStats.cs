@@ -30,7 +30,7 @@ public static class LunacidEquipStats
         public readonly float Damage;
         public readonly float CastTime;
         public readonly float MinCastTime;
-        public readonly float Cost;
+        public float Cost;
 
         public SpellData(float damage, float castTime, float minCastTime, float cost)
         {

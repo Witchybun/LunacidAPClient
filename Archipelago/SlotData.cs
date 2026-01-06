@@ -14,6 +14,7 @@ namespace LunacidAP.Archipelago
         private const string SEED_KEY = "seed";
         private const string VERSION = "client_version";
         private const string CLASS_KEY = "starting_class";
+        private const string STARTING_WEAPON_KEY = "starting_weapon";
         private const string ER_KEY = "entrance_randomization";
         private const string LEVEL_KEY = "levelsanity";
         private const string SWITCH_KEY = "switch_locks";
@@ -56,15 +57,13 @@ namespace LunacidAP.Archipelago
         public bool Quenchsanity { get; private set; }
         public bool EtnasPupil { get; private set; }
         public bool Bookworm { get; private set; }
-        //public bool NormalizedDrops { get; private set; }
+        public string StartingWeapon { get; private set; }
         public bool Shopsanity { get; private set; }
         public bool Switchlock { get; private set; }
         public bool Doorlock { get; private set; }
         public bool Levelsanity { get; private set; }
         public bool GrassSanity { get; private set; }
         public bool Breakables { get; private set; }
-        //public float ExperienceMultiplier { get; private set; }
-        //public float WExperienceMultiplier { get; private set; }
         public int RequiredCoins { get; private set; }
         public bool DeathLink { get; private set; }
         public bool RandomElements { get; private set; }
@@ -103,6 +102,7 @@ namespace LunacidAP.Archipelago
             RequiredCoins = GetSlotSetting(COIN_KEY, 30);
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
+            StartingWeapon = GetSlotSetting(STARTING_WEAPON_KEY, "");
             _log.LogInfo("Halfway done.");
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             RandomEquipStats = GetSlotSetting(RANDOM_WEP_STAT_KEY, RandomEquip.Off);

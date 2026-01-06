@@ -842,6 +842,7 @@ namespace LunacidAP.Archipelago
         public void RandomizeEquipData(int seed)
         {
             var random = new System.Random(seed);
+            var startingWeaponIsSpell = LunacidItems.Spells.Contains(SlotData.StartingWeapon);
             if (ConnectionData.RandomizedWeaponData.Count > 0 && ConnectionData.RandomizedSpellData.Count > 0) return;
             switch (SlotData.RandomEquipStats)
             {
@@ -868,6 +869,13 @@ namespace LunacidAP.Archipelago
                         var chosenKey = copiedMagicData.Keys.ToList()[random.Next(copiedMagicData.Count)];
                         var chosenMagic = copiedMagicData[chosenKey];
                         copiedMagicData.Remove(chosenKey);
+                        if (startingWeaponIsSpell)
+                        {
+                            if (spell == SlotData.StartingWeapon)
+                            {
+                                chosenMagic.Cost = Math.Min(10, chosenMagic.Cost);
+                            }
+                        }
                         ConnectionData.RandomizedSpellData[spell] = chosenMagic;
                     }
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
@@ -909,6 +917,13 @@ namespace LunacidAP.Archipelago
                         var minCastTime =  castChoice.MinCastTime;
                         var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
                             random.Next(magicCount)].Cost;
+                        if (startingWeaponIsSpell)
+                        {
+                            if (spell == SlotData.StartingWeapon)
+                            {
+                                cost = Math.Min(10, cost);
+                            }
+                        }
                         var spellData = new LunacidEquipStats.SpellData(damage, castTime, minCastTime, cost);
                         ConnectionData.RandomizedSpellData[spell] = spellData;
                     }
