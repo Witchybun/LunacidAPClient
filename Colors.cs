@@ -6,6 +6,7 @@ using Archipelago.MultiClient.Net.Enums;
 using BepInEx;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using LunacidAP.Patches;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ namespace LunacidAP
             {"Gift", "#FF8DA1"},
         };
 
-        private static readonly Dictionary<Plugin.RandoSettings.Colors, Dictionary<string, string>> ColorLookup = new();
+        private static readonly Dictionary<SaveHandler.RandoSettings.Colors, Dictionary<string, string>> ColorLookup = new();
 
         private static ManualLogSource _log;
 
@@ -55,12 +56,12 @@ namespace LunacidAP
 
         public static string GetGiftColor()
         {;
-            return ColorLookup[Plugin.randoSettings.ItemColors]["Gift"];
+            return ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Gift"];
         }
 
         public static string GetCheatColor()
         {
-            return ColorLookup[Plugin.randoSettings.ItemColors]["Cheat"];
+            return ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Cheat"];
         }
 
         public static void GrabCustomColors()
@@ -93,22 +94,22 @@ namespace LunacidAP
                 colorReader.Close();
             }
             
-            ColorLookup[Plugin.RandoSettings.Colors.Archipelago] = ArchipelagoColors;
-            ColorLookup[Plugin.RandoSettings.Colors.Multiworldgg] = MultiworldGGColors;
-            ColorLookup[Plugin.RandoSettings.Colors.Custom] = CustomColors;
+            ColorLookup[SaveHandler.RandoSettings.Colors.Archipelago] = ArchipelagoColors;
+            ColorLookup[SaveHandler.RandoSettings.Colors.Multiworldgg] = MultiworldGGColors;
+            ColorLookup[SaveHandler.RandoSettings.Colors.Custom] = CustomColors;
         }
 
         public static string GetClassificationHex(ItemFlags itemFlags)
         {
             if (itemFlags.HasFlag(ItemFlags.Advancement))
             {
-                return ColorLookup[Plugin.randoSettings.ItemColors]["Progression"];
+                return ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Progression"];
             }
             if (itemFlags.HasFlag(ItemFlags.NeverExclude))
             {
-                return ColorLookup[Plugin.randoSettings.ItemColors]["Useful"];
+                return ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Useful"];
             }
-            return itemFlags.HasFlag(ItemFlags.Trap) ? ColorLookup[Plugin.randoSettings.ItemColors]["Trap"] : ColorLookup[Plugin.randoSettings.ItemColors]["Filler"];
+            return itemFlags.HasFlag(ItemFlags.Trap) ? ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Trap"] : ColorLookup[SaveHandler.MainRandoSettings.ItemColors]["Filler"];
         }
 
         public static Color HexToColorConverter(string hex)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -8,6 +9,8 @@ using LunacidAP.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace LunacidAP.Patches
@@ -87,128 +90,143 @@ namespace LunacidAP.Patches
 
         [HarmonyPatch(typeof(Menus), "Click")]
         [HarmonyPrefix]
-        private static bool Click_GatherData(int which, Menus __instance, ref int ___EQ_SLOT, ref int ___EQ_SLOT2)
+        private static bool Click_GenericUIClickPrefix(int which, Menus __instance, ref int ___EQ_SLOT, ref int ___EQ_SLOT2)
         {
-            if (which == 51 && (__instance.current_query == 6 || __instance.current_query == 0)) // Loading a save from main menu
+            switch (which)
             {
-                PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);
-                var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
-                _currentSave = saveSlot;
-                if (___EQ_SLOT2 != 10 && !StaticFuncs.IS_NULL(OfferSaveInfo(__instance.CON, saveSlot))) // Some menu instances are similar but not quite
+                // Player has died but wants to resume.  Need some feedback.
+                case 55 when __instance.current_query == 0:
                 {
-                    SaveHandler.ReadSave(saveSlot);
-                    ArchipelagoClient.AP.Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, slotID: saveSlot);
-                }
-                return true;
-            }
-            else if (which == 55 && __instance.current_query == 0) // Player has died but wants to resume.  Need some feedback.
-            {
-                if (ArchipelagoClient.AP.IsConnecting)
-                {
-                    return false;
-                }
-                if (ArchipelagoClient.AP.Authenticated)
-                {
-                    return true;
-                }
-                else
-                {
+                    if (ArchipelagoClient.AP.IsConnecting)
+                    {
+                        return false;
+                    }
+                    if (ArchipelagoClient.AP.Authenticated)
+                    {
+                        return true;
+                    }
                     _log.LogInfo($"Reloading {_currentSave}");
-                    SaveHandler.ReadSave(_currentSave);
                     ArchipelagoClient.AP.AttemptConnectFromDeath(_currentSave);
                     return false; // don't let the player play.
                 }
-            }
-            else if (which == 28) // Query for deleting save data
-            {
-                if (__instance.current_query == 0) // saving in-game
+                // Say no to a load at menu
+                case 29 when __instance.current_query == 6:
+                    ArchipelagoClient.AP.Disconnect();
+                    break;
+                case 37:
                 {
-                    SaveHandler.SaveData(_currentSave);
-                }
-                else if (__instance.current_query == 5) // deleting a save
-                {
-                    PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);
-                    var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
-                    _currentSave = saveSlot;
-                    ConnectionData.WriteConnectionData();
-                    SaveHandler.SaveData(saveSlot);
-                }
-                else if (__instance.current_query == 6) // Trying to load save fully but connection isn't made yet
-                {
+                    var audioMethod = __instance.GetType().GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
+                    var slotName = __instance.ITEMS[20].GetComponent<TMP_InputField>().text;
+                    var hostName = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(27).gameObject.GetComponent<TMP_InputField>().text;
+                    var portName = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(28).gameObject.GetComponent<TMP_InputField>().text;
+                    var port = int.Parse(portName);
+                    var password = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(29).gameObject.GetComponent<TMP_InputField>().text;
+                    SaveHandler.CurrentSaveData.SlotName = slotName;
+                    SaveHandler.CurrentSaveData.Port = port;
+                    SaveHandler.CurrentSaveData.HostName = hostName;
+                    SaveHandler.CurrentSaveData.Password = password;
+                    if (StaticFuncs.IS_NULL(slotName) || StaticFuncs.IS_NULL(hostName) || StaticFuncs.IS_NULL(portName))
+                    {
+                        audioMethod.Invoke(__instance, new object[] { 5 });
+                        return false;
+                    }
                     if (!ArchipelagoClient.AP.Authenticated)
                     {
+                        _log.LogInfo($"Telling the game to save AP data at {_currentSave}");
+                        ArchipelagoClient.AP.Connect(slotName, hostName, port, password, false, _currentSave);
                         return false;
                     }
-                    var saveSlot = PlayerPrefs.GetInt("CURRENT_SAVE", ___EQ_SLOT);
-                    if (SaveHandler.GetSaveSeed(saveSlot) != ArchipelagoClient.AP.SlotData.Seed)
+                    __instance.sub_menu = 9;
+                    __instance.LoadSub();
+                    __instance.TXT[31].text = "Finalize Creation?";
+                    __instance.current_query = 1;
+                    EventSystem.current.SetSelectedGameObject(__instance.ITEMS[10]);
+                    audioMethod.Invoke(__instance, new object[] { 8 });
+                    _log.LogInfo($"Saving to {_currentSave}");
+                    break;
+                }
+                case 41:
+                    ShopHandler.EnsureEnchantedKey();
+                    break;
+                case 28 when __instance.current_query == 5:
+                {
+                    PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);
+                    __instance.CON.CURRENT_PL_DATA = Save.ResetData();
+                    Save.SAVE_FILE(___EQ_SLOT, Vector3.zero, __instance.CON);
+                    switch (___EQ_SLOT)
                     {
-                        return false;
+                        case 0:
+                        {
+                            __instance.CON.CURRENT_SYS_DATA.SAVE0_INFO = "";
+                            var index3 = StaticFuncs.RemoveTMPSUB(__instance.TXT[25].transform.GetChild(0));
+                            __instance.TXT[25].transform.GetChild(index3).GetComponent<Image>().sprite = __instance.C_ART[19];
+                            __instance.TXT[25].text = "";
+                            break;
+                        }
+                        case 1:
+                        {
+                            __instance.CON.CURRENT_SYS_DATA.SAVE1_INFO = "";
+                            int index2 = StaticFuncs.RemoveTMPSUB(__instance.TXT[26].transform.GetChild(0));
+                            __instance.TXT[26].transform.GetChild(index2).GetComponent<Image>().sprite = __instance.C_ART[19];
+                            __instance.TXT[26].text = "";
+                            break;
+                        }
+                        case 2:
+                        {
+                            __instance.CON.CURRENT_SYS_DATA.SAVE2_INFO = "";
+                            int index = StaticFuncs.RemoveTMPSUB(__instance.TXT[27].transform.GetChild(0));
+                            __instance.TXT[27].transform.GetChild(index).GetComponent<Image>().sprite = __instance.C_ART[19];
+                            __instance.TXT[27].text = "";
+                            break;
+                        }
                     }
-                }
-            }
-            else if (which == 29 && __instance.current_query == 6) // Say no to a load at menu
-            {
-                ArchipelagoClient.AP.Disconnect();
-                ConnectionData.WriteConnectionData();
-            }
-            else if (which == 37)
-            {
-                var audioMethod = __instance.GetType().GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
-                var slotName = __instance.ITEMS[20].GetComponent<TMP_InputField>().text;
-                var hostName = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(27).gameObject.GetComponent<TMP_InputField>().text;
-                var portName = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(28).gameObject.GetComponent<TMP_InputField>().text;
-                var port = int.Parse(portName);
-                var password = GameObject.Find("PLAYER").transform.GetChild(1).GetChild(0).GetChild(4).GetChild(2).GetChild(29).gameObject.GetComponent<TMP_InputField>().text;
-                if (StaticFuncs.IS_NULL(slotName) || StaticFuncs.IS_NULL(hostName) || StaticFuncs.IS_NULL(portName))
-                {
-                    audioMethod.Invoke(__instance, new object[] { 5 });
+                    var path = Application.dataPath + "/SAVE_" + ___EQ_SLOT + ".MIDNIGHTMULTI";
+                    if (File.Exists(path))
+                    {
+                        File.Delete(path);
+                    }
+                    Save.SAVE_SYSTEM(__instance.CON);
+                    __instance.sub_menu = 8;
+                    __instance.ITEMS[18].SetActive(value: false);
+                    __instance.LoadSub();
+                    EventSystem.current.SetSelectedGameObject(__instance.ITEMS[8]);
                     return false;
                 }
-                if (!ArchipelagoClient.AP.Authenticated)
-                {
-                    _log.LogInfo($"Telling the game to save AP data at {_currentSave}");
-                    ArchipelagoClient.AP.Connect(slotName, hostName, port, password, false, _currentSave);
-                    return false;
-                }
-                __instance.sub_menu = 9;
-                __instance.LoadSub();
-                __instance.TXT[31].text = "Finalize Creation?";
-                __instance.current_query = 1;
-                EventSystem.current.SetSelectedGameObject(__instance.ITEMS[10]);
-                audioMethod.Invoke(__instance, new object[] { 8 });
-                _log.LogInfo($"Saving to {_currentSave}");
-                SaveHandler.SaveData(_currentSave);
             }
-            else if (which == 41)
-            {
-                ShopHandler.EnsureEnchantedKey();
-            }
+
             return true;
         }
 
         [HarmonyPatch(typeof(Menus), "Click")]
         [HarmonyPostfix]
-        private static void Click_FixDueToPronouns_Postfix(int which, Menus __instance)
+        private static void Click_GenericClickPostfix(int which, Menus __instance, ref int ___EQ_SLOT, ref int ___EQ_SLOT2)
         {
-            if (which is 83 or 84)
+            switch (which)
             {
-                FixConnectionInfoDisplay();
+                // Loading a save from main menu
+                case 51 when __instance.current_query is 6 or 0:
+                {
+                    if (___EQ_SLOT2 != 10 && !StaticFuncs.IS_NULL(OfferSaveInfo(__instance.CON, ___EQ_SLOT))) // Some menu instances are similar but not quite
+                    {
+                        _currentSave = ___EQ_SLOT;
+                        ArchipelagoClient.AP.Connect(SaveHandler.CurrentSaveData.SlotName, SaveHandler.CurrentSaveData.HostName, SaveHandler.CurrentSaveData.Port, SaveHandler.CurrentSaveData.Password, false, slotID: ___EQ_SLOT);
+                    }
+                    break;
+                }
+                case 83 or 84:
+                    FixConnectionInfoDisplay();
+                    break;
             }
         }
 
         private static string OfferSaveInfo(CONTROL control, int saveSlot)
         {
-            switch (saveSlot)
+            return saveSlot switch
             {
-                case 0:
-                    return control.CURRENT_SYS_DATA.SAVE0_INFO;
-                case 1:
-                    return control.CURRENT_SYS_DATA.SAVE1_INFO;
-                case 2:
-                    return control.CURRENT_SYS_DATA.SAVE2_INFO;
-            }
-            return control.CURRENT_SYS_DATA.SAVE0_INFO;
-
+                1 => control.CURRENT_SYS_DATA.SAVE1_INFO,
+                2 => control.CURRENT_SYS_DATA.SAVE2_INFO,
+                _ => control.CURRENT_SYS_DATA.SAVE0_INFO
+            };
         }
 
         [HarmonyPatch(typeof(Menus), "Update")]
@@ -274,11 +292,11 @@ namespace LunacidAP.Patches
                             var classCount = Math.Min(8, ArchipelagoClient.AP.SlotData.StartingClass); // Random utilizes Forsaken's slot anyway.
                             if (ArchipelagoClient.AP.SlotData.StartingClass == 9)
                             {
-                                ConnectionData.StoredLevel = ArchipelagoClient.AP.SlotData.CustomStats["Level"];
+                                SaveHandler.CurrentSaveData.StoredLevel = ArchipelagoClient.AP.SlotData.CustomStats["Level"];
                             }
                             else
                             {
-                                ConnectionData.StoredLevel = StartingClassToLevel[ArchipelagoClient.AP.SlotData.StartingClass];
+                                SaveHandler.CurrentSaveData.StoredLevel = StartingClassToLevel[ArchipelagoClient.AP.SlotData.StartingClass];
                             }
                             while (count < classCount)
                             {
@@ -366,7 +384,7 @@ namespace LunacidAP.Patches
             var level = __instance.CON.CURRENT_PL_DATA.PLAYER_LVL.ToString();
             if (ArchipelagoClient.AP.SlotData.Levelsanity)
             {
-                level = level + " " + $"(Stored {ConnectionData.StoredLevel.ToString()})";
+                level = level + " " + $"(Stored {SaveHandler.CurrentSaveData.StoredLevel.ToString()})";
             }
             __instance.TXT[1].text = "LEVEL " + level + ": " + className;
 

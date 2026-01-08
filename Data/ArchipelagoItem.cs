@@ -1,3 +1,4 @@
+using System;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
 using LunacidAP.Archipelago;
@@ -5,6 +6,7 @@ using Newtonsoft.Json;
 
 namespace LunacidAP.Data
 {
+    [Serializable]
     public class ArchipelagoItem
     {
         public long ID;

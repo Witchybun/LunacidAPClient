@@ -24,7 +24,6 @@ namespace LunacidAP
         private ManualLogSource Log { get; set; }
         public GeneralTweaks GeneralTweaks { get; private set; }
         public ArchipelagoClient Archipelago { get; private set; }
-        private LogicHelper LunacidLogic { get; set; }
         public static ManualLogSource LOG { get; private set; }
         public LocationHandler LocationHandler { get; private set; }
         public ItemHandler ItemHandler { get; private set; }
@@ -46,7 +45,7 @@ namespace LunacidAP
         public LivingGateHandler LivingGateHandler { get; private set; }
         public Colors Colors { get; private set; }
         
-        public static RandoSettings randoSettings = new RandoSettings(100, 100, false, false, RandoSettings.Colors.Archipelago, false);
+        
         private string _currentSceneName;
         private GameObject _hubLevel;
         private void Awake()
@@ -67,8 +66,7 @@ namespace LunacidAP
                 ArchipelagoClient.Setup(Log);
                 GeneralTweaks = new GeneralTweaks(Log);
                 LocationHandler = new LocationHandler(Log);
-                LunacidLogic = new LogicHelper(Log);
-                ItemHandler = new ItemHandler(LunacidLogic, Log);
+                ItemHandler = new ItemHandler(Log);
                 SwitchLocker = new SwitchLocker(Log);
                 DoorHandler = new DoorHandler(Log);
                 SaveHandler = new SaveHandler(Log);
@@ -92,7 +90,6 @@ namespace LunacidAP
                 StoreCustomAudio();
                 ArchipelagoGames.ConstructData();
                 LunacidEquipStats.InitializeEquipStatLookups();
-                LoadCustomRandoSettings();
                 Colors.GrabCustomColors();
                 Log.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} has been loaded!  Have fun!");
             }
@@ -115,20 +112,27 @@ namespace LunacidAP
             var sceneName = scene.name;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
             ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
-            if (sceneName == "MainMenu")
+            switch (sceneName)
             {
-                var versionLabel = GameObject.Find("PLAYER/Canvas/HUD/ROOT/MAIN/version_label").transform;
-                versionLabel.position = new Vector3(-75.0263f, -20.5211f, -262.409f);
-                var gameVersion = versionLabel.GetComponent<TextMeshProUGUI>().text;
-                versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
-                var textBox = FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(5).gameObject;
-                RandoOptionsMaker.CreatePortModificationSetting(textBox);
-                ConnectionData.WriteConnectionData();
+                case "MainMenu":
+                {
+                    var versionLabel = GameObject.Find("PLAYER/Canvas/HUD/ROOT/MAIN/version_label").transform;
+                    versionLabel.position = new Vector3(-75.0263f, -20.5211f, -262.409f);
+                    var gameVersion = versionLabel.GetComponent<TextMeshProUGUI>().text;
+                    versionLabel.GetComponent<TextMeshProUGUI>().text = $"Game Version {gameVersion}\nRandomizer Version {PluginInfo.PLUGIN_VERSION}";
+                    var textBox = FindObjectOfType<Menus>().transform.GetChild(4).GetChild(2).GetChild(5).gameObject;
+                    RandoOptionsMaker.CreatePortModificationSetting(textBox);
+                    break;
+                }
+                case "DETHLAND":
+                    var wheelOfTheWorst = UnityEngine.Random.RandomRangeInt(0, 100);
+                    if (wheelOfTheWorst != 0) GameObject.Find("LEVEL/GRIM").SetActive(false);
+                    break;
             }
+
             if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {
                 ArchipelagoClient.AP.Disconnect();
-                ConnectionData.WriteConnectionData();
             }
             if (ArchipelagoClient.IsInGame)
             {
@@ -141,14 +145,16 @@ namespace LunacidAP
                     var baseParent = menu4;
                     RandoOptionsMaker.CreateInGameRandoSettings(baseParent);
                 }
-                SaveCustomRandoSettings();
             }
             if (sceneName == "CHAR_CREATE")
             {
+                SaveHandler.CurrentSaveData = new SaveHandler.SaveSlotData();
                 UI.ModifyCharCreateForArchipelago();
             }
             _currentSceneName = "";
+            GeneralTweaks.ConstructGlowObject();
             GrassBreakHandler.AddArchipelagoData(sceneName);
+            ReadDialogueHelper.AssignPickupsForLoreInScene(sceneName);
             TeleportHandler.IsSwappingScenes = false;
             Cleanup();
             _hubLevel = null;
@@ -170,9 +176,9 @@ namespace LunacidAP
 
             ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
 
-            if (!ConnectionData.EnteredScenes.Contains(newScene))
+            if (!SaveHandler.CurrentSaveData.EnteredScenes.Contains(newScene))
             {
-                ConnectionData.EnteredScenes.Add(newScene);
+                SaveHandler.CurrentSaveData.EnteredScenes.Add(newScene);
             }
         }
 
@@ -191,30 +197,7 @@ namespace LunacidAP
             }
             Log.LogInfo($"Deleted {count} null objects to save scene space");
         }
-
-        private void LoadCustomRandoSettings()
-        {
-            var mainDir = Path.Combine(Path.Combine(BepInEx.Paths.PluginPath, "LunacidAP"), "RandoSettings.json");
-            if (!File.Exists(mainDir))
-            {
-                var serializedDefault = JsonConvert.SerializeObject(randoSettings);
-                File.WriteAllText(mainDir, serializedDefault);
-                return;
-            }
-            using var settingReader = new StreamReader(mainDir);
-            var text2 = settingReader.ReadToEnd();
-            var settings = JsonConvert.DeserializeObject<RandoSettings>(text2);
-            randoSettings = settings;
-            settingReader.Close();
-        }
-
-        public static void SaveCustomRandoSettings()
-        {
-            var mainDir = Path.Combine(Path.Combine(Paths.PluginPath, "LunacidAP"), "RandoSettings.json");
-            var text = JsonConvert.SerializeObject(randoSettings);
-            File.WriteAllText(mainDir, text);
-        }
-
+        
         private void CheckForVictory(string sceneName)
         {
             if (!ArchipelagoClient.AP.Authenticated)
@@ -249,7 +232,7 @@ namespace LunacidAP
 
         private void CheckForDeath(string sceneName)
         {
-            if (!ArchipelagoClient.AP.Authenticated || !ConnectionData.DeathLink)
+            if (!ArchipelagoClient.AP.Authenticated || !SaveHandler.CurrentSaveData.DeathLink)
             {
                 return;
             }
@@ -350,32 +333,6 @@ namespace LunacidAP
                 _hubLevel = GameObject.Find("LEVEL");
             }
             GeneralTweaks.EnsureAftermathAfterKill(_hubLevel.transform);
-        }
-        
-        public class RandoSettings
-        {
-            public int ExpRate { get; set; }
-            public int WexpRate  { get; set; }
-            public bool IsNormalized { get; set; }
-            public bool PlayCustomMusic { get; set; }
-            public Colors ItemColors { get; set; }
-            public bool AutoHint { get; set; }
-            public enum Colors
-            {
-                Archipelago = 0,
-                Multiworldgg = 1,
-                Custom = 2
-            }
-
-            public RandoSettings(int expRate, int wexpRate, bool playCustomMusic, bool isNormalized, Colors itemColors, bool autoHint)
-            {
-                ExpRate = expRate;
-                WexpRate = wexpRate;
-                IsNormalized = isNormalized;
-                PlayCustomMusic = playCustomMusic;
-                ItemColors = itemColors;
-                AutoHint = autoHint;
-            }
         }
     }
 }

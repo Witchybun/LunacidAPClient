@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace LunacidAP.Data
@@ -172,6 +173,7 @@ namespace LunacidAP.Data
             }
         }
 
+        [Serializable]
         public class RandomizedEnemyData
         {
             public readonly string GroupName;

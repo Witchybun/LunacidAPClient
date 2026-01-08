@@ -119,7 +119,7 @@ namespace LunacidAP.Patches
             {
                 return warpData;
             }
-            if (ConnectionData.Entrances.TryGetValue(entrance, out var newEntrance))
+            if (SaveHandler.CurrentSaveData.Entrances.TryGetValue(entrance, out var newEntrance))
             {
                 if (SceneManager.GetActiveScene().name == "HUB_01")
                 {
@@ -174,7 +174,7 @@ namespace LunacidAP.Patches
 
             _log.LogInfo("from: " + fromString);
 
-            if (!ConnectionData.Entrances.TryGetValue(fromString, out var toString))
+            if (!SaveHandler.CurrentSaveData.Entrances.TryGetValue(fromString, out var toString))
             {
                 _log.LogError("to:   unknown");
                 return;
@@ -186,16 +186,16 @@ namespace LunacidAP.Patches
                 return;
             }
 
-            if (ConnectionData.TraversedEntrances.ContainsKey(fromString)
-                || ConnectionData.TraversedEntrances.ContainsKey(toString))
+            if (SaveHandler.CurrentSaveData.TraversedEntrances.ContainsKey(fromString)
+                || SaveHandler.CurrentSaveData.TraversedEntrances.ContainsKey(toString))
             {
                 return;
             }
 
-            ConnectionData.TraversedEntrances.Add(fromString, toString);
-            ConnectionData.TraversedEntrances.Add(toString, fromString);
+            SaveHandler.CurrentSaveData.TraversedEntrances.Add(fromString, toString);
+            SaveHandler.CurrentSaveData.TraversedEntrances.Add(toString, fromString);
 
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = ConnectionData.TraversedEntrances.ToArray();
+            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
         }
     }
 }

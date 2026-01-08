@@ -105,12 +105,11 @@ namespace LunacidAP.Patches
             {
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 PAPPY = CON.PAPPY;
-                var hintInfo = ConnectionData.CommunionHints[__instance.NPC_NAME];
+                var hintInfo = SaveHandler.CurrentSaveData.CommunionHints[__instance.NPC_NAME];
                 var text = hintInfo.Message;
                 if (ArchipelagoClient.AP.WasItemReceived("Bestial Mastery"))
                 {
-                    _log.LogInfo($"Do we have AutoHint? {Plugin.randoSettings.AutoHint}");
-                    if (Plugin.randoSettings.AutoHint)
+                    if (SaveHandler.MainRandoSettings.AutoHint)
                     {
                         var player = hintInfo.Player;
                         var important = hintInfo.Important;
@@ -182,7 +181,7 @@ namespace LunacidAP.Patches
 
         public static void DetermineHints(int seed)
         {
-            if (ConnectionData.CommunionHints is not null && ConnectionData.CommunionHints.Count() > 1)
+            if (SaveHandler.CurrentSaveData.CommunionHints is not null && SaveHandler.CurrentSaveData.CommunionHints.Count() > 1)
             {
                 return; // already genned probably
             }
@@ -199,7 +198,7 @@ namespace LunacidAP.Patches
                 {
                     if (!unusedCreatures.Any())
                     {
-                        ConnectionData.CommunionHints = CreatureHints;
+                        SaveHandler.CurrentSaveData.CommunionHints = CreatureHints;
                         break;
                     }
                     var chosenCreature = unusedCreatures[random.Next(0, unusedCreatures.Count() - 1)];
@@ -213,14 +212,14 @@ namespace LunacidAP.Patches
             {
                 GenerateFillerHints(unusedCreatures, random);
             }
-            ConnectionData.CommunionHints = CreatureHints;
+            SaveHandler.CurrentSaveData.CommunionHints = CreatureHints;
         }
 
 
         private static void GenerateFillerHints(List<string> unusedCreatures, System.Random random)
         {
 
-            var locationList = ConnectionData.ScoutedLocations.Keys.ToList();
+            var locationList = SaveHandler.CurrentSaveData.ScoutedLocations.Keys.ToList();
             var locationCount = locationList.Count();
             var chosenLocations = new List<long>();
             foreach (var creature in unusedCreatures)
@@ -230,8 +229,8 @@ namespace LunacidAP.Patches
                 {
                     chosenLocation = locationList[random.Next(0, locationCount - 1)];
                 }
-                var important = ConnectionData.ScoutedLocations[chosenLocation].Classification.HasFlag(ItemFlags.Advancement);
-                var locationInfo = ConnectionData.ScoutedLocations[chosenLocation];
+                var important = SaveHandler.CurrentSaveData.ScoutedLocations[chosenLocation].Classification.HasFlag(ItemFlags.Advancement);
+                var locationInfo = SaveHandler.CurrentSaveData.ScoutedLocations[chosenLocation];
                 chosenLocations.Add(chosenLocation);
                 CreatureHints[creature] = new CreatureHintData(string.Format(CreatureToHint[creature], ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation), locationInfo.Name),ArchipelagoClient.AP.SlotID, (int)chosenLocation, important);
             }
@@ -249,11 +248,10 @@ namespace LunacidAP.Patches
                 __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
                     $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
             }
-            _log.LogInfo($"The NPC is {__instance.npc_name}");
-            _log.LogInfo(__instance.gameObject.name);
         }
     }
 
+    [Serializable]
     public class CreatureHintData
     {
         public readonly string Message;

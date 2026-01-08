@@ -31,7 +31,7 @@ namespace LunacidAP.Patches
             {
                 return true; // Don't randomize music in non-ingame scenarios.
             }
-            if (!Plugin.randoSettings.PlayCustomMusic)
+            if (!SaveHandler.MainRandoSettings.PlayCustomMusic)
             {
                 return true; // Randomized music is off, don't change anything.
             }

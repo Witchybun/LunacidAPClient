@@ -48,7 +48,7 @@ namespace LunacidAP.Patches
                 _log.LogError($"Could not find recipe location for {weaponToCheck}!");
                 return false;
             }
-            var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
             if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
             {
                 LocationHandler.SendLocationCoveringPatchouliCase(locationData);

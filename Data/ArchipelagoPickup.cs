@@ -27,7 +27,7 @@ namespace LunacidAP.Data
             if (!Collected)
             {
                 LocationHandler.SendLocationCoveringPatchouliCase(LocationData);
-                if (ArchipelagoItem.SlotName != ConnectionData.SlotName)
+                if (ArchipelagoItem.SlotName != SaveHandler.CurrentSaveData.SlotName)
                 {
                     LocationHandler.SendMessageOnPickup(ArchipelagoItem);
                 }
@@ -36,7 +36,7 @@ namespace LunacidAP.Data
             else if (CanBeRepeated)
             {
                 ArchipelagoClient.AP.SendLocationGivenLocationDataSendingGift(LocationData);
-                if (ArchipelagoItem.SlotName != ConnectionData.SlotName)
+                if (ArchipelagoItem.SlotName != SaveHandler.CurrentSaveData.SlotName)
                 {
                     LocationHandler.SendMessageOnPickup(ArchipelagoItem);
                 }

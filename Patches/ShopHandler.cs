@@ -240,12 +240,12 @@ namespace LunacidAP.Patches
                 if (inventoryText == location.GameObjectName)
                 {
                     var itemName = shopItem.item;
-                    if (ConnectionData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
+                    if (SaveHandler.CurrentSaveData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
                     {
                         if (item.Classification.HasFlag(ItemFlags.Trap))
                         {
-                            var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
-                            var scouts = ConnectionData.ScoutedLocations.Values.ToList();
+                            var random = new System.Random(SaveHandler.CurrentSaveData.Seed + (int)location.APLocationID);
+                            var scouts = SaveHandler.CurrentSaveData.ScoutedLocations.Values.ToList();
                             var scoutedLocationsAvoidingTrapsObject = scouts.Where(x => !x.Classification.HasFlag(ItemFlags.Trap));
                             try
                             {
@@ -258,7 +258,7 @@ namespace LunacidAP.Patches
                             }
                             
                         }
-                        if (Plugin.randoSettings.AutoHint && item.Classification.HasFlag(ItemFlags.Advancement))
+                        if (SaveHandler.MainRandoSettings.AutoHint && item.Classification.HasFlag(ItemFlags.Advancement))
                         {
                             ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, (int)location.APLocationID);
                         }
@@ -334,8 +334,8 @@ namespace LunacidAP.Patches
             
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
-                ConnectionData.BoughtItems.Add(objectName);
-                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = ConnectionData.BoughtItems.ToArray();
+                SaveHandler.CurrentSaveData.BoughtItems.Add(objectName);
+                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = SaveHandler.CurrentSaveData.BoughtItems.ToArray();
                 
                 return true;
             }
@@ -348,13 +348,13 @@ namespace LunacidAP.Patches
                 return true;  // Likely not a location
             }
             var slotNameofItemOwner = locationInfo.SlotName;
-            if (ConnectionData.SlotName != slotNameofItemOwner)
+            if (SaveHandler.CurrentSaveData.SlotName != slotNameofItemOwner)
             {
                 var itemName = locationInfo.Name;
                 __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
             }
             ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
-            ConnectionData.CompletedLocations.Add(location);
+            SaveHandler.CurrentSaveData.CompletedLocations.Add(location);
             return true;
         }
 
@@ -380,10 +380,10 @@ namespace LunacidAP.Patches
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
                 if (locationInfo.Classification.HasFlag(ItemFlags.Trap))
                 {
-                    var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
+                    var random = new System.Random(SaveHandler.CurrentSaveData.Seed + (int)apLocation.APLocationID);
                     try
                     {
-                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                        var scoutedLocationsAvoidingTraps = SaveHandler.CurrentSaveData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
                         locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
                     }
                     catch

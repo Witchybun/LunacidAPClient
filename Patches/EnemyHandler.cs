@@ -52,12 +52,12 @@ namespace LunacidAP.Patches
             {
                 AddFeatherToJailor(__instance);
             }
-            var dropBoosts = ConnectionData.ReceivedItems.Count(x => x.Value.ItemName == "Text on Great Well Resourcefulness");
+            var dropBoosts = SaveHandler.CurrentSaveData.ReceivedItems.Count(x => x.Value.ItemName == "Text on Great Well Resourcefulness");
             float nothingWeightScalar = (float)Math.Max(0.75, 0.25 * dropBoosts);
             var lOOTS = __instance.LOOTS;
             //NameEveryDrop(__instance.name, lOOTS);
             var nothingWeight = 0f;
-            var areDropsNormalized = Plugin.randoSettings.IsNormalized;
+            var areDropsNormalized = SaveHandler.MainRandoSettings.IsNormalized;
             var normalizedNonemptyWeight = 0;
             for (int i = 0; i < lOOTS.Length; i++)
             {
@@ -89,7 +89,7 @@ namespace LunacidAP.Patches
                 _log.LogError($"Location {location} doesn't exist in Archipelago!");
                 return false;
             }
-            var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
             if (item.Collected)
             {
                 var result = ArchipelagoClient.AP.Gifting.CanGiftToPlayer(item.SlotID);
@@ -236,6 +236,10 @@ namespace LunacidAP.Patches
                 obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;
                 obj.GetComponent<ArchipelagoPickup>().Collected = archipelagoPickup.Collected;
                 obj.GetComponent<ArchipelagoPickup>().CanBeRepeated = archipelagoPickup.CanBeRepeated;
+                if (!archipelagoPickup.Collected)
+                {
+                    LocationHandler.Pickups.Add(archipelagoPickup);
+                }
                 var pickupObject = obj.GetComponent<Item_Pickup_scr>();
                 SwapperHandler.ReplaceModelWithAppropriateItem(pickupObject, archipelagoPickup.LocationData);
             }
@@ -276,12 +280,11 @@ namespace LunacidAP.Patches
             {
                 return true;
             }
-            var random = new Random(ConnectionData.Seed);
             EnemyPrefabKeys = EnemyPrefabs.Keys.ToList();
             foreach (var data in enemyPositionData)
             {
                 var gameObjectWithChildren = GameObject.Find(SceneToWorldObjectsName[scene]).transform;
-                if (!ConnectionData.RandomEnemyData.TryGetValue(scene, out var enemyData))
+                if (!SaveHandler.CurrentSaveData.RandomEnemyData.TryGetValue(scene, out var enemyData))
                 {
                     _log.LogWarning($"Scene {scene} is not in the enemy data dictionary.");
                     return true;
@@ -292,7 +295,7 @@ namespace LunacidAP.Patches
                 }
                 foreach (var affectedChild in data.AffectedChildren)
                 {
-                    var chosenEnemy = TryGetEnemy(data.GroupName, affectedChild, enemyData, random);
+                    var chosenEnemy = TryGetEnemy(data.GroupName, affectedChild, enemyData);
                     var givenChild = gameObjectWithChildren.GetChild(affectedChild);
                     var isBlessed = false;
                     if (data.GroupName == "MainPrison")
@@ -308,7 +311,7 @@ namespace LunacidAP.Patches
             return true;
         }
 
-        private static string TryGetEnemy(string groupName, int child, List<RandomizedEnemyData> enemyData, System.Random random)
+        private static string TryGetEnemy(string groupName, int child, List<RandomizedEnemyData> enemyData)
         {
             foreach (var enemy in enemyData)
             {
@@ -331,11 +334,11 @@ namespace LunacidAP.Patches
                     {
                         if (capitalizedName == "MUMMY")
                         {
-                            capitalizedName = new List<string>() { "MUMMY", "MUMMY_CRAWLING" }[random.Next(2)];
+                            capitalizedName = new List<string>() { "MUMMY", "MUMMY_CRAWLING" }[UnityEngine.Random.Range(0, 2)];
                         }
                         else if (capitalizedName == "VENUS")
                         {
-                            capitalizedName = new List<string>() { "VENUS", "VENUS_HIDE" }[random.Next(2)];
+                            capitalizedName = new List<string>() { "VENUS", "VENUS_HIDE" }[UnityEngine.Random.Range(0, 2)];
                         }
 
                         return capitalizedName;
@@ -520,13 +523,12 @@ namespace LunacidAP.Patches
                     {
                         foreach (var id in ids)
                         {
-                            if (!ConnectionData.ScoutedLocations.TryGetValue(id, out var archipelagoItem))
+                            if (!SaveHandler.CurrentSaveData.ScoutedLocations.TryGetValue(id, out var archipelagoItem))
                             {
                                 continue;
                             }
                             var locationName = ArchipelagoClient.AP.GetLocationNameFromID(id);
-                            _log.LogInfo($"Item status:  AutoHint?: {Plugin.randoSettings.AutoHint}.  Has flag?: {archipelagoItem.Classification.HasFlag(ItemFlags.Advancement)}");
-                            if (Plugin.randoSettings.AutoHint && archipelagoItem.Classification.HasFlag(ItemFlags.Advancement))
+                            if (SaveHandler.MainRandoSettings.AutoHint && archipelagoItem.Classification.HasFlag(ItemFlags.Advancement))
                             {
                                 ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, id);
                             }

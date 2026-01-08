@@ -164,39 +164,33 @@ namespace LunacidAP.Archipelago
                     return;
                 }
                 SlotData = new SlotData(success.SlotData, _log);
-                ConnectionData.WriteConnectionData(hostName, port, slotName, password);
                 int seed = SlotData.GetSlotSetting("seed", 0);
                 SlotID = success.Slot;
                 if (success.SlotData["death_link"].ToString() == "1")
                 {
-                    ConnectionData.DeathLink = true;
+                    SaveHandler.CurrentSaveData.DeathLink = true;
                     InitializeDeathLink();
                 }
                 SetUpGifting();
                 MuseHandler.InitializeChosenSongs(seed);
                 RandomStatic = new System.Random(seed);
-                var unverifiedLocations = ConnectionData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
+                var unverifiedLocations = SaveHandler.CurrentSaveData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
                 Session.Locations.CompleteLocationChecks(unverifiedLocations);
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
                 {
-                    if (!ConnectionData.CompletedLocations.Contains(locationID))
+                    if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
                     {
-                        ConnectionData.CompletedLocations.Add(locationID);
+                        SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
                     }
                 }
 
                 // Connection successful
-                ConnectionData.WriteConnectionData(hostName, port, slotName, password);
                 Authenticated = true;
-                if (slotID > -1)
-                {
-                    SaveHandler.SaveData(slotID); // to ensure the updated information isn't lost at load.
-                }
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
                 {
-                    if (!ConnectionData.CompletedLocations.Contains(locationID))
+                    if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
                     {
-                        ConnectionData.CompletedLocations.Add(locationID);
+                        SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
                     }
                 }
                 BuildLocations(SlotData.Seed);
@@ -205,13 +199,11 @@ namespace LunacidAP.Archipelago
                 _trapHandler = new TrapHandler();
                 allowCoroutines = true;
                 CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
-                _log.LogInfo("Starting RingLink");
                 if (SlotData.RingLink)
                 {
                     Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
                     Session.Socket.PacketReceived += RingLink_OnValueChanged;
                 }
-                _log.LogInfo("Done");
                 StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
                 StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
                 StartCoroutine(_trapHandler.DropRatsWhenPossible());
@@ -268,7 +260,7 @@ namespace LunacidAP.Archipelago
 
         private void BuildLocations(int seed)
         {
-            if (ConnectionData.Seed != seed)
+            if (SaveHandler.CurrentSaveData.Seed != seed)
             {
                 BuildLocationTable();
                 // Scout unchecked locations
@@ -294,14 +286,14 @@ namespace LunacidAP.Archipelago
                 foreach (var item in scoutedInfo.Values)
                 {
                     int locationID = (int)item.LocationId;
-                    bool collected = ConnectionData.CompletedLocations.Contains(locationID);
+                    bool collected = SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID);
                     _locationTable[locationID] = new ArchipelagoItem(item, collected);
                     if (!ArchipelagoGames.GameData.ContainsKey(item.ItemGame))
                     {
                         ArchipelagoGames.ConstructNewGameData(item.ItemGame);
                     }
                 }
-                ConnectionData.ScoutedLocations = _locationTable;
+                SaveHandler.CurrentSaveData.ScoutedLocations = _locationTable;
             }    
         }
 
@@ -334,7 +326,7 @@ namespace LunacidAP.Archipelago
 
         public void AttemptConnectFromDeath(int currentSave)
         {
-            Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, false, currentSave);
+            Connect(SaveHandler.CurrentSaveData.SlotName, SaveHandler.CurrentSaveData.HostName, SaveHandler.CurrentSaveData.Port, SaveHandler.CurrentSaveData.Password, false, currentSave);
         }
 
         public void Gifting_WhenGiftWasReceived(Gift incomingGift)
@@ -389,7 +381,7 @@ namespace LunacidAP.Archipelago
             while (!Authenticated && IsInGame)
             {
                 yield return new WaitForSeconds(60);
-                Connect(ConnectionData.SlotName, ConnectionData.HostName, ConnectionData.Port, ConnectionData.Password, true);
+                Connect(SaveHandler.CurrentSaveData.SlotName, SaveHandler.CurrentSaveData.HostName, SaveHandler.CurrentSaveData.Port, SaveHandler.CurrentSaveData.Password, true);
             }
         }
 
@@ -409,10 +401,6 @@ namespace LunacidAP.Archipelago
             }
             _deathLinkService = null;
             allowCoroutines = false;
-            if (SceneManager.GetActiveScene().name == "MainMenu")
-            {
-                ConnectionData.WriteConnectionData();
-            }
             Session = null;
             Authenticated = false;
         }
@@ -451,23 +439,24 @@ namespace LunacidAP.Archipelago
                 {
                     cheatedCount += 1;
                 }
-                if (item.Index < ConnectionData.Index)
+
+                if (item.Index < SaveHandler.CurrentSaveData.Index)
                 {
                     continue;
                 }
                 // I wanna get rid of this so friggen bad.
-                if (ConnectionData.ReceivedItems.ContainsKey(item.Identifier))
+                if (SaveHandler.CurrentSaveData.ReceivedItems.ContainsKey(item.Identifier))
                 {
                     continue;
                 }
-                var isSelf = item.PlayerName == ConnectionData.SlotName;
+                var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
                 var isCheated = item.LocationId < 0;
                 var isLevelLocation = item.LocationName.Contains("Reach Level");
                 var isSelfLevelLocation = isLevelLocation && isSelf;
                 ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
                 yield return new WaitForSeconds(1f);
-                ConnectionData.ReceivedItems[item.Identifier] = item;
-                ConnectionData.Index++;
+                SaveHandler.CurrentSaveData.ReceivedItems[item.Identifier] = item;
+                SaveHandler.CurrentSaveData.Index++;
             }
         }
 
@@ -496,7 +485,7 @@ namespace LunacidAP.Archipelago
                 return;
             }
             IsCurrentlyDeathLinked = true;  // Done to avoid spamming as the game itself calls die repeatedly.
-            var deathLink = new DeathLink(ConnectionData.SlotName, $"{ConnectionData.SlotName} perished in the Great Well!");
+            var deathLink = new DeathLink(SaveHandler.CurrentSaveData.SlotName, $"{SaveHandler.CurrentSaveData.SlotName} perished in the Great Well!");
             _deathLinkService.SendDeathLink(deathLink);
         }
 
@@ -707,25 +696,20 @@ namespace LunacidAP.Archipelago
             {
                 return;
             }
-            _log.LogInfo("Got rings.");
             var data = packetBounce.Data;
             var uuid = (int)data["source"];
-            _log.LogInfo($"We have {uuid} vs {CurrentRingLinkUuid}");
             if (uuid == CurrentRingLinkUuid)
             {
                 return;
             }
             var amount = (int)data["amount"];
-            _log.LogInfo($"We were given {amount}");
             StartCoroutine(UpdateGameSilverWhenPossible(amount));
         }
 
         private IEnumerator UpdateGameSilverWhenPossible(int amount)
         {
-            _log.LogInfo("1");
             while (!IsInNormalGameState())
             {
-                _log.LogInfo("Waiting...");
                 if (!allowCoroutines)
                 {
                     yield break;
@@ -733,7 +717,6 @@ namespace LunacidAP.Archipelago
                 
                 yield return new WaitForSeconds(1f);
             }
-            _log.LogInfo("Attempt to change gold.");
             var con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             con.CURRENT_PL_DATA.GOLD = Math.Max(0, con.CURRENT_PL_DATA.GOLD + amount);
         }
@@ -741,13 +724,13 @@ namespace LunacidAP.Archipelago
         public ArchipelagoItem SendLocationGivenLocationDataSendingGift(LocationData locationData)
         {
 
-            var item = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
             var isRepeatable = item.Classification == ItemFlags.None || item.Classification.HasFlag(ItemFlags.Trap) || LunacidItems.Materials.Contains(item.Name);
             if (IsLocationChecked(locationData.APLocationID))
             {
-                if (item.SlotName == ConnectionData.SlotName && !isRepeatable)
+                if (item.SlotName == SaveHandler.CurrentSaveData.SlotName && !isRepeatable)
                     return item;
-                if (item.SlotName != ConnectionData.SlotName)
+                if (item.SlotName != SaveHandler.CurrentSaveData.SlotName)
                     return GiftHelper.GiftItemToOtherPlayer(item) ? item : null;
                 ItemHandler.GiveLunacidItem(item.Name, item.Classification, item.SlotName, true, overrideColor: Colors.GetGiftColor()); // Hey its junk.  Let them grind.  Let them suffer.
                 return item;
@@ -760,7 +743,7 @@ namespace LunacidAP.Archipelago
 
         public ArchipelagoItem ScoutLocation(long locationId)
         {
-            if (!ConnectionData.ScoutedLocations.TryGetValue(locationId, out var archipelagoItem))
+            if (!SaveHandler.CurrentSaveData.ScoutedLocations.TryGetValue(locationId, out var archipelagoItem))
             {
                 _log.LogError($"Could not find location for {locationId}");
             }
@@ -769,18 +752,18 @@ namespace LunacidAP.Archipelago
 
         public bool IsLocationChecked(long location)
         {
-            return ConnectionData.CompletedLocations.Contains(location);
+            return SaveHandler.CurrentSaveData.CompletedLocations.Contains(location);
         }
 
         public bool IsLocationChecked(string location)
         {
             var locationID = GetLocationIDFromName(location);
-            return ConnectionData.CompletedLocations.Contains(locationID);
+            return SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID);
         }
 
         public bool IsLocationChecked(LocationData location)
         {
-            return ConnectionData.CompletedLocations.Contains(location.APLocationID);
+            return SaveHandler.CurrentSaveData.CompletedLocations.Contains(location.APLocationID);
         }
 
         public long GetLocationIDFromName(string locationName)
@@ -800,7 +783,7 @@ namespace LunacidAP.Archipelago
 
         public bool WasItemReceived(string itemName)
         {
-            foreach (var receivedItem in ConnectionData.ReceivedItems)
+            foreach (var receivedItem in SaveHandler.CurrentSaveData.ReceivedItems)
             {
                 if (receivedItem.Value.ItemName == itemName)
                 {
@@ -813,7 +796,7 @@ namespace LunacidAP.Archipelago
         public bool WasItemCountReceived(string itemName, int count)
         {
             var foundCount = 0;
-            foreach (var receivedItem in ConnectionData.ReceivedItems)
+            foreach (var receivedItem in SaveHandler.CurrentSaveData.ReceivedItems)
             {
                 if (receivedItem.Value.ItemName == itemName)
                 {
@@ -843,13 +826,13 @@ namespace LunacidAP.Archipelago
         {
             var random = new System.Random(seed);
             var startingWeaponIsSpell = LunacidItems.Spells.Contains(SlotData.StartingWeapon);
-            if (ConnectionData.RandomizedWeaponData.Count > 0 && ConnectionData.RandomizedSpellData.Count > 0) return;
+            if (SaveHandler.CurrentSaveData.RandomizedWeaponData.Count > 0 && SaveHandler.CurrentSaveData.RandomizedSpellData.Count > 0) return;
             switch (SlotData.RandomEquipStats)
             {
                 case RandomEquip.Off:
                 {
-                    ConnectionData.RandomizedWeaponData = LunacidEquipStats.UsableWeaponData;
-                    ConnectionData.RandomizedSpellData = LunacidEquipStats.UsableMagicData;
+                    SaveHandler.CurrentSaveData.RandomizedWeaponData = LunacidEquipStats.UsableWeaponData;
+                    SaveHandler.CurrentSaveData.RandomizedSpellData = LunacidEquipStats.UsableMagicData;
                     break;
                 }
                 case RandomEquip.Shuffled:
@@ -862,7 +845,7 @@ namespace LunacidAP.Archipelago
                         var chosenKey = copiedWeaponData.Keys.ToList()[random.Next(copiedWeaponData.Count)];
                         var chosenWeapon = copiedWeaponData[chosenKey];
                         copiedWeaponData.Remove(chosenKey);
-                        ConnectionData.RandomizedWeaponData[weapon] = chosenWeapon;
+                        SaveHandler.CurrentSaveData.RandomizedWeaponData[weapon] = chosenWeapon;
                     }
                     foreach (var spell in LunacidEquipStats.UsableMagicData.Keys)
                     {
@@ -876,14 +859,14 @@ namespace LunacidAP.Archipelago
                                 chosenMagic.Cost = Math.Min(10, chosenMagic.Cost);
                             }
                         }
-                        ConnectionData.RandomizedSpellData[spell] = chosenMagic;
+                        SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = chosenMagic;
                     }
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
                     {
                         var chosenKey = copiedSupportMagicData.Keys.ToList()[random.Next(copiedSupportMagicData.Count)];
                         var chosenSupportMagic = copiedSupportMagicData[chosenKey];
                         copiedSupportMagicData.Remove(chosenKey);
-                        ConnectionData.RandomizedSpellData[spell] = chosenSupportMagic;
+                        SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = chosenSupportMagic;
                     }
                     break;
                 }
@@ -904,7 +887,7 @@ namespace LunacidAP.Archipelago
                         var thrust = weaponList[random.Next(weaponCount)]
                             .Thrust;
                         var weaponData = new LunacidEquipStats.WeaponData(damage, speed, guard, backstep, thrust);
-                        ConnectionData.RandomizedWeaponData[weapon] = weaponData;
+                        SaveHandler.CurrentSaveData.RandomizedWeaponData[weapon] = weaponData;
                     }
 
                     foreach (var spell in LunacidEquipStats.UsableAttackMagicData.Keys)
@@ -925,7 +908,7 @@ namespace LunacidAP.Archipelago
                             }
                         }
                         var spellData = new LunacidEquipStats.SpellData(damage, castTime, minCastTime, cost);
-                        ConnectionData.RandomizedSpellData[spell] = spellData;
+                        SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = spellData;
                     }
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
                     {
@@ -937,7 +920,7 @@ namespace LunacidAP.Archipelago
                         var cost = LunacidEquipStats.UsableMagicData.Values.ToList()[
                             random.Next(magicCount)].Cost;
                         var spellData = new LunacidEquipStats.SpellData(0, castTime, minCastTime, cost);
-                        ConnectionData.RandomizedSpellData[spell] = spellData;
+                        SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = spellData;
                     }
                     break;
                 }

@@ -12,7 +12,6 @@ namespace LunacidAP.Patches
     public class GrassBreakHandler
     {
         private static ManualLogSource _log;
-        private static GameObject _glowObject;
         public GrassBreakHandler(ManualLogSource log)
         {
             _log = log;
@@ -30,9 +29,9 @@ namespace LunacidAP.Patches
             }
             if (archipelagoInfo.LocationData is null)
             {
-                _log.LogInfo("The information is null.");
                 return true;
             }
+            LocationHandler.Pickups.Remove(archipelagoInfo);
             // Its a grass/pot.  Drop the item on the floor.
             if (__instance.type == 2 && __instance.attack_controlled != -1)
             {
@@ -61,7 +60,7 @@ namespace LunacidAP.Patches
             }
             if (__instance.type == 3)
             {
-                UnityEngine.Object.Destroy(__instance.MOM);
+                Object.Destroy(__instance.MOM);
             }
             switch (__instance.dest_type)
             {
@@ -90,7 +89,6 @@ namespace LunacidAP.Patches
             }
             else if (locationName == "FlA: Fiddlehead 15 - (Temple of Earth)")
             {
-                _log.LogInfo("Fixing the Fiddlehead");
                 return new Vector3(46.4224f, 13.02f, 201.6953f);
             }
             return originalPosition;
@@ -102,12 +100,11 @@ namespace LunacidAP.Patches
             {
                 return;
             }
-            ConstructGlowObject();
             AddArchipelagoDataForGrass(sceneName);
             AddArchipelagoDataForBreakables(sceneName);
         }
 
-        public static void AddArchipelagoDataForGrass(string sceneName)
+        private static void AddArchipelagoDataForGrass(string sceneName)
         {
             if (!ArchipelagoClient.AP.SlotData.GrassSanity)
             {
@@ -126,7 +123,7 @@ namespace LunacidAP.Patches
                     _log.LogError($"Couldn't find a position for {group.APLocationName}.");
                     continue;
                 }
-                var item = ConnectionData.ScoutedLocations[group.APLocationID];
+                var item = SaveHandler.CurrentSaveData.ScoutedLocations[group.APLocationID];
                 
                 if (gameObject.GetComponent<ArchipelagoPickup>() is null)
                 {
@@ -134,42 +131,18 @@ namespace LunacidAP.Patches
                     gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
                     gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
                     gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                    gameObject.GetComponent<ArchipelagoPickup>().Position =  group.Position;
                 }
-                if (!item.Collected)
-                {
-                    SetParticleSystemForObject(gameObject, item);
-                }
+
+                if (item.Collected) continue;
+                GeneralTweaks.SetParticleSystemForObject(gameObject, item);
+                LocationHandler.Pickups.Add(gameObject.GetComponent<ArchipelagoPickup>());
 
 
             }
         }
 
-        private static void ConstructGlowObject()
-        {
-            var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
-            var glow = ashes.transform.GetChild(0).GetChild(1);
-            _glowObject = glow.gameObject;
-        }
-
-        private static void SetParticleSystemForObject(GameObject gameObject, ArchipelagoItem item)
-        {
-            var flag = item.Classification;
-            if (item.Classification.HasFlag(ItemFlags.Trap))
-            {
-                var choices = new List<ItemFlags>() {ItemFlags.Advancement | ItemFlags.NeverExclude, ItemFlags.Advancement, ItemFlags.NeverExclude, ItemFlags.None };
-                flag = choices[ArchipelagoClient.AP.RandomStatic.Next(choices.Count() - 1)];
-            }
-            var hexColor = Colors.GetClassificationHex(flag);
-            var color = Colors.HexToColorConverter(hexColor);
-            var newGlow = GameObject.Instantiate(_glowObject);
-            newGlow.transform.parent = gameObject.transform;
-            newGlow.transform.position = gameObject.transform.position;
-            var main = newGlow.GetComponent<ParticleSystemRenderer>().material;
-            main.color = color;
-            newGlow.gameObject.SetActive(true);
-        }
-
-        public static void AddArchipelagoDataForBreakables(string sceneName)
+        private static void AddArchipelagoDataForBreakables(string sceneName)
         {
             if (!ArchipelagoClient.AP.SlotData.Breakables)
             {
@@ -194,18 +167,18 @@ namespace LunacidAP.Patches
                         gameObject.transform.position += new Vector3(-3f, 0f, 0f); // Move the pots out of the wall.
                     }
                 }
-                var item = ConnectionData.ScoutedLocations[group.APLocationID];
+                var item = SaveHandler.CurrentSaveData.ScoutedLocations[group.APLocationID];
                 if (gameObject.GetComponent<ArchipelagoPickup>() is null)
                 {
                     gameObject.AddComponent<ArchipelagoPickup>();
                     gameObject.GetComponent<ArchipelagoPickup>().LocationData = group;
                     gameObject.GetComponent<ArchipelagoPickup>().ArchipelagoItem = item;
                     gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
+                    gameObject.GetComponent<ArchipelagoPickup>().Position =  group.Position;
+                    
                 }
-                if (!item.Collected)
-                {
-                    SetParticleSystemForObject(gameObject, item);
-                }
+                if (item.Collected) continue;
+                GeneralTweaks.SetParticleSystemForObject(gameObject, item);
             }
         }
 
@@ -226,7 +199,6 @@ namespace LunacidAP.Patches
             }
             if (shortestDistance > 5f)
             {
-                _log.LogInfo("Found nothing.");
                 return null;
             }
             return objectOfShortestDistance;

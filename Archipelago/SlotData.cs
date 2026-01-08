@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using LunacidAP.Data;
+using LunacidAP.Patches;
 using Newtonsoft.Json;
 using static LunacidAP.Data.LunacidEnemies;
 
@@ -79,8 +80,9 @@ namespace LunacidAP.Archipelago
 
         public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
         {
+            // Don't remove this its important to read for bug reports - Me some time ago mrow
             _log = log;
-            _log.LogInfo("Initializing Slot Data");
+            _log.LogInfo("Starting Slot Data Reading.  If you do not see \"TRANS RIGHTS\" in a new line after this, something went wrong.  Report it.");
             _slotDataFields = slotDataFields;
             Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
             StartingClass = GetSlotSetting(CLASS_KEY, 0);
@@ -103,7 +105,6 @@ namespace LunacidAP.Archipelago
             DeathLink = GetSlotSetting(DL_KEY, false);
             RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
             StartingWeapon = GetSlotSetting(STARTING_WEAPON_KEY, "");
-            _log.LogInfo("Halfway done.");
             var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
             RandomEquipStats = GetSlotSetting(RANDOM_WEP_STAT_KEY, RandomEquip.Off);
             FalseWalls = GetSlotSetting(WALL_KEY, false);
@@ -116,15 +117,13 @@ namespace LunacidAP.Archipelago
             CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
             var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
             var itemSpots = GetSlotSetting(IMPORTANT_ITEM_KEY, "");
-            _log.LogInfo("Can we fucking get the item locations...");
             ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<List<string>>>>(itemSpots);
-            _log.LogInfo("Finished getting slot settings, building dictionaries");
             foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
             {
                 var newKey = data.Key.ToUpper().Replace("'", "");
-                if (!ConnectionData.Elements.ContainsKey(newKey))
+                if (!SaveHandler.CurrentSaveData.Elements.ContainsKey(newKey))
                 {
-                    ConnectionData.Elements.Add(newKey, data.Value);
+                    SaveHandler.CurrentSaveData.Elements.Add(newKey, data.Value);
                 }
             }
             if (EntranceRandomizer)
@@ -132,21 +131,21 @@ namespace LunacidAP.Archipelago
                 var entranceData = GetSlotSetting(ENT_KEY, "");
                 foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(entranceData))
                 {
-                    if (!ConnectionData.Entrances.ContainsKey(data.Key))
+                    if (!SaveHandler.CurrentSaveData.Entrances.ContainsKey(data.Key))
                     {
-                        ConnectionData.Entrances.Add(data.Key, data.Value);
+                        SaveHandler.CurrentSaveData.Entrances.Add(data.Key, data.Value);
                     }
                 }
             }
             else
             {
-                ConnectionData.Entrances = WarpDestinations.DefaultEntrances;
+                SaveHandler.CurrentSaveData.Entrances = WarpDestinations.DefaultEntrances;
             }
 
 
             if (EnemyRandomization)
             {
-                if (ConnectionData.RandomEnemyData.Any())
+                if (SaveHandler.CurrentSaveData.RandomEnemyData.Any())
                 {
                     _log.LogInfo("The enemy data was already filled, so no need to regenerate again.");
                 }
@@ -160,12 +159,12 @@ namespace LunacidAP.Archipelago
                             var splitDataString = item.Split('|');
                             constructedList.Add(new RandomizedEnemyData(splitDataString[0], int.Parse(splitDataString[1]), splitDataString[2]));
                         }
-                        ConnectionData.RandomEnemyData[data.Key] = constructedList;
+                        SaveHandler.CurrentSaveData.RandomEnemyData[data.Key] = constructedList;
                     }
                 }
 
             }
-
+            _log.LogInfo($"TRANS RIGHTS");
         }
 
         private Goal GetSlotSetting(string key, Goal defaultValue)

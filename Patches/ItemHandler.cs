@@ -20,14 +20,12 @@ namespace LunacidAP.Patches
     {
         private static CONTROL Control;
         private static POP_text_scr Popup;
-        private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
         private static readonly List<string> SpecialItems = new() { "Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring" };
 
-        public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
+        public ItemHandler(ManualLogSource log)
         {
             _log = log;
-            _lunacidLogic = lunacidLogic;
             Harmony.CreateAndPatchAll(typeof(ItemHandler));
         }
 
@@ -43,11 +41,11 @@ namespace LunacidAP.Patches
 
             var weaponNoHeader = Term.Replace("Weapons/", "");
             var magicNoHeader = Term.Replace("Spells/", "");
-            if (LunacidEquipStats.EquipmentLookup.ContainsKey(weaponNoHeader) && ConnectionData.Elements.TryGetValue(weaponNoHeader, out var element1))
+            if (LunacidEquipStats.EquipmentLookup.ContainsKey(weaponNoHeader) && SaveHandler.CurrentSaveData.Elements.TryGetValue(weaponNoHeader, out var element1))
             {
                 __result = LunacidEquipStats.ChangeNameBasedOnElement(weaponNoHeader, element1);
             }
-            else if (LunacidEquipStats.EquipmentLookup.ContainsKey(magicNoHeader) && ConnectionData.Elements.TryGetValue(magicNoHeader, out var element2))
+            else if (LunacidEquipStats.EquipmentLookup.ContainsKey(magicNoHeader) && SaveHandler.CurrentSaveData.Elements.TryGetValue(magicNoHeader, out var element2))
             {
                 __result = LunacidEquipStats.ChangeNameBasedOnElement(magicNoHeader, element2);
             }
@@ -241,10 +239,9 @@ namespace LunacidAP.Patches
         {
             try
             {
-                _log.LogInfo(Name);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
                 var newName = Name;
-                if (ConnectionData.Elements.TryGetValue(Name, out var element))
+                if (SaveHandler.CurrentSaveData.Elements.TryGetValue(Name, out var element))
                 {
                     newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
                 }
@@ -276,7 +273,7 @@ namespace LunacidAP.Patches
         {
             try
             {
-                var element = ConnectionData.Elements[Name];
+                var element = SaveHandler.CurrentSaveData.Elements[Name];
                 var newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
                 PopupCommand(2, newName, color, player, self, isSelfLevelLocation);
                 for (int k = 0; k < 128; k++)

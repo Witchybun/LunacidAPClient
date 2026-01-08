@@ -7,6 +7,7 @@ namespace LunacidAP.Data;
 
 public static class LunacidEquipStats
 {
+    [Serializable]
     public class WeaponData
     {
         public readonly float Damage;
@@ -25,6 +26,7 @@ public static class LunacidEquipStats
         }
     }
 
+    [Serializable]
     public class SpellData
     {
         public readonly float Damage;

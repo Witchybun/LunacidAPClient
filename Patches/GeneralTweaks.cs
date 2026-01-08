@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -21,12 +23,39 @@ namespace LunacidAP.Patches
         private static ManualLogSource _log;
         private static long LucidID = 319;
         private static string[] _kept { get; set; }
+        
+        public static GameObject _glowObject;
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
 
         public GeneralTweaks(ManualLogSource log)
         {
             _log = log;
             Harmony.CreateAndPatchAll(typeof(GeneralTweaks));
+        }
+        
+        public static void ConstructGlowObject()
+        {
+            var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
+            var glow = ashes.transform.GetChild(0).GetChild(1);
+            _glowObject = glow.gameObject;
+        }
+        
+        public static void SetParticleSystemForObject(GameObject gameObject, ArchipelagoItem item)
+        {
+            var flag = item.Classification;
+            if (item.Classification.HasFlag(ItemFlags.Trap))
+            {
+                var choices = new List<ItemFlags>() {ItemFlags.Advancement | ItemFlags.NeverExclude, ItemFlags.Advancement, ItemFlags.NeverExclude, ItemFlags.None };
+                flag = choices[ArchipelagoClient.AP.RandomStatic.Next(choices.Count() - 1)];
+            }
+            var hexColor = Colors.GetClassificationHex(flag);
+            var color = Colors.HexToColorConverter(hexColor);
+            var newGlow = GameObject.Instantiate(_glowObject, gameObject.transform, true);
+            newGlow.name = "MW Item Glow";
+            newGlow.transform.position = gameObject.transform.position;
+            var main = newGlow.GetComponent<ParticleSystemRenderer>().material;
+            main.color = color;
+            newGlow.gameObject.SetActive(true);
         }
 
         [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
@@ -73,9 +102,9 @@ namespace LunacidAP.Patches
         private static void Start_SendLucidCheck(Boss __instance)
         {
             var locationData = new LunacidLocations.LocationData(319, "CF: Calamis' Weapon of Choice", ignoreLocationHandler: true);
-            var archipelagoItem = ConnectionData.ScoutedLocations[319];
+            var archipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[319];
             LocationHandler.SendLocationCoveringPatchouliCase(locationData);
-            if (archipelagoItem.SlotName != ConnectionData.SlotName)
+            if (archipelagoItem.SlotName != SaveHandler.CurrentSaveData.SlotName)
             {
                 LocationHandler.SendMessageOnPickup(archipelagoItem);
             }
@@ -85,7 +114,7 @@ namespace LunacidAP.Patches
         [HarmonyPostfix]
         private static void Die_FalsifyDLTag()
         {
-            if (!ConnectionData.DeathLink) return;
+            if (!SaveHandler.CurrentSaveData.DeathLink) return;
             ArchipelagoClient.AP.SendDeathLink();
         }
 
@@ -126,7 +155,7 @@ namespace LunacidAP.Patches
             ___KEEP[6] = __instance.CON.CURRENT_PL_DATA.ITEM5;
             ___KEEP[7] = __instance.CON.CURRENT_PL_DATA.MAG1;
             ___KEEP[8] = __instance.CON.CURRENT_PL_DATA.MAG2;
-            var calamisItem = ConnectionData.ScoutedLocations[LucidID].Name;
+            var calamisItem = SaveHandler.CurrentSaveData.ScoutedLocations[LucidID].Name;
             var cantFight = !ArchipelagoClient.AP.WasItemReceived("Lucid Blade") && calamisItem != "Lucid Blade";
             __instance.CON.CURRENT_PL_DATA.WEP1 = cantFight ? null : "LUCID BLADE";
             __instance.CON.CURRENT_PL_DATA.WEP2 = cantFight ? null : "LUCID BLADE";
@@ -246,18 +275,18 @@ namespace LunacidAP.Patches
             ___CON.CURRENT_PL_DATA.XP = Convert.ToInt32(nearestHundred);
             if (__instance.XP_DRAIN_DUR > 0f)
             {
-                if (ConnectionData.StoredExperience > 0)
+                if (SaveHandler.CurrentSaveData.StoredExperience > 0)
                 {
                     ___XP_DURP += Time.deltaTime * 1.2f;
                     if (___XP_DURP > 1f)
                     {
-                        ConnectionData.StoredExperience -= Mathf.RoundToInt(___XP_DURP);
+                        SaveHandler.CurrentSaveData.StoredExperience -= Mathf.RoundToInt(___XP_DURP);
                         ___XP_DURP = 0f;
                     }
                 }
                 else
                 {
-                    ConnectionData.StoredExperience = 0;
+                    SaveHandler.CurrentSaveData.StoredExperience = 0;
                 }
             }
 
@@ -323,11 +352,95 @@ namespace LunacidAP.Patches
 
         public static void EnsureAftermathAfterKill(Transform hubLevel)
         {
-            if (!hubLevel.GetChild(7).gameObject.activeSelf && ConnectionData.EnteredScenes.Contains("Chamber of Fate"))
+            if (!hubLevel.GetChild(7).gameObject.activeSelf && SaveHandler.CurrentSaveData.EnteredScenes.Contains("Chamber of Fate"))
             {
                 hubLevel.GetChild(8).gameObject.SetActive(false);
                 hubLevel.GetChild(7).gameObject.SetActive(true);
             }
+        }
+
+        [HarmonyPatch(typeof(Compass_control), "Update")]
+        [HarmonyPrefix]
+        private static bool Update_RotateToNearestCheck(Compass_control __instance)
+        {
+            if (__instance.style == 0)
+            {
+                return false;
+            }
+            var playerPosition = __instance.PL.transform.position;
+            var relativeVector = FindClosestItemVectorRelativeToPlayer(playerPosition);
+            if (__instance.style == 1)
+            {
+                
+                var playerRotation = __instance.PL.ROT.y;
+                var rotation2d = ClosestItemAngle2D(relativeVector);
+                if (rotation2d > 360f)
+                {
+                    __instance.MDL.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, playerRotation));
+                    return false;
+                }
+                var totalRotation2d = playerRotation - rotation2d + 180;  // Add 180 to "flip" the pointer around.
+                switch (totalRotation2d)
+                {
+                    case > 180f:
+                        totalRotation2d -= 360f;
+                        break;
+                    case < -180f:
+                        totalRotation2d += 360f;
+                        break;
+                }
+                __instance.MDL.transform.localRotation = Quaternion.Euler(new Vector3(0, 0, totalRotation2d));
+                return false;
+            }
+            if (relativeVector is { x: 0, z: 0 })
+            {
+                __instance.MDL.transform.rotation =
+                    Quaternion.LookRotation(Vector3.forward, Vector3.up);
+                return false;
+            }
+            __instance.MDL.transform.rotation =
+                Quaternion.LookRotation(new Vector3(relativeVector.x, relativeVector.y, relativeVector.z),
+                    Vector3.up);
+            return false;
+        }
+
+        private static Vector3 FindClosestItemVectorRelativeToPlayer(Vector3 playerPosition)
+        {
+            if (!LocationHandler.Pickups.Any())
+            {
+                return playerPosition;
+            }
+            var closestVector = new Vector3(99999f, 99999f, 99999f);
+            var closestDistance = 999999999f;
+            foreach (var pickup in LocationHandler.Pickups)
+            {
+                if (pickup is null)
+                {
+                    continue;
+                }
+                var distance =  Vector3.Distance(playerPosition, pickup.Position);
+                if (distance > closestDistance) continue;
+                closestVector = pickup.Position;
+                closestDistance = distance;
+            }
+            if (Vector3.Distance(closestVector, new Vector3(99999f, 99999f, 99999f)) < 0.5f)
+            {
+                return playerPosition;
+            }
+            var shiftedVector = closestVector - playerPosition;
+            return shiftedVector;
+        }
+        
+        private static float ClosestItemAngle2D(Vector3 relativeVector)
+        {
+            var shadowVector = new Vector2(relativeVector.x, relativeVector.z);
+            if (Vector2.Distance(shadowVector, new Vector2(0, 0)) < 0.1f)
+            {
+                return 400f;
+            }
+
+            var unitVector = shadowVector / shadowVector.magnitude;
+            return Math.Sign(unitVector.x)*(float)(180 * Math.Acos(unitVector.y) / Math.PI);
         }
     }
 }

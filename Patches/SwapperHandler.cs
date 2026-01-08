@@ -30,17 +30,17 @@ namespace LunacidAP.Patches
             {
                 var actualName = LocationHandler.TheDaedalusConundrum(pickupObject);
                 var apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
-                archipelagoItem = ConnectionData.ScoutedLocations[apLocation.APLocationID];
+                archipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[apLocation.APLocationID];
                 return archipelagoItem;
             }
             else
             {
-                archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
+                archipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
             }
             var locationItem = archipelagoItem.Name;
             var usedClassification = archipelagoItem.Classification.HasFlag(ItemFlags.Trap) ? ItemFlags.Advancement : archipelagoItem.Classification;
             ChangeGlowToFlagColor(pickupObject.gameObject, usedClassification);
-            if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
+            if (SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
             {
                 try
                 {
@@ -328,7 +328,7 @@ namespace LunacidAP.Patches
         private static void ReplaceModelWithTrickyThing(Item_Pickup_scr pickupObject)
         {
             var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight" };
-            var random = new System.Random(ConnectionData.Seed + DateTime.Today.Day + pickupObject.gameObject.GetInstanceID()).Next(0, 6);
+            var random = new System.Random(SaveHandler.CurrentSaveData.Seed + DateTime.Today.Day + pickupObject.gameObject.GetInstanceID()).Next(0, 6);
             var chosenTrick = trickyThings[random];
             var type = "";
             switch (chosenTrick)

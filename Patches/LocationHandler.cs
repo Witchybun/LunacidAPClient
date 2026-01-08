@@ -18,7 +18,7 @@ namespace LunacidAP.Patches
         private static POP_text_scr _popup;
         private static ManualLogSource _log;
         private static int _currentFloor = 0;
-        public static List<ArchipelagoPickup> Pickups = new List<ArchipelagoPickup>();
+        public static readonly List<ArchipelagoPickup> Pickups = new ();
 
 
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -85,7 +85,10 @@ namespace LunacidAP.Patches
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().Collected = item.Collected;
                 __instance.gameObject.GetComponent<ArchipelagoPickup>().Position =
                     __instance.gameObject.transform.position;
-                Pickups.Add(__instance.gameObject.GetComponent<ArchipelagoPickup>());
+                if (!item.Collected)
+                {
+                    Pickups.Add(__instance.gameObject.GetComponent<ArchipelagoPickup>());
+                }
             }
             __instance.gameObject.SetActive(!item.Collected);
             return false;
@@ -108,48 +111,27 @@ namespace LunacidAP.Patches
             {
                 return true;
             }
-            var sceneName = SceneManager.GetActiveScene().name;
-            var position = __instance.transform.position;
-            LocationData locationOfShortestDistance = new();
-            Vector3 positionOfShortestDistance = new Vector3(6969.0f, 6969.0f, 6969.0f);
-            float shortestDistance = 696969f;
-            if (!LunacidLocations.LoreLocations.TryGetValue(sceneName, out var locations))
+            var pickup = __instance.gameObject.GetComponent<ArchipelagoPickup>();
+            if (pickup is null)
             {
                 return true;
             }
-            foreach (var group in locations)
-            {
-                if (Vector3.Distance(group.Position, position) < Vector3.Distance(position, positionOfShortestDistance))
-                {
-                    locationOfShortestDistance = group;
-                    positionOfShortestDistance = group.Position;
-                    shortestDistance = Vector3.Distance(group.Position, position);
-                }
-            }
-            if (shortestDistance > 2f)
-            {
-                _log.LogWarning("Could not find valid location for this book.  Might not be randomized.");
-                _log.LogWarning($"Closest location: {locationOfShortestDistance.APLocationName}, Distance: {shortestDistance}");
-                _log.LogWarning($"Scene: {sceneName}, Location: {position.x}, {position.y}, {position.z}");
-                return true;
-            }
-            _log.LogWarning($"Closest location: {locationOfShortestDistance.APLocationName}, Distance: {shortestDistance}");
-            var item = ConnectionData.ScoutedLocations[locationOfShortestDistance.APLocationID];
+            var location = pickup.LocationData;
+            var item = pickup.ArchipelagoItem;
             if (item.Collected)
             {
                 return true;
             }
-            _log.LogWarning($"Item is {item.Name}.  ID for location is {locationOfShortestDistance.APLocationID}.");
-            if (item.SlotName != ConnectionData.SlotName)
+            if (item.SlotName != SaveHandler.CurrentSaveData.SlotName)
             {
                 if (!item.Collected)
                 {
                     SendMessageOnPickup(item);
                 }
             }
-            SendLocationCoveringPatchouliCase(locationOfShortestDistance);
-            
-            
+            SendLocationCoveringPatchouliCase(location);
+            Pickups.Remove(pickup);
+            __instance.gameObject.transform.Find("MW Item Glow").gameObject.SetActive(false);
             return false;
         }
 
@@ -159,9 +141,9 @@ namespace LunacidAP.Patches
             if (pickupObject.gameObject.name == "WEPON")
             {
                 var apLocation = APLocationData["ARCHIVES"].First(x => x.GameObjectName == "WEPON");
-                var item = ConnectionData.ScoutedLocations[apLocation.APLocationID];
+                var item = SaveHandler.CurrentSaveData.ScoutedLocations[apLocation.APLocationID];
                 SendLocationCoveringPatchouliCase(apLocation);
-                if (item.SlotName != ConnectionData.SlotName)
+                if (item.SlotName != SaveHandler.CurrentSaveData.SlotName)
                 {
                     SendMessageOnPickup(item);
                 }
@@ -177,7 +159,7 @@ namespace LunacidAP.Patches
             {
                 var actualName = TheDaedalusConundrum(pickupObject);
                 apData.LocationData = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
-                apData.ArchipelagoItem = ConnectionData.ScoutedLocations[apData.LocationData.APLocationID];
+                apData.ArchipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[apData.LocationData.APLocationID];
                 apData.Collected = false; // Perhaps when the dummy location is repeated, its possible this is "true" and won't send.  Safe to do.
             }
             if (apData.Collected && !apData.CanBeRepeated)
@@ -186,7 +168,7 @@ namespace LunacidAP.Patches
                 return false;
             }
             apData.SendLocation();
-            if (apData.ArchipelagoItem.SlotName != ConnectionData.SlotName)
+            if (apData.ArchipelagoItem.SlotName != SaveHandler.CurrentSaveData.SlotName)
             {
                 var color = Colors.GetClassificationHex(apData.ArchipelagoItem.Classification);
                 if (!apData.Collected)
@@ -410,10 +392,10 @@ namespace LunacidAP.Patches
                 {
                     var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
                     ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(patchouliCanopy);  // Ensures its done.
-                    ConnectionData.CompletedLocations.Add(patchouliCanopy);
+                    SaveHandler.CurrentSaveData.CompletedLocations.Add(patchouliCanopy);
                 }
-                ConnectionData.CompletedLocations.Add(location.APLocationID);
-                ConnectionData.ScoutedLocations[location.APLocationID].Collected = true;
+                SaveHandler.CurrentSaveData.CompletedLocations.Add(location.APLocationID);
+                SaveHandler.CurrentSaveData.ScoutedLocations[location.APLocationID].Collected = true;
 
             }
             else  // Otherwise just save it for syncing later.
@@ -421,10 +403,10 @@ namespace LunacidAP.Patches
                 if (location.APLocationName == "YF: Patchouli's Reward")
                 {
                     var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
-                    ConnectionData.CompletedLocations.Add(patchouliCanopy);
+                    SaveHandler.CurrentSaveData.CompletedLocations.Add(patchouliCanopy);
                 }
-                ConnectionData.CompletedLocations.Add(location.APLocationID);
-                ConnectionData.ScoutedLocations[location.APLocationID].Collected = true;
+                SaveHandler.CurrentSaveData.CompletedLocations.Add(location.APLocationID);
+                SaveHandler.CurrentSaveData.ScoutedLocations[location.APLocationID].Collected = true;
             }
         }
 

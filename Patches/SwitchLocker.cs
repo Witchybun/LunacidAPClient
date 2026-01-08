@@ -39,7 +39,7 @@ namespace LunacidAP.Patches
             }
             var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             _popup = control.PAPPY;
-            foreach (var receivedItem in ConnectionData.ReceivedItems)
+            foreach (var receivedItem in SaveHandler.CurrentSaveData.ReceivedItems)
             {
                 if (receivedItem.Value.ItemName == itemName)
                 {

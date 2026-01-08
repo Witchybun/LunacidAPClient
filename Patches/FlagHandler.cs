@@ -349,7 +349,7 @@ namespace LunacidAP.Patches
                                 }
                             }
                             var daDemiTwiggaUwu = pittObjects.transform.Find("NEW_NPC").Find("DEMI_0");
-                            if (!daDemiTwiggaUwu.Find("Demi").gameObject.activeSelf && !ConnectionData.EnteredScenes.Contains("HUB_01"))
+                            if (!daDemiTwiggaUwu.Find("Demi").gameObject.activeSelf && !SaveHandler.CurrentSaveData.EnteredScenes.Contains("HUB_01"))
                             {
                                 daDemiTwiggaUwu.Find("TRIGGER_POINT").gameObject.SetActive(true);
                                 daDemiTwiggaUwu.Find("TRIGGER_POINT").Find("AUTO").gameObject.SetActive(true);

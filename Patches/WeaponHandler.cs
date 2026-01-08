@@ -41,7 +41,7 @@ namespace LunacidAP.Patches
             var weaponName = StaticFuncs.REMOVE_NUMS(__instance.EQ_WEP.name.Replace("(Clone)", ""));
             if (ArchipelagoClient.AP.SlotData.RandomElements)
             {
-                if (ConnectionData.Elements.TryGetValue(weaponName, out string elementName))
+                if (SaveHandler.CurrentSaveData.Elements.TryGetValue(weaponName, out string elementName))
                 {
                     if (LunacidItems.ElementToID.TryGetValue(elementName, out int element))
                     {
@@ -52,7 +52,7 @@ namespace LunacidAP.Patches
 
             if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
             {
-                if (!ConnectionData.RandomizedWeaponData.TryGetValue(weaponName, out var data))
+                if (!SaveHandler.CurrentSaveData.RandomizedWeaponData.TryGetValue(weaponName, out var data))
                 {
                     _log.LogWarning($"Could not find data for {weaponName}");
                 }
@@ -105,7 +105,7 @@ namespace LunacidAP.Patches
         {
             if (!string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG1) && __instance.CURRENT_PL_DATA.MAG1 != "EMPTY")
             {
-                if (!ConnectionData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
+                if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
                 {
                     _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
                 }
@@ -122,7 +122,7 @@ namespace LunacidAP.Patches
                     }
                     if (ArchipelagoClient.AP.SlotData.RandomElements)
                     {
-                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
+                        if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                         {
                             __instance.EQ_MAG1.MAG_ELEM = numId;
                             __instance.EQ_MAG1.MAG_COLOR = LunacidEquipStats.SpellColors[element];
@@ -137,7 +137,7 @@ namespace LunacidAP.Patches
             if (string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG2) ||
                 __instance.CURRENT_PL_DATA.MAG2 == "EMPTY") return;
             {
-                if (!ConnectionData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
+                if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
                 {
                     _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
                 }
@@ -153,7 +153,7 @@ namespace LunacidAP.Patches
                     }
                     if (ArchipelagoClient.AP.SlotData.RandomElements)
                     {
-                        if (ConnectionData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
+                        if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                         {
                             __instance.EQ_MAG2.MAG_ELEM = numId;
                             __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
@@ -181,7 +181,7 @@ namespace LunacidAP.Patches
             {
                 foreach (Damage_Trigger trigger in componentsInChildren.Cast<Damage_Trigger>())
                 {
-                    trigger.element = LunacidItems.ElementToID[ConnectionData.Elements[weapon]];
+                    trigger.element = LunacidItems.ElementToID[SaveHandler.CurrentSaveData.Elements[weapon]];
                 }
             }
             else
@@ -241,7 +241,7 @@ namespace LunacidAP.Patches
                             var nameWithoutClone = component2.name.Replace("(Clone)", "");
                             var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component2.WEP_ELEMENT];
                             __instance.TXT[9].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
-                            var statData = ConnectionData.RandomizedWeaponData[nameWithoutClone];
+                            var statData = SaveHandler.CurrentSaveData.RandomizedWeaponData[nameWithoutClone];
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                             var trueDamage = GetRealDamageForWeapon(CON, statData.Damage, component2);
                             __instance.TXT[10].text = trueDamage.ToString("F0") + "\n" + 
@@ -265,7 +265,7 @@ namespace LunacidAP.Patches
                         {
                             var component = gameObject.GetComponent<Magic_scr>();
                             var nameWithoutClone = component.name.Replace("(Clone)", "");
-                            var statData = ConnectionData.RandomizedSpellData[nameWithoutClone];
+                            var statData = SaveHandler.CurrentSaveData.RandomizedSpellData[nameWithoutClone];
                             var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
                             __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = freeSpells.Contains(nameWithoutClone) ? "0" : statData.Cost.ToString();
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -291,12 +291,12 @@ namespace LunacidAP.Patches
 
         private static bool IsElementShuffled(string weaponName, out int element)
         {
-            if (ConnectionData.Elements is null)
+            if (SaveHandler.CurrentSaveData.Elements is null)
             {
                 element = -1;
                 return false;
             }
-            if (ConnectionData.Elements.TryGetValue(weaponName, out string givenElement))
+            if (SaveHandler.CurrentSaveData.Elements.TryGetValue(weaponName, out string givenElement))
             {
                 if (LunacidItems.WeaponsWithDefaultElement.Contains(weaponName))
                 {
@@ -326,7 +326,7 @@ namespace LunacidAP.Patches
                     decimal currentExp = __instance.Player.GetComponent<Player_Control_scr>().CON.CURRENT_PL_DATA.XP;
                     var nearestHundred = Math.Ceiling(currentExp / 100) * 100;
                     __instance.Player.GetComponent<Player_Control_scr>().CON.CURRENT_PL_DATA.XP = Convert.ToInt32(nearestHundred);
-                    ConnectionData.StoredExperience = Mathf.Max(0, ConnectionData.StoredExperience - 1);
+                    SaveHandler.CurrentSaveData.StoredExperience = Mathf.Max(0, SaveHandler.CurrentSaveData.StoredExperience - 1);
                 }
             }
         }
