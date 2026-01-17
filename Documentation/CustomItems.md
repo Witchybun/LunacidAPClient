@@ -2,9 +2,6 @@
 
 This document details the new items Lunacid AP makes and what they do:
 
-## Orb of a Lost Archipelago
-This object tells the player what checks in the given area are in logic or not.  It scrambles the list every once in a while, offering the idea of the names "floating in smoke" akin to crystal ball readings.  If the list of locations is too long, it gets truncated.  Either wait, or do the checks you can do, to see more.
-
 ## Great Well Doors Keyring
 This object tells the player what keys were sent to the player to open doors, meant to help avoid wanting to check /received in the Text Client over this.  Each key is named something somewhat relevant to the door its meant to open.  These are:
 
@@ -45,4 +42,28 @@ Forlorn Arena Gate Switch Key: On top floor; opens the door to Forlorn Arena.
 Temple of Water/Earth Switch Key: In Forlorn Arena; opens shortcut after opening the chests there.
 Labyrinth of Ash Switch Key: Near start; opens shortcut.
 
+## Text on Great Well Resourcefulness
 
+When an item has a drop table, it contains *N* drops and 1 "Nothing".  This item reduces the "Nothing" weight, 
+meaning its more likely something drops.
+
+## Lucky Bangle
+
+Triples EXP gain.  It's logical for Levelsanity levels above 50.
+
+## The Weight of the Dream (Nothing)
+
+Literally nothing.  It can be used to pad the randomizer so you aren't loaded with nice items by the end.
+
+## Demi's/Patchouli's Gift for a Stranger
+
+Gives a random player a gift/trap.  If there are no players in the multiworld with a gift box open, this does nothing.
+
+## Rat Gang
+
+Summons 5 rats under the player, and the first part of "Rats, We're Rats, We're The Rats" plays.
+
+## Date With Death Trap
+
+There was a promotional video KIRA made that uses a scene in the game.  This scene was never removed.  When received,
+you are warped there.  There's a 1% chance death is there and you have to rush leave or die.

@@ -236,10 +236,6 @@ namespace LunacidAP.Patches
                 obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;
                 obj.GetComponent<ArchipelagoPickup>().Collected = archipelagoPickup.Collected;
                 obj.GetComponent<ArchipelagoPickup>().CanBeRepeated = archipelagoPickup.CanBeRepeated;
-                if (!archipelagoPickup.Collected)
-                {
-                    LocationHandler.Pickups.Add(archipelagoPickup);
-                }
                 var pickupObject = obj.GetComponent<Item_Pickup_scr>();
                 SwapperHandler.ReplaceModelWithAppropriateItem(pickupObject, archipelagoPickup.LocationData);
             }

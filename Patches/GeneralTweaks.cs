@@ -363,6 +363,10 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool Update_RotateToNearestCheck(Compass_control __instance)
         {
+            if (!SaveHandler.MainRandoSettings.CompassCheck)
+            {
+                return true;
+            }
             if (__instance.style == 0)
             {
                 return false;

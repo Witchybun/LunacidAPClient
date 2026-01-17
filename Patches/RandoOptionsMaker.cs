@@ -130,6 +130,20 @@ public class RandoOptionsMaker
         autoHintButton.name = "Auto Hint Button";
         var autoHintButtonData = autoHintButton.GetComponent<Button>();
         autoHintButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 105;
+        var compassCheckName = Object.Instantiate(leftSideParent.Find("A"), leftSideParent, true);
+        compassCheckName.position = new Vector3(compassCheckName.position.x, compassCheckName.position.y + 5f, compassCheckName.position.z);
+        Object.Destroy(compassCheckName.GetComponent<I2.Loc.Localize>());  // DIE
+        compassCheckName.GetComponent<TextMeshProUGUI>().text = "Check Compass";
+        compassCheckName.name = "Compass Check";
+        var compassCheckStateName = Object.Instantiate(settingNameParent.Find("A"), settingNameParent, true);
+        compassCheckStateName.name = "Compass Check State";
+        compassCheckStateName.position = new Vector3(compassCheckStateName.position.x, compassCheckStateName.position.y + 5f, compassCheckStateName.position.z);
+        compassCheckStateName.GetComponent<TextMeshProUGUI>().text = SaveHandler.MainRandoSettings.CompassCheck ? "[On]" : "[Off]";
+        var compassButton = Object.Instantiate(baseParent.Find("compass_button"), baseParent, true);
+        compassButton.name = "Compass Button";
+        compassButton.position = new Vector3(compassButton.position.x, compassButton.position.y + 5f, compassButton.position.z);
+        var compassButtonData = compassButton.GetComponent<Button>();
+        compassButtonData.onClick.m_PersistentCalls.m_Calls[0].arguments.intArgument = 106;
     }
 
     private static void LoadPortValues()
@@ -204,10 +218,20 @@ public class RandoOptionsMaker
                 return false;
             }
             case 105:
+            {
                 SaveHandler.MainRandoSettings.AutoHint = !SaveHandler.MainRandoSettings.AutoHint;
                 var hintSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings").Find("Auto Hint State");
                 hintSetting.GetComponent<TextMeshProUGUI>().text = SaveHandler.MainRandoSettings.AutoHint ? "[On]" : "[Off]";
+                return false; 
+            }
+            case 106:
+            {
+                SaveHandler.MainRandoSettings.CompassCheck = !SaveHandler.MainRandoSettings.CompassCheck;
+                var compassSetting = __instance.MENUS[0].transform.Find("menu4").Find("Settings").Find("Compass Check State");
+                compassSetting.GetComponent<TextMeshProUGUI>().text = SaveHandler.MainRandoSettings.CompassCheck? "[On]" : "[Off]";
                 return false;
+            }
+                
         }
 
         return true;

@@ -153,6 +153,7 @@ namespace LunacidAP.Archipelago
             string outText;
             if (result.Successful)
             {
+                _log.LogInfo("Beginning connection and setup.  If you don't see \"Connected!\" then this crashed somewhere, and send a report!  Tank u wuw");
                 var success = (LoginSuccessful)result;
                 if (!APVersionIsAcceptable(success.SlotData, out var apworldVersion))
                 {
@@ -175,6 +176,7 @@ namespace LunacidAP.Archipelago
                 MuseHandler.InitializeChosenSongs(seed);
                 RandomStatic = new System.Random(seed);
                 var unverifiedLocations = SaveHandler.CurrentSaveData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
+                _log.LogInfo("Checking off locations done out-of-game into the save.");
                 Session.Locations.CompleteLocationChecks(unverifiedLocations);
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
                 {
@@ -185,25 +187,27 @@ namespace LunacidAP.Archipelago
                 }
 
                 // Connection successful
-                Authenticated = true;
                 foreach (long locationID in Session.Locations.AllLocationsChecked)
                 {
                     if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
                     {
+                        _log.LogInfo($"The player already checked {locationID} so we're add it to completed locations.");
                         SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
                     }
                 }
+                _log.LogInfo("Building some basic data structures.");
                 BuildLocations(SlotData.Seed);
                 CommunionHint.DetermineHints(seed);
                 RandomizeEquipData(seed);
                 _trapHandler = new TrapHandler();
-                allowCoroutines = true;
                 CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
                 if (SlotData.RingLink)
                 {
                     Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
                     Session.Socket.PacketReceived += RingLink_OnValueChanged;
                 }
+                _log.LogInfo("We're starting all coroutines.");
+                allowCoroutines = true;
                 StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
                 StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
                 StartCoroutine(_trapHandler.DropRatsWhenPossible());
@@ -216,6 +220,7 @@ namespace LunacidAP.Archipelago
                 StartCoroutine(HandleQueuedItems());
                 StartCoroutine(giftHelper.HandleIncomingGifts());
                 Authenticated = true;
+                _log.LogInfo("Connected!");
             }
             else
             {
@@ -408,6 +413,7 @@ namespace LunacidAP.Archipelago
         private void OnItemReceived(ReceivedItemsHelper helper)
         {
             var item = helper.DequeueItem();
+            _log.LogInfo($"Received {item.ItemName} with index of {helper.Index}");
             var receivedItem = new ReceivedItem(item, helper.Index);
             ItemsToProcess.Enqueue(receivedItem);
         }
@@ -435,6 +441,7 @@ namespace LunacidAP.Archipelago
                     yield return null;
                 }
                 var item = ItemsToProcess.Dequeue();
+                _log.LogInfo($"About to try and give {item.ItemName}");
                 if (item.LocationId < 0)
                 {
                     cheatedCount += 1;
@@ -442,13 +449,17 @@ namespace LunacidAP.Archipelago
 
                 if (item.Index < SaveHandler.CurrentSaveData.Index)
                 {
+                    _log.LogInfo("Ignoring the item because the index says so.");
                     continue;
                 }
+                _log.LogInfo("Item can possibly be given.");
                 // I wanna get rid of this so friggen bad.
                 if (SaveHandler.CurrentSaveData.ReceivedItems.ContainsKey(item.Identifier))
                 {
+                    _log.LogInfo("Ignoring the item as the ReceivedItems list has it in there.");
                     continue;
                 }
+                _log.LogInfo("Giving item.");
                 var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
                 var isCheated = item.LocationId < 0;
                 var isLevelLocation = item.LocationName.Contains("Reach Level");

@@ -205,7 +205,7 @@ namespace LunacidAP.Patches
                     unusedCreatures.Remove(chosenCreature);
                     var locationName = location[0];
                     var message = string.Format(CreatureToHint[chosenCreature], locationName, item.Key);
-                    CreatureHints[chosenCreature] = new CreatureHintData(message, int.Parse(location[1]), int.Parse(location[2]), true);
+                    CreatureHints[chosenCreature] = new CreatureHintData(message, int.Parse(location[1]), long.Parse(location[2]), true);
                 }
             }
             if (unusedCreatures.Any())
@@ -256,10 +256,10 @@ namespace LunacidAP.Patches
     {
         public readonly string Message;
         public readonly int Player;
-        public readonly int LocationId;
+        public readonly long LocationId;
         public readonly bool Important;
 
-        public CreatureHintData(string message, int player, int locationId, bool important)
+        public CreatureHintData(string message, int player, long locationId, bool important)
         {
             Message = message;
             Player = player;

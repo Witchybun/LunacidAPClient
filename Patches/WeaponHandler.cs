@@ -211,28 +211,30 @@ namespace LunacidAP.Patches
         
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
-        private static void ItemLoad_FixStatsInMenu(Menus __instance)
+        private static void ItemLoad_FixStatsInMenu(Menus __instance, ref int ___EQ_SEL)
         {
-            var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-            int EQ_SEL = (int)eqSelField.GetValue(__instance);
-            int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
+            int.TryParse(EventSystem.current.currentSelectedGameObject.name.Substring(3), out var result);
+            if (result != -1)
+            {
+                ___EQ_SEL = result;
+            }
             switch (__instance.sub_menu)
             {
                 case 4:
                     {
-                        if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.WEPS[num]))
+                        if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.WEPS[result]))
                         {
                             break;
                         }
 
                         GameObject gameObject2;
-                        if (int.TryParse(__instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(__instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2, 2), out _))
+                        if (int.TryParse(__instance.CON.CURRENT_PL_DATA.WEPS[result].Substring(__instance.CON.CURRENT_PL_DATA.WEPS[result].Length - 2, 2), out _))
                         {
-                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num].Substring(0, __instance.CON.CURRENT_PL_DATA.WEPS[num].Length - 2))) as GameObject;
+                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[result].Substring(0, __instance.CON.CURRENT_PL_DATA.WEPS[result].Length - 2))) as GameObject;
                         }
                         else
                         {
-                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[num])) as GameObject;
+                            gameObject2 = Object.Instantiate(Resources.Load("WEPS/" + __instance.CON.CURRENT_PL_DATA.WEPS[result])) as GameObject;
                         }
 
                         if (gameObject2 != null)
@@ -241,7 +243,16 @@ namespace LunacidAP.Patches
                             var nameWithoutClone = component2.name.Replace("(Clone)", "");
                             var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component2.WEP_ELEMENT];
                             __instance.TXT[9].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
-                            var statData = SaveHandler.CurrentSaveData.RandomizedWeaponData[nameWithoutClone];
+                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                            {
+                                return;
+                            }
+                            if (!SaveHandler.CurrentSaveData.RandomizedWeaponData.TryGetValue(nameWithoutClone,
+                                    out var statData))
+                            {
+                                _log.LogWarning($"Weapon {nameWithoutClone} isn't in the list for randomized weapon data.  Bug?");
+                                return;
+                            }
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                             var trueDamage = GetRealDamageForWeapon(CON, statData.Damage, component2);
                             __instance.TXT[10].text = trueDamage.ToString("F0") + "\n" + 
@@ -256,16 +267,30 @@ namespace LunacidAP.Patches
                     }
                 case 5:
                     {
-                        if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.SPELLS[num]))
+                        if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.SPELLS[result]))
                         {
                             break;
                         }
-                        var gameObject = Object.Instantiate(Resources.Load("MAGIC/" + __instance.CON.CURRENT_PL_DATA.SPELLS[num])) as GameObject;
+                        var gameObject = Object.Instantiate(Resources.Load("MAGIC/" + __instance.CON.CURRENT_PL_DATA.SPELLS[result])) as GameObject;
                         if (gameObject != null)
                         {
                             var component = gameObject.GetComponent<Magic_scr>();
                             var nameWithoutClone = component.name.Replace("(Clone)", "");
-                            var statData = SaveHandler.CurrentSaveData.RandomizedSpellData[nameWithoutClone];
+                            if (nameWithoutClone != "BLOOD STRIKE")
+                            {
+                                var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component.MAG_ELEM];
+                                __instance.TXT[22].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
+                            }
+                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                            {
+                                return;
+                            }
+                            if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(nameWithoutClone,
+                                    out var statData))
+                            {
+                                _log.LogWarning($"Spell {nameWithoutClone} isn't in the list for randomized weapon data.  Bug?");
+                                return;
+                            }
                             var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
                             __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = freeSpells.Contains(nameWithoutClone) ? "0" : statData.Cost.ToString();
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
@@ -274,13 +299,6 @@ namespace LunacidAP.Patches
 
                             var damage = GetRealDamageForSpell(CON, statData.Damage);
                             __instance.TXT[23].transform.GetChild(num6 + 2).GetComponent<TextMeshProUGUI>().text = damage.ToString("F2").Substring(0, damage.ToString("F2").Length - 3);
-
-                            if (nameWithoutClone == "BLOOD STRIKE")
-                            {
-                                break; // To keep the original flavor of this spell which denotes it as blood
-                            }
-                            var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component.MAG_ELEM];
-                            __instance.TXT[22].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
                         }
 
                         Object.Destroy(gameObject);

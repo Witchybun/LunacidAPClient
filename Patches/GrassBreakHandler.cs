@@ -31,7 +31,7 @@ namespace LunacidAP.Patches
             {
                 return true;
             }
-            LocationHandler.Pickups.Remove(archipelagoInfo);
+            LocationHandler.Pickups.RemoveAll(x => Vector3.Distance(x.Position, archipelagoInfo.Position) < 0.5f);
             // Its a grass/pot.  Drop the item on the floor.
             if (__instance.type == 2 && __instance.attack_controlled != -1)
             {
@@ -179,6 +179,7 @@ namespace LunacidAP.Patches
                 }
                 if (item.Collected) continue;
                 GeneralTweaks.SetParticleSystemForObject(gameObject, item);
+                LocationHandler.Pickups.Add(gameObject.GetComponent<ArchipelagoPickup>());
             }
         }
 

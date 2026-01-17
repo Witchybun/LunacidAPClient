@@ -69,6 +69,8 @@ namespace LunacidAP.Patches
 
         public static void AssignPickupsForLoreInScene(string sceneName)
         {
+            if (!ArchipelagoClient.AP.Authenticated) return;
+            if (!ArchipelagoClient.AP.SlotData.Bookworm) return;
             if (Object.FindObjectsOfType(typeof(LoreBlock)) is not LoreBlock[] loreSpots)
             {
                 return;

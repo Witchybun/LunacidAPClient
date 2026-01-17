@@ -34,10 +34,11 @@ namespace LunacidAP.Patches
         {
             public int ExpRate { get; set; } = 100;
             public int WexpRate { get; set; } = 100;
-            public bool IsNormalized { get; set; } = false;
-            public bool PlayCustomMusic { get; set; } = false;
+            public bool IsNormalized { get; set; }
+            public bool PlayCustomMusic { get; set; }
             public Colors ItemColors { get; set; } = Colors.Archipelago;
-            public bool AutoHint { get; set; } = false;
+            public bool AutoHint { get; set; }
+            public bool CompassCheck { get; set; }
 
             public enum Colors
             {
