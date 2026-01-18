@@ -20,7 +20,7 @@ namespace LunacidAP.Patches
         private static ManualLogSource _log;
         private static List<string> freeSpells = new()
         {
-            "SPIRIT WARP", "ROCK BRIDGE", "ICARIAN FLIGHT", "BARRIER", "COFFIN"
+            "SPIRIT WARP", "ROCK BRIDGE", "ICARIAN FLIGHT", "BARRIER", "COFFIN", "GHOST LIGHT", "WIND DASH"
         };
 
         public WeaponHandler(ManualLogSource log)
@@ -104,6 +104,10 @@ namespace LunacidAP.Patches
         {
             if (!string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG1) && __instance.CURRENT_PL_DATA.MAG1 != "EMPTY")
             {
+                if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
+                {
+                    __instance.EQ_MAG1.MAG_COST = 0;
+                }
                 if (!ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
                 {
                     if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
@@ -111,10 +115,10 @@ namespace LunacidAP.Patches
                     }
                     __instance.EQ_MAG1.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null); __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
                     __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime; __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
-                    __instance.EQ_MAG1.MAG_COST = data.Cost;
-                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
+                    
+                    if (!freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
                     {
-                        __instance.EQ_MAG1.MAG_COST = 0;
+                        __instance.EQ_MAG1.MAG_COST = data.Cost;
                     }
                 }
                     
@@ -133,30 +137,33 @@ namespace LunacidAP.Patches
             if (string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG2) ||
                 __instance.CURRENT_PL_DATA.MAG2 == "EMPTY") return;
             {
-                if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
+                if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
                 {
-                    _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
+                    __instance.EQ_MAG2.MAG_COST = 0;
                 }
-                else
+                if (!ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
                 {
-                    __instance.EQ_MAG2.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
-                    __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
-                    __instance.EQ_MAG2.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
-                    __instance.EQ_MAG2.MAG_COST = data.Cost;
-                    if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
-                    {
-                        __instance.EQ_MAG2.MAG_COST = 0;
+                    if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
+                    { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
                     }
-                    if (ArchipelagoClient.AP.SlotData.RandomElements)
+                    __instance.EQ_MAG2.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null); __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG2.MAG_CHARGE_TIME = data.CastTime; __instance.EQ_MAG2.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+                    
+                    if (!freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
                     {
-                        if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
-                        {
-                            __instance.EQ_MAG2.MAG_ELEM = numId;
-                            __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
-                        }
+                        __instance.EQ_MAG2.MAG_COST = data.Cost;
                     }
-                    __instance.EQ_MAG2.SetValues();
                 }
+                    
+                if (ArchipelagoClient.AP.SlotData.RandomElements)
+                {
+                    if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
+                    {
+                        __instance.EQ_MAG2.MAG_ELEM = numId;
+                        __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
+                    }
+                }
+                __instance.EQ_MAG2.SetValues();
             }
         }
         
@@ -271,6 +278,11 @@ namespace LunacidAP.Patches
                         {
                             var component = gameObject.GetComponent<Magic_scr>();
                             var nameWithoutClone = component.name.Replace("(Clone)", "");
+                            var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
+                            if (freeSpells.Contains(nameWithoutClone))
+                            {
+                                __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = "0";
+                            }
                             if (nameWithoutClone != "BLOOD STRIKE")
                             {
                                 var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component.MAG_ELEM];
@@ -286,7 +298,6 @@ namespace LunacidAP.Patches
                                 _log.LogWarning($"Spell {nameWithoutClone} isn't in the list for randomized weapon data.  Bug?");
                                 return;
                             }
-                            var num6 = StaticFuncs.RemoveTMPSUB(__instance.TXT[23].transform.GetChild(0));
                             __instance.TXT[23].transform.GetChild(num6).GetComponent<TextMeshProUGUI>().text = freeSpells.Contains(nameWithoutClone) ? "0" : statData.Cost.ToString();
                             var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                             var castTime = GetRealCastTimeForSpell(CON, statData.CastTime, statData.MinCastTime);
