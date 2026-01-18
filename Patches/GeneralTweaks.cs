@@ -451,16 +451,10 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool OnEnable_FixRealTimer(Real_Timer __instance)
         {
-            if (!__instance.Begin)
-            {
-                if (__instance.ACT is not null)
-                {
-                    __instance.ACT.SetActive(value: true);
-                    return false;
-                }
-            }
-
-            return true;
+            if (__instance.Begin) return true;
+            if (__instance.ACT is null) return true;
+            __instance.ACT.SetActive(value: true);
+            return false;
 
         }
     }
