@@ -446,5 +446,22 @@ namespace LunacidAP.Patches
             var unitVector = shadowVector / shadowVector.magnitude;
             return Math.Sign(unitVector.x)*(float)(180 * Math.Acos(unitVector.y) / Math.PI);
         }
+
+        [HarmonyPatch(typeof(Real_Timer), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_FixRealTimer(Real_Timer __instance)
+        {
+            if (!__instance.Begin)
+            {
+                if (__instance.ACT is not null)
+                {
+                    __instance.ACT.SetActive(value: true);
+                    return false;
+                }
+            }
+
+            return true;
+
+        }
     }
 }
