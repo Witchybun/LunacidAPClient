@@ -47,6 +47,12 @@ Labyrinth of Ash Switch Key: Near start; opens shortcut.
 When an item has a drop table, it contains *N* drops and 1 "Nothing".  This item reduces the "Nothing" weight, 
 meaning its more likely something drops.
 
+## Bestial Mastery
+
+When using Bestial Communion, enemies talk to you in their language which uses a cipher.  This is usually
+a hint about an important item from your game.  Bestial Mastery auto-translates it for you, and if Auto Hint
+is on, also auto hints it.
+
 ## Lucky Bangle
 
 Triples EXP gain.  It's logical for Levelsanity levels above 50.

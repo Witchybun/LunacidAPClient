@@ -197,10 +197,14 @@ namespace LunacidAP.Archipelago
                 }
                 _log.LogInfo("Building some basic data structures.");
                 BuildLocations(SlotData.Seed);
+                _log.LogInfo("Built locations");
                 CommunionHint.DetermineHints(seed);
+                _log.LogInfo("Determined Hints");
                 RandomizeEquipData(seed);
+                _log.LogInfo("Made equip data");
                 _trapHandler = new TrapHandler();
                 CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
+                _log.LogInfo("Ringlink time");
                 if (SlotData.RingLink)
                 {
                     Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
@@ -293,8 +297,10 @@ namespace LunacidAP.Archipelago
                     int locationID = (int)item.LocationId;
                     bool collected = SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID);
                     _locationTable[locationID] = new ArchipelagoItem(item, collected);
-                    if (!ArchipelagoGames.GameData.ContainsKey(item.ItemGame))
+                    var newlyAdded = new List<string>();
+                    if (!ArchipelagoGames.GameData.ContainsKey(item.ItemGame) && !newlyAdded.Contains(item.ItemGame))
                     {
+                        newlyAdded.Add(item.ItemGame);
                         ArchipelagoGames.ConstructNewGameData(item.ItemGame);
                     }
                 }
@@ -835,17 +841,15 @@ namespace LunacidAP.Archipelago
         
         public void RandomizeEquipData(int seed)
         {
+            if (SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+            {
+                return;
+            }
             var random = new System.Random(seed);
             var startingWeaponIsSpell = LunacidItems.Spells.Contains(SlotData.StartingWeapon);
             if (SaveHandler.CurrentSaveData.RandomizedWeaponData.Count > 0 && SaveHandler.CurrentSaveData.RandomizedSpellData.Count > 0) return;
             switch (SlotData.RandomEquipStats)
             {
-                case RandomEquip.Off:
-                {
-                    SaveHandler.CurrentSaveData.RandomizedWeaponData = LunacidEquipStats.UsableWeaponData;
-                    SaveHandler.CurrentSaveData.RandomizedSpellData = LunacidEquipStats.UsableMagicData;
-                    break;
-                }
                 case RandomEquip.Shuffled:
                 {
                     var copiedWeaponData = LunacidEquipStats.UsableWeaponData;

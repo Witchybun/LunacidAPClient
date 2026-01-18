@@ -49,7 +49,6 @@ namespace LunacidAP.Patches
                     }
                 }
             }
-
             if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
             {
                 if (!SaveHandler.CurrentSaveData.RandomizedWeaponData.TryGetValue(weaponName, out var data))
@@ -105,33 +104,30 @@ namespace LunacidAP.Patches
         {
             if (!string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG1) && __instance.CURRENT_PL_DATA.MAG1 != "EMPTY")
             {
-                if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
+                if (!ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
                 {
-                    _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
-                }
-                else
-                {
-                    __instance.EQ_MAG1.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
-                    __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
-                    __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime;
-                    __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+                    if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
+                    { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
+                    }
+                    __instance.EQ_MAG1.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null); __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime; __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
                     __instance.EQ_MAG1.MAG_COST = data.Cost;
                     if (freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
                     {
                         __instance.EQ_MAG1.MAG_COST = 0;
                     }
-                    if (ArchipelagoClient.AP.SlotData.RandomElements)
-                    {
-                        if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
-                        {
-                            __instance.EQ_MAG1.MAG_ELEM = numId;
-                            __instance.EQ_MAG1.MAG_COLOR = LunacidEquipStats.SpellColors[element];
-                        }
-
-                        
-                    }
-                    __instance.EQ_MAG1.SetValues();
                 }
+                    
+                if (ArchipelagoClient.AP.SlotData.RandomElements)
+                {
+                    if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
+                    {
+                        __instance.EQ_MAG1.MAG_ELEM = numId;
+                        __instance.EQ_MAG1.MAG_COLOR = LunacidEquipStats.SpellColors[element];
+                    }
+                }
+                __instance.EQ_MAG1.SetValues();
+                
             }
 
             if (string.IsNullOrEmpty(__instance.CURRENT_PL_DATA.MAG2) ||
@@ -159,7 +155,6 @@ namespace LunacidAP.Patches
                             __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
                         }
                     }
-
                     __instance.EQ_MAG2.SetValues();
                 }
             }

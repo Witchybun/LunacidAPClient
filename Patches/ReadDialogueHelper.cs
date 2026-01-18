@@ -71,14 +71,22 @@ namespace LunacidAP.Patches
         {
             if (!ArchipelagoClient.AP.Authenticated) return;
             if (!ArchipelagoClient.AP.SlotData.Bookworm) return;
-            if (Object.FindObjectsOfType(typeof(LoreBlock)) is not LoreBlock[] loreSpots)
+            if (Object.FindObjectsOfType(typeof(LoreBlock), true) is not LoreBlock[] loreSpots)
             {
+                _log.LogWarning("Current scene has no LoreBlock objects.  Error?");
                 return;
             }
             if (!LunacidLocations.LoreLocations.TryGetValue(sceneName, out var locations))
             {
+                _log.LogWarning($"Scene {sceneName} has no books documented.  Error?");
                 return;
             }
+
+            if (sceneName == "SEWER_A1")   // ???
+            {
+                
+            }
+            
             foreach (var lore in loreSpots)
             {
                 var position = lore.transform.position;
@@ -97,8 +105,10 @@ namespace LunacidAP.Patches
                 }
                 if (shortestDistance > 2f)
                 {
+                    _log.LogWarning($"We went through every documented spot.  {lore.transform.parent.name} isn't in there.");
                     continue;
                 }
+                _log.LogInfo($"Found {lore.transform.parent.name} at {position}");
                 var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationOfShortestDistance.APLocationID];
                 lore.gameObject.AddComponent<ArchipelagoPickup>();
                 lore.gameObject.GetComponent<ArchipelagoPickup>().LocationData = locationOfShortestDistance;
