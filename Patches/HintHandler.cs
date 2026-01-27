@@ -206,6 +206,7 @@ namespace LunacidAP.Patches
                     var locationName = location[0];
                     var message = string.Format(CreatureToHint[chosenCreature], locationName, item.Key);
                     CreatureHints[chosenCreature] = new CreatureHintData(message, int.Parse(location[1]), long.Parse(location[2]), true);
+                    
                 }
             }
             if (unusedCreatures.Any())
@@ -240,13 +241,17 @@ namespace LunacidAP.Patches
         [HarmonyPostfix]
         private static void LOAD_MakeGarratHintForYou(CutScene_Dialog __instance)
         {
-            if (__instance.npc_name == "GARRAT THE HOUND")
+            if (__instance.npc_name != "GARRAT THE HOUND") return;
+            __instance.talk_speed *= 1.5f; // Make sure all of it actually gets said.
+            var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
+            var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"][0];
+            __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
+                $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
+            var player = int.Parse(bladeLocation[1]);
+            var location = long.Parse(bladeLocation[2]);
+            if (SaveHandler.MainRandoSettings.AutoHint)
             {
-                __instance.talk_speed *= 1.5f; // Make sure all of it actually gets said.
-                var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
-                var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"];
-                __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
-                    $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
+                ArchipelagoClient.AP.Session.Hints.CreateHints(player, HintStatus.Unspecified, location);
             }
         }
     }

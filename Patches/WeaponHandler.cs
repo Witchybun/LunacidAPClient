@@ -38,6 +38,8 @@ namespace LunacidAP.Patches
             {
                 return;
             }
+            var additionalExp = SaveHandler.MainRandoSettings.WexpRate/100f;
+            __instance.EQ_WEP.WEP_GROWTH *= additionalExp*2;  //Let's lie a bit.
             var weaponName = StaticFuncs.REMOVE_NUMS(__instance.EQ_WEP.name.Replace("(Clone)", ""));
             if (ArchipelagoClient.AP.SlotData.RandomElements)
             {
@@ -108,13 +110,15 @@ namespace LunacidAP.Patches
                 {
                     __instance.EQ_MAG1.MAG_COST = 0;
                 }
-                if (!ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
                 {
                     if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
                     { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
                     }
-                    __instance.EQ_MAG1.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null); __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
-                    __instance.EQ_MAG1.MAG_CHARGE_TIME = data.CastTime; __instance.EQ_MAG1.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+
+                    __instance.EQ_MAG1.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
+                    __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG1.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
                     
                     if (!freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG1))
                     {
@@ -127,7 +131,15 @@ namespace LunacidAP.Patches
                     if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                     {
                         __instance.EQ_MAG1.MAG_ELEM = numId;
-                        __instance.EQ_MAG1.MAG_COLOR = LunacidEquipStats.SpellColors[element];
+                        if (LunacidEquipStats.SpellColors.TryGetValue(element, out var color))
+                        {
+                            __instance.EQ_MAG1.MAG_COLOR = color;
+                        }
+                        else
+                        {
+                            _log.LogWarning($"Spell {__instance.CURRENT_PL_DATA.MAG1}'s element isn't in the spell color list for whatever reason.");
+                        }
+                        
                     }
                 }
                 __instance.EQ_MAG1.SetValues();
@@ -141,13 +153,14 @@ namespace LunacidAP.Patches
                 {
                     __instance.EQ_MAG2.MAG_COST = 0;
                 }
-                if (!ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
                 {
                     if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
                     { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
                     }
-                    __instance.EQ_MAG2.MAG_DAMAGE = StaticFuncs.calcStat(6, __instance.CURRENT_PL_DATA.PLAYER_INT, null); __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
-                    __instance.EQ_MAG2.MAG_CHARGE_TIME = data.CastTime; __instance.EQ_MAG2.MAG_CHARGE_TIME -= StaticFuncs.calcStat(7, __instance.CURRENT_PL_DATA.PLAYER_INT, null);
+                    __instance.EQ_MAG2.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
+                    __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
+                    __instance.EQ_MAG2.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
                     
                     if (!freeSpells.Contains(__instance.CURRENT_PL_DATA.MAG2))
                     {
@@ -160,7 +173,14 @@ namespace LunacidAP.Patches
                     if (SaveHandler.CurrentSaveData.Elements.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var element) && LunacidItems.ElementToID.TryGetValue(element, out var numId))
                     {
                         __instance.EQ_MAG2.MAG_ELEM = numId;
-                        __instance.EQ_MAG2.MAG_COLOR = LunacidEquipStats.SpellColors[element];
+                        if (LunacidEquipStats.SpellColors.TryGetValue(element, out var color))
+                        {
+                            __instance.EQ_MAG2.MAG_COLOR = color;
+                        }
+                        else
+                        {
+                            _log.LogWarning($"Spell {__instance.CURRENT_PL_DATA.MAG2}'s element isn't in the spell color list for whatever reason.");
+                        }
                     }
                 }
                 __instance.EQ_MAG2.SetValues();
@@ -191,6 +211,57 @@ namespace LunacidAP.Patches
                 _log.LogWarning($"Could not change element for {castName}");
             }
 
+        }
+
+        [HarmonyPatch(typeof(SpecialSpell), "Hurt")]
+        [HarmonyPrefix]
+        private static bool Hurt_ChangeDamageForCalor(SpecialSpell __instance, Collider obj, ref bool ___hurting)
+        {
+            ___hurting = true;
+            if (__instance.Child_Effect)
+            {
+                __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+            }
+            if (__instance.type == 0)
+            {
+                var elementId = 1;
+                if (ArchipelagoClient.AP.SlotData.RandomElements)
+                {
+                    var element = SaveHandler.CurrentSaveData.Elements["IGNIS CALOR"];
+                    elementId = LunacidItems.ElementToID[element];
+                }
+                float num = obj.GetComponent<OBJ_HEALTH>().Damage_Mult[elementId];
+                if (num < 1.5f)
+                {
+                    num += 0.1f;
+                }
+                obj.GetComponent<OBJ_HEALTH>().Damage_Mult[elementId] = 1f;
+                if (elementId == 1) obj.GetComponent<OBJ_HEALTH>().temperature += __instance.power;
+                if (elementId == 3)
+                {
+                    var poisonValue = obj.GetComponent<OBJ_HEALTH>().GetType().GetField("poi", BindingFlags.Instance | BindingFlags.NonPublic)
+                        ?.GetValue(obj.GetComponent<OBJ_HEALTH>()) is float ? (float)obj.GetComponent<OBJ_HEALTH>().GetType().GetField("poi", BindingFlags.Instance | BindingFlags.NonPublic)
+                        ?.GetValue(obj.GetComponent<OBJ_HEALTH>())! : 0;
+                    var newPoison = poisonValue + __instance.power;
+                    obj.GetComponent<OBJ_HEALTH>().GetType().GetField("poi", BindingFlags.Instance | BindingFlags.NonPublic)
+                        ?.SetValue(obj.GetComponent<OBJ_HEALTH>(), newPoison);
+                }
+                var damage = 2f;
+                if (ArchipelagoClient.AP.SlotData.RandomEquipStats != RandomEquip.Off)
+                {
+                    var con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                    if (con is null)
+                    {
+                        _log.LogInfo("CON is null");
+                    }
+                    var data = SaveHandler.CurrentSaveData.RandomizedSpellData["IGNIS CALOR"];
+                    damage = GetRealDamageForSpell(con, data.Damage);
+                }
+                obj.GetComponent<OBJ_HEALTH>().Hurt(new Vector2(damage, elementId));
+                obj.GetComponent<OBJ_HEALTH>().Damage_Mult[elementId] = num;
+            }
+
+            return false;
         }
 
         private static float GetRealDamageForSpell(CONTROL control, float damage)
@@ -245,7 +316,7 @@ namespace LunacidAP.Patches
                             var nameWithoutClone = component2.name.Replace("(Clone)", "");
                             var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component2.WEP_ELEMENT];
                             __instance.TXT[9].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
-                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats == RandomEquip.Off)
                             {
                                 return;
                             }
@@ -288,7 +359,7 @@ namespace LunacidAP.Patches
                                 var elementSprite = IsElementShuffled(nameWithoutClone, out var element) ? __instance.ELEM[element] : __instance.ELEM[component.MAG_ELEM];
                                 __instance.TXT[22].transform.GetChild(0).GetComponent<Image>().sprite = elementSprite;
                             }
-                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+                            if (ArchipelagoClient.AP.SlotData.RandomEquipStats == RandomEquip.Off)
                             {
                                 return;
                             }

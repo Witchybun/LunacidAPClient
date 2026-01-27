@@ -223,8 +223,8 @@ namespace LunacidAP.Archipelago
                 StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
                 StartCoroutine(HandleQueuedItems());
                 StartCoroutine(giftHelper.HandleIncomingGifts());
-                Authenticated = true;
                 _log.LogInfo("Connected!");
+                Authenticated = true;
             }
             else
             {
@@ -841,7 +841,7 @@ namespace LunacidAP.Archipelago
         
         public void RandomizeEquipData(int seed)
         {
-            if (SlotData.RandomEquipStats.HasFlag(RandomEquip.Off))
+            if (SlotData.RandomEquipStats == RandomEquip.Off)
             {
                 return;
             }
@@ -852,36 +852,46 @@ namespace LunacidAP.Archipelago
             {
                 case RandomEquip.Shuffled:
                 {
-                    var copiedWeaponData = LunacidEquipStats.UsableWeaponData;
-                    var copiedMagicData = LunacidEquipStats.UsableAttackMagicData;
-                    var copiedSupportMagicData = LunacidEquipStats.UsableSupportMagicData;
+                    var copiedWeaponValues = LunacidEquipStats.UsableWeaponData.Values.OrderBy(x => random.Next()).ToList();
+                    var copiedMagicValues = LunacidEquipStats.UsableAttackMagicData.Values.OrderBy(x => random.Next()).ToList();
+                    var copiedSupportMagicValues = LunacidEquipStats.UsableSupportMagicData.Values.OrderBy(x => random.Next()).ToList();
+                    _log.LogInfo("Started weapons.");
+                    var count = 0;
                     foreach (var weapon in LunacidEquipStats.UsableWeaponData.Keys)
                     {
-                        var chosenKey = copiedWeaponData.Keys.ToList()[random.Next(copiedWeaponData.Count)];
-                        var chosenWeapon = copiedWeaponData[chosenKey];
-                        copiedWeaponData.Remove(chosenKey);
+                        var chosenWeapon = copiedWeaponValues[count];
                         SaveHandler.CurrentSaveData.RandomizedWeaponData[weapon] = chosenWeapon;
+                        count += 1;
                     }
-                    foreach (var spell in LunacidEquipStats.UsableMagicData.Keys)
+
+                    count = 0;
+                    _log.LogInfo("Started spells.");
+                    foreach (var spell in LunacidEquipStats.UsableAttackMagicData.Keys)
                     {
-                        var chosenKey = copiedMagicData.Keys.ToList()[random.Next(copiedMagicData.Count)];
-                        var chosenMagic = copiedMagicData[chosenKey];
-                        copiedMagicData.Remove(chosenKey);
+                        _log.LogInfo($"Handling {spell}.  We're at {count} vs the max of {copiedMagicValues.Count}");
+                        var chosenMagic = copiedMagicValues[count];
+                        _log.LogInfo("Found counterpart.");
                         if (startingWeaponIsSpell)
                         {
-                            if (spell == SlotData.StartingWeapon)
+                            var cappedName = SlotData.StartingWeapon.ToUpper();
+                            if (spell == cappedName)
                             {
+                                _log.LogInfo("Dropping spell's cast cost possibly.");
                                 chosenMagic.Cost = Math.Min(10, chosenMagic.Cost);
                             }
                         }
+                        _log.LogInfo("Adding to the list.");
                         SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = chosenMagic;
+                        count += 1;
                     }
+
+                    count = 0;
+                    _log.LogInfo("Started support spells.");
                     foreach (var spell in LunacidEquipStats.UsableSupportMagicData.Keys)
                     {
-                        var chosenKey = copiedSupportMagicData.Keys.ToList()[random.Next(copiedSupportMagicData.Count)];
-                        var chosenSupportMagic = copiedSupportMagicData[chosenKey];
-                        copiedSupportMagicData.Remove(chosenKey);
+                        var chosenSupportMagic = copiedSupportMagicValues[count];
                         SaveHandler.CurrentSaveData.RandomizedSpellData[spell] = chosenSupportMagic;
+                        count += 1;
                     }
                     break;
                 }
@@ -917,7 +927,8 @@ namespace LunacidAP.Archipelago
                             random.Next(magicCount)].Cost;
                         if (startingWeaponIsSpell)
                         {
-                            if (spell == SlotData.StartingWeapon)
+                            var cappedName = SlotData.StartingWeapon.ToUpper();
+                            if (spell == cappedName)
                             {
                                 cost = Math.Min(10, cost);
                             }

@@ -50,6 +50,11 @@ namespace LunacidAP.Patches
                 __instance.CON.CURRENT_PL_DATA.ZONE_2 = WarpDestinations.StartingAreaDataToStartingSubstring[startingArea];
                 zONE_ = WarpDestinations.StartingAreaDataToStartingSubstring[startingArea];
                 ItemHandler.GiveLunacidItem("Spirit Warp", ItemFlags.Advancement, "The Crystal", false);
+                if (!SaveHandler.CurrentSaveData.TraversedEntrances.ContainsKey("Move to Starting Area"))
+                {
+                    SaveHandler.CurrentSaveData.TraversedEntrances.Add("Move to Starting Area", "Found");
+                }
+                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
             }
             __instance.MAP_IMG[0].color = new Color(0.5f, 0.5f, 0.5f, 1);
             __instance.STATIC_IMG[0].color = new Color(0.5608f, 0.6f, 0.698f, 0.8f);

@@ -125,13 +125,26 @@ namespace LunacidAP
                     break;
                 }
                 case "DETHLAND":
+                {
                     var wheelOfTheWorst = UnityEngine.Random.RandomRangeInt(0, 100);
                     if (wheelOfTheWorst != 0) GameObject.Find("LEVEL/GRIM").SetActive(false);
                     break;
+                }
+                case "HUB_01":
+                {
+                    if (ArchipelagoClient.AP.IsLocationChecked(3)) break;
+                    var clive = GameObject.Find("Clive");
+                    if (clive is null) break;
+                    clive.transform.GetChild(4).gameObject.SetActive(true);
+                    clive.transform.GetChild(5).gameObject.SetActive(false);
+                    clive.transform.GetChild(6).gameObject.SetActive(false);
+                    break;
+                }
             }
 
             if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
             {
+                GeneralTweaks.NoBlade = false;
                 ArchipelagoClient.AP.Disconnect();
             }
             if (ArchipelagoClient.IsInGame)
@@ -322,17 +335,25 @@ namespace LunacidAP
             }
             if (_currentSceneName == "")
             {
-                _currentSceneName = SceneManager.GetActiveScene().name;
+                try
+                {
+                    _currentSceneName = SceneManager.GetActiveScene().name;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                
             }
             if (_currentSceneName != "HUB_01")
             {
                 return;
             }
-            if (_hubLevel is null)
+            _hubLevel ??= GameObject.Find("LEVEL");
+            if (_hubLevel is not null)
             {
-                _hubLevel = GameObject.Find("LEVEL");
+                GeneralTweaks.EnsureAftermathAfterKill(_hubLevel.transform);
             }
-            GeneralTweaks.EnsureAftermathAfterKill(_hubLevel.transform);
         }
     }
 }

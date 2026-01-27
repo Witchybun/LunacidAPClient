@@ -55,22 +55,6 @@ namespace LunacidAP.Patches
             return false;
         }
 
-        [HarmonyPatch(typeof(CONTROL), "OnSwap")]
-        [HarmonyPostfix]
-        private static void OnSwap_ModifyWeaponGrowth(CONTROL __instance)
-        {
-            if (__instance.EQ_WEP is null)
-            {
-                return;
-            }
-            if (__instance.EQ_WEP.WEP_XP > 99f)
-            {
-                __instance.EQ_WEP.WEP_XP = 99f;
-            }
-            var additionalExp = SaveHandler.MainRandoSettings.WexpRate/100f;
-            __instance.EQ_WEP.WEP_GROWTH *= additionalExp;
-        }
-
         private static void StoreXP(int LEVELED_XP, bool ST, float PLAYER_L, float MOON_MULT)
         {
             if (ST)

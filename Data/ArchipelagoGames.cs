@@ -12,9 +12,9 @@ namespace LunacidAP.Data
     {
         public class APGameData
         {
-            public string Game;
+            public readonly string Game;
 
-            public string Blurb;
+            public readonly string Blurb;
 
             public Dictionary<string, string> Items;
 
@@ -26,7 +26,10 @@ namespace LunacidAP.Data
             }
         }
 
-        public static readonly Dictionary<string, APGameData> GameData = new();
+        public static readonly Dictionary<string, APGameData> GameData = new()
+        {
+            {"Generic", new APGameData("Generic", "A mysterious item from another time and place.", new())}
+        };
 
         public static void ConstructData()
         {

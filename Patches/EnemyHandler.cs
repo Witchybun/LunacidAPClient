@@ -44,7 +44,7 @@ namespace LunacidAP.Patches
                 return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.
                 // Also tower has no drops, so why run this.
             }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off)
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off || __instance.name == "SANGUIS UMBRA")
             {
                 return true;
             }
@@ -549,6 +549,10 @@ namespace LunacidAP.Patches
                             }
                             text3 += $"{locationName}: <color={color}>{archipelagoItem.Name}</color>\n";
                         }
+                    }
+                    else
+                    {
+                        _log.LogWarning($"Enemy {__instance.NPC_NAME} is not in the list of enemies.");
                     }
                 }
                 ___PAPPY.POP(text3, 1f, 12);

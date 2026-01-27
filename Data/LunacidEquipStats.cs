@@ -84,7 +84,7 @@ public static class LunacidEquipStats
 
     private static void GatherSpellColors()
     {
-        var earthStrike = Resources.Load<GameObject>("MAGIC/EARTH STRIKE");
+        var earthStrike = Resources.Load<GameObject>("MAGIC/WIND SLICER");
         SpellColors["Normal"] = earthStrike.GetComponent<Magic_scr>().MAG_COLOR;
         var flameSpear = Resources.Load<GameObject>("MAGIC/FLAME SPEAR");
         SpellColors["Fire"] = flameSpear.GetComponent<Magic_scr>().MAG_COLOR;
@@ -94,7 +94,9 @@ public static class LunacidEquipStats
         SpellColors["Light"] = lightning.GetComponent<Magic_scr>().MAG_COLOR;
         var darkSkull =  Resources.Load<GameObject>("MAGIC/DARK SKULL");
         SpellColors["Dark"] = darkSkull.GetComponent<Magic_scr>().MAG_COLOR;
-        
+        var slimeOrb = Resources.Load<GameObject>("MAGIC/SLIME ORB");
+        SpellColors["Poison"] = slimeOrb.GetComponent<Magic_scr>().MAG_COLOR;
+
     }
     
     public class EquipAlternatives

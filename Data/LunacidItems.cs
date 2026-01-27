@@ -160,7 +160,8 @@ namespace LunacidAP.Data
             {"LUCID_CAST", "LUCID BLADE"},
             {"FANG_CAST", "SERPENT FANG"},
             {"LIGHTBLADE_CAST", "SHINING BLADE"},
-            {"PUMP_CAST", "PUMPKIN POP"}
+            {"PUMP_CAST", "PUMPKIN POP"},
+            {"GameObject", "IGNIS CALOR"}
 
         };
 

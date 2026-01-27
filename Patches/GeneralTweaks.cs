@@ -17,12 +17,15 @@ using UnityEngineInternal.Input;
 
 namespace LunacidAP.Patches
 {
+    
     public class GeneralTweaks
     {
         // Should be for any fixes or changes to code that aren't necessarily AP oriented but change something.
         private static ManualLogSource _log;
         private static long LucidID = 319;
         private static string[] _kept { get; set; }
+
+        public static bool NoBlade = false;
         
         public static GameObject _glowObject;
         const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -171,11 +174,24 @@ namespace LunacidAP.Patches
             __instance.CON.OpenMenu();
             __instance.CON.EQITEMS();
             __instance.CON.EQMagic();
+            NoBlade = cantFight;
             ___ANIM = __instance.transform.GetChild(0).GetComponent<Animation>();
             
             if (!cantFight) __instance.StartCoroutine("Regen");
             ___ROUT = __instance.StartCoroutine("GO");
             return false;
+        }
+
+        [HarmonyPatch(typeof(CONTROL), "OnINV")]
+        [HarmonyPrefix]
+        private static bool OnInv_DenyPlayerInventoryIfNoLucidBlade()
+        {
+            if (NoBlade)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         [HarmonyPatch(typeof(Item_Pickup_scr), "Pickup")]
@@ -218,6 +234,7 @@ namespace LunacidAP.Patches
             _kept = ___KEEP;
             __instance.CON.CURRENT_PL_DATA.WEP1 = _kept[0];
             __instance.CON.CURRENT_PL_DATA.WEP2 = _kept[1];
+            NoBlade = false;
             try
             {
                 __instance.CON.CURRENT_PL_DATA.ITEM1 = _kept[2];

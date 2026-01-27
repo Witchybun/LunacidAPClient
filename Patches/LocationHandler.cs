@@ -130,7 +130,7 @@ namespace LunacidAP.Patches
                 }
             }
             SendLocationCoveringPatchouliCase(location);
-            Pickups.Remove(pickup);
+            Pickups.RemoveAll(x => pickup.name == x.name);
             __instance.gameObject.transform.Find("MW Item Glow").gameObject.SetActive(false);
             return false;
         }

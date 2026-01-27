@@ -105,10 +105,8 @@ namespace LunacidAP.Patches
                 }
                 if (shortestDistance > 2f)
                 {
-                    _log.LogWarning($"We went through every documented spot.  {lore.transform.parent.name} isn't in there.");
                     continue;
                 }
-                _log.LogInfo($"Found {lore.transform.parent.name} at {position}");
                 var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationOfShortestDistance.APLocationID];
                 lore.gameObject.AddComponent<ArchipelagoPickup>();
                 lore.gameObject.GetComponent<ArchipelagoPickup>().LocationData = locationOfShortestDistance;

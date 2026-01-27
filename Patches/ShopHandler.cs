@@ -360,7 +360,7 @@ namespace LunacidAP.Patches
 
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
-        private static void ItemLoad_ChangeDisplayNameToApItem_Postfix(Menus __instance)
+        private static void ItemLoad_ChangeDisplayNameToApItem_Postfix(Menus __instance, ref int ___EQ_SEL)
         {
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
@@ -369,9 +369,7 @@ namespace LunacidAP.Patches
             if (__instance.sub_menu == 14)
             {
                 var sceneName = __instance.gameObject.scene.name;
-                var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-                int EQ_SEL = (int)eqSelField.GetValue(__instance);
-                var objectName = __instance.SHOP.INV[EQ_SEL].OBJ.name;
+                var objectName = __instance.SHOP.INV[___EQ_SEL].OBJ.name;
                 if (ShopLocations.All(x => x.GameObjectName != objectName))
                 {
                     return;
@@ -400,14 +398,7 @@ namespace LunacidAP.Patches
                 var gameNameLength = gameName.Length;
                 gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
                 var blurb = "";
-                if (!ArchipelagoGames.GameData.TryGetValue(gameName, out var gameData))
-                {
-                    blurb = ArchipelagoGames.GameData["Generic"].Blurb;
-                }
-                else
-                {
-                    blurb = gameData.Blurb;
-                }
+                blurb = !ArchipelagoGames.GameData.TryGetValue(gameName, out var gameData) ? ArchipelagoGames.GameData["Generic"].Blurb : gameData.Blurb;
                 var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\n{blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
                 __instance.TXT[56].text = itemName.ToUpper();
                 __instance.TXT[50].text = totalBlurb;
