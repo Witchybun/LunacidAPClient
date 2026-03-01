@@ -60,9 +60,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(0, 10.0f);
-            TrapCounts["Bleed Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(0, 10.0f);
+                TrapCounts["Bleed Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Bleed Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }
@@ -94,9 +105,19 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(1, 10.0f);
-            TrapCounts["Poison Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(1, 10.0f);
+                TrapCounts["Poison Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Poison Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
             yield return new WaitForSeconds(5f);
         }
     }
@@ -128,9 +149,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(2, 10.0f);
-            TrapCounts["Curse Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(2, 10.0f);
+                TrapCounts["Curse Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Curse Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }
@@ -162,9 +194,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(4, 10.0f);
-            TrapCounts["Slowness Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(4, 10.0f);
+                TrapCounts["Slowness Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Slowness Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }
@@ -197,9 +240,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(5, 10.0f);
-            TrapCounts["Blindness Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(5, 10.0f);
+                TrapCounts["Blindness Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Blindness Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }
@@ -231,9 +285,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(6, 10.0f);
-            TrapCounts["Mana Drain Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(6, 10.0f);
+                TrapCounts["Mana Drain Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give Mana Drain Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }
@@ -265,9 +330,20 @@ public class TrapHandler
                 con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 yield return new WaitForSeconds(1f);
             }
-            con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-            con.PL.Poison.Harm(7, 10.0f);
-            TrapCounts["XP Drain Trap"] -= 1;
+
+            try
+            {
+                con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                con.PL.Poison.Harm(7, 10.0f);
+                TrapCounts["XP Drain Trap"] -= 1;
+            }
+            catch (Exception e)
+            {
+                Plugin.LOG.LogError("Could not give XP Drain Trap");
+                Plugin.LOG.LogError(e.ToString());
+                throw;
+            }
+            
             yield return new WaitForSeconds(5f);
         }
     }

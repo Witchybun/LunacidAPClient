@@ -390,9 +390,8 @@ namespace LunacidAP.Patches
                 ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location.APLocationID);
                 if (location.APLocationName == "YF: Patchouli's Reward")
                 {
-                    var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
-                    ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(patchouliCanopy);  // Ensures its done.
-                    SaveHandler.CurrentSaveData.CompletedLocations.Add(patchouliCanopy);
+                    ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(102);  // Ensures its done.
+                    SaveHandler.CurrentSaveData.CompletedLocations.Add(102);
                 }
                 SaveHandler.CurrentSaveData.CompletedLocations.Add(location.APLocationID);
                 SaveHandler.CurrentSaveData.ScoutedLocations[location.APLocationID].Collected = true;
@@ -402,8 +401,7 @@ namespace LunacidAP.Patches
             {
                 if (location.APLocationName == "YF: Patchouli's Reward")
                 {
-                    var patchouliCanopy = ArchipelagoClient.AP.GetLocationIDFromName("YF: Patchouli's Canopy Offer");
-                    SaveHandler.CurrentSaveData.CompletedLocations.Add(patchouliCanopy);
+                    SaveHandler.CurrentSaveData.CompletedLocations.Add(102);
                 }
                 SaveHandler.CurrentSaveData.CompletedLocations.Add(location.APLocationID);
                 SaveHandler.CurrentSaveData.ScoutedLocations[location.APLocationID].Collected = true;
@@ -452,16 +450,16 @@ namespace LunacidAP.Patches
             {
                 return true;
             }
-            var locationName = "";
-            if (__instance.ACT.name == "KILL_HEALTH")
+
+            var locationName = __instance.ACT.name switch
             {
-                locationName = string.Format("TA: Floor {0} Item 1", _currentFloor);
-            }
-            else if (__instance.ACT.name == "KILL_SHARD")
-            {
-                locationName = string.Format("TA: Floor {0} Item 2", _currentFloor);
-            }
-            if (ArchipelagoClient.AP.IsLocationChecked(locationName) && __instance.ACT is not null)
+                "KILL_HEALTH" => string.Format("TA: Floor {0} Item 1", _currentFloor),
+                "KILL_SHARD" => string.Format("TA: Floor {0} Item 2", _currentFloor),
+                _ => ""
+            };
+
+            var locationID = TowerLocationNameToID[locationName];
+            if (ArchipelagoClient.AP.IsLocationChecked(locationID) && __instance.ACT is not null)
             {
                 __instance.ACT.SetActive(true);
             }

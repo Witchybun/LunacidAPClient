@@ -71,6 +71,7 @@ namespace LunacidAP.Archipelago
         private static readonly Queue<ReceivedItem> ItemsToProcess = new();
         public static readonly Queue<Gift> GiftsToProcess = new();
         public bool allowCoroutines; // Can be set to false in order to cleanly kill the coroutines initialized upon connecting.
+        public bool setAllCouroutines;
 
         public static void Setup(ManualLogSource log)
         {
@@ -212,18 +213,22 @@ namespace LunacidAP.Archipelago
                 }
                 _log.LogInfo("We're starting all coroutines.");
                 allowCoroutines = true;
-                StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
-                StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
-                StartCoroutine(_trapHandler.DropRatsWhenPossible());
-                StartCoroutine(_trapHandler.CursePlayerWhenPossible());
-                StartCoroutine(_trapHandler.BlindPlayerWhenPossible());
-                StartCoroutine(_trapHandler.SlowPlayerWhenPossible());
-                StartCoroutine(_trapHandler.DrainManaOfPlayerWhenPossible());
-                StartCoroutine(_trapHandler.DrainXPOfPlayerWhenPossible());
-                StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
-                StartCoroutine(HandleQueuedItems());
-                StartCoroutine(giftHelper.HandleIncomingGifts());
+                if (!setAllCouroutines)
+                {
+                    StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.DropRatsWhenPossible());
+                    StartCoroutine(_trapHandler.CursePlayerWhenPossible());
+                    StartCoroutine(_trapHandler.BlindPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.SlowPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.DrainManaOfPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.DrainXPOfPlayerWhenPossible());
+                    StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
+                    StartCoroutine(HandleQueuedItems());
+                    StartCoroutine(giftHelper.HandleIncomingGifts());
+                }
                 _log.LogInfo("Connected!");
+                setAllCouroutines = true;
                 Authenticated = true;
             }
             else
@@ -414,6 +419,7 @@ namespace LunacidAP.Archipelago
             allowCoroutines = false;
             Session = null;
             Authenticated = false;
+            setAllCouroutines = false;
         }
 
         private void OnItemReceived(ReceivedItemsHelper helper)
@@ -466,14 +472,23 @@ namespace LunacidAP.Archipelago
                     continue;
                 }
                 _log.LogInfo("Giving item.");
-                var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
-                var isCheated = item.LocationId < 0;
-                var isLevelLocation = item.LocationName.Contains("Reach Level");
-                var isSelfLevelLocation = isLevelLocation && isSelf;
-                ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
+                try
+                {
+                    var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
+                    var isCheated = item.LocationId < 0;
+                    var isLevelLocation = item.LocationName.Contains("Reach Level");
+                    var isSelfLevelLocation = isLevelLocation && isSelf;
+                    ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
+                    SaveHandler.CurrentSaveData.ReceivedItems[item.Identifier] = item;
+                    SaveHandler.CurrentSaveData.Index++;
+                }
+                catch(Exception e)
+                {
+                    _log.LogError("Could not give you an item");
+                    _log.LogError(e.ToString());
+                    
+                }
                 yield return new WaitForSeconds(1f);
-                SaveHandler.CurrentSaveData.ReceivedItems[item.Identifier] = item;
-                SaveHandler.CurrentSaveData.Index++;
             }
         }
 
@@ -772,22 +787,12 @@ namespace LunacidAP.Archipelago
             return SaveHandler.CurrentSaveData.CompletedLocations.Contains(location);
         }
 
-        public bool IsLocationChecked(string location)
-        {
-            var locationID = GetLocationIDFromName(location);
-            return SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID);
-        }
-
         public bool IsLocationChecked(LocationData location)
         {
             return SaveHandler.CurrentSaveData.CompletedLocations.Contains(location.APLocationID);
         }
 
-        public long GetLocationIDFromName(string locationName)
-        {
-            return Session.Locations.GetLocationIdFromName(Game, locationName);
-        }
-
+        // Get rid of this somehow.
         public string GetLocationNameFromID(long location)
         {
             return Session.Locations.GetLocationNameFromId(location, "Lunacid");
@@ -795,7 +800,15 @@ namespace LunacidAP.Archipelago
 
         public string GetPlayerNameFromSlot(int slot)
         {
-            return Session.Players.GetPlayerName(slot);
+            try
+            {
+                return Session.Players.GetPlayerName(slot);
+            }
+            catch (Exception e)
+            {
+                _log.LogError("Could not get player name; returning generic.");
+                return "Unknown";
+            }
         }
 
         public bool WasItemReceived(string itemName)

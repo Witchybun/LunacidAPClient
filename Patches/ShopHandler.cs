@@ -28,7 +28,7 @@ namespace LunacidAP.Patches
 
         public static void EnsureEnchantedKey()
         {
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked("Buy Enchanted Key"))
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked(354))
             {
                 return;
             }

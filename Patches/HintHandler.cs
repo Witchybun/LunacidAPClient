@@ -187,6 +187,7 @@ namespace LunacidAP.Patches
             }
             CreatureHints = new() { };
             var dictionaryToManipulate = ArchipelagoClient.AP.SlotData.ImportantItemLocations;
+            var lucidBladeInfo = dictionaryToManipulate["Lucid Blade"];
             dictionaryToManipulate.Remove("Lucid Blade");
             var random = new System.Random(seed);
             dictionaryToManipulate = dictionaryToManipulate.OrderBy(x => random.Next()).ToDictionary(item => item.Key, item => item.Value);
@@ -214,6 +215,7 @@ namespace LunacidAP.Patches
                 GenerateFillerHints(unusedCreatures, random);
             }
             SaveHandler.CurrentSaveData.CommunionHints = CreatureHints;
+            dictionaryToManipulate["Lucid Blade"] = lucidBladeInfo;
         }
 
 
@@ -245,6 +247,7 @@ namespace LunacidAP.Patches
             __instance.talk_speed *= 1.5f; // Make sure all of it actually gets said.
             var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
             var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"][0];
+            bladeLocation.ForEach(i => _log.LogInfo(i));
             __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
                 $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
             var player = int.Parse(bladeLocation[1]);

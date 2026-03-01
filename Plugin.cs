@@ -111,7 +111,10 @@ namespace LunacidAP
         {
             var sceneName = scene.name;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
-            ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
+            if (ArchipelagoClient.AP is not null)
+            {
+                ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
+            }
             switch (sceneName)
             {
                 case "MainMenu":
@@ -132,7 +135,7 @@ namespace LunacidAP
                 }
                 case "HUB_01":
                 {
-                    if (ArchipelagoClient.AP.IsLocationChecked(3)) break;
+                    if (ArchipelagoClient.AP is not null && ArchipelagoClient.AP.IsLocationChecked(3)) break;
                     var clive = GameObject.Find("Clive");
                     if (clive is null) break;
                     clive.transform.GetChild(4).gameObject.SetActive(true);
@@ -142,7 +145,7 @@ namespace LunacidAP
                 }
             }
 
-            if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP.Session is not null)
+            if (!ArchipelagoClient.IsInGame && ArchipelagoClient.AP is not null && ArchipelagoClient.AP.Session is not null)
             {
                 GeneralTweaks.NoBlade = false;
                 ArchipelagoClient.AP.Disconnect();
@@ -187,7 +190,18 @@ namespace LunacidAP
                 return;
             }
 
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
+            if (ArchipelagoClient.AP is not null)
+            {
+                try
+                {
+                    ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
+                }
+                catch (Exception e)
+                {
+                    Log.LogError("Storing the current scene failed for whatever reason.  Perhaps a connection problem.");
+                    Console.WriteLine(e);
+                }
+            }
 
             if (!SaveHandler.CurrentSaveData.EnteredScenes.Contains(newScene))
             {
@@ -204,7 +218,6 @@ namespace LunacidAP
                 if (item.transform.childCount == 0 && item.GetComponents(typeof(Component)).Length == 1)
                 {
                     Destroy(item);
-
                     count += 1;
                 }
             }

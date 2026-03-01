@@ -161,7 +161,7 @@ namespace LunacidAP.Data
             {"FANG_CAST", "SERPENT FANG"},
             {"LIGHTBLADE_CAST", "SHINING BLADE"},
             {"PUMP_CAST", "PUMPKIN POP"},
-            {"GameObject", "IGNIS CALOR"}
+            {"GameObject", "IGNIS CALOR"},
 
         };
 

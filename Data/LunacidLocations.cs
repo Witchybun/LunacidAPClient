@@ -1586,5 +1586,39 @@ namespace LunacidAP.Data
             "Daedalus' Blackened Treats", "Lobos' Late Treats", "Shery's Delectable Treats", "Demi's Reward for All Soul Candies",
             "Headless Horseman: Cavalry Saber Drop"
         };
+
+        public static readonly Dictionary<string, int> TowerLocationNameToID = new()
+        {
+            { "TA: Floor 5 Chest", 223 },
+            { "TA: Floor 10 Chest", 224 },
+            { "TA: Floor 15 Chest", 225 },
+            { "TA: Floor 20 Chest", 226 },
+            { "TA: Floor 25 Chest", 227 },
+            { "TA: Floor 30 Chest", 228 },
+            { "TA: Floor 35 Chest", 229 },
+            { "TA: Floor 40 Chest", 230 },
+            { "TA: Floor 45 Chest", 231 },
+            { "TA: Floor 50 Chest", 232 },
+            { "TA: Floor 5 Item 1", 233 },
+            { "TA: Floor 5 Item 2", 234 },
+            { "TA: Floor 10 Item 1", 235 },
+            { "TA: Floor 10 Item 2", 236 },
+            { "TA: Floor 15 Item 1", 237 },
+            { "TA: Floor 15 Item 2", 238 },
+            { "TA: Floor 20 Item 1", 239 },
+            { "TA: Floor 20 Item 2", 240 },
+            { "TA: Floor 25 Item 1", 241 },
+            { "TA: Floor 25 Item 2", 242 },
+            { "TA: Floor 30 Item 1", 243 },
+            { "TA: Floor 30 Item 2", 244 },
+            { "TA: Floor 35 Item 1", 245 },
+            { "TA: Floor 35 Item 2", 246 },
+            { "TA: Floor 40 Item 1", 247 },
+            { "TA: Floor 40 Item 2", 248 },
+            { "TA: Floor 45 Item 1", 249 },
+            { "TA: Floor 45 Item 2", 250 },
+            { "TA: Floor 50 Item 1", 251 },
+            { "TA: Floor 50 Item 2", 252 },
+        };
     }
 }

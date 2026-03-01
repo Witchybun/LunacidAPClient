@@ -7,6 +7,7 @@ using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
+using I2.Loc;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using Newtonsoft.Json.Linq;
@@ -212,19 +213,37 @@ namespace LunacidAP.Patches
         }
 
         [HarmonyPatch(typeof(Money_Damage), "OnTriggerEnter")]
-        [HarmonyPostfix]
-        private static void OnTriggerEnter_AlsoMakePeopleLoseMoney(Money_Damage __instance, ref int ___scaled_power)
+        [HarmonyPrefix]
+        private static bool OnTriggerEnter_AlsoMakePeopleLoseMoney(Money_Damage __instance, Collider obj, 
+            ref int ___scaled_power, ref float ___hold_power)
         {
-            if (!ArchipelagoClient.AP.SlotData.RingLink)
+            if (obj.gameObject.layer is > 0 and < 8 || obj.gameObject.layer is > 11 and < 16 || !(obj.GetComponent<Player_Control_scr>() != null))
             {
-                return;
+                return false;
             }
-            if (__instance.REG_DAMAGE.power> 0)
+            if (__instance.CON.CURRENT_PL_DATA.GOLD > 0)
             {
-                return;
+                var amount = Mathf.Max(0, __instance.CON.CURRENT_PL_DATA.GOLD - ___scaled_power);
+                __instance.CON.CURRENT_PL_DATA.GOLD = amount;
+                if (ArchipelagoClient.AP.SlotData.RingLink)
+                {
+                    _log.LogInfo($"Sending Ringlink packet of {-___scaled_power} due to Mimic");
+                    ArchipelagoClient.AP.SendRingLinkPacket(-___scaled_power);
+                }
+                if (LocalizationManager.CurrentLanguage.Contains("Spanish"))
+                {
+                    __instance.POPPY.POP("PERDISTE " + ___scaled_power + " DE PLATA", 1f, 1);
+                }
+                else
+                {
+                    __instance.POPPY.POP(___scaled_power + " " + LocalizationManager.GetTranslation("SILVER LOST"), 1f, 1);
+                }
             }
-            var amount = -___scaled_power;
-            ArchipelagoClient.AP.SendRingLinkPacket(amount);
+            else
+            {
+                __instance.REG_DAMAGE.power = ___hold_power;
+            }
+            return false;
         }
 
         [HarmonyPatch(typeof(Boss), "End")]

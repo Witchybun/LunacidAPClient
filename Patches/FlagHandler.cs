@@ -265,7 +265,7 @@ namespace LunacidAP.Patches
                                 var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
                                 if (patchi.GetChild(3).gameObject.activeSelf)
                                 {
-                                    if (ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Canopy Offer"))
+                                    if (ArchipelagoClient.AP.IsLocationChecked(102))
                                     {
                                         patchi.GetChild(2).gameObject.SetActive(true);
                                         patchi.GetChild(3).gameObject.SetActive(false);
@@ -273,7 +273,7 @@ namespace LunacidAP.Patches
                                 }
                                 if (patchi.GetChild(4).gameObject.activeSelf)
                                 {
-                                    var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                                    var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked(103);
                                     if (DoesPlayerHaveItem("Skull of Josiah")
                               && !isLocationChecked)
                                     {
@@ -342,8 +342,7 @@ namespace LunacidAP.Patches
                             if (stateController == "META")
                             {
                                 var vhsTape = pittObjects.transform.GetChild(1).GetChild(22).gameObject;
-                                var secretID = ArchipelagoClient.AP.GetLocationIDFromName("HB: Temple Hidden Room In Sewer");
-                                if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
+                                if (!ArchipelagoClient.AP.IsLocationChecked(27))
                                 {
                                     vhsTape.SetActive(value: true);
                                 }
@@ -394,7 +393,6 @@ namespace LunacidAP.Patches
                         {
                             if (stateController == "META")
                             {
-                                var corrupt = ArchipelagoClient.AP.GetLocationIDFromName("AT: Corrupted Room");
                                 if (!ArchipelagoClient.AP.WasItemReceived("Corrupt Key"))
                                 {
                                     sTATES[0].SetActive(value: true);
@@ -560,7 +558,7 @@ namespace LunacidAP.Patches
                         if (sceneName == "FOREST_A1")
                         {
                             var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
-                            var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                            var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked(103);
                             if (patchi.GetChild(3).gameObject.activeSelf && patchi.GetChild(3).GetChild(0).gameObject.activeSelf)
                             {
                                 if (!isLocationChecked)
