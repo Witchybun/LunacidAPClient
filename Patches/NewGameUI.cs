@@ -101,7 +101,17 @@ namespace LunacidAP.Patches
                     {
                         return false;
                     }
-                    if (ArchipelagoClient.AP.Authenticated)
+
+                    var isActuallyOnline = false;
+                    try
+                    {
+                        isActuallyOnline = ArchipelagoClient.AP.BasicPing();
+                    }
+                    catch (Exception e)
+                    {
+                        _log.LogError("Not online.");
+                    }
+                    if (ArchipelagoClient.AP.Authenticated && isActuallyOnline)
                     {
                         return true;
                     }
@@ -333,13 +343,22 @@ namespace LunacidAP.Patches
                 case "Gameover":
                     {
                         var load = GameObject.FindObjectOfType<Menus>().transform.GetChild(3).GetChild(0);
-                        if (!ArchipelagoClient.AP.Authenticated)
+                        var isActuallyOnline = false;
+                        try
                         {
-                            load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "connect";
+                            isActuallyOnline = ArchipelagoClient.AP.BasicPing();
+                        }
+                        catch (Exception e)
+                        {
+                            _log.LogError("Not online.");
+                        }
+                        if (ArchipelagoClient.AP.Authenticated && isActuallyOnline)
+                        {
+                            load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "load";
                         }
                         else
                         {
-                            load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "load";
+                            load.GetChild(0).GetComponent<TextMeshProUGUI>().text = "connect";
 
                         }
                         return;

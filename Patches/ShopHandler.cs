@@ -335,7 +335,14 @@ namespace LunacidAP.Patches
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
                 SaveHandler.CurrentSaveData.BoughtItems.Add(objectName);
-                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = SaveHandler.CurrentSaveData.BoughtItems.ToArray();
+                try
+                {
+                    ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = SaveHandler.CurrentSaveData.BoughtItems.ToArray();
+                }
+                catch (Exception e)
+                {
+                    _log.LogWarning("Could not update datastorage on bought items; likely not online.");
+                }
                 
                 return true;
             }

@@ -67,7 +67,7 @@ namespace LunacidAP.Data
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
             "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
-            "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
+            "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY",
             "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
 
@@ -77,6 +77,13 @@ namespace LunacidAP.Data
             "Ignis Calor", "Lava Chasm", "Light Reveal", "Lightning", "Lithomancy", "Moon Beam", "Rock Bridge", "Slime Orb",
             "Spirit Warp", "Summon Fairy", "Summon Ice Sword", "Wind Dash", "Wind Slicer", "Summon Snail", "Summon Kodama", "Tornado", "Dark Skull",
             "Quick Stride", "Jingle Bells", "Poison Mist", "Pumpkin Pop"
+        };
+
+        public static readonly List<string> SupportSpells = new()
+        {
+            "BARRIER", "BESTIAL COMMUNION", "COFFIN", "CORPSE TRANSFORMATION", "GHOST LIGHT", "HOLY WARMTH", 
+            "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", 
+            "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE", "ROCK BRIDGE", "WIND DASH"
         };
 
         public static readonly List<string> UniqueDrop = new(){
@@ -153,7 +160,7 @@ namespace LunacidAP.Data
             {"ICE_SPEAR_CAST_PL", "ICE SPEAR"},
             {"IGNIS_CAST", "IGNIS CALOR"},
             {"LIGHTNING_CAST", "LIGHTNING"},
-            {"POI_CLOUD_CAST", "POISON CLOUD"},
+            {"POI_CLOUD_CAST", "POISON MIST"},
             {"SLIME_CAST", "SLIME ORB"},
             {"TORNADO_CAST", "TORNADO"},
             {"WIND_CUT_CAST", "WIND SLICER"},

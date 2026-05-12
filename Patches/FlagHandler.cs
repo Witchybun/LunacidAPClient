@@ -506,13 +506,13 @@ namespace LunacidAP.Patches
 
         private static void RefreshSceneEntities(string itemName)
         {
-            var sceneName = SceneManager.GetActiveScene().name;
-            Transform map = GameObject.Find(sceneName).transform;
+            var sceneName = Plugin.CurrentSceneName;
             switch (itemName)
             {
                 case "Vampiric Symbol (W)":
                 {
-                    var casDoor = map.GetChild(7).GetChild(10);
+                    var cas1 = GameObject.Find("CAS_1").transform;
+                    var casDoor = cas1.GetChild(7).GetChild(10);
                     casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
                     casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
                     break;
@@ -521,11 +521,13 @@ namespace LunacidAP.Patches
                 {
                     if (sceneName == "ARCHIVES")
                     {
-                        map.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
+                        var archives = GameObject.Find("ARCHIVES").transform;
+                        archives.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
                     }
                     else
                     {
-                        var casDoor2 = map.GetChild(7).GetChild(13);
+                        var cas1 = GameObject.Find("CAS_1").transform;
+                        var casDoor2 = cas1.GetChild(7).GetChild(13);
                         foreach (Transform child in casDoor2)
                         {
                             child.GetComponent<AREA_SAVED_ITEM>().Load();
@@ -536,7 +538,8 @@ namespace LunacidAP.Patches
                 }
                     case "Vampiric Symbol (E)":
                 {
-                    var casDoor2 = map.GetChild(7).GetChild(13);
+                    var cas1 = GameObject.Find("CAS_1").transform;
+                    var casDoor2 = cas1.GetChild(7).GetChild(13);
                     foreach (Transform child in casDoor2)
                     {
                         child.GetComponent<AREA_SAVED_ITEM>().Load();

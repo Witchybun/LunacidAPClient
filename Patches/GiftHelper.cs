@@ -29,9 +29,45 @@ namespace LunacidAP.Patches
             LunacidTraits.DesiredTraits = LunacidTraits.GetDesiredTraits();
         }
 
-        
 
-        public IEnumerator HandleIncomingGifts()
+        public void HandleGift()
+        {
+            if (!ArchipelagoClient.GiftsToProcess.Any() || ArchipelagoClient.AP.Session is null)
+            {
+                return;
+            }
+            while (!ArchipelagoClient.AP.IsInNormalGameState())
+            {
+                return;
+            }
+
+            if (ArchipelagoClient.AP.GiftCounter > 0)
+            {
+                ArchipelagoClient.AP.GiftCounter--;
+                return;
+            }
+
+            ArchipelagoClient.AP.GiftCounter = 30;
+            var gift = ArchipelagoClient.GiftsToProcess.Dequeue();
+            ArchipelagoClient.AP.Gifting.RemoveGiftFromGiftBox(gift.ID);
+            if (gift.IsRefund)
+            {
+                return;  // You never send things which are Lunacid oriented anyway, so let them die.
+            }
+            if (gift.Traits.Any(x => x.Trait == "OthersGift"))
+            {
+                GiveRandomLunacidItem(gift);
+                return;
+            }
+            if (IsLunacidItem(gift, out var isTrap))
+            {
+                ItemHandler.GiveLunacidItem(gift, isTrap);
+                return;
+            }
+            HandleGiftingByTrait(gift);
+        }
+
+        /*public IEnumerator HandleIncomingGifts()
         {
             while (ArchipelagoClient.AP.allowCoroutines)
             {
@@ -70,7 +106,7 @@ namespace LunacidAP.Patches
                 yield return new WaitForSeconds(1f);
             }
             
-        }
+        }*/
 
         private void GiveRandomLunacidItem(Gift gift)
         {

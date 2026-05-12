@@ -97,7 +97,7 @@ namespace LunacidAP.Patches
             {
                 damage *= StaticFuncs.calcStat(5, control.CURRENT_PL_DATA.PLAYER_DEX, null);
             }
-            return damage;
+            return Math.Max(10, damage);
         }
 
         [HarmonyPatch(typeof(CONTROL), "EQMagic")]
@@ -115,8 +115,7 @@ namespace LunacidAP.Patches
                     if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG1, out var data))
                     { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG1}");
                     }
-
-                    __instance.EQ_MAG1.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
+                    __instance.EQ_MAG1.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage, __instance.CURRENT_PL_DATA.MAG1);
                     __instance.EQ_MAG1.MIN_CHARGE_TIME = data.MinCastTime;
                     __instance.EQ_MAG1.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
                     
@@ -158,7 +157,7 @@ namespace LunacidAP.Patches
                     if (!SaveHandler.CurrentSaveData.RandomizedSpellData.TryGetValue(__instance.CURRENT_PL_DATA.MAG2, out var data))
                     { _log.LogWarning($"Could not find data for {__instance.CURRENT_PL_DATA.MAG2}");
                     }
-                    __instance.EQ_MAG2.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage);
+                    __instance.EQ_MAG2.MAG_DAMAGE = GetRealDamageForSpell(__instance, data.Damage, __instance.CURRENT_PL_DATA.MAG2);
                     __instance.EQ_MAG2.MIN_CHARGE_TIME = data.MinCastTime;
                     __instance.EQ_MAG2.MAG_CHARGE_TIME = GetRealCastTimeForSpell(__instance, data.CastTime, data.MinCastTime);
                     
@@ -206,11 +205,6 @@ namespace LunacidAP.Patches
                     trigger.element = LunacidItems.ElementToID[SaveHandler.CurrentSaveData.Elements[weapon]];
                 }
             }
-            else
-            {
-                _log.LogWarning($"Could not change element for {castName}");
-            }
-
         }
 
         [HarmonyPatch(typeof(SpecialSpell), "Hurt")]
@@ -264,12 +258,16 @@ namespace LunacidAP.Patches
             return false;
         }
 
-        private static float GetRealDamageForSpell(CONTROL control, float damage)
+        private static float GetRealDamageForSpell(CONTROL control, float damage, string name = "")
         {
+            if (LunacidItems.SupportSpells.Contains(name))
+            {
+                return 0;
+            }
             damage *= StaticFuncs.calcStat(6, control.CURRENT_PL_DATA.PLAYER_INT, null);
-            if (control.CURRENT_PL_DATA.PLAYER_CLASS.ToUpper() != "UNDEAD" || !control.EQ_MAG2.MAG_BL) return damage;
+            if (control.CURRENT_PL_DATA.PLAYER_CLASS.ToUpper() != "UNDEAD" || !control.EQ_MAG2.MAG_BL) return Math.Max(10, damage);
             damage *= 2f;
-            return damage;
+            return Math.Max(10, damage);
         }
 
         private static float GetRealCastTimeForSpell(CONTROL control, float castTime, float minCastTime)
@@ -374,7 +372,7 @@ namespace LunacidAP.Patches
                             var castTime = GetRealCastTimeForSpell(CON, statData.CastTime, statData.MinCastTime);
                             __instance.TXT[23].transform.GetChild(num6 + 1).GetComponent<TextMeshProUGUI>().text = castTime > 0.3f ? castTime.ToString("F2") : LocalizationManager.GetTranslation("Spells/Instant");
 
-                            var damage = GetRealDamageForSpell(CON, statData.Damage);
+                            var damage = GetRealDamageForSpell(CON, statData.Damage, nameWithoutClone);
                             __instance.TXT[23].transform.GetChild(num6 + 2).GetComponent<TextMeshProUGUI>().text = damage.ToString("F2").Substring(0, damage.ToString("F2").Length - 3);
                         }
 

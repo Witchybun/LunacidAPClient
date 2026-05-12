@@ -277,7 +277,7 @@ namespace LunacidAP.Data
             { "IKURR'ILB", new(){ 531, 532, 533 } },
             { "MIMIC", new(){ 534, 535, 536 } },
             { "OBSIDIAN SKELETON", new(){ 409, 410, 537, 538, 539, 540 } },
-            { "ANPU", new(){ 541, 542, 411, 412 } },
+            { "Anpu", new(){ 541, 542, 411, 412 } },
             { "SERPENT", new(){ 543, 544 } },
             { "EMBALMED", new(){ 545, 546, 547 } },
             { "JAILOR", new(){ 414, 548, 549, 550, 551, 552 } },

@@ -44,7 +44,7 @@ namespace LunacidAP.Patches
                 return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.
                 // Also tower has no drops, so why run this.
             }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off || __instance.name == "SANGUIS UMBRA")
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off)
             {
                 return true;
             }

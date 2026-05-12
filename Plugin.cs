@@ -15,6 +15,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace LunacidAP
 {
@@ -46,7 +47,7 @@ namespace LunacidAP
         public Colors Colors { get; private set; }
         
         
-        private string _currentSceneName;
+        public static string CurrentSceneName;
         private GameObject _hubLevel;
         private void Awake()
         {
@@ -110,10 +111,12 @@ namespace LunacidAP
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             var sceneName = scene.name;
+            CurrentSceneName = scene.name;
+            ArchipelagoClient.AP.ScenePingSuccess = false;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
             if (ArchipelagoClient.AP is not null)
             {
-                ArchipelagoClient.AP.IsCurrentlyDeathLinked = false;
+                ArchipelagoClient.AP.isCurrentlyDeathLinked = false;
             }
             switch (sceneName)
             {
@@ -167,7 +170,7 @@ namespace LunacidAP
                 SaveHandler.CurrentSaveData = new SaveHandler.SaveSlotData();
                 UI.ModifyCharCreateForArchipelago();
             }
-            _currentSceneName = "";
+            CurrentSceneName = "";
             GeneralTweaks.ConstructGlowObject();
             GrassBreakHandler.AddArchipelagoData(sceneName);
             ReadDialogueHelper.AssignPickupsForLoreInScene(sceneName);
@@ -175,6 +178,7 @@ namespace LunacidAP
             Cleanup();
             _hubLevel = null;
         }
+        
         private void AddSceneIfNotIncluded(string sceneName)
         {
             if (!LunacidDoors.SceneToDisplayName.TryGetValue(sceneName, out var newScene))
@@ -183,30 +187,30 @@ namespace LunacidAP
                 return;
             }
 
-            var oldScene = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"];
-
-            if (oldScene == newScene)
+            try
             {
-                return;
-            }
+                var oldScene = ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"];
 
-            if (ArchipelagoClient.AP is not null)
-            {
-                try
+                if (oldScene == newScene)
+                {
+                    return;
+                }
+                
+                if (ArchipelagoClient.AP is not null)
                 {
                     ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "currentScene"] = newScene;
                 }
-                catch (Exception e)
+
+                if (!SaveHandler.CurrentSaveData.EnteredScenes.Contains(newScene))
                 {
-                    Log.LogError("Storing the current scene failed for whatever reason.  Perhaps a connection problem.");
-                    Console.WriteLine(e);
+                    SaveHandler.CurrentSaveData.EnteredScenes.Add(newScene);
                 }
             }
-
-            if (!SaveHandler.CurrentSaveData.EnteredScenes.Contains(newScene))
+            catch (Exception e)
             {
-                SaveHandler.CurrentSaveData.EnteredScenes.Add(newScene);
+                Log.LogWarning("Attempting to update DataStorage failed; likely a connection problem.");
             }
+            
         }
 
         private void Cleanup()
@@ -342,15 +346,15 @@ namespace LunacidAP
 
         private void Update()
         {
-            if (ArchipelagoClient.AP.Authenticated && ArchipelagoClient.AP.IsCurrentlyDeathLinked)
+            if (ArchipelagoClient.AP.Authenticated && ArchipelagoClient.AP.isCurrentlyDeathLinked)
             {
-                StartCoroutine(ArchipelagoClient.AP.ReceiveDeathLink(ArchipelagoClient.AP.CurrentDLData[0], ArchipelagoClient.AP.CurrentDLData[1]));
+                StartCoroutine(ArchipelagoClient.AP.ReceiveDeathLink(ArchipelagoClient.AP.currentDLData[0], ArchipelagoClient.AP.currentDLData[1]));
             }
-            if (_currentSceneName == "")
+            if (CurrentSceneName == "")
             {
                 try
                 {
-                    _currentSceneName = SceneManager.GetActiveScene().name;
+                    CurrentSceneName = SceneManager.GetActiveScene().name;
                 }
                 catch (Exception e)
                 {
@@ -358,7 +362,7 @@ namespace LunacidAP
                 }
                 
             }
-            if (_currentSceneName != "HUB_01")
+            if (CurrentSceneName != "HUB_01")
             {
                 return;
             }

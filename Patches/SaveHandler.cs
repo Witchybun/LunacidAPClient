@@ -47,7 +47,7 @@ namespace LunacidAP.Patches
                 Custom = 2
             }
 
-            public Dictionary<SaveHandler.RandoSettings.Colors, string> ColorSettingToName = new()
+            public Dictionary<Colors, string> ColorSettingToName = new()
             {
                 { Colors.Archipelago, "[Archipelago]" },
                 { Colors.Multiworldgg, "[MultiworldGG]" },
@@ -84,7 +84,7 @@ namespace LunacidAP.Patches
             public Dictionary<string, ReceivedItem> ReceivedItems { get; private set; } = new();
             public List<long> CompletedLocations { get; private set; } = new();
             public Dictionary<string, CreatureHintData> CommunionHints { get; set; } = new();
-            public Dictionary<string, string> Elements { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
+            public Dictionary<string, string> Elements { get; private set; }
             public Dictionary<string, LunacidEquipStats.WeaponData> RandomizedWeaponData { get; set; } = new();
             public Dictionary<string, LunacidEquipStats.SpellData> RandomizedSpellData { get; set; } = new();
             public Dictionary<string, string> Entrances { get; set; } = new();

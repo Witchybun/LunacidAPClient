@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
@@ -54,7 +55,15 @@ namespace LunacidAP.Patches
                 {
                     SaveHandler.CurrentSaveData.TraversedEntrances.Add("Move to Starting Area", "Found");
                 }
-                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
+
+                try
+                {
+                    ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
+                }
+                catch (Exception e)
+                {
+                    _log.LogWarning("Could not update datastorage on traversed entrances; likely not online.");
+                }
             }
             __instance.MAP_IMG[0].color = new Color(0.5f, 0.5f, 0.5f, 1);
             __instance.STATIC_IMG[0].color = new Color(0.5608f, 0.6f, 0.698f, 0.8f);
@@ -199,8 +208,14 @@ namespace LunacidAP.Patches
 
             SaveHandler.CurrentSaveData.TraversedEntrances.Add(fromString, toString);
             SaveHandler.CurrentSaveData.TraversedEntrances.Add(toString, fromString);
-
-            ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
+            try
+            {
+                ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "TraversedEntrances"] = SaveHandler.CurrentSaveData.TraversedEntrances.ToArray();
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning("Could not update datastorage on traversed entrances; likely not online.");
+            }
         }
     }
 }

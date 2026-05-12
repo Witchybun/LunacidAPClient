@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
@@ -8,6 +9,7 @@ using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace LunacidAP.Patches
 {
@@ -45,7 +47,15 @@ namespace LunacidAP.Patches
         private static string DetermineRequestedHints()
         {
             var hintString = "<size=100%>Clint's Hintbook \n (Be sure to pick up anything in here!)</size> \n \n";
-            var hints = ArchipelagoClient.AP.Session.DataStorage.GetHints(ArchipelagoClient.AP.SlotID);
+            Hint[] hints;
+            try
+            {
+                hints = ArchipelagoClient.AP.Session.DataStorage.GetHints(ArchipelagoClient.AP.SlotID);
+            }
+            catch (Exception e)
+            {
+                return "<size=50%>Couldn't find anything for you to do, for whatever reason!</size>";
+            }
             var goodHints = new List<Hint>() { };
             foreach (var hint in hints)
             {
@@ -69,6 +79,8 @@ namespace LunacidAP.Patches
 
         public static void AssignPickupsForLoreInScene(string sceneName)
         {
+            if (ArchipelagoClient.AP is null) return;
+            if (ArchipelagoClient.AP.SlotData is null) return;
             if (!ArchipelagoClient.AP.Authenticated) return;
             if (!ArchipelagoClient.AP.SlotData.Bookworm) return;
             if (Object.FindObjectsOfType(typeof(LoreBlock), true) is not LoreBlock[] loreSpots)
@@ -80,11 +92,6 @@ namespace LunacidAP.Patches
             {
                 _log.LogWarning($"Scene {sceneName} has no books documented.  Error?");
                 return;
-            }
-
-            if (sceneName == "SEWER_A1")   // ???
-            {
-                
             }
             
             foreach (var lore in loreSpots)

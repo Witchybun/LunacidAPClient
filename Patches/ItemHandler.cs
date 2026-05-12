@@ -169,8 +169,17 @@ namespace LunacidAP.Patches
 
             if (itemName.Contains("for a Stranger"))
             {
-                ArchipelagoClient.AP.SendRandomGiftViaAsync(itemName);
-                PopupCommand(3, itemName, color, player, self, isSelfLevelLocation, isGift);
+                try
+                {
+                    ArchipelagoClient.AP.SendRandomGiftViaAsync(itemName);
+                    PopupCommand(3, itemName, color, player, self, isSelfLevelLocation, isGift);
+                }
+                catch (Exception e)
+                {
+                    _log.LogError("Could not send gift from item.");
+                    _log.LogError(e);
+                    throw;
+                }
                 return;
             }
             _log.LogError($"Supplied item {itemName} was not caught by any of the given cases");

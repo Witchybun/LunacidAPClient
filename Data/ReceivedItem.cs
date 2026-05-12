@@ -9,7 +9,7 @@ namespace LunacidAP.Data
     [Serializable]
     public class ReceivedItem
     {
-        public int Index { get;  }
+        public int Index { get; set; }
         public string Game { get; }
         public string Identifier { get; }
         public string LocationName { get; }

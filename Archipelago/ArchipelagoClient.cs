@@ -19,9 +19,7 @@ using static LunacidAP.Data.LunacidGifts;
 using System.Threading;
 using Archipelago.MultiClient.Net.Helpers;
 using Archipelago.MultiClient.Net.Packets;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Object = System.Object;
 
 namespace LunacidAP.Archipelago
 {
@@ -62,16 +60,25 @@ namespace LunacidAP.Archipelago
                 _connecting = value;
             }
         }
+
+        private int itemCounter;
+        private int locationCounter;
+        private int trapCounter;
+        public int GiftCounter;
+        private bool continualPingSuccess;
+        public bool ScenePingSuccess;
+        private int continualPingTimer;
+        private bool lastContinualPingState;
+
         private DeathLinkService _deathLinkService;
-        public bool IsCurrentlyDeathLinked;
-        public string[] CurrentDLData = new string[2] { "", "" };
+        public bool isCurrentlyDeathLinked;
+        public string[] currentDLData = new string[2] { "", "" };
         public static bool IsInGame = false;
         public static readonly List<string> ScenesNotInGame = new() { "MainMenu", "CHAR_CREATE", "Gameover" };
         private readonly SortedDictionary<long, ArchipelagoItem> _locationTable = new() { };
         private static readonly Queue<ReceivedItem> ItemsToProcess = new();
         public static readonly Queue<Gift> GiftsToProcess = new();
-        public bool allowCoroutines; // Can be set to false in order to cleanly kill the coroutines initialized upon connecting.
-        public bool setAllCouroutines;
+        private static readonly Queue<int> SilverToProcess = new();
 
         public static void Setup(ManualLogSource log)
         {
@@ -165,71 +172,8 @@ namespace LunacidAP.Archipelago
                     _log.LogError(outMes);
                     return;
                 }
-                SlotData = new SlotData(success.SlotData, _log);
-                int seed = SlotData.GetSlotSetting("seed", 0);
                 SlotID = success.Slot;
-                if (success.SlotData["death_link"].ToString() == "1")
-                {
-                    SaveHandler.CurrentSaveData.DeathLink = true;
-                    InitializeDeathLink();
-                }
-                SetUpGifting();
-                MuseHandler.InitializeChosenSongs(seed);
-                RandomStatic = new System.Random(seed);
-                var unverifiedLocations = SaveHandler.CurrentSaveData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
-                _log.LogInfo("Checking off locations done out-of-game into the save.");
-                Session.Locations.CompleteLocationChecks(unverifiedLocations);
-                foreach (long locationID in Session.Locations.AllLocationsChecked)
-                {
-                    if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
-                    {
-                        SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
-                    }
-                }
-
-                // Connection successful
-                foreach (long locationID in Session.Locations.AllLocationsChecked)
-                {
-                    if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
-                    {
-                        _log.LogInfo($"The player already checked {locationID} so we're add it to completed locations.");
-                        SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
-                    }
-                }
-                _log.LogInfo("Building some basic data structures.");
-                BuildLocations(SlotData.Seed);
-                _log.LogInfo("Built locations");
-                CommunionHint.DetermineHints(seed);
-                _log.LogInfo("Determined Hints");
-                RandomizeEquipData(seed);
-                _log.LogInfo("Made equip data");
-                _trapHandler = new TrapHandler();
-                CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
-                _log.LogInfo("Ringlink time");
-                if (SlotData.RingLink)
-                {
-                    Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
-                    Session.Socket.PacketReceived += RingLink_OnValueChanged;
-                }
-                _log.LogInfo("We're starting all coroutines.");
-                allowCoroutines = true;
-                if (!setAllCouroutines)
-                {
-                    StartCoroutine(_trapHandler.BleedPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.PoisonPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.DropRatsWhenPossible());
-                    StartCoroutine(_trapHandler.CursePlayerWhenPossible());
-                    StartCoroutine(_trapHandler.BlindPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.SlowPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.DrainManaOfPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.DrainXPOfPlayerWhenPossible());
-                    StartCoroutine(_trapHandler.GoDateDeathWhenNotDoingSoAlready());
-                    StartCoroutine(HandleQueuedItems());
-                    StartCoroutine(giftHelper.HandleIncomingGifts());
-                }
-                _log.LogInfo("Connected!");
-                setAllCouroutines = true;
-                Authenticated = true;
+                ProcessSlotData(success.SlotData);
             }
             else
             {
@@ -243,6 +187,61 @@ namespace LunacidAP.Archipelago
                 Disconnect();
             }
             IsConnecting = false;
+        }
+
+        private void ProcessSlotData(Dictionary<string, object> slotData)
+        {
+            SlotData = new SlotData(slotData, _log);
+            var seed = SlotData.GetSlotSetting("seed", 0); 
+            if (slotData["death_link"].ToString() == "1")
+            {
+                SaveHandler.CurrentSaveData.DeathLink = true; 
+                InitializeDeathLink();
+            }
+            SetUpGifting();
+            MuseHandler.InitializeChosenSongs(seed);
+            RandomStatic = new System.Random(seed);
+            var unverifiedLocations = SaveHandler.CurrentSaveData.CompletedLocations.Where(x => !Session.Locations.AllLocationsChecked.Contains(x)).ToArray();
+            _log.LogInfo("Checking off locations done out-of-game into the save.");
+            Session.Locations.CompleteLocationChecks(unverifiedLocations);
+            foreach (var locationID in Session.Locations.AllLocationsChecked)
+            {
+                if (!SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID))
+                {
+                    SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
+                }
+            }
+
+            // Connection successful
+            foreach (var locationID in Session.Locations.AllLocationsChecked)
+            {
+                if (SaveHandler.CurrentSaveData.CompletedLocations.Contains(locationID)) continue;
+                _log.LogInfo($"The player already checked {locationID} so we're add it to completed locations.");
+                SaveHandler.CurrentSaveData.CompletedLocations.Add(locationID);
+            }
+            _log.LogInfo("Building some basic data structures.");
+            BuildLocations(SlotData.Seed);
+            _log.LogInfo("Built locations");
+            CommunionHint.DetermineHints(seed);
+            _log.LogInfo("Determined Hints");
+            RandomizeEquipData(seed);
+            _log.LogInfo("Made equip data");
+            _trapHandler = new TrapHandler();
+            CurrentRingLinkUuid = UnityEngine.Random.Range(0, SlotID + seed + DateTime.Now.Second + DateTime.Now.Millisecond);
+            _log.LogInfo("Ringlink time");
+            if (SlotData.RingLink)
+            {
+                Session.ConnectionInfo.UpdateConnectionOptions(Session.ConnectionInfo.Tags.Append("RingLink").ToArray());
+                Session.Socket.PacketReceived += RingLink_OnValueChanged;
+            }
+            _log.LogInfo("Connected!");
+            if (IsInGame)
+            {
+                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+                Popup = Control.PAPPY;
+                Popup?.POP("<color=#FDDA0D>The link to the outer worlds has been healed.</color>", 1f, 0);
+            }
+            Authenticated = true;
         }
 
         private bool APVersionIsAcceptable(Dictionary<string, object> slotData, out string version)
@@ -269,7 +268,14 @@ namespace LunacidAP.Archipelago
                     {"amount",  amount},
                 }
             };
-            Session.Socket.SendPacketAsync(packet);
+            try
+            {
+                Session.Socket.SendPacketAsync(packet);
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning("Packet sending failed, likely offline.");
+            }
         }
 
         private void BuildLocations(int seed)
@@ -394,9 +400,20 @@ namespace LunacidAP.Archipelago
 
         private IEnumerator TryReconnect()
         {
-            while (!Authenticated && IsInGame)
+            _log.LogInfo(1);
+            Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            _log.LogInfo(2);
+            Popup = Control.PAPPY;
+            _log.LogInfo(3);
+            Popup?.POP("<color=#FF0000>Your link to other worlds has been severed.</color>", 1f, 1);
+            _log.LogInfo(4);
+            while (!Authenticated)
             {
-                yield return new WaitForSeconds(60);
+                yield return new WaitForSeconds(30);
+                if (!IsInGame)
+                {
+                    break;
+                }
                 Connect(SaveHandler.CurrentSaveData.SlotName, SaveHandler.CurrentSaveData.HostName, SaveHandler.CurrentSaveData.Port, SaveHandler.CurrentSaveData.Password, true);
             }
         }
@@ -405,7 +422,8 @@ namespace LunacidAP.Archipelago
         {
             _log.LogError(message);
             if (e != null) _log.LogError(e.ToString());
-            //Disconnect();
+            Disconnect();
+            StartCoroutine(TryReconnect());
         }
 
         public void Disconnect()
@@ -416,10 +434,8 @@ namespace LunacidAP.Archipelago
                 _log.LogInfo($"Disconnecting.");
             }
             _deathLinkService = null;
-            allowCoroutines = false;
             Session = null;
             Authenticated = false;
-            setAllCouroutines = false;
         }
 
         private void OnItemReceived(ReceivedItemsHelper helper)
@@ -432,64 +448,78 @@ namespace LunacidAP.Archipelago
 
         private void Update()
         {
+            UpdateControl();
+            DequeueItem();
+            ProcessGift();
+            ProcessNextTrap();
+            ProcessRinglinkSilver();
+        }
+
+        private void UpdateControl()
+        {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
         }
 
-        private IEnumerator HandleQueuedItems()
+        private void DequeueItem()
         {
-            while (allowCoroutines)
+            if (!ItemsToProcess.Any())
             {
-                while (!ItemsToProcess.Any())
-                {
-                    if (!allowCoroutines)
-                    {
-                        ItemsToProcess.Clear();
-                        yield break;
-                    }
-                    yield return null;
-                }
-                while (!IsInNormalGameState())
-                {
-                    yield return null;
-                }
-                var item = ItemsToProcess.Dequeue();
-                _log.LogInfo($"About to try and give {item.ItemName}");
-                if (item.LocationId < 0)
-                {
-                    cheatedCount += 1;
-                }
-
-                if (item.Index < SaveHandler.CurrentSaveData.Index)
-                {
-                    _log.LogInfo("Ignoring the item because the index says so.");
-                    continue;
-                }
-                _log.LogInfo("Item can possibly be given.");
-                // I wanna get rid of this so friggen bad.
-                if (SaveHandler.CurrentSaveData.ReceivedItems.ContainsKey(item.Identifier))
-                {
-                    _log.LogInfo("Ignoring the item as the ReceivedItems list has it in there.");
-                    continue;
-                }
-                _log.LogInfo("Giving item.");
-                try
-                {
-                    var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
-                    var isCheated = item.LocationId < 0;
-                    var isLevelLocation = item.LocationName.Contains("Reach Level");
-                    var isSelfLevelLocation = isLevelLocation && isSelf;
-                    ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
-                    SaveHandler.CurrentSaveData.ReceivedItems[item.Identifier] = item;
-                    SaveHandler.CurrentSaveData.Index++;
-                }
-                catch(Exception e)
-                {
-                    _log.LogError("Could not give you an item");
-                    _log.LogError(e.ToString());
-                    
-                }
-                yield return new WaitForSeconds(1f);
+                return;
             }
+            if (!IsInNormalGameState())
+            {
+                return;
+            }
+            var item = ItemsToProcess.Dequeue();
+            if (SaveHandler.CurrentSaveData.ReceivedItems.ContainsKey(item.Identifier))
+            {
+                return;
+            }
+            if (itemCounter > 0)
+            {
+                itemCounter--;
+                ItemsToProcess.Enqueue(item);
+                return;
+            }
+
+            itemCounter = 60;
+            if (!ItemsToProcess.Any())
+            {
+                itemCounter = 0;
+            }
+            _log.LogInfo($"About to try and give {item.ItemName}");
+            if (item.LocationId < 0)
+            {
+                cheatedCount += 1;
+            }
+            _log.LogInfo("Giving item.");
+            try
+            {
+                var isSelf = item.PlayerName == SaveHandler.CurrentSaveData.SlotName;
+                var isCheated = item.LocationId < 0;
+                var isLevelLocation = item.LocationName.Contains("Reach Level");
+                var isSelfLevelLocation = isLevelLocation && isSelf;
+                ItemHandler.GiveLunacidItem(item, isSelf, isCheated, isSelfLevelLocation);
+                SaveHandler.CurrentSaveData.ReceivedItems[item.Identifier] = item;
+                SaveHandler.CurrentSaveData.Index++;
+            }
+            catch(Exception e)
+            {
+                _log.LogError("Could not give you an item.  Adding it back to the queue.");
+                _log.LogError(e.ToString());
+                ItemsToProcess.Enqueue(item);
+            }
+        }
+
+        private void ProcessGift()
+        {
+            giftHelper?.HandleGift();
+        }
+
+        private void ProcessNextTrap()
+        {
+            _trapHandler?.StatusPlayerWhenPossible();
+            
         }
 
         public void InitializeDeathLink()
@@ -504,19 +534,19 @@ namespace LunacidAP.Archipelago
 
         private void DeathLinkReceieved(DeathLink deathLink)
         {
-            IsCurrentlyDeathLinked = true;
-            CurrentDLData[0] = deathLink.Source;
-            CurrentDLData[1] = deathLink.Cause;
+            isCurrentlyDeathLinked = true;
+            currentDLData[0] = deathLink.Source;
+            currentDLData[1] = deathLink.Cause;
 
         }
 
         public void SendDeathLink()
         {
-            if (IsCurrentlyDeathLinked)
+            if (isCurrentlyDeathLinked)
             {
                 return;
             }
-            IsCurrentlyDeathLinked = true;  // Done to avoid spamming as the game itself calls die repeatedly.
+            isCurrentlyDeathLinked = true;  // Done to avoid spamming as the game itself calls die repeatedly.
             var deathLink = new DeathLink(SaveHandler.CurrentSaveData.SlotName, $"{SaveHandler.CurrentSaveData.SlotName} perished in the Great Well!");
             _deathLinkService.SendDeathLink(deathLink);
         }
@@ -532,7 +562,7 @@ namespace LunacidAP.Archipelago
                 }
                 var you = GameObject.Find("PLAYER").GetComponent<Player_Control_scr>();
                 Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                IsCurrentlyDeathLinked = true;
+                isCurrentlyDeathLinked = true;
                 you.Die();
             }
             catch
@@ -735,20 +765,16 @@ namespace LunacidAP.Archipelago
                 return;
             }
             var amount = (int)data["amount"];
-            StartCoroutine(UpdateGameSilverWhenPossible(amount));
+            SilverToProcess.Enqueue(amount);
         }
 
-        private IEnumerator UpdateGameSilverWhenPossible(int amount)
+        private void ProcessRinglinkSilver()
         {
-            while (!IsInNormalGameState())
+            if (!SilverToProcess.Any())
             {
-                if (!allowCoroutines)
-                {
-                    yield break;
-                }
-                
-                yield return new WaitForSeconds(1f);
+                return;
             }
+            var amount = SilverToProcess.Dequeue();
             var con = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             con.CURRENT_PL_DATA.GOLD = Math.Max(0, con.CURRENT_PL_DATA.GOLD + amount);
         }
@@ -966,6 +992,52 @@ namespace LunacidAP.Archipelago
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public bool BasicPing(bool isContinual = false)
+        {
+            if (ScenePingSuccess && !isContinual)
+            {
+                return ScenePingSuccess;
+            }
+
+            if (isContinual && continualPingTimer > 0)
+            {
+                continualPingTimer--;
+                return lastContinualPingState;
+            }
+
+            if (isContinual)
+            {
+                continualPingTimer = 200;
+            }
+            
+            try
+            {
+                Session.Socket.SendPacket(new BouncePacket());
+                if (isContinual)
+                {
+                    lastContinualPingState = true;
+                }
+                else
+                {
+                    ScenePingSuccess = true;
+                }
+            }
+            catch (Exception e)
+            {
+                _log.LogWarning("The basic ping failed.");
+                if (isContinual)
+                {
+                    lastContinualPingState = false;
+                }
+                else
+                {
+                    ScenePingSuccess = false;
+                }
+            }
+
+            return isContinual ? lastContinualPingState : ScenePingSuccess;
         }
     }
 }

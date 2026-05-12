@@ -107,13 +107,17 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool ACT_SendLoreLocation(LoreBlock __instance)
         {
+            if (ArchipelagoClient.AP is null) return true;
+            if (ArchipelagoClient.AP.SlotData is null) return true;
             if (!ArchipelagoClient.AP.SlotData.Bookworm)
             {
+                _log.LogWarning("Bookworm isn't on.  Enjoy reading.");
                 return true;
             }
             var pickup = __instance.gameObject.GetComponent<ArchipelagoPickup>();
             if (pickup is null)
             {
+                _log.LogWarning("The LoreBlock has no ArchipelagoPickup object.  If its a known location, tell the developer.");
                 return true;
             }
             var location = pickup.LocationData;
@@ -470,11 +474,19 @@ namespace LunacidAP.Patches
         private static bool IsLocationCollected(LocationData apLocation)
         {
             var isItemCollected = ArchipelagoClient.AP.IsLocationChecked(apLocation);
-            var isItemTrulyCollected = ArchipelagoClient.AP.Session.Locations.AllLocationsChecked.Contains(apLocation.APLocationID);
-            if (isItemCollected != isItemTrulyCollected)
+            try
             {
-                _log.LogWarning($"Location {apLocation.APLocationName} has collect state mismatch; {isItemCollected} vs {isItemTrulyCollected}");
+                var isItemTrulyCollected = ArchipelagoClient.AP.Session.Locations.AllLocationsChecked.Contains(apLocation.APLocationID);
+                if (isItemCollected != isItemTrulyCollected)
+                {
+                    _log.LogWarning($"Location {apLocation.APLocationName} has collect state mismatch; {isItemCollected} vs {isItemTrulyCollected}");
+                }
             }
+            catch (Exception e)
+            {
+                
+            }
+            
             return isItemCollected;
         }
 

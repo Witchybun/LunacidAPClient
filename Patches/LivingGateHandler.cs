@@ -1,3 +1,4 @@
+using System;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -17,9 +18,10 @@ namespace LunacidAP.Patches
 
         [HarmonyPatch(typeof(KeyTrigger), "OnTriggerEnter")]
         [HarmonyPrefix]
-        private static bool OnTriggerEnter_UpdateChoosenGate(KeyTrigger __instance, Collider other)
+        private static void OnTriggerEnter_UpdateChoosenGate(KeyTrigger __instance, Collider other)
         {
-            if (other.gameObject.name == __instance.LOOKING_FOR && other.gameObject.name == "LV_GATE")
+            if (other.gameObject.name != __instance.LOOKING_FOR || other.gameObject.name != "LV_GATE") return;
+            try
             {
                 switch (other.gameObject.scene.name)
                 {
@@ -32,8 +34,10 @@ namespace LunacidAP.Patches
                         break;
                 }
             }
-
-            return true;
+            catch (Exception e)
+            {
+                _log.LogWarning("Could not update datastorage value on gates; likely not online.");
+            }
         }
     }
 }
