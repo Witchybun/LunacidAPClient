@@ -10,12 +10,10 @@ using I2.Loc;
 using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using LunacidAP.Patches;
-using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 namespace LunacidAP
 {
@@ -112,6 +110,10 @@ namespace LunacidAP
         {
             var sceneName = scene.name;
             CurrentSceneName = scene.name;
+            if (InitialLoadGrabber.SceneIterator(sceneName))
+            {
+                return;
+            }
             ArchipelagoClient.AP.ScenePingSuccess = false;
             ArchipelagoClient.IsInGame = !ArchipelagoClient.ScenesNotInGame.Contains(sceneName);
             if (ArchipelagoClient.AP is not null)

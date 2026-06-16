@@ -92,6 +92,7 @@ namespace LunacidAP.Patches
         [HarmonyPrefix]
         private static bool Click_GenericUIClickPrefix(int which, Menus __instance, ref int ___EQ_SLOT, ref int ___EQ_SLOT2)
         {
+            //_log.LogInfo($"Which: {which}, Current Query: {__instance.current_query}");
             switch (which)
             {
                 // Player has died but wants to resume.  Need some feedback.
@@ -158,6 +159,29 @@ namespace LunacidAP.Patches
                 case 41:
                     ShopHandler.EnsureEnchantedKey();
                     break;
+                case 28 when __instance.current_query == 6:
+                {
+                    if (ArchipelagoClient.AP.IsConnecting)
+                    {
+                        return false;
+                    }
+
+                    var isActuallyOnline = false;
+                    try
+                    {
+                        isActuallyOnline = ArchipelagoClient.AP.BasicPing();
+                    }
+                    catch (Exception e)
+                    {
+                        _log.LogError("Not online.");
+                    }
+                    if (ArchipelagoClient.AP.Authenticated && isActuallyOnline)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
                 case 28 when __instance.current_query == 5:
                 {
                     PlayerPrefs.SetInt("CURRENT_SAVE", ___EQ_SLOT);

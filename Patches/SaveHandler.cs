@@ -161,6 +161,7 @@ namespace LunacidAP.Patches
                 var fileStream = new FileStream(path, FileMode.Open);
                 var result = binaryFormatter.Deserialize(fileStream) as MultiworldSave;
                 fileStream.Close();
+                _log.LogInfo($"Old Port {result.SaveSlotData.Port} new port {newPort}");
                 result.SaveSlotData.Port = newPort;
                 var saveFileStream = new FileStream(path, FileMode.Create);
                 binaryFormatter.Serialize(saveFileStream, result);
