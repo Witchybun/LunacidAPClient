@@ -1,12 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Numerics;
-using Archipelago.Gifting.Net.Gifts;
-using Archipelago.Gifting.Net.Gifts.Versions.Current;
-using Archipelago.Gifting.Net.Traits;
-using HarmonyLib;
+using Archipelago.Gifting.Net.Versioning.Gifts;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace LunacidAP.Data
 {

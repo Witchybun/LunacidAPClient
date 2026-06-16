@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
+using Newtonsoft.Json.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class ShopHandler
     {
@@ -25,7 +28,7 @@ namespace LunacidAP
 
         public static void EnsureEnchantedKey()
         {
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked("Buy Enchanted Key"))
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity || ArchipelagoClient.AP.IsLocationChecked(354))
             {
                 return;
             }
@@ -194,7 +197,7 @@ namespace LunacidAP
             {
                 return true; // This runs on a lot of stuff; avoid a case where it would try to run on scenes where you can't have initialized AP to begin with.
             }
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity || text2load != 11)
+            if (text2load != 11)
             {
                 return true;
             }
@@ -236,25 +239,41 @@ namespace LunacidAP
             {
                 if (inventoryText == location.GameObjectName)
                 {
-                    if (!ConnectionData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
+                    var itemName = shopItem.item;
+                    if (SaveHandler.CurrentSaveData.ScoutedLocations.TryGetValue(location.APLocationID, out var item))
                     {
-                        _log.LogError($"Location {location.APLocationName} failed in a scout!");
-                        continue;
+                        if (item.Classification.HasFlag(ItemFlags.Trap))
+                        {
+                            var random = new System.Random(SaveHandler.CurrentSaveData.Seed + (int)location.APLocationID);
+                            var scouts = SaveHandler.CurrentSaveData.ScoutedLocations.Values.ToList();
+                            var scoutedLocationsAvoidingTrapsObject = scouts.Where(x => !x.Classification.HasFlag(ItemFlags.Trap));
+                            try
+                            {
+                                var scoutedLocationsAvoidingTraps = scoutedLocationsAvoidingTrapsObject.ToList();
+                                item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count()) - 1];
+                            }
+                            catch
+                            {
+                                _log.LogError("Something went wrong with trying to find a suitable trap replacement.  Telling the truth.");
+                            }
+                            
+                        }
+                        if (SaveHandler.MainRandoSettings.AutoHint && item.Classification.HasFlag(ItemFlags.Advancement))
+                        {
+                            ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, (int)location.APLocationID);
+                        }
+                        itemName = item.Name;
                     }
-                    if (item.Classification.HasFlag(ItemFlags.Trap))
-                    {
-                        var random = new System.Random(ConnectionData.Seed + (int)location.APLocationID);
-                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
-                        item = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count())];
-                    }
-                    var itemName = item.Name;
                     var itemNameCondensed = CommunionHint.GetSuitableStringLength(itemName, 22);
                     if (itemNameCondensed != itemName)
                     {
                         itemNameCondensed += "...";
                     }
-                    var color = ArchipelagoClient.FlagColor(item.Classification);
-                    itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
+                    if (item is not null)
+                    {
+                        var color = Colors.GetClassificationHex(item.Classification);
+                        itemNameCondensed = $"<color={color}>{itemNameCondensed}</color>";
+                    }
                     var cost = " - <sprite=0>" + shopItem.cost.ToString();
                     if (DetermineItemCost(shopItem, sceneName) == 0)
                     {
@@ -279,15 +298,15 @@ namespace LunacidAP
             }
             else
             {
-                if (LunacidLocations.InitialVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Initial Offerings Voucher"))
+                if (InitialVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Initial Offerings Voucher"))
                 {
                     return 0;
                 }
-                if (LunacidLocations.GoldenVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Golden Armor Voucher"))
+                if (GoldenVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Golden Armor Voucher"))
                 {
                     return 0;
                 }
-                if (LunacidLocations.DreamerVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Dreamer Voucher"))
+                if (DreamerVoucherItems.Contains(shopItem.item) && ArchipelagoClient.AP.WasItemReceived("Sheryl's Dreamer Voucher"))
                 {
                     return 0;
                 }
@@ -299,34 +318,56 @@ namespace LunacidAP
         [HarmonyPrefix]
         public static bool Buy_MakeSureAPItemsArePurchased(int which, Shop_Inventory __instance)
         {
-            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
+            var sceneName = __instance.gameObject.scene.name;
+            __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
+            var objectName = __instance.INV[which].OBJ.name;
+            if (ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                var amount = -__instance.INV[which].cost;
+                ArchipelagoClient.AP.SendRingLinkPacket(amount);
+            }
+            if (ShopLocations.All(x => x.GameObjectName == __instance.INV[which].OBJ.name) ||
+                __instance.INV[which].cost > __instance.CON.CURRENT_PL_DATA.GOLD)
             {
                 return true;
             }
-            var sceneName = __instance.gameObject.scene.name;
-            __instance.INV[which].cost = DetermineItemCost(__instance.INV[which], sceneName);
-            if (LunacidLocations.ShopLocations.Any(x => x.GameObjectName == __instance.INV[which].OBJ.name) &&
-            __instance.INV[which].cost <= __instance.CON.CURRENT_PL_DATA.GOLD)
+            
+            if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
-                var objectName = __instance.INV[which].OBJ.name;
-                var apLocation = DetermineShopLocation(sceneName, objectName);
-                var location = +apLocation.APLocationID;
-                var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
-                var slotNameofItemOwner = locationInfo.SlotName;
-                if (ConnectionData.SlotName != slotNameofItemOwner)
+                SaveHandler.CurrentSaveData.BoughtItems.Add(objectName);
+                try
                 {
-                    var itemName = locationInfo.Name;
-                    __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
+                    ArchipelagoClient.AP.Session.DataStorage[Scope.Slot, "BoughtItems"] = SaveHandler.CurrentSaveData.BoughtItems.ToArray();
                 }
-                ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
-                ConnectionData.CompletedLocations.Add(location);
+                catch (Exception e)
+                {
+                    _log.LogWarning("Could not update datastorage on bought items; likely not online.");
+                }
+                
+                return true;
             }
+            
+            var apLocation = DetermineShopLocation(sceneName, objectName);
+            var location = +apLocation.APLocationID;
+            var locationInfo = ArchipelagoClient.AP.ScoutLocation(location);
+            if (locationInfo is null)
+            {
+                return true;  // Likely not a location
+            }
+            var slotNameofItemOwner = locationInfo.SlotName;
+            if (SaveHandler.CurrentSaveData.SlotName != slotNameofItemOwner)
+            {
+                var itemName = locationInfo.Name;
+                __instance.CON.PAPPY.POP($"Found {itemName} for {slotNameofItemOwner}", 1f, 0);
+            }
+            ArchipelagoClient.AP.Session.Locations.CompleteLocationChecks(location);
+            SaveHandler.CurrentSaveData.CompletedLocations.Add(location);
             return true;
         }
 
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPostfix]
-        private static void ItemLoad_ChangeDisplayNameToApItem_Postfix(Menus __instance)
+        private static void ItemLoad_ChangeDisplayNameToApItem_Postfix(Menus __instance, ref int ___EQ_SEL)
         {
             if (!ArchipelagoClient.AP.SlotData.Shopsanity)
             {
@@ -335,21 +376,27 @@ namespace LunacidAP
             if (__instance.sub_menu == 14)
             {
                 var sceneName = __instance.gameObject.scene.name;
-                var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-                int EQ_SEL = (int)eqSelField.GetValue(__instance);
-                var objectName = __instance.SHOP.INV[EQ_SEL].OBJ.name;
-                if (!ShopLocations.Any(x => x.GameObjectName == objectName))
+                var objectName = __instance.SHOP.INV[___EQ_SEL].OBJ.name;
+                if (ShopLocations.All(x => x.GameObjectName != objectName))
                 {
                     return;
                 }
                 var apLocation = DetermineShopLocation(sceneName, objectName);
                 var locationInfo = ArchipelagoClient.AP.ScoutLocation(apLocation.APLocationID);
                 if (locationInfo.Classification.HasFlag(ItemFlags.Trap))
+                {
+                    var random = new System.Random(SaveHandler.CurrentSaveData.Seed + (int)apLocation.APLocationID);
+                    try
                     {
-                        var random = new System.Random(ConnectionData.Seed + (int)apLocation.APLocationID);
-                        var scoutedLocationsAvoidingTraps = ConnectionData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
+                        var scoutedLocationsAvoidingTraps = SaveHandler.CurrentSaveData.ScoutedLocations.Values.ToList().Where(x => !x.Classification.HasFlag(ItemFlags.Trap)).ToList();
                         locationInfo = scoutedLocationsAvoidingTraps[random.Next(scoutedLocationsAvoidingTraps.Count)];
                     }
+                    catch
+                    {
+                        _log.LogError("Something went wrong with trying to find a suitable trap replacement.  Telling the truth.");
+                    }
+                    
+                }
                 var slotName = locationInfo.SlotName;
                 var itemName = locationInfo.Name;
                 var itemNameLength = itemName.Length;
@@ -357,16 +404,9 @@ namespace LunacidAP
                 var gameName = locationInfo.Game;
                 var gameNameLength = gameName.Length;
                 gameName = gameName.Substring(0, Math.Min(gameNameLength, 25));
-                var progression = ArchipelagoClient.ProgressionFlagToString[locationInfo.Classification];
-                if (!ArchipelagoGames.GameToProtagonist.TryGetValue(gameName, out string protag))
-                {
-                    protag = "an unknown entity";
-                }
-                if (!ArchipelagoGames.GameToItemBlurb.TryGetValue(gameName, out string blurb))
-                {
-                    blurb = "an unknown land amongst the archipelagos.";
-                }
-                var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\nA curious object, once claimed by {protag} from {blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
+                var blurb = "";
+                blurb = !ArchipelagoGames.GameData.TryGetValue(gameName, out var gameData) ? ArchipelagoGames.GameData["Generic"].Blurb : gameData.Blurb;
+                var totalBlurb = $"<align=center>SLOT NAME: {slotName.ToUpper()}</align>\n\n{blurb}" + "  " + BlurbOnProgression(locationInfo.Classification);
                 __instance.TXT[56].text = itemName.ToUpper();
                 __instance.TXT[50].text = totalBlurb;
                 __instance.ITEMS[26].SetActive(value: false);
@@ -394,19 +434,6 @@ namespace LunacidAP
                 x.APLocationName.Contains(nameHelper)) ?? new LocationData();
             }
             return new LocationData();
-        }
-
-        private static string ThePatchouliConundrum(string apLocation, string sceneName)
-        {
-            if (sceneName == "FOREST_A1" && apLocation == "Buy Ocean Elixir")
-            {
-                apLocation += " (Patchouli)";
-            }
-            else if (apLocation == "Buy Ocean Elixir")
-            {
-                apLocation += " (Sheryl)";
-            }
-            return apLocation;
         }
 
         private static string BlurbOnProgression(ItemFlags flag)

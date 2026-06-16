@@ -4,10 +4,11 @@ using System.Linq;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class CommunionHint
     {
@@ -53,7 +54,7 @@ namespace LunacidAP
             { "TILLANDSIA", "The wind blows so well at {0}.  Not even {1} stops it blowing past me.  It feels like home..." },
         };
 
-        private static Dictionary<string, HintData> CreatureHints { get; set; }
+        private static Dictionary<string, CreatureHintData> CreatureHints { get; set; }
 
         public static void Awake(ManualLogSource log)
         {
@@ -104,17 +105,27 @@ namespace LunacidAP
             {
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 PAPPY = CON.PAPPY;
-                var hintData = ConnectionData.CommunionHints[__instance.NPC_NAME];
-                var text = hintData.LocationDialogue;
-                var isProgression = hintData.Progression;
-                var locationID = hintData.LocationID;
-                /*if (!hintData.AlreadyHinted) // Lets turn off automatic hinting for now, for flair's sake.
+                var hintInfo = SaveHandler.CurrentSaveData.CommunionHints[__instance.NPC_NAME];
+                var text = hintInfo.Message;
+                if (ArchipelagoClient.AP.WasItemReceived("Bestial Mastery"))
                 {
-                    ArchipelagoClient.AP.ScoutLocation(locationID, isProgression);
-                }*/
-                ConnectionData.CommunionHints[__instance.NPC_NAME].AlreadyHinted = true;
-                text = Encrypt(text);
-                PAPPY.POP(text, 1f, 13);
+                    if (SaveHandler.MainRandoSettings.AutoHint)
+                    {
+                        var player = hintInfo.Player;
+                        var important = hintInfo.Important;
+                        var location = hintInfo.LocationId;
+                        if (important)
+                        {
+                            ArchipelagoClient.AP.Session.Hints.CreateHints(player, HintStatus.Unspecified, location);
+                        }
+                    }
+                    PAPPY.POP(text, 5f, 16);
+                }
+                else
+                {
+                    text = Encrypt(text);
+                    PAPPY.POP(text, 1f, 13);
+                }
                 __instance.transform.GetChild(0).gameObject.SetActive(value: true);
                 UnityEngine.Object.Destroy(__instance.gameObject);
                 return false;
@@ -133,10 +144,6 @@ namespace LunacidAP
                 {
                     _log.LogError("Child is null");
                 }
-                if (__instance.transform.GetChild(0).gameObject is null)
-                {
-                    _log.LogError("Child GameObject is null");
-                }
                 _log.LogError(ex.Message);
                 return true;
             }
@@ -147,7 +154,7 @@ namespace LunacidAP
             var length = phrase.Length;
             if (length > size)
             {
-                if (phrase.Any(x => Char.IsWhiteSpace(x)))
+                if (phrase.Any(Char.IsWhiteSpace))
                 {
                     var phraseArray = phrase.Split(' ');
                     var shortestPhrase = "";
@@ -155,7 +162,7 @@ namespace LunacidAP
                     {
                         var previousPhrase = shortestPhrase;
                         shortestPhrase += word + " ";
-                        
+
                         if (shortestPhrase.Length > size)
                         {
                             shortestPhrase = previousPhrase;
@@ -164,8 +171,8 @@ namespace LunacidAP
                     }
                     if (shortestPhrase != "")
                     {
-                       return shortestPhrase + "..."; 
-                    }  
+                        return shortestPhrase + "...";
+                    }
                 }
                 return phrase.Substring(0, size);
             }
@@ -174,50 +181,98 @@ namespace LunacidAP
 
         public static void DetermineHints(int seed)
         {
-            if (ConnectionData.CommunionHints is not null && ConnectionData.CommunionHints.Count() > 1)
+            if (SaveHandler.CurrentSaveData.CommunionHints is not null && SaveHandler.CurrentSaveData.CommunionHints.Count() > 1)
             {
                 return; // already genned probably
             }
             CreatureHints = new() { };
+            var dictionaryToManipulate = ArchipelagoClient.AP.SlotData.ImportantItemLocations;
+            var lucidBladeInfo = dictionaryToManipulate["Lucid Blade"];
+            dictionaryToManipulate.Remove("Lucid Blade");
             var random = new System.Random(seed);
-            var locationList = ConnectionData.ScoutedLocations.Keys.ToList();
-            var locationCount = locationList.Count();
-            var chosenLocations = new List<int>(){};
-            foreach (var creature in CreatureToHint)
+            dictionaryToManipulate = dictionaryToManipulate.OrderBy(x => random.Next()).ToDictionary(item => item.Key, item => item.Value);
+            var unusedCreatures = CreatureToHint.Keys.ToList();
+            foreach (var item in dictionaryToManipulate)
             {
-                var chosenLocationPosition = random.Next(0, locationCount - 1);
-                while (chosenLocations.Contains(chosenLocationPosition))
+                var locations = item.Value;
+                foreach (var location in locations)
                 {
-                    chosenLocationPosition = random.Next(0, locationCount - 1);
+                    if (!unusedCreatures.Any())
+                    {
+                        SaveHandler.CurrentSaveData.CommunionHints = CreatureHints;
+                        break;
+                    }
+                    var chosenCreature = unusedCreatures[random.Next(0, unusedCreatures.Count() - 1)];
+                    unusedCreatures.Remove(chosenCreature);
+                    var locationName = location[0];
+                    var message = string.Format(CreatureToHint[chosenCreature], locationName, item.Key);
+                    CreatureHints[chosenCreature] = new CreatureHintData(message, int.Parse(location[1]), long.Parse(location[2]), true);
+                    
                 }
-                chosenLocations.Add(chosenLocationPosition);
-                var chosenLocation = locationList[chosenLocationPosition];
-                var location = ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation);
-                location = GetSuitableStringLength(location, 30);
-                var itemData = ConnectionData.ScoutedLocations[chosenLocation];
-                var isProgression = itemData.Classification.HasFlag(ItemFlags.Advancement);
-                var item = itemData.Name;
-                item = GetSuitableStringLength(item, 22);
-                var text = string.Format(creature.Value, location, item);
-                CreatureHints[creature.Key] = new HintData(text, chosenLocation, isProgression, false);
             }
-            ConnectionData.CommunionHints = CreatureHints;
+            if (unusedCreatures.Any())
+            {
+                GenerateFillerHints(unusedCreatures, random);
+            }
+            SaveHandler.CurrentSaveData.CommunionHints = CreatureHints;
+            dictionaryToManipulate["Lucid Blade"] = lucidBladeInfo;
         }
 
-        public class HintData
-        {
-            public string LocationDialogue { get; set; }
-            public long LocationID { get; set; }
-            public bool Progression { get; set; }
-            public bool AlreadyHinted { get; set; }
 
-            public HintData(string locationDialogue, long locationID, bool progression, bool alreadyHinted)
+        private static void GenerateFillerHints(List<string> unusedCreatures, System.Random random)
+        {
+
+            var locationList = SaveHandler.CurrentSaveData.ScoutedLocations.Keys.ToList();
+            var locationCount = locationList.Count();
+            var chosenLocations = new List<long>();
+            foreach (var creature in unusedCreatures)
             {
-                LocationDialogue = locationDialogue;
-                LocationID = locationID;
-                Progression = progression;
-                AlreadyHinted = alreadyHinted;
+                var chosenLocation = locationList[random.Next(0, locationCount - 1)];
+                while (chosenLocations.Contains(chosenLocation))
+                {
+                    chosenLocation = locationList[random.Next(0, locationCount - 1)];
+                }
+                var important = SaveHandler.CurrentSaveData.ScoutedLocations[chosenLocation].Classification.HasFlag(ItemFlags.Advancement);
+                var locationInfo = SaveHandler.CurrentSaveData.ScoutedLocations[chosenLocation];
+                chosenLocations.Add(chosenLocation);
+                CreatureHints[creature] = new CreatureHintData(string.Format(CreatureToHint[creature], ArchipelagoClient.AP.GetLocationNameFromID(chosenLocation), locationInfo.Name),ArchipelagoClient.AP.SlotID, (int)chosenLocation, important);
             }
+        }
+
+        [HarmonyPatch(typeof(CutScene_Dialog), "LOAD")]
+        [HarmonyPostfix]
+        private static void LOAD_MakeGarratHintForYou(CutScene_Dialog __instance)
+        {
+            if (__instance.npc_name != "GARRAT THE HOUND") return;
+            __instance.talk_speed *= 1.5f; // Make sure all of it actually gets said.
+            var playerName = __instance.CON.CURRENT_PL_DATA.PLAYER_NAME;
+            var bladeLocation = ArchipelagoClient.AP.SlotData.ImportantItemLocations["Lucid Blade"][0];
+            bladeLocation.ForEach(i => _log.LogInfo(i));
+            __instance.LINES[0].value = __instance.gameObject.name == "Gar_DIALOG_ALT" ? $"You're alive, {playerName}?   Without {bladeLocation[0]} you have no chance of victory." : 
+                $"{playerName}.  Without {bladeLocation[0]} you have no chance of victory.";
+            var player = int.Parse(bladeLocation[1]);
+            var location = long.Parse(bladeLocation[2]);
+            if (SaveHandler.MainRandoSettings.AutoHint)
+            {
+                ArchipelagoClient.AP.Session.Hints.CreateHints(player, HintStatus.Unspecified, location);
+            }
+        }
+    }
+
+    [Serializable]
+    public class CreatureHintData
+    {
+        public readonly string Message;
+        public readonly int Player;
+        public readonly long LocationId;
+        public readonly bool Important;
+
+        public CreatureHintData(string message, int player, long locationId, bool important)
+        {
+            Message = message;
+            Player = player;
+            LocationId = locationId;
+            Important = important;
         }
     }
 

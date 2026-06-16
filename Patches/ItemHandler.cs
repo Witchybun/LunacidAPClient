@@ -2,121 +2,98 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Archipelago.Gifting.Net.Gifts.Versions.Current;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 using Archipelago.MultiClient.Net.Enums;
+using Archipelago.MultiClient.Net.Packets;
 using BepInEx.Logging;
 using HarmonyLib;
+using I2.Loc;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
-using TMPro;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class ItemHandler
     {
         private static CONTROL Control;
         private static POP_text_scr Popup;
-        private static LogicHelper _lunacidLogic;
         private static ManualLogSource _log;
+        private static readonly List<string> SpecialItems = new() { "Orb of a Lost Archipelago", "Great Well Doors Keyring", "Great Well Switches Keyring" };
 
-        public ItemHandler(LogicHelper lunacidLogic, ManualLogSource log)
+        public ItemHandler(ManualLogSource log)
         {
             _log = log;
-            _lunacidLogic = lunacidLogic;
             Harmony.CreateAndPatchAll(typeof(ItemHandler));
+        }
+
+        [HarmonyPatch(typeof(LocalizationManager), "GetTranslation")]
+        [HarmonyPostfix]
+        private static void GetTranslation_UseCustomNameWhenApplicable(string Term, ref string __result, bool FixForRTL = true, int maxLineLengthForRTL = 0, bool ignoreRTLnumbers = true, bool applyParameters = false, GameObject localParametersRoot = null, string overrideLanguage = null, bool allowLocalizedParameters = true)
+        {
+            var itemNoHeader = Term.Replace("Items/", "");
+            if (SpecialItems.Contains(itemNoHeader))
+            {
+                __result = itemNoHeader;
+            }
+
+            var weaponNoHeader = Term.Replace("Weapons/", "");
+            var magicNoHeader = Term.Replace("Spells/", "");
+            if (LunacidEquipStats.EquipmentLookup.ContainsKey(weaponNoHeader) && SaveHandler.CurrentSaveData.Elements.TryGetValue(weaponNoHeader, out var element1))
+            {
+                __result = LunacidEquipStats.ChangeNameBasedOnElement(weaponNoHeader, element1);
+            }
+            else if (LunacidEquipStats.EquipmentLookup.ContainsKey(magicNoHeader) && SaveHandler.CurrentSaveData.Elements.TryGetValue(magicNoHeader, out var element2))
+            {
+                __result = LunacidEquipStats.ChangeNameBasedOnElement(magicNoHeader, element2);
+            }
         }
 
         [HarmonyPatch(typeof(Menus), "ItemLoad")]
         [HarmonyPrefix]
         private static bool ItemLoad_CreateFakeKeys(Menus __instance)
         {
-            if (__instance.sub_menu != 6)
+            if (__instance.sub_menu == 6)
             {
-                return true;
-            }
-            var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
-            int EQ_SEL = (int)eqSelField.GetValue(__instance);
-            __instance.TXT[9].GetComponent<Animation>().Play();
-            __instance.TXT[10].GetComponent<Animation>().Play();
-            __instance.TXT[11].GetComponent<Animation>().Play();
-            int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
-            if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.ITEMS[num]))
-            {
-                return true;
-            }
-            var keyItems = new List<string>() { "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago" };
-            if (!keyItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
-            {
-                return true;
-            }
-            int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
-            string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
-            if (itemName == "Great Well Doors Keyring")
-            {
-                CreateDoorKeyInInventory(__instance, num3);
-            }
-            else if (itemName == "Great Well Switches Keyring")
-            {
-                CreateSwitchKeyInInventory(__instance, num3);
-            }
-            else if (itemName == "Orb of a Lost Archipelago")
-            {
-                CreateOrbInInventory(__instance, num3);
-            }
-            return false;
-        }
-
-        // This is a temporary patch to fix a vanilla bug.
-        [HarmonyPatch(typeof(Player_Poison), "Harm")]
-        [HarmonyPrefix]
-        private static bool Harm_FixSlownessBug(int type, float duration, Player_Poison __instance)
-        {
-            __instance.IMG.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = Camera.main.aspect;
-            if (type == 4)
-            {
-                var poisonType = __instance.GetType();
-                var plField = poisonType.GetField("PL", BindingFlags.Instance | BindingFlags.NonPublic);
-                GameObject PL = (GameObject)plField.GetValue(__instance);
-                if (PL.GetComponent<Player_Control_scr>().CON.EQ_WEP != null)
+                var eqSelField = __instance.GetType().GetField("EQ_SEL", BindingFlags.Instance | BindingFlags.NonPublic);
+                var EQ_SEL = (int)eqSelField.GetValue(__instance);
+                __instance.TXT[9].GetComponent<Animation>().Play();
+                __instance.TXT[10].GetComponent<Animation>().Play();
+                __instance.TXT[11].GetComponent<Animation>().Play();
+                int num = EQ_SEL = int.Parse(EventSystem.current.currentSelectedGameObject.name.Substring(3));
+                if (StaticFuncs.IS_NULL(__instance.CON.CURRENT_PL_DATA.ITEMS[num]))
                 {
                     return true;
                 }
-                else
+                if (!SpecialItems.Contains(StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num])))
                 {
-                    var CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                    if (__instance.SLOW_DUR == 0f)
-                    {
-                        var audioMethod = poisonType.GetMethod("Audio", BindingFlags.Instance | BindingFlags.NonPublic);
-                        __instance.Active_Effects++;
-                        audioMethod.Invoke(__instance, new object[] { 2 });
-                        var SLOW_slotField = poisonType.GetField("SLOW_slot", BindingFlags.Instance | BindingFlags.NonPublic);
-                        SLOW_slotField.SetValue(__instance, __instance.Active_Effects - 1);
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().text = "slowed";
-                        __instance.transform.GetChild(__instance.Active_Effects - 1).GetComponent<TextMeshProUGUI>().color = Color.grey;
-                    }
-                    var steps = duration;
-                    steps *= Mathf.LerpUnclamped(1.25f, 0.2f, (float)CON.CURRENT_PL_DATA.PLAYER_RES / 100f);
-                    __instance.SLOW_DUR = Time.time + steps;
+                    return true;
                 }
+                int num3 = int.Parse(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Substring(__instance.CON.CURRENT_PL_DATA.ITEMS[num].Length - 2, 2));
+                string itemName = StaticFuncs.REMOVE_NUMS(__instance.CON.CURRENT_PL_DATA.ITEMS[num]);
+                if (itemName == "Great Well Doors Keyring")
+                {
+                    CreateDoorKeyInInventory(__instance, num3);
+                }
+                else if (itemName == "Great Well Switches Keyring")
+                {
+                    CreateSwitchKeyInInventory(__instance, num3);
+                }
+                /*else if (itemName == "Orb of a Lost Archipelago")
+                {
+                    CreateOrbInInventory(__instance, num3);
+                }*/
                 return false;
             }
             return true;
         }
 
-        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "")
+        public static void GiveLunacidItem(string itemName, ItemFlags itemFlag, string player = "", bool self = false, string overrideColor = "", bool isSelfLevelLocation = false, bool isGift = false)
         {
-            if (LunacidItems.FakeItems.Contains(itemName))
-            {
-                return;
-            }
-            if (!FlagHandler.DoesPlayerHaveItem("Orb of a Lost Archipelago"))
-            {
-                Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
-                ApplyItemToInventory("Orb of a Lost Archipelago");
-            }
-            string color = ArchipelagoClient.FlagColor(itemFlag);
+            Control ??= GameObject.Find("CONTROL").GetComponent<CONTROL>();
+            string color = Colors.GetClassificationHex(itemFlag);
             if (overrideColor != "")
             {
                 color = overrideColor;
@@ -131,63 +108,99 @@ namespace LunacidAP
             {
                 itemName = itemName.ToUpper();
             }
+            if (LunacidItems.FakeItems.Contains(itemName))
+            {
+                PopupCommand(0, itemName, color, player, self, isSelfLevelLocation, isGift);
+                return;
+            }
+            if (itemName == "Deep Knowledge")
+            {
+                GiveEXP(itemName, color, player, self, isSelfLevelLocation);
+                return;
+            }
+            if (itemName == "Text on Great Well Resourcefulness")
+            {
+                GiveDropBoost(itemName, color, player, self, isSelfLevelLocation);
+                return;
+            }
             switch (type)
             {
                 case 1:
                     {
-                        GiveWeapon(itemName, color, player, self);
+                        GiveWeapon(itemName, color, player, self, isSelfLevelLocation);
                         return;
                     }
                 case 2:
                     {
-                        GiveSpell(itemName, color, player, self);
+                        GiveSpell(itemName, color, player, self, isSelfLevelLocation);
                         return;
                     }
                 case 0:
                     {
-                        GiveSilver(itemName, player, self);
+                        GiveSilver(itemName, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case 4:
                     {
-                        GiveItem(itemName, color, player, self);
+                        GiveItem(itemName, color, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case 3:
                     {
-                        GiveMaterial(itemName, color, player, self);
+                        GiveMaterial(itemName, color, player, self, isSelfLevelLocation, isGift);
                         return;
                     }
                 case -1:
                     {
-                        GiveSwitch(itemName, color, player, self);
+                        GiveSwitch(itemName, color, player, self, isSelfLevelLocation);
                         return;
                     }
                 case -2:
                     {
-                        GiveDoor(itemName, color, player, self);
+                        GiveDoor(itemName, color, player, self, isSelfLevelLocation);
                         return;
                     }
             }
-            if (itemName.Contains(" Trap"))
+            if (LunacidItems.Traps.Contains(itemName))
             {
-                GiveTrap(itemName, color, player, self);
+                GiveTrap(itemName, color, player, self, isSelfLevelLocation, isGift);
+                return;
+            }
+
+            if (itemName.Contains("for a Stranger"))
+            {
+                try
+                {
+                    ArchipelagoClient.AP.SendRandomGiftViaAsync(itemName);
+                    PopupCommand(3, itemName, color, player, self, isSelfLevelLocation, isGift);
+                }
+                catch (Exception e)
+                {
+                    _log.LogError("Could not send gift from item.");
+                    _log.LogError(e);
+                    throw;
+                }
                 return;
             }
             _log.LogError($"Supplied item {itemName} was not caught by any of the given cases");
         }
 
-        public static void GiveLunacidItem(long itemID, ItemFlags itemFlag, string player = "", bool self = false)
+        public static void GiveLunacidItem(long itemID, ItemFlags itemFlag, string player = "", bool self = false, bool isSelfLevelLocation = false)
         {
             string Name = ArchipelagoClient.AP.Session.Items.GetItemName(itemID);
-            GiveLunacidItem(Name, itemFlag, player, self);
+            GiveLunacidItem(Name, itemFlag, player, self, isSelfLevelLocation: isSelfLevelLocation);
         }
 
-        public static void GiveLunacidItem(ReceivedItem receivedItem, bool self)
+        public static void GiveLunacidItem(ReceivedItem receivedItem, bool self, bool isCheated, bool isSelfLevelLocation)
         {
-
-            GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self);
-            ConnectionData.ReceivedItems.Add(receivedItem);
+            if (isCheated)
+            {
+                GiveLunacidItem(receivedItem.ItemName, receivedItem.Classification, receivedItem.PlayerName, self, Colors.GetCheatColor());
+            }
+            else
+            {
+                GiveLunacidItem(receivedItem.ItemId, receivedItem.Classification, receivedItem.PlayerName, self, isSelfLevelLocation);
+            }
         }
 
         public static void GiveLunacidItem(Gift gift, bool isTrap)
@@ -201,22 +214,51 @@ namespace LunacidAP
             GiveLunacidItem(gift.ItemName, ItemFlags.None, playerName, false);
         }
 
-        private static void PopupCommand(int sprite, string Name, string color, string player, bool self)
+        private static void PopupCommand(int sprite, string Name, string color, string player, bool self, bool isSelfLevelLocation = false, bool isGift = false)
         {
             Control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             Popup = Control.PAPPY;
+            var finalText = "";
+            if (isGift)
+            {
+                finalText = $"{player} GIFTED  YOU A <color={color}>{Name}</color>, HOW NICE!";
+                Popup?.POP(finalText, 1f, 0);
+                return;
+            }
+            if (isSelfLevelLocation)
+            {
+                finalText += "Level Up!  ";
+            }
             if (self)
-                Popup?.POP($"<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED", 1f, 0);
+            {
+                finalText += $"<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED";
+                Popup?.POP($"{finalText}<color={color}>{Name}</color> <sprite={sprite}> ACQUIRED", 1f, 0);
+            }
             else
-                Popup?.POP($"<color={color}>{Name}</color> <sprite={sprite}> RECEIVED FROM {player}", 1f, 0);
+            {
+                finalText += $"<color={color}>{Name}</color> <sprite={sprite}> RECEIVED FROM {player}";
+            }
+            Popup?.POP(finalText, 1f, 0);
+                
+                
+            
         }
 
-        private static void GiveWeapon(string Name, string color, string player = "", bool self = false)
+        private static void GiveWeapon(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
         {
             try
             {
-                PopupCommand(1, Name, color, player, self);
                 Name = Name.Replace("JAILOR'S", "JAILORS");
+                var newName = Name;
+                if (SaveHandler.CurrentSaveData.Elements.TryGetValue(Name, out var element))
+                {
+                    newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
+                }
+                else
+                {
+                    _log.LogWarning($"Weapon {Name} has no element?");
+                }
+                PopupCommand(1, newName, color, player, self, isSelfLevelLocation);
                 for (int j = 0; j < 128; j++)
                 {
                     if (Control.CURRENT_PL_DATA.WEPS[j] == "" || Control.CURRENT_PL_DATA.WEPS[j] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.WEPS[j]) == Name)
@@ -236,11 +278,13 @@ namespace LunacidAP
 
         }
 
-        private static void GiveSpell(string Name, string color, string player = "", bool self = false)
+        private static void GiveSpell(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
         {
             try
             {
-                PopupCommand(2, Name, color, player, self);
+                var element = SaveHandler.CurrentSaveData.Elements[Name];
+                var newName = LunacidEquipStats.ChangeNameBasedOnElement(Name, element);
+                PopupCommand(2, newName, color, player, self, isSelfLevelLocation);
                 for (int k = 0; k < 128; k++)
                 {
                     if (Control.CURRENT_PL_DATA.SPELLS[k] == "" || Control.CURRENT_PL_DATA.SPELLS[k] == null || StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.SPELLS[k]) == Name)
@@ -259,18 +303,34 @@ namespace LunacidAP
 
         }
 
-        private static void GiveSilver(string Name, string player = "", bool self = false)
+        private static void GiveSilver(string Name, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
-            var currencyMultiplier = ArchipelagoClient.AP.SlotData.Fillerbundle;
-            var currencyAmount = (10 * currencyMultiplier).ToString();
-            PopupCommand(0, currencyAmount, "white", player, self);
-            Control.CURRENT_PL_DATA.GOLD += int.Parse(currencyAmount);
+            var currencyAmount = DetermineRandomAmount(Name).ToString();
+            PopupCommand(0, currencyAmount, "white", player, self, isSelfLevelLocation, isGift);
+            var amount = int.Parse(currencyAmount);
+            if (ArchipelagoClient.AP.SlotData.RingLink)
+            {
+                ArchipelagoClient.AP.SendRingLinkPacket(amount);
+            }
+            Control.CURRENT_PL_DATA.GOLD += amount;
         }
 
-        private static void GiveItem(string Name, string color, string player = "", bool self = false)
+        private static void GiveItem(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
-            PopupCommand(4, Name, color, player, self);
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation, isGift);
             ApplyItemToInventory(Name);
+        }
+
+        private static void GiveEXP(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        {
+            PopupCommand(0, Name, color, player, self, isSelfLevelLocation);
+            Control.CURRENT_PL_DATA.XP += 100;
+        }
+
+        private static void GiveDropBoost(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        {
+            PopupCommand(0, Name, color, player, self, isSelfLevelLocation);
+
         }
 
         private static void ApplyItemToInventory(string Name)
@@ -283,7 +343,7 @@ namespace LunacidAP
             {
                 _log.LogError("SlotData is null!");
             }
-            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
+            var bundleSize = DetermineRandomAmount(Name);
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
@@ -303,7 +363,7 @@ namespace LunacidAP
             Useable_Item[] eQ_ITEMS = Control.EQ_ITEMS;
             foreach (Useable_Item useable_Item in eQ_ITEMS)
             {
-                if (!(useable_Item.ITEM_NAME == Name.Replace(" ", "_")))
+                if (useable_Item.ITEM_NAME != Name.Replace(" ", "_"))
                 {
                     continue;
                 }
@@ -326,7 +386,7 @@ namespace LunacidAP
                 }
                 else
                 {
-                    if (!(StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) == Name))
+                    if (StaticFuncs.REMOVE_NUMS(Control.CURRENT_PL_DATA.ITEMS[m]) != Name)
                     {
                         continue;
                     }
@@ -350,29 +410,28 @@ namespace LunacidAP
             }
         }
 
-        private static void GiveMaterial(string Name, string color, string player = "", bool self = false)
+        private static void GiveMaterial(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
             if (!LunacidItems.MaterialNames.Keys.Contains(Name))
             {
                 return;
             }
-            var bundleSize = ArchipelagoClient.AP.SlotData.Fillerbundle;
+            var bundleSize = DetermineRandomAmount(Name);
             if (LunacidItems.OneCountItems.Contains(Name))
             {
                 bundleSize = 1;
             }
             var actualName = LunacidItems.MaterialNames[Name].ToString();
-            PopupCommand(3, Name, color, player, self);
+            PopupCommand(3, Name, color, player, self, isSelfLevelLocation, isGift);
             for (int i = 0; i < 128; i++)
             {
                 if (Control.CURRENT_PL_DATA.MATER[i] == "" || Control.CURRENT_PL_DATA.MATER[i] == null)
                 {
                     Control.CURRENT_PL_DATA.MATER[i] = actualName + ValueSuffix(bundleSize);  // Used Alt_Name previously
-                    i = 999;
                 }
                 else
                 {
-                    if (!(Control.CURRENT_PL_DATA.MATER[i].Substring(0, Control.CURRENT_PL_DATA.MATER[i].Length - 2) == actualName))  // Used Alt_Name previously
+                    if (Control.CURRENT_PL_DATA.MATER[i].Substring(0, Control.CURRENT_PL_DATA.MATER[i].Length - 2) != actualName)  // Used Alt_Name previously
                     {
                         continue;
                     }
@@ -391,33 +450,50 @@ namespace LunacidAP
                     {
                         Control.CURRENT_PL_DATA.MATER[i] = actualName + num;  // Used Alt_Name previously
                     }
-                    i = 999;
                 }
+
+                i = 999;
             }
         }
 
-        private static void GiveSwitch(string Name, string color, string player = "", bool self = false)
+        private static void GiveSwitch(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
         {
-            PopupCommand(4, Name, color, player, self);
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation);
             if (!FlagHandler.DoesPlayerHaveItem("Great Well Switches Keyring"))
             {
                 ApplyItemToInventory("Great Well Switches Keyring");
             }
         }
 
-        private static void GiveDoor(string Name, string color, string player = "", bool self = false)
+        private static int DetermineRandomAmount(string Name)
         {
-            PopupCommand(4, Name, color, player, self);
+            var random = new System.Random(Name.GetHashCode() + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute);
+            var chosenValue = 1;
+            if (Name == "Silver")
+            {
+                chosenValue = (int)Math.Sqrt(random.Next(0, 400));
+            }
+            else
+            {
+                chosenValue = (int)Math.Sqrt(random.Next(0, 25));
+            }
+
+            return chosenValue == 0 ? 1 : chosenValue;
+        }
+
+        private static void GiveDoor(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false)
+        {
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation);
             if (!FlagHandler.DoesPlayerHaveItem("Great Well Doors Keyring"))
             {
                 ApplyItemToInventory("Great Well Doors Keyring");
             }
         }
 
-        private static void GiveTrap(string Name, string color, string player = "", bool self = false)
+        private static void GiveTrap(string Name, string color, string player = "", bool self = false, bool isSelfLevelLocation = false, bool isGift = false)
         {
-            PopupCommand(4, Name, color, player, self);
-            Control.PL.Poison.Harm(LunacidItems.TrapToHarm[Name], 10.0f);
+            PopupCommand(4, Name, color, player, self, isSelfLevelLocation, isGift);
+            TrapHandler.AddTrap(Name);
         }
 
         private static void CreateDoorKeyInInventory(Menus menu, int itemCount)
@@ -491,142 +567,6 @@ namespace LunacidAP
             menu.TXT[32].transform.GetChild(0).gameObject.SetActive(value: true);
             menu.TXT[32].transform.GetChild(1).gameObject.SetActive(value: true);
             menu.TXT[32].transform.GetChild(1).GetComponent<UnityEngine.UI.Image>().sprite = component6.SPR;
-            UnityEngine.Object.Destroy(obj);
-            var doubleClick = menu.GetType().GetMethod("DoubleClick", BindingFlags.Instance | BindingFlags.NonPublic);
-            if ((bool)doubleClick.Invoke(menu, null))
-            {
-                var click = menu.GetType().GetMethod("Click", BindingFlags.Instance | BindingFlags.NonPublic);
-                click.Invoke(menu, new object[1] { 24 });
-            }
-        }
-
-        private static void CreateOrbInInventory(Menus menu, int itemCount)
-        {
-            GameObject obj = UnityEngine.Object.Instantiate(Resources.Load("ITEMS/" + "Dusty Crystal Orb")) as GameObject;
-            var sceneName = menu.gameObject.scene.name;
-            Useable_Item component6 = obj.GetComponent<Useable_Item>();
-            var description = "<size=80%>An orb with several words floating within, as semblances of colorful smoke.</size>\n";
-            var rightsideLocations = new List<string>() { };
-            if (LunacidLocations.APLocationData.Keys.Contains(sceneName))
-            {
-                foreach (var locationData in LunacidLocations.APLocationData[sceneName])
-                {
-                    if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
-                    {
-                        rightsideLocations.Add(locationData.APLocationName);
-                    }
-                }
-            }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity != Dropsanity.Off)
-            {
-                foreach (var locationData in LunacidLocations.UniqueDropLocations)
-                {
-                    var enemyName = locationData.APLocationName.Split(':')[0];
-                    _log.LogInfo($"Looking at {enemyName}");
-                    if (LunacidEnemies.EnemyToScenes[enemyName].Contains(sceneName))
-                    {
-                        if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
-                        {
-                            rightsideLocations.Add(locationData.APLocationName);
-                        }
-                    }
-                }
-            }
-            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Randomized)
-            {
-                foreach (var locationData in LunacidLocations.OtherDropLocations)
-                {
-                    var enemyName = locationData.APLocationName.Split(':')[0];
-                    if (!LunacidEnemies.EnemyToScenes.TryGetValue(enemyName, out var sceneList))
-                    {
-                        _log.LogWarning($"Couldn't find {locationData.APLocationName} in multiworld, continuing.");
-                        continue;
-                    }
-                    if (sceneList.Contains(sceneName))
-                    {
-                        if (!ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
-                        {
-                            rightsideLocations.Add(locationData.APLocationName);
-                        }
-                    }
-                }
-            }
-            var shopScenes = new List<string>() { "HUB_01", "FOREST_A1" };
-            if (ArchipelagoClient.AP.SlotData.Shopsanity && shopScenes.Contains(sceneName))
-            {
-                if (sceneName == "FOREST_A1")
-                {
-                    var locationID = ArchipelagoClient.AP.GetLocationIDFromName("Buy Ocean Elixir (Patchouli)");
-                    if (!ArchipelagoClient.AP.IsLocationChecked(locationID))
-                    {
-                        rightsideLocations.Add("Buy Ocean Elixir (Patchouli)");
-                    }
-                }
-                else
-                {
-                    foreach (var locationData in LunacidLocations.ShopLocations)
-                    {
-                        if (locationData.APLocationName != "Buy Ocean Elixir (Patchouli)" &&
-                        !ArchipelagoClient.AP.IsLocationChecked(locationData.APLocationID))
-                        {
-                            rightsideLocations.Add(locationData.APLocationName);
-                        }
-                    }
-                }
-
-            }
-            var random = new System.Random(DateTime.Today.Day + DateTime.Today.Hour + DateTime.Today.Minute);
-            rightsideLocations = rightsideLocations.OrderBy(_ => random.Next()).ToList();
-            var leftsideLocations = new List<string>() { };
-            var wasListTooBig = false;
-
-            if (rightsideLocations.Count() == 0)
-            {
-                description = "<size=80%>A multi-colored orb, clear as glass.  Once, words danced upon its surface, but now nothing can be seen...</size>";
-            }
-            else if (rightsideLocations.Count > 14)
-            {
-                if (rightsideLocations.Count > 25)
-                {
-                    wasListTooBig = true;
-                    while(rightsideLocations.Count> 25)
-                    {
-                        rightsideLocations.RemoveAt(0);
-                    }
-                }
-                while (rightsideLocations.Count > 14)
-                {
-                    leftsideLocations.Add(rightsideLocations[0]);
-                    rightsideLocations.RemoveAt(0);
-                }
-            }
-            var leftsideText = "";
-            var rightsideText = "";
-            foreach (var location in rightsideLocations)
-            {
-                rightsideText += $"<size=55%><align=center><color={_lunacidLogic.ColorLogicLocation(location, sceneName)}>{location}</color></align></size>\n";
-            }
-            if (leftsideLocations.Count > 0)
-            {
-                foreach (var location in leftsideLocations)
-                {
-                    leftsideText += $"<size=37%><align=center><color={_lunacidLogic.ColorLogicLocation(location, sceneName)}>{location.ToUpper()}</color></align></size>\n";
-                }
-            }
-            if (wasListTooBig)
-            {
-                leftsideText += $"<size=50%>THE OTHER WORDS BLEND TOGETHER...</size>\n";
-            }
-            var inventoryItem = LunacidLocations.sceneToArea.Keys.Contains(sceneName) ? LunacidLocations.sceneToArea[sceneName] : "a Lost Archipelago";
-            menu.TXT[32].text = $"Orb of {inventoryItem}";
-            menu.TXT[33].text = itemCount.ToString() + "\n<size=35%>\n</size>" + leftsideText;
-            menu.TXT[34].text = description + rightsideText;
-            menu.TXT[32].transform.GetChild(0).gameObject.SetActive(leftsideLocations.Count == 0);
-            menu.TXT[32].transform.GetChild(1).gameObject.SetActive(leftsideLocations.Count == 0);
-            if (leftsideLocations.Count == 0)
-            {
-                menu.TXT[32].transform.GetChild(1).GetComponent<UnityEngine.UI.Image>().sprite = component6.SPR;
-            }
             UnityEngine.Object.Destroy(obj);
             var doubleClick = menu.GetType().GetMethod("DoubleClick", BindingFlags.Instance | BindingFlags.NonPublic);
             if ((bool)doubleClick.Invoke(menu, null))

@@ -1,0 +1,250 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using BepInEx.Logging;
+using LunacidAP.Data;
+using LunacidAP.Patches;
+using Newtonsoft.Json;
+using static LunacidAP.Data.LunacidEnemies;
+
+namespace LunacidAP.Archipelago
+{
+    public class SlotData
+    {
+        private ManualLogSource _log;
+        private const string SEED_KEY = "seed";
+        private const string VERSION = "client_version";
+        private const string CLASS_KEY = "starting_class";
+        private const string STARTING_WEAPON_KEY = "starting_weapon";
+        private const string ER_KEY = "entrance_randomization";
+        private const string LEVEL_KEY = "levelsanity";
+        private const string SWITCH_KEY = "switch_locks";
+        private const string DOOR_KEY = "door_locks";
+        private const string COIN_KEY = "required_strange_coin";
+        private const string ENEMY_RANDO_KEY = "enemy_randomization";
+        private const string ENEMY_DATA_KEY = "enemy_placement";
+        private const string ENDING_KEY = "ending";
+        private const string SHOP_KEY = "shopsanity";
+        private const string DROP_KEY = "dropsanity";
+        private const string QUENCH_KEY = "quenchsanity";
+        private const string ETNAS_KEY = "etnas_pupil";
+        private const string LORE_KEY = "bookworm";
+        private const string GRASS_KEY = "grasssanity";
+        private const string BREAK_KEY = "breakables";
+        private const string DL_KEY = "death_link";
+        private const string RANDOM_ELE_KEY = "random_elements";
+        private const string RANDOM_WEP_STAT_KEY = "random_equip_stats";
+        private const string ELE_DICT_KEY = "elements";
+        private const string WALL_KEY = "secret_door_lock";
+        private const string START_AREA_KEY = "starting_area";
+        private const string ENT_KEY = "entrances";
+        private const string MONTH_KEY = "rolled_month";
+        private const string CUSTOM_NAME_KEY = "created_class_name";
+        private const string CUSTOM_DESC_KEY = "created_class_description";
+        private const string CUSTOM_CLASS_KEY = "created_class_stats";
+        private const string IMPORTANT_ITEM_KEY = "item_spots";
+        private const string LEVEL_CHALLENGE_KEY = "force_no_exp";
+        private const string RING_LINK_KEY = "silver_link";
+        private Dictionary<string, object> _slotDataFields;
+        public int Seed { get; private set; }
+        public Goal Ending { get; private set; }
+        public int StartingClass { get; private set; }
+        public int StartingArea { get; private set; }
+        public bool EntranceRandomizer { get; private set; }
+        public string ClientVersion { get; private set; }
+        public bool EnemyRandomization { get; private set; }
+        public Dictionary<string, RandomizedEnemyData> RandomEnemyData { get; private set; }
+        public Dropsanity Dropsanity { get; private set; }
+        public bool Quenchsanity { get; private set; }
+        public bool EtnasPupil { get; private set; }
+        public bool Bookworm { get; private set; }
+        public string StartingWeapon { get; private set; }
+        public bool Shopsanity { get; private set; }
+        public bool Switchlock { get; private set; }
+        public bool Doorlock { get; private set; }
+        public bool Levelsanity { get; private set; }
+        public bool GrassSanity { get; private set; }
+        public bool Breakables { get; private set; }
+        public int RequiredCoins { get; private set; }
+        public bool DeathLink { get; private set; }
+        public bool RandomElements { get; private set; }
+        public RandomEquip RandomEquipStats { get; private set; }
+        public bool FalseWalls { get; private set; }
+        public int RolledMonth { get; private set; }
+        public string CustomName { get; private set; }
+        public string CustomDescription { get; private set; }
+        public Dictionary<string, int> CustomStats { get; private set; }
+        public Dictionary<string, List<List<string>>> ImportantItemLocations { get; private set; }
+        public bool ForceNoEXP { get; private set; }
+        public bool RingLink { get; private set; }
+
+        public SlotData(Dictionary<string, object> slotDataFields, ManualLogSource log)
+        {
+            // Don't remove this its important to read for bug reports - Me some time ago mrow
+            _log = log;
+            _log.LogInfo("Starting Slot Data Reading.  If you do not see \"TRANS RIGHTS\" in a new line after this, something went wrong.  Report it.");
+            _slotDataFields = slotDataFields;
+            Ending = GetSlotSetting(ENDING_KEY, Goal.AnyEnding);
+            StartingClass = GetSlotSetting(CLASS_KEY, 0);
+            EntranceRandomizer = GetSlotSetting(ER_KEY, false);
+            Seed = GetSlotSetting(SEED_KEY, 0);
+            ClientVersion = GetSlotSetting(VERSION, "0.0.0");
+            StartingArea = GetSlotSetting(START_AREA_KEY, 0);
+            EnemyRandomization = GetSlotSetting(ENEMY_RANDO_KEY, false);
+            Dropsanity = GetSlotSetting(DROP_KEY, Dropsanity.Off);
+            Quenchsanity = GetSlotSetting(QUENCH_KEY, false);
+            EtnasPupil = GetSlotSetting(ETNAS_KEY, false);
+            Shopsanity = GetSlotSetting(SHOP_KEY, false);
+            Switchlock = GetSlotSetting(SWITCH_KEY, false);
+            Doorlock = GetSlotSetting(DOOR_KEY, false);
+            Levelsanity = GetSlotSetting(LEVEL_KEY, false);
+            GrassSanity = GetSlotSetting(GRASS_KEY, false);
+            Breakables = GetSlotSetting(BREAK_KEY, false);
+            Bookworm = GetSlotSetting(LORE_KEY, false);
+            RequiredCoins = GetSlotSetting(COIN_KEY, 30);
+            DeathLink = GetSlotSetting(DL_KEY, false);
+            RandomElements = GetSlotSetting(RANDOM_ELE_KEY, false);
+            StartingWeapon = GetSlotSetting(STARTING_WEAPON_KEY, "");
+            var elementsData = GetSlotSetting(ELE_DICT_KEY, "");
+            RandomEquipStats = GetSlotSetting(RANDOM_WEP_STAT_KEY, RandomEquip.Off);
+            FalseWalls = GetSlotSetting(WALL_KEY, false);
+            RolledMonth = GetSlotSetting(MONTH_KEY, 1);
+            CustomName = GetSlotSetting(CUSTOM_NAME_KEY, "");
+            CustomDescription = GetSlotSetting(CUSTOM_DESC_KEY, "");
+            ForceNoEXP = GetSlotSetting(LEVEL_CHALLENGE_KEY, false);
+            RingLink = GetSlotSetting(RING_LINK_KEY, false);
+            var customStats = GetSlotSetting(CUSTOM_CLASS_KEY, "");
+            CustomStats = JsonConvert.DeserializeObject<Dictionary<string, int>>(customStats);
+            var enemyData = GetSlotSetting(ENEMY_DATA_KEY, "");
+            var itemSpots = GetSlotSetting(IMPORTANT_ITEM_KEY, "");
+            ImportantItemLocations = JsonConvert.DeserializeObject<Dictionary<string, List<List<string>>>>(itemSpots);
+            foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(elementsData))
+            {
+                var newKey = data.Key.ToUpper().Replace("'", "");
+                if (!SaveHandler.CurrentSaveData.Elements.ContainsKey(newKey))
+                {
+                    SaveHandler.CurrentSaveData.Elements.Add(newKey, data.Value);
+                }
+            }
+            if (EntranceRandomizer)
+            {
+                var entranceData = GetSlotSetting(ENT_KEY, "");
+                foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, string>>(entranceData))
+                {
+                    if (!SaveHandler.CurrentSaveData.Entrances.ContainsKey(data.Key))
+                    {
+                        SaveHandler.CurrentSaveData.Entrances.Add(data.Key, data.Value);
+                    }
+                }
+            }
+            else
+            {
+                SaveHandler.CurrentSaveData.Entrances = WarpDestinations.DefaultEntrances;
+            }
+
+
+            if (EnemyRandomization)
+            {
+                if (SaveHandler.CurrentSaveData.RandomEnemyData.Any())
+                {
+                    _log.LogInfo("The enemy data was already filled, so no need to regenerate again.");
+                }
+                else
+                {
+                    foreach (var data in JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(enemyData))
+                    {
+                        var constructedList = new List<RandomizedEnemyData>();
+                        foreach (var item in data.Value)
+                        {
+                            var splitDataString = item.Split('|');
+                            constructedList.Add(new RandomizedEnemyData(splitDataString[0], int.Parse(splitDataString[1]), splitDataString[2]));
+                        }
+                        SaveHandler.CurrentSaveData.RandomEnemyData[data.Key] = constructedList;
+                    }
+                }
+
+            }
+            _log.LogInfo($"TRANS RIGHTS");
+        }
+
+        private Goal GetSlotSetting(string key, Goal defaultValue)
+        {
+            return (Goal)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(Goal), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
+        }
+
+        private Dropsanity GetSlotSetting(string key, Dropsanity defaultValue)
+        {
+            return (Dropsanity)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(Dropsanity), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
+        }
+
+        private RandomEquip GetSlotSetting(string key, RandomEquip defaultValue)
+        {
+            return (RandomEquip)(_slotDataFields.TryGetValue(key, out var field) ? Enum.Parse(typeof(RandomEquip), field.ToString()) : GetSlotDefaultValue(key, defaultValue));
+        }
+
+        private string GetSlotSetting(string key, string defaultValue)
+        {
+            return _slotDataFields.TryGetValue(key, out var field) ? field.ToString() : GetSlotDefaultValue(key, defaultValue);
+        }
+
+        public int GetSlotSetting(string key, int defaultValue)
+        {
+            return _slotDataFields.TryGetValue(key, out var field) ? (int)(long)field : GetSlotDefaultValue(key, defaultValue);
+        }
+
+        public bool GetSlotSetting(string key, bool defaultValue)
+        {
+            if (_slotDataFields.ContainsKey(key) && _slotDataFields[key] != null && _slotDataFields[key] is bool boolValue)
+            {
+                return boolValue;
+            }
+            if (_slotDataFields[key] is string strValue && bool.TryParse(strValue, out var parsedValue))
+            {
+                return parsedValue;
+            }
+            if (_slotDataFields[key] is int intValue)
+            {
+                return intValue != 0;
+            }
+            if (_slotDataFields[key] is long longValue)
+            {
+                return longValue != 0;
+            }
+            if (_slotDataFields[key] is short shortValue)
+            {
+                return shortValue != 0;
+            }
+
+            return GetSlotDefaultValue(key, defaultValue);
+        }
+
+        private T GetSlotDefaultValue<T>(string key, T defaultValue)
+        {
+            _log.LogWarning($"SlotData did not contain expected key: \"{key}\"");
+            return defaultValue;
+        }
+    }
+
+    public enum Goal
+    {
+        AnyEnding = 0,
+        EndingA = 1,
+        EndingB = 2,
+        EndingCD = 3,
+        EndingE = 4,
+    }
+
+    public enum Dropsanity
+    {
+        Off = 0,
+        Unique = 1,
+        Randomized = 2,
+    }
+
+    public enum RandomEquip
+    {
+        Off = 0,
+        Shuffled = 1,
+        Randomized = 2
+    }
+}

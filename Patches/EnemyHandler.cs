@@ -1,0 +1,564 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using Archipelago.MultiClient.Net.Enums;
+using BepInEx.Logging;
+using HarmonyLib;
+using I2.Loc;
+using LunacidAP.Archipelago;
+using LunacidAP.Data;
+using UnityEngine;
+using static LunacidAP.Data.LunacidEnemies;
+using static LunacidAP.Data.LunacidLocations;
+using Object = UnityEngine.Object;
+using Random = System.Random;
+
+namespace LunacidAP.Patches
+{
+    public class EnemyHandler
+    {
+        private static ManualLogSource _log;
+        private static Dictionary<string, GameObject> EnemyPrefabs = new();
+        private static List<string> EnemyPrefabKeys = new();
+        private static List<string> barredEnemies = new(){
+            "MILK SNAIL_2", "RAT", "SKELETON_HURT", "LVG_OBJ", "Starved VP_Hurt", "ANKOU", "HOMUNCULUS", "SPECTRE", "ABYSSAL DEMON"
+        };
+
+        public static GameObject RatPrefab;
+        private static string magicCast = "MAGIC/CAST/";
+        private static Transform EnemyCombatant { get; set; }
+        public EnemyHandler(ManualLogSource log)
+        {
+            _log = log;
+            Harmony.CreateAndPatchAll(typeof(EnemyHandler));
+        }
+
+        [HarmonyPatch(typeof(Loot_scr), "OnEnable")]
+        [HarmonyPrefix]
+        private static bool OnEnable_ModifyDrops_Prefix(Loot_scr __instance)
+        {
+            if ((ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off && __instance.name == "SANGUIS UMBRA") || __instance.name == "CENTAUR" || __instance.gameObject.scene.name == "TOWER")
+            {
+                return false; // Third book is always in the pool, they drop nothing.  And Centaurs has only one drop which is null so don't even bother.
+                // Also tower has no drops, so why run this.
+            }
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Off)
+            {
+                return true;
+            }
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Randomized)
+            {
+                AddFeatherToJailor(__instance);
+            }
+            var dropBoosts = SaveHandler.CurrentSaveData.ReceivedItems.Count(x => x.Value.ItemName == "Text on Great Well Resourcefulness");
+            float nothingWeightScalar = (float)Math.Max(0.75, 0.25 * dropBoosts);
+            var lOOTS = __instance.LOOTS;
+            //NameEveryDrop(__instance.name, lOOTS);
+            var nothingWeight = 0f;
+            var areDropsNormalized = SaveHandler.MainRandoSettings.IsNormalized;
+            var normalizedNonemptyWeight = 0;
+            for (int i = 0; i < lOOTS.Length; i++)
+            {
+                if (lOOTS[i].ITEM is null)
+                {
+                    nothingWeight = lOOTS[i].CHANCE;
+                    continue;
+                }
+                normalizedNonemptyWeight += lOOTS[i].CHANCE;
+            }
+            var totalWeight = nothingWeight + normalizedNonemptyWeight;
+            nothingWeight *= nothingWeightScalar;
+            var otherDropScalar = (float)((1 - nothingWeightScalar) * totalWeight / (totalWeight - nothingWeight) + nothingWeightScalar);
+            normalizedNonemptyWeight = (int)(float)((totalWeight - nothingWeightScalar * nothingWeight) / (lOOTS.Length - 1));
+            int num3 = DetermineDrop(nothingWeight, normalizedNonemptyWeight, totalWeight, otherDropScalar, lOOTS, areDropsNormalized);
+            if (__instance.LOOTS[num3].ITEM == null)
+            {
+                return false;
+            }
+            var location = ConstructLocation(__instance.name, __instance.LOOTS[num3].ITEM.name);
+            if (location == "FAIL" || location == "SETTING_DIFFERENCE" || location == "SAFE")
+            {
+                DropItemOnFloor(__instance.LOOTS[num3].ITEM, __instance.gameObject.transform.position, null);
+                return false;
+            }
+            var locationData = GetDropLocationData(location);
+            if (locationData.APLocationName == "ERROR")
+            {
+                _log.LogError($"Location {location} doesn't exist in Archipelago!");
+                return false;
+            }
+            var item = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
+            if (item.Collected)
+            {
+                var result = ArchipelagoClient.AP.Gifting.CanGiftToPlayer(item.SlotID);
+                {
+                    if (!result.CanGift)
+                    {
+                        return false;
+                    }
+                }
+            }
+            var archipelagoPickup = new ArchipelagoPickup(locationData, item, item.Collected, true, __instance.gameObject.transform.position);
+            _log.LogInfo($"We're dropping the item {__instance.LOOTS[num3].ITEM.name} on the floor");
+            var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
+            DropItemOnFloor(ashes, __instance.gameObject.transform.position, archipelagoPickup);
+            return false;
+        }
+
+        private static void AddFeatherToJailor(Loot_scr lootInfo)
+        {
+            if (lootInfo.name != "JAILOR")
+            {
+                return;
+            }
+            var newLootData = new Loot_scr.Reward();
+            newLootData.ITEM = new GameObject();
+            newLootData.ITEM.name = "ANGEL_PICKUP";
+            newLootData.CHANCE = 1;
+            var loot = lootInfo.LOOTS.ToList();
+            loot.Add(newLootData);
+            lootInfo.LOOTS = loot.ToArray();
+        }
+
+        private static int DetermineDrop(float nothingChance, float normalizedWeight, float totalWeight, float dropScalar, Loot_scr.Reward[] possibleLoot, bool areDropsNormalized)
+        {
+            if (possibleLoot.Length == 1)
+            {
+                return 0; // It only has one drop.  Don't even calculate anything.
+            }
+            float num2 = UnityEngine.Random.Range(0f, totalWeight);
+            int num3 = 0;
+            for (int j = 0; j < possibleLoot.Length; j++)
+            {
+                if (possibleLoot[j].ITEM is null)
+                {
+                    num2 -= nothingChance;
+                    if (num2 <= 0f)
+                    {
+                        num3 = j;
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (areDropsNormalized)
+                {
+                    num2 -= normalizedWeight;
+                    if (num2 <= 0f)
+                    {
+                        num3 = j;
+                        break;
+                    }
+                }
+                else
+                {
+                    num2 -= (float)possibleLoot[j].CHANCE * dropScalar;
+                    if (num2 <= 0f)
+                    {
+                        num3 = j;
+                        break;
+                    }
+                }
+            }
+            return num3;
+        }
+
+        private static void NameEveryDrop(string mobName, Loot_scr.Reward[] rewards)
+        {
+            var count = 0;
+            foreach (var reward in rewards)
+            {
+                var name = "";
+                name = reward.ITEM is null ? "NULL" : reward.ITEM.name;
+                _log.LogInfo($"{mobName} drops {name} with weight {reward.CHANCE}");
+                count += reward.CHANCE;
+            }
+            _log.LogInfo($"Total chance is {count}!");
+        }
+
+        private static LocationData GetDropLocationData(string location)
+        {
+            foreach (var locationData in UniqueDropLocations)
+            {
+                if (locationData.APLocationName == location)
+                {
+                    return locationData;
+                }
+            }
+            foreach (var locationData in OtherDropLocations)
+            {
+                if (locationData.APLocationName == location)
+                {
+                    return locationData;
+                }
+            }
+            return new LocationData(0, "ERROR");
+        }
+
+        private static string ConstructLocation(string enemyObjectName, string itemObjectName)
+        {
+            if (!NamesToGameObject.TryGetValue(enemyObjectName, out var enemyName))
+            {
+                _log.LogWarning($"Enemy {enemyObjectName} is not in the Dictionary.");
+                return "FAIL";
+            }
+            if (!ObjectToLocationSuffix.TryGetValue(itemObjectName, out var itemName))
+            {
+                _log.LogWarning($"Item {itemObjectName} is not in the Dictionary");
+                return "FAIL";
+            }
+            if (ArchipelagoClient.AP.SlotData.Dropsanity == Dropsanity.Unique && !LunacidItems.Weapons.Contains(itemName) && !LunacidItems.Spells.Contains(itemName) && !LunacidItems.UniqueDrop.Contains(itemName))
+            {
+                _log.LogWarning($"Location {enemyName}: {itemName} Drop isn't in the current game's possible locations.  Giving item as normal.");
+                return "SETTING_DIFFERENCE";
+            }
+            var constructedLocation = $"{enemyName}: {itemName} Drop";
+            if (itemName == "Angelic Feather")
+            {
+                return "Item Blessed By the Angels";
+            }
+            return constructedLocation;
+
+        }
+
+        public static void DropItemOnFloor(GameObject loot, Vector3 position, ArchipelagoPickup archipelagoPickup)
+        {
+            GameObject obj = Object.Instantiate(loot, position, Quaternion.identity);
+            obj.SetActive(value: false);
+            if (archipelagoPickup is not null && obj.GetComponent<ArchipelagoPickup>() is null)
+            {
+                obj.AddComponent<ArchipelagoPickup>();
+                obj.GetComponent<ArchipelagoPickup>().LocationData = archipelagoPickup.LocationData;
+                obj.GetComponent<ArchipelagoPickup>().ArchipelagoItem = archipelagoPickup.ArchipelagoItem;
+                obj.GetComponent<ArchipelagoPickup>().Collected = archipelagoPickup.Collected;
+                obj.GetComponent<ArchipelagoPickup>().CanBeRepeated = archipelagoPickup.CanBeRepeated;
+                var pickupObject = obj.GetComponent<Item_Pickup_scr>();
+                SwapperHandler.ReplaceModelWithAppropriateItem(pickupObject, archipelagoPickup.LocationData);
+            }
+            obj.AddComponent<Place_on_Ground>();
+            obj.GetComponent<Place_on_Ground>().LOOTED = true;
+            obj.SetActive(value: true);
+        }
+
+        [HarmonyPatch(typeof(NPC_SYS), "Start")]
+        [HarmonyPrefix]
+        private static bool NPC_SYS_InitializeEnemyPlacement(NPC_SYS __instance)
+        {
+            if (__instance.FABS[0].name != "ABYSSAL DEMON")
+            { 
+                return true;
+            }
+            if (!EnemyPrefabs.Any())
+            {
+                foreach (var item in __instance.FABS)
+                {
+                    if (barredEnemies.Contains(item.name))
+                    {
+                        if (item.name == "RAT")
+                        {
+                            RatPrefab = item;
+                        }
+                        continue;
+                    }
+                    EnemyPrefabs[item.name] = item;
+                }
+            }
+            if (!ArchipelagoClient.AP.SlotData.EnemyRandomization)
+            {
+                return false;
+            }
+            var scene = __instance.gameObject.scene.name;
+            if (!BaseEnemyPositionData.TryGetValue(__instance.gameObject.scene.name, out var enemyPositionData))
+            {
+                return true;
+            }
+            EnemyPrefabKeys = EnemyPrefabs.Keys.ToList();
+            foreach (var data in enemyPositionData)
+            {
+                var gameObjectWithChildren = GameObject.Find(SceneToWorldObjectsName[scene]).transform;
+                if (!SaveHandler.CurrentSaveData.RandomEnemyData.TryGetValue(scene, out var enemyData))
+                {
+                    _log.LogWarning($"Scene {scene} is not in the enemy data dictionary.");
+                    return true;
+                }
+                foreach (var childIndex in data.ChildPath)
+                {
+                    gameObjectWithChildren = gameObjectWithChildren.GetChild(childIndex);
+                }
+                foreach (var affectedChild in data.AffectedChildren)
+                {
+                    var chosenEnemy = TryGetEnemy(data.GroupName, affectedChild, enemyData);
+                    var givenChild = gameObjectWithChildren.GetChild(affectedChild);
+                    var isBlessed = false;
+                    if (data.GroupName == "MainPrison")
+                    {
+                        if (affectedChild == 14)
+                        {
+                            isBlessed = true;
+                        }
+                    }
+                    SwapEnemy(givenChild, scene, chosenEnemy, isBlessed);
+                }
+            }
+            return true;
+        }
+
+        private static string TryGetEnemy(string groupName, int child, List<RandomizedEnemyData> enemyData)
+        {
+            foreach (var enemy in enemyData)
+            {
+                if (enemy.EnemyName == "Lunaga")
+                {
+                    continue; // remove later; they weren't in the list oops.
+                }
+                if (enemy.GroupName == groupName && enemy.AffectedChild == child)
+                {
+                    if (APWorldNameToGameName.TryGetValue(enemy.EnemyName, out var gameName))
+                    {
+                        return gameName;
+                    }
+                    var capitalizedName = enemy.EnemyName.ToUpper();
+                    if (enemy.EnemyName == "Rat")
+                    {
+                        return "RAT2";
+                    }
+                    if (EnemyPrefabKeys.Contains(capitalizedName))
+                    {
+                        if (capitalizedName == "MUMMY")
+                        {
+                            capitalizedName = new List<string>() { "MUMMY", "MUMMY_CRAWLING" }[UnityEngine.Random.Range(0, 2)];
+                        }
+                        else if (capitalizedName == "VENUS")
+                        {
+                            capitalizedName = new List<string>() { "VENUS", "VENUS_HIDE" }[UnityEngine.Random.Range(0, 2)];
+                        }
+
+                        return capitalizedName;
+                    }
+                }
+            }
+            _log.LogError($"Could not find suitable enemy for {groupName}, {child}, returning NULL and keeping normal placement.");
+            return "NULL";
+        }
+
+        private static void SwapEnemy(Transform child, string scene, string chosenEnemyName, bool isBlessed)
+        {
+            if (chosenEnemyName == "NULL")
+            {
+                return;
+            }
+            if (!EnemyPrefabs.TryGetValue(chosenEnemyName, out var chosenEnemy))
+            {
+                _log.LogError($"Could not find {chosenEnemyName} in prefab list!  Returning normal enemy.");
+                return;
+            }
+            var position = child.position;
+            var rotation = child.rotation;
+            var newEnemy = Object.Instantiate(chosenEnemy, position, rotation, parent: child.parent);
+            newEnemy.transform.localScale = child.localScale;
+            newEnemy.name = newEnemy.name.Replace("(Clone)", "");
+            newEnemy.name = CleanupName.Keys.Contains(newEnemy.name) ? CleanupName[newEnemy.name] : newEnemy.name;
+            var ai = newEnemy.GetComponent<AI_simple>();
+            if (ai is not null)
+            {
+                var childai = child.GetComponent<AI_simple>();
+                ai.BAR = childai.BAR;
+                ai.health = Math.Max(ai.health, ai.health_max) * SceneToAverageLevel[scene] / ai.Level;
+                ai.health_max = ai.health;
+                ai.Level = childai.Level; // keep the exp amounts of the old enemy.
+            }
+            if (isBlessed)
+            {
+                var angelFeather = child.GetComponent<Loot_scr>().LOOTS[6];
+                var loots = newEnemy.GetComponent<Loot_scr>().LOOTS.ToList();
+                loots.Add(angelFeather);
+                newEnemy.GetComponent<Loot_scr>().LOOTS = loots.ToArray();
+            }
+            child.gameObject.SetActive(false);
+        }
+
+        [HarmonyPatch(typeof(Damage_Trigger), "Hurt")]
+        [HarmonyPrefix]
+        public static void Alter_Enemy_Damage_if_Random(Damage_Trigger __instance)
+        {
+            if (!ArchipelagoClient.AP.SlotData.EnemyRandomization)
+            {
+                return;
+            }
+            if (!__instance.EffectPlayer || !__instance.OnlyPL)
+            {
+                return;
+            }
+            if (!SceneToWorldObjectsName.Keys.ToList().Contains(__instance.gameObject.scene.name))
+            {
+                return;
+            }
+            var enemy = __instance.transform;
+            var enemySpell = enemy.name.Replace("(Clone)", "");
+            if (EnemySpells.Contains(enemySpell))
+            {
+                enemy = EnemyCombatant;
+            }
+            else
+            {
+                while (!EnemyPrefabKeys.Contains(enemy.name))
+                {
+                    if (WorldObjects.Contains(enemy.name))
+                    {
+                        _log.LogWarning("Could not find enemy!");
+                        return;
+                    }
+                    enemy = enemy.parent;
+                }
+            }
+            if (EnemyCombatant is null)
+            {
+                return;  // Its likely a spellcast which didn't hit the player.  Its fine.
+            }
+            var scene = __instance.gameObject.scene.name;
+            var enemyLevel = enemy.GetComponent<AI_simple>().Level;
+            __instance.power = Math.Min(150, Math.Max(10, __instance.power * (SceneToAverageLevel[scene] / enemyLevel)));
+        }
+
+        [HarmonyPatch(typeof(Spawn_on_enable), "OnEnable")]
+        [HarmonyPostfix]
+        private static void OnEnable_CollectSpellData(Spawn_on_enable __instance)
+        {
+            if (__instance.item == "MAGIC/CAST/SILK_SPIT_CAST")
+            {
+                return; //Its a Lunaga, they aren't shuffled.
+            }
+            GameObject castOverride = new();
+            var castOverrideField = __instance.GetType().GetField("OVERRIDE", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (castOverrideField is not null)
+            {
+                castOverride = (GameObject)castOverrideField.GetValue(__instance);
+            }
+            var overrideName = "";
+            if (castOverride.name != "" && __instance.item == "")
+            {
+                overrideName = castOverride.name.Replace("Clone", "");
+            }
+            if (overrideName == "")
+            {
+                return;
+            }
+            var castItemNoParents = __instance.item.Replace(magicCast, "");
+            try
+            {
+                if (EnemySpells.Contains(castItemNoParents) || EnemySpells.Contains(overrideName))
+                {
+                    var enemy = __instance.transform;
+                    var enemyName = ModdedNameToPrefabName.Keys.Contains(enemy.name) ? ModdedNameToPrefabName[enemy.name] : enemy.name;
+                    while (!EnemyPrefabKeys.Contains(enemyName))
+                    {
+                        if (WorldObjects.Contains(enemy.name))
+                        {
+                            _log.LogWarning("Could not find enemy!");
+                            return;
+                        }
+                        enemy = enemy.parent;
+                        enemyName = ModdedNameToPrefabName.Keys.Contains(enemy.name) ? ModdedNameToPrefabName[enemy.name] : enemy.name;
+                    }
+                    EnemyCombatant = enemy;
+                }
+            }
+            catch
+            {
+                _log.LogWarning($"Could not find spell data for {__instance.name}");
+            }
+        }
+
+        [HarmonyPatch(typeof(Analyz_NPC), "OnTriggerEnter")]
+        [HarmonyPrefix]
+        private static bool OnTriggerEnter_DisplayEnemyDropsIfDropsanity(Analyz_NPC __instance, Collider other, ref POP_text_scr ___PAPPY)
+        {
+            if (other.gameObject.GetComponent<OBJ_HEALTH>() == null || other.gameObject.GetComponent<OBJ_HEALTH>().MOM == null || !(other.gameObject.GetComponent<OBJ_HEALTH>().MOM.GetComponent<AI_simple>() != null))
+            {
+                return false;
+            }
+		    if (__instance.COM)
+		    {
+                __instance.NPC_NAME = other.GetComponent<OBJ_HEALTH>().MOM.gameObject.name.ToUpper().Replace(" ", "");
+			    var text = "";
+			    var streamReader = new StreamReader(Application.dataPath + "/Resources/TXT/" + PlayerPrefs.GetString("LANG", "ENG") + "/COMM.txt");
+			    var text2 = streamReader.ReadToEnd();
+			    streamReader.Close();
+			    var array = text2.Split("|"[0]);
+			    for (var i = 0; i < array.Length; i++)
+                {
+                    if (!array[i].ToUpper().Contains(__instance.NPC_NAME)) continue;
+                    text = array[i + 1].Replace("\n", "");
+                    i = 999;
+                }
+                ___PAPPY.POP(text, 1f, 13);
+			    Debug.Log(__instance.NPC_NAME);
+			    Debug.Log(text);
+			    __instance.transform.GetChild(0).gameObject.SetActive(value: true);
+		    }
+            else
+            {
+                var analysisMethod = __instance.GetType().GetMethod("Analysis", BindingFlags.Instance | BindingFlags.NonPublic);
+                analysisMethod.Invoke(__instance, new object[] { other.GetComponent<OBJ_HEALTH>().MOM });
+                var text3 = "";
+                text3 = __instance.NPC_NAME + "\nHealth: " + __instance.NPC_H.ToString("F0") + "\n" + 
+                        LocalizationManager.GetTranslation("NORMAL") + ": " + (__instance.NORMAL_MULT * 100f).ToString("F0") + "%   " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData62") + ": " + (__instance.FIRE_MULT * 100f).ToString("F0") + "%\n" + 
+                        LocalizationManager.GetTranslation("Manual/ManualData63") + ": " + (__instance.ICE_MULT * 100f).ToString("F0") + "%   " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData64") + ": " + (__instance.POISON_MULT * 100f).ToString("F0") + "%\n" + 
+                        LocalizationManager.GetTranslation("Manual/ManualData65") + ": " + (__instance.LIGHT_MULT * 100f).ToString("F0") + "%  " + 
+                        LocalizationManager.GetTranslation("Manual/ManualData66") + ": " + (__instance.DARK_MULT * 100f).ToString("F0") + "%";
+                text3 += "\n";
+                if (ArchipelagoClient.AP.SlotData.Dropsanity != Dropsanity.Off)
+                {
+                    if (EnemyInternalNameToLocationIDs.TryGetValue(__instance.NPC_NAME, out var ids))
+                    {
+                        foreach (var id in ids)
+                        {
+                            if (!SaveHandler.CurrentSaveData.ScoutedLocations.TryGetValue(id, out var archipelagoItem))
+                            {
+                                continue;
+                            }
+                            var locationName = ArchipelagoClient.AP.GetLocationNameFromID(id);
+                            if (SaveHandler.MainRandoSettings.AutoHint && archipelagoItem.Classification.HasFlag(ItemFlags.Advancement))
+                            {
+                                ArchipelagoClient.AP.Session.Hints.CreateHints(HintStatus.Unspecified, id);
+                            }
+                            var color = Colors.GetClassificationHex(archipelagoItem.Classification);
+                            switch (id)
+                            {
+                                case 406:
+                                    text3 += "(IF AXE)\n";
+                                    break;
+                                case 411:
+                                    text3 += "(IF KHOPESH)\n";
+                                    break;
+                                case 412:
+                                    text3 += "(IF SICKLE)\n";
+                                    break;
+                                case 416:
+                                    text3 += "(IF SPEAR)\n";
+                                    break;
+                                case 417:
+                                    text3 += "(IF SPEAR)\n";
+                                    break;
+                            }
+                            text3 += $"{locationName}: <color={color}>{archipelagoItem.Name}</color>\n";
+                        }
+                    }
+                    else
+                    {
+                        _log.LogWarning($"Enemy {__instance.NPC_NAME} is not in the list of enemies.");
+                    }
+                }
+                ___PAPPY.POP(text3, 1f, 12);
+            }
+            Object.Destroy(__instance.gameObject);
+            return false;
+        }
+    }
+}

@@ -1,9 +1,12 @@
+using System;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.Models;
+using LunacidAP.Archipelago;
 using Newtonsoft.Json;
 
 namespace LunacidAP.Data
 {
+    [Serializable]
     public class ArchipelagoItem
     {
         public long ID;
@@ -12,19 +15,20 @@ namespace LunacidAP.Data
         public string SlotName;
         public string Game;
         public ItemFlags Classification;
-
-        public ArchipelagoItem(ScoutedItemInfo item, bool received)
+        public bool Collected;
+        public ArchipelagoItem(ScoutedItemInfo item, bool collected)
         {
             ID = item.ItemId;
             Name = item.ItemName;
-            SlotID = received ? ArchipelagoClient.AP.SlotID : item.Player;
+            SlotID = item.Player;
             SlotName = ArchipelagoClient.AP.Session.Players.GetPlayerName(SlotID);
             Game = item.ItemGame;
             Classification = item.Flags;
+            Collected = collected;
         }
 
         [JsonConstructor]
-        public ArchipelagoItem(long id, string name, int slotID, string slotName, string game, ItemFlags classification)
+        public ArchipelagoItem(int index, long id, string name, int slotID, string slotName, string game, ItemFlags classification, bool collected)
         {
             ID = id;
             Name = name;
@@ -32,6 +36,18 @@ namespace LunacidAP.Data
             SlotName = slotName;
             Game = game;
             Classification = classification;
+            Collected = collected;
+        }
+
+        public ArchipelagoItem()
+        {
+            ID = -34;
+            Name = "NULL";
+            SlotID = -1;
+            SlotName = "NULL";
+            Game = "NULL";
+            Classification = ItemFlags.None;
+            Collected = false;
         }
     }
 }

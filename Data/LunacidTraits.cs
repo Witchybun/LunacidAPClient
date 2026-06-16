@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using Archipelago.Gifting.Net.Traits;
+using Archipelago.Gifting.Net.Versioning.Gifts.Current;
 
 namespace LunacidAP.Data
 {
@@ -313,5 +315,17 @@ namespace LunacidAP.Data
             {"Mana Drain Trap", ManaDrainTrapTraits},
             {"XP Drain Trap", XPrainTrapTraits}
         };
+
+        public static string[] DesiredTraits;
+
+        public static string[] GetDesiredTraits()
+        {
+            var traitList = new List<string>();
+            foreach (var trait in from traitArray in LunacidItemTraits.Values from trait in traitArray where !traitList.Contains(trait.Trait) select trait)
+            {
+                traitList.Add(trait.Trait);
+            }
+            return traitList.ToArray();
+        }
     }
 }

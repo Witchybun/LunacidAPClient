@@ -3,11 +3,12 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class FlagHandler
     {
@@ -26,11 +27,7 @@ namespace LunacidAP
         [HarmonyPrefix]
         private static bool Check_CheckEndingScenarioForAP(Ending_Switch __instance)
         {
-            bool flag = true;
-            if (ArchipelagoClient.AP.SlotData.Ending.HasFlag(Goal.EndingA))
-            {
-                flag = false;
-            }
+            bool flag = !ArchipelagoClient.AP.SlotData.Ending.HasFlag(Goal.EndingA);
             if (!ArchipelagoClient.AP.WasItemReceived("White VHS Tape"))
             {
                 flag = false;
@@ -105,7 +102,10 @@ namespace LunacidAP
             var flagData = LunacidFlags.ItemToFlag[Name].Flag;
             if (Name == "Progressive Vampiric Symbol")
             {
-                ModifyFlag(flagData[0], flagData[1], Math.Min(3, ConnectionData.Index));
+                var slotValue = 1;
+                if (DoesPlayerHaveItem("Vampiric Symbol (W)")) slotValue += 1;
+                if (DoesPlayerHaveItem("Vampiric Symbol (A)")) slotValue += 1;
+                ModifyFlag(24, Math.Min(3, slotValue), Math.Min(3, slotValue));
                 return;
             }
             if (!DoesPlayerHaveItem(Name) && Name != "Skull of Josiah")
@@ -124,8 +124,8 @@ namespace LunacidAP
         public static int ReadFlagValue(int Zone, int Slot)
         {
             var flag = LoadFlag(Zone);
-            char value = flag[Slot];
-            return value;
+            var flagArray = flag.ToArray();
+            return int.Parse(flagArray[Slot].ToString());
 
         }
 
@@ -187,6 +187,30 @@ namespace LunacidAP
                 case 16:
                     CON.CURRENT_PL_DATA.ZONE_16 = current_string;
                     break;
+                case 17:
+                    CON.CURRENT_PL_DATA.ZONE_17 = current_string;
+                    break;
+                case 18:
+                    CON.CURRENT_PL_DATA.ZONE_18 = current_string;
+                    break;
+                case 19:
+                    CON.CURRENT_PL_DATA.ZONE_19 = current_string;
+                    break;
+                case 20:
+                    CON.CURRENT_PL_DATA.ZONE_20 = current_string;
+                    break;
+                case 21:
+                    CON.CURRENT_PL_DATA.ZONE_21 = current_string;
+                    break;
+                case 22:
+                    CON.CURRENT_PL_DATA.ZONE_22 = current_string;
+                    break;
+                case 23:
+                    CON.CURRENT_PL_DATA.ZONE_23 = current_string;
+                    break;
+                case 24:
+                    CON.CURRENT_PL_DATA.ZONE_24 = current_string;
+                    break;
             }
         }
 
@@ -202,6 +226,7 @@ namespace LunacidAP
                 errorData[4] = __instance.value.ToString();
                 CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
                 var sceneName = __instance.gameObject.scene.name;
+                ModifyFlagDataForFlagSplits(__instance, sceneName);
                 __instance.current_string = ZoneDataPicker(__instance.Zone);
                 __instance.value = int.Parse(__instance.current_string.Substring(__instance.Slot - 1, 1));
                 var stateController = __instance.name;
@@ -220,6 +245,7 @@ namespace LunacidAP
                         break;
                     }
                 }
+
                 for (int i = 0; i < sTATES.Length; i++)
                 {
                     errorData[1] = i.ToString();
@@ -239,7 +265,7 @@ namespace LunacidAP
                                 var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
                                 if (patchi.GetChild(3).gameObject.activeSelf)
                                 {
-                                    if (ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Canopy Offer"))
+                                    if (ArchipelagoClient.AP.IsLocationChecked(102))
                                     {
                                         patchi.GetChild(2).gameObject.SetActive(true);
                                         patchi.GetChild(3).gameObject.SetActive(false);
@@ -247,7 +273,7 @@ namespace LunacidAP
                                 }
                                 if (patchi.GetChild(4).gameObject.activeSelf)
                                 {
-                                    var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                                    var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked(103);
                                     if (DoesPlayerHaveItem("Skull of Josiah")
                               && !isLocationChecked)
                                     {
@@ -300,9 +326,14 @@ namespace LunacidAP
                             var pittObjects = GameObject.Find("THE_PIT_A1");
                             var woodenGate = pittObjects.transform.GetChild(3).GetChild(4).gameObject;
                             var corruptKeyTrig = pittObjects.transform.GetChild(3).GetChild(0).GetChild(1).gameObject;
-                            if (woodenGate.activeSelf)
+                            woodenGate.transform.position = new Vector3(1.0661f, 4.9291f, -26.2029f);
+                            if (ReadFlagValue(2, 0) == 0)
                             {
-                                woodenGate.SetActive(value: false);
+                                foreach (Transform child in woodenGate.transform)
+                                {
+                                    GameObject.Destroy(child.gameObject.GetComponent<OBJ_HEALTH>());
+                                }
+
                             }
                             if (ArchipelagoClient.AP.WasItemReceived("VHS Tape"))
                             {
@@ -311,12 +342,20 @@ namespace LunacidAP
                             if (stateController == "META")
                             {
                                 var vhsTape = pittObjects.transform.GetChild(1).GetChild(22).gameObject;
-                                var secretID = ArchipelagoClient.AP.GetLocationIDFromName("HB: Temple Hidden Room In Sewer");
-                                if (!ArchipelagoClient.AP.IsLocationChecked(secretID))
+                                if (!ArchipelagoClient.AP.IsLocationChecked(27))
                                 {
                                     vhsTape.SetActive(value: true);
                                 }
                             }
+                            var daDemiTwiggaUwu = pittObjects.transform.Find("NEW_NPC").Find("DEMI_0");
+                            if (!daDemiTwiggaUwu.Find("Demi").gameObject.activeSelf && !SaveHandler.CurrentSaveData.EnteredScenes.Contains("HUB_01"))
+                            {
+                                daDemiTwiggaUwu.Find("TRIGGER_POINT").gameObject.SetActive(true);
+                                daDemiTwiggaUwu.Find("TRIGGER_POINT").Find("AUTO").gameObject.SetActive(true);
+                            }
+                            var demiHerself = daDemiTwiggaUwu.Find("Demi");
+                            demiHerself.transform.position = new Vector3(-2.7497f, 3.3072f, -20.9103f);
+                            demiHerself.transform.rotation = Quaternion.Euler(new Vector3(0f, 70f, 0f));
                             break;
                         }
                     case "CAS_1":
@@ -354,7 +393,6 @@ namespace LunacidAP
                         {
                             if (stateController == "META")
                             {
-                                var corrupt = ArchipelagoClient.AP.GetLocationIDFromName("AT: Corrupted Room");
                                 if (!ArchipelagoClient.AP.WasItemReceived("Corrupt Key"))
                                 {
                                     sTATES[0].SetActive(value: true);
@@ -378,11 +416,38 @@ namespace LunacidAP
                         }
                     case "HUB_01":
                         {
-                            var book = GameObject.Find("LEVEL").transform.GetChild(9).GetChild(1);
+                            var level = GameObject.Find("LEVEL").transform;
+                            var book = level.GetChild(9).GetChild(1);
                             if (!book.gameObject.activeSelf)
                             {
                                 book.gameObject.SetActive(value: true);
                             }
+                            if (ArchipelagoClient.AP.SlotData.RolledMonth == 10)
+                            {
+                                var quest = level.Find("Props").Find("HALLO_CHECK").Find("Hallo").Find("Halloween_Props").Find("Hallow_Bowl").Find("QUEST");
+                                quest.gameObject.SetActive(true);
+                                var quest2 = quest.GetChild(0);
+                                quest2.gameObject.SetActive(true);
+                                var quest3 = quest2.GetChild(0);
+                                quest3.gameObject.SetActive(true);
+                                var quest4 = quest3.GetChild(0);
+                                quest4.gameObject.SetActive(true);
+                                var quest5 = quest4.GetChild(0);
+                                quest5.gameObject.SetActive(true);
+                                var quest6 = quest5.Find("QUEST6");
+                                quest6.gameObject.SetActive(true);
+                                var spell = quest6.Find("PUMPKIN POP");
+
+                                if (ArchipelagoClient.AP.WasItemCountReceived("Soul Candy", 35))
+                                {
+                                    spell.gameObject.SetActive(true);
+                                }
+                                else
+                                {
+                                    spell.gameObject.SetActive(false);
+                                }
+                            }
+
                             break;
                         }
                 }
@@ -391,6 +456,7 @@ namespace LunacidAP
             catch (Exception ex)
             {
                 _log.LogError($"Method {nameof(Load_RetainItemPickups)} has failed:");
+                _log.LogError($"Instance: {__instance.name}");
                 _log.LogError($"Name: {errorData[0]}, Iteration: {errorData[1]}, State Name: {errorData[2]}");
                 _log.LogError($"State Count: {errorData[3]}, Value: {errorData[4]}");
                 _log.LogError($"{ex}");
@@ -399,50 +465,87 @@ namespace LunacidAP
             }
         }
 
-        public static void RefreshSceneEntities(string itemName)
+        [HarmonyPatch(typeof(AREA_SAVED_ITEM), "Save")]
+        [HarmonyPrefix]
+        private static bool Save_SaveDifferentValueForThings(AREA_SAVED_ITEM __instance)
         {
+            if (__instance.Zone == 15 && __instance.Slot == 3)
+            {
+                return false; // Stop the Jotunn's death from keeping the entire area always flooded.
+            }
             var sceneName = SceneManager.GetActiveScene().name;
+            switch (sceneName)
+            {
+                case "PITT_A1":
+                {
+                    if (__instance.gameObject.name == "LADDER")
+                    {
+                        __instance.Slot = 16;
+                        __instance.Zone = 24;
+                    }
+                    else if (__instance.gameObject.name == "LEVER_GATE1")
+                    {
+                        __instance.Slot = 14;
+                        __instance.Zone = 24;
+                    }
+
+                    break;
+                }
+                case "CAS_1":
+                {
+                    break;
+                }
+                case "ARCHIVES":
+                {
+                    break;
+                }
+            }
+            return true;
+            
+        }
+
+        private static void RefreshSceneEntities(string itemName)
+        {
+            var sceneName = Plugin.CurrentSceneName;
             switch (itemName)
             {
-                case "Progressive Vampiric Symbol":
+                case "Vampiric Symbol (W)":
+                {
+                    var cas1 = GameObject.Find("CAS_1").transform;
+                    var casDoor = cas1.GetChild(7).GetChild(10);
+                    casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
+                    casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
+                    break;
+                }
+                case "Vampiric Symbol (A)":
+                {
+                    if (sceneName == "ARCHIVES")
                     {
-                        var receivedCount = ArchipelagoClient.AP.Session.Items.AllItemsReceived.Count(x => ArchipelagoClient.AP.Session.Items.GetItemName(x.ItemId) == "Progressive Vampiric Symbol");
-                        Transform map = GameObject.Find(sceneName).transform;
-                        if (sceneName == "ARCHIVES")
-                        {
-                            map.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
-                            break;
-                        }
-                        switch (receivedCount)
-                        {
-                            case 1:
-                                {
-                                    var casDoor = map.GetChild(7).GetChild(10);
-                                    casDoor.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    casDoor.GetChild(3).GetComponent<AREA_SAVED_ITEM>().Load();
-                                    break;
-                                }
-                            case 2:
-                                {
-                                    var casDoor2 = map.GetChild(7).GetChild(13);
-                                    foreach (Transform child in casDoor2)
-                                    {
-                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    }
-                                    break;
-                                }
-                            case 3:
-                                {
-                                    var casDoor2 = map.GetChild(7).GetChild(13);
-                                    foreach (Transform child in casDoor2)
-                                    {
-                                        child.GetComponent<AREA_SAVED_ITEM>().Load();
-                                    }
-                                    break;
-                                }
-                        }
-                        break;
+                        var archives = GameObject.Find("ARCHIVES").transform;
+                        archives.GetChild(3).GetChild(28).GetComponent<AREA_SAVED_ITEM>().Load();
                     }
+                    else
+                    {
+                        var cas1 = GameObject.Find("CAS_1").transform;
+                        var casDoor2 = cas1.GetChild(7).GetChild(13);
+                        foreach (Transform child in casDoor2)
+                        {
+                            child.GetComponent<AREA_SAVED_ITEM>().Load();
+                        }
+                    }
+
+                    break;
+                }
+                    case "Vampiric Symbol (E)":
+                {
+                    var cas1 = GameObject.Find("CAS_1").transform;
+                    var casDoor2 = cas1.GetChild(7).GetChild(13);
+                    foreach (Transform child in casDoor2)
+                    {
+                        child.GetComponent<AREA_SAVED_ITEM>().Load();
+                    }
+                    break;
+            }
                 case "VHS Tape":
                     {
                         // The effect really isn't felt in the same map anyway.
@@ -458,7 +561,7 @@ namespace LunacidAP
                         if (sceneName == "FOREST_A1")
                         {
                             var patchi = GameObject.Find("FOREST_A1").transform.GetChild(7).Find("PATCHI").GetChild(1);
-                            var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked("YF: Patchouli's Reward");
+                            var isLocationChecked = ArchipelagoClient.AP.IsLocationChecked(103);
                             if (patchi.GetChild(3).gameObject.activeSelf && patchi.GetChild(3).GetChild(0).gameObject.activeSelf)
                             {
                                 if (!isLocationChecked)
@@ -517,6 +620,10 @@ namespace LunacidAP
         {
             CON = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             var playerInventory = CON.CURRENT_PL_DATA.ITEMS;
+            if (playerInventory is null)
+            {
+                return false;
+            }
             for (var i = 0; i < 128; i++)
             {
                 if (playerInventory[i] == "" || playerInventory[i] == null)
@@ -588,8 +695,115 @@ namespace LunacidAP
                 case 16:
                     current_string = CON.CURRENT_PL_DATA.ZONE_16;
                     break;
+                case 17:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_17;
+                    break;
+                case 18:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_18;
+                    break;
+                case 19:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_19;
+                    break;
+                case 20:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_20;
+                    break;
+                case 21:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_21;
+                    break;
+                case 22:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_22;
+                    break;
+                case 23:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_23;
+                    break;
+                case 24:
+                    current_string = CON.CURRENT_PL_DATA.ZONE_24;
+                    break;
             }
             return current_string;
+        }
+
+        private static void ModifyFlagDataForFlagSplits(AREA_SAVED_ITEM saveObject, string scene)
+        {
+            switch (scene)
+            {
+                case "PITT_A1":
+                {
+                    switch (saveObject.gameObject.name)
+                    {
+                        case "LADDER":
+                            saveObject.Slot = 16;
+                            saveObject.Zone = 24;
+                            break;
+                        case "LEVER_GATE1":
+                            saveObject.Slot = 14;
+                            saveObject.Zone = 24;
+                            break;
+                    }
+
+                    break;
+                }
+                case "CAS_1":
+                {
+                    switch (saveObject.gameObject.name)
+                    {
+                        case "CAS_DOOR":
+                        {
+                            saveObject.Slot = 1;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER":  // Front door to Castle Le Fanu or a door deeper inside.
+                        {
+                            if (saveObject.transform.parent.name == "CAS_DOOR")
+                            {
+                                saveObject.Slot = 1;
+                                saveObject.Zone = 24;
+                                break;
+                            }
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER2":
+                        {
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VEr3":
+                        {
+                            saveObject.Slot = 2;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER4":
+                        {
+                            saveObject.Slot = 3;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                        case "KY_VER5":
+                        {
+                            saveObject.Slot = 3;
+                            saveObject.Zone = 24;
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case "ARCHIVES":
+                {
+                    if (saveObject.name == "KY_VER")
+                    {
+                        saveObject.Slot = 2;
+                        saveObject.Zone = 24;
+                    }
+
+                    break;
+                }
+                    
+            }
         }
     }
 }

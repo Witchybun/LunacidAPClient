@@ -1,10 +1,11 @@
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
+using LunacidAP.Archipelago;
 using LunacidAP.Data;
 using UnityEngine;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class SwitchLocker
     {
@@ -38,9 +39,9 @@ namespace LunacidAP
             }
             var control = GameObject.Find("CONTROL").GetComponent<CONTROL>();
             _popup = control.PAPPY;
-            foreach (var receivedItem in ConnectionData.ReceivedItems)
+            foreach (var receivedItem in SaveHandler.CurrentSaveData.ReceivedItems)
             {
-                if (receivedItem.ItemName == itemName)
+                if (receivedItem.Value.ItemName == itemName)
                 {
                     return true; // Allow the switch to function.
                 }

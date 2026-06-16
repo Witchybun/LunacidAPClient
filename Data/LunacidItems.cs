@@ -1,41 +1,22 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LunacidAP.Data
 {
     public class LunacidItems
     {
-        public class ItemData
-        {
-            public long ItemID { get; set; }
-            public string ItemName { get; set; }
-            public string GameObjectName { get; set; }
-            public ItemType Type {get; set;}
-            public bool OneCount {get; set;}
-            public int CountMult {get; set;}
-            public string Element {get; set;}
-
-            public ItemData(long itemID, string itemName, string gameObject, ItemType type, bool oneCount = true, int countMult = 1, string element = "NA")
-            {
-                ItemID = itemID;
-                ItemName = ItemName;
-                GameObjectName = gameObject;
-                Type = type;
-                OneCount = oneCount;
-                CountMult = countMult;
-                Element = element;
-            }
-        }
 
         public static readonly List<string> OneCountItems = new(){
             "VHS Tape", "White VHS Tape", "Corrupt Key", "Skull of Josiah", "Fractured Life", "Fractured Death",
             "Earth Talisman", "Water Talisman", "Enchanted Key", "Crystal Lantern", "Oil Lantern", "Terminus Prison Key", "Broken Sword",
             "Black Book", "Vampiric Symbol (W)", "Vampiric Symbol (E)", "Vampiric Symbol (A)", "Earth Elixir", "Ocean Elixir", "Skeleton Egg", "Dried Rat",
             "Skeletal Rattle", "Dusty Crystal Orb", "Great Well Doors Keyring", "Great Well Switches Keyring", "Orb of a Lost Archipelago", "Tent", "Strange Coin",
-            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Soul Candy", "Bomb", "Angel Feather"
         };
 
         public static readonly List<string> FakeItems = new(){
-            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher",
+            "Bestial Mastery", "Text on Great Well Resourcefulness", "Lucky Bangle", "The Weight of the Dream (Nothing)"
         };
 
         public static readonly List<string> Weapons = new(){
@@ -47,7 +28,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Jailor's Candle", "Obsidian Cursebrand", "Obsidian Poisonguard",
             "Skeleton Axe", "Sucsarian Dagger", "Sucsarian Spear", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", "Marauder Black Flail", "Double Crossbow",
             "Fire Sword", "Steel Lance", "Elfen Longsword", "Steel Claw", "Steel Club", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch"
+            "Dark Greatsword", "Shining Blade", "Poison Claw", "Iron Club", "Iron Torch", "Limbo", "Thorn", "Ghost Sword", "Cavalry Saber"
         };
 
         public static readonly List<string> Swords = new(){
@@ -57,7 +38,7 @@ namespace LunacidAP.Data
             "Brittle Arming Sword", "Golden Khopesh", "Golden Sickle", "Ice Sickle", "Obsidian Cursebrand", 
             "Sucsarian Dagger", "Cursed Blade", "Lyrian Longsword", "Rusted Sword", 
             "Elfen Longsword", "Lyrian Greatsword", "Saint Ishii", "Silver Rapier", "Heritage Sword",
-            "Dark Greatsword", "Shining Blade"
+            "Dark Greatsword", "Shining Blade", "Limbo", "Ghost Sword", "Thorn", "Cavalry Sword"
         };
 
         public static readonly List<string> Axes = new(){
@@ -85,8 +66,8 @@ namespace LunacidAP.Data
         };
 
         public static readonly List<string> WeaponsWithDefaultElement = new(){
-            "LUCID BLADE", "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
-            "FLAME FLARE", "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "POISON MIST",
+            "WAND OF POWER", "BARRIER", "BESTIAL COMMUNION", "BLOOD DRAIN", "COFFIN", "CORPSE TRANSFORMATION",
+            "GHOST LIGHT", "HOLY WARMTH", "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY",
             "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", "WIND DASH", "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE"
         };
 
@@ -95,21 +76,36 @@ namespace LunacidAP.Data
             "Earth Thorn", "Fire Worm", "Flame Flare", "Flame Spear", "Ghost Light", "Holy Warmth", "Icarian Flight", "Ice Spear", "Ice Tear",
             "Ignis Calor", "Lava Chasm", "Light Reveal", "Lightning", "Lithomancy", "Moon Beam", "Rock Bridge", "Slime Orb",
             "Spirit Warp", "Summon Fairy", "Summon Ice Sword", "Wind Dash", "Wind Slicer", "Summon Snail", "Summon Kodama", "Tornado", "Dark Skull",
-            "Quick Stride", "Jingle Bells", "Poison Mist"
+            "Quick Stride", "Jingle Bells", "Poison Mist", "Pumpkin Pop"
+        };
+
+        public static readonly List<string> SupportSpells = new()
+        {
+            "BARRIER", "BESTIAL COMMUNION", "COFFIN", "CORPSE TRANSFORMATION", "GHOST LIGHT", "HOLY WARMTH", 
+            "ICARIAN FLIGHT", "LIGHT REVEAL", "LITHOMANCY", "SPIRIT WARP", "SUMMON FAIRY", "SUMMON ICE SWORD", 
+            "SUMMON SNAIL", "SUMMON KODAMA", "QUICK STRIDE", "ROCK BRIDGE", "WIND DASH"
+        };
+
+        public static readonly List<string> UniqueDrop = new(){
+            "Ocean Elixir", "Black Book"
         };
 
         public static readonly List<string> Items = new(){
-            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
             "Throwing Knife", "Holy Water", "Antidote", "White VHS Tape", "Ocean Elixir", "Earth Elixir", "Black Book", "Enchanted Key",
             "VHS Tape", "Corrupt Key", "Skull of Josiah", "Vampiric Symbol (W)", "Vampiric Symbol (A)", "Vampiric Symbol (E)", "Crystal Lantern",
             "Terminus Prison Key", "Survey Banner", "Water Talisman", "Earth Talisman", "Oil Lantern", "Strange Coin", "Health ViaI", "Eggnog", "Dusty Crystal Orb",
             "Skeleton Egg", "Dried Rat", "Skeletal Rattle", "Coal", "Pink Shrimp", "Angel Feather", "Sheryl's Initial Offerings Voucher", 
-            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Fool's Gold"
+            "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher", "Soul Candy", "Lucky Bangle"
+        };
+
+        public static readonly List<string> Vouchers = new(){
+            "Sheryl's Initial Offerings Voucher", "Sheryl's Golden Armor Voucher", "Sheryl's Dreamer Voucher", "Patchouli's Drink Voucher"
         };
 
         public static readonly List<string> Filler = new(){
-            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Limbo", "Wisp Heart", "Staff of Osiris",
+            "Blood Wine", "Light Urn", "Cloth Bandage", "Dark Urn", "Bomb", "Poison Urn", "Wisp Heart", "Staff of Osiris",
             "Moonlight Vial", "Spectral Candle", "Health Vial", "Mana Vial", "Fairy Moss", "Crystal Shard", "Poison Throwing Knife",
             "Throwing Knife", "Holy Water", "Antidote", "Survey Banner", "Pink Shrimp", "Angel Feather", "Fool's Gold"
         };
@@ -117,7 +113,7 @@ namespace LunacidAP.Data
         public static readonly List<string> Materials = new(){
             "Ectoplasm", "Snowflake Obsidian", "Moon Petal", "Fractured Life", "Fractured Death", "Broken Sword", "Fire Opal", "Ashes",
             "Opal", "Yellow Morel", "Lotus Seed Pod", "Obsidian", "Onyx", "Ocean Bone Shard", "Bloodweed", "Ikurr'ilb Root",
-            "Destroying Angel Mushroom", "Ocean Bone Shell"
+            "Destroying Angel Mushroom", "Ocean Bone Shell", "Bones", "Fool's Gold", "Fiddlehead", "Fire Coral", "Vampiric Ashes"
         };
 
         public static readonly List<string> Switches = new(){
@@ -133,11 +129,47 @@ namespace LunacidAP.Data
             "Sewers Sea Door Key", "Accursed Door Key", "Castle Doors Key", "Library Exit Door Key", "Surface Door Key",
             "Light Accursed Door Key", "Queen's Throne Door Key", "Prison Main Door Key", "Secondary Lock Key",
             "Burning Hot Key", "Forbidden Door Key", "Sucsarian Key", "Dreamer Key", "Ballroom Side Rooms Keyring",
-            "Tower of Abyss Keyring"
+            "Tower of Abyss Keyring", "Ashen Doors Keyring"
         };
 
         public static readonly List<string> Traps = new(){
-            "Bleed Trap", "Poison Trap", "Curse Trap", "Slowness Trap", "Blindness Trap", "Mana Drain Trap", "XP Drain Trap",
+            "Bleed Trap", "Poison Trap", "Curse Trap", "Slowness Trap", "Blindness Trap", "Mana Drain Trap", "XP Drain Trap", 
+            "Rat Gang", "Date With Death Trap",
+        };
+        
+        public static Dictionary<string, string> CastToWeapon = new(){
+            {"ARROW_CAST", "ELFEN BOW"},
+            {"TWISTED_STAFF_CAST", "TWISTED STAFF"},
+            {"BOLT_CAST", "CROSSBOW"},
+            {"BOLT_CAST2", "DOUBLE CROSSBOW"},
+            {"HOOK_CAST", "FISHING SPEAR"},
+            {"MOONLIGHT_CAST", "MOONLIGHT"},
+            {"BULLET_CAST", "PRIVATEER MUSKET"},
+            {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
+            {"ICE_SPIKE_CAST", "ICE TEAR"},
+            {"LAVA_FLOOR_CAST", "LAVA CHASM"},
+            {"MOON_BEAM_CAST", "MOON BEAM"},
+            {"THORN_CAST", "EARTH THORN"},
+            {"BLOOD_STRIKE_CAST", "BLOOD STRIKE"},
+            {"BLUE_FLAME_CAST", "BLUE FLAME ARC"},
+            {"SKULL_CAST", "DARK SKULL"},
+            {"ROCK_CAST", "EARTH STRIKE"},
+            {"FLAME_WORM_CAST2", "FIRE WORM"},
+            {"FLAME_FLARE_CAST", "FLAME FLARE"},
+            {"FLAME_SPEAR_CAST", "FLAME SPEAR"},
+            {"ICE_SPEAR_CAST_PL", "ICE SPEAR"},
+            {"IGNIS_CAST", "IGNIS CALOR"},
+            {"LIGHTNING_CAST", "LIGHTNING"},
+            {"POI_CLOUD_CAST", "POISON MIST"},
+            {"SLIME_CAST", "SLIME ORB"},
+            {"TORNADO_CAST", "TORNADO"},
+            {"WIND_CUT_CAST", "WIND SLICER"},
+            {"LUCID_CAST", "LUCID BLADE"},
+            {"FANG_CAST", "SERPENT FANG"},
+            {"LIGHTBLADE_CAST", "SHINING BLADE"},
+            {"PUMP_CAST", "PUMPKIN POP"},
+            {"GameObject", "IGNIS CALOR"},
+
         };
 
         public static readonly Dictionary<string, int> MaterialNames = new(){
@@ -166,16 +198,6 @@ namespace LunacidAP.Data
             { "Broken Sword", 52 },
         };
 
-        public static readonly Dictionary<string, int> TrapToHarm = new(){
-            {"Bleed Trap", 0},
-            {"Poison Trap", 1},
-            {"Curse Trap", 2},
-            {"Slowness Trap", 4},
-            {"Blindness Trap", 5},
-            {"Mana Drain Trap", 6},
-            {"XP Drain Trap", 7}
-        };
-
         public static readonly Dictionary<string, int> ElementToID = new(){
             {"Normal", 0},
             {"Fire", 1},
@@ -189,19 +211,11 @@ namespace LunacidAP.Data
             {"Dark and Fire", 11}
         };
 
+        public static readonly Dictionary<int, string> IDToElement =
+            ElementToID.ToDictionary(x => x.Value, x => x.Key);
+
         public static readonly List<string> UniqueItems = new(){ // Items that are either unique, or are always unique on a given map.
             "COIN_PICKUP", "ENKEY_PICKUP"
-        };
-
-        public static Dictionary<string, string> ArrowToWeapon = new(){
-            {"ARROW_CAST", "ELFEN BOW"},
-            {"TWISTED_STAFF_CAST", "TWISTED STAFF"},
-            {"BOLT_CAST", "CROSSBOW"},
-            {"BOLT_CAST2", "DOUBLE CROSSBOW"},
-            {"HOOK_CAST", "FISHING SPEAR"},
-            {"MOONLIGHT_CAST", "MOONLIGHT"},
-            {"BULLET_CAST", "PRIVATEER MUSKET"},
-            {"JAILOR_CANDLE_CAST", "JAILORS CANDLE"},
         };
 
         public static Dictionary<string, string> ItemToPickup = new(){

@@ -1,0 +1,101 @@
+using System;
+using BepInEx.Logging;
+using HarmonyLib;
+using LunacidAP.Archipelago;
+using LunacidAP.Data;
+using UnityEngine;
+using static LunacidAP.Data.LunacidLocations;
+
+namespace LunacidAP.Patches
+{
+    public class ExpHandler
+    {
+        private static ManualLogSource _log;
+        private static POP_text_scr _popup;
+        public ExpHandler(ManualLogSource log)
+        {
+            _log = log;
+            Harmony.CreateAndPatchAll(typeof(ExpHandler));
+        }
+
+        [HarmonyPatch(typeof(CONTROL), "GiveXP")]
+        [HarmonyPrefix]
+        private static bool GiveXP_MultiplyIncomingXP(CONTROL __instance, int LEVELED_XP)
+        {
+            if (ArchipelagoClient.AP.SlotData.ForceNoEXP)
+            {
+                return false;
+            }
+            var hasBangle = ArchipelagoClient.AP.WasItemReceived("Lucky Bangle") ? 3 : 1;
+            var givenXP = LEVELED_XP;
+            var multiplier = Math.Min(12, hasBangle * SaveHandler.MainRandoSettings.ExpRate/100f);
+            givenXP = Mathf.RoundToInt(givenXP * multiplier);
+            if ((__instance.CURRENT_PL_DATA.PLAYER_LVL < 100 || SaveHandler.CurrentSaveData.StoredLevel < 100) && ArchipelagoClient.AP.SlotData.Levelsanity)
+            {
+                StoreXP(givenXP, __instance.ST, __instance.CURRENT_PL_DATA.PLAYER_L, __instance.GetComponent<SimpleMoon>().MOON_MULT);
+                SendLevelLocations();
+                return false;
+            }
+            if (__instance.ST)
+            {
+                givenXP = Mathf.RoundToInt((float)givenXP * 0.3f);
+            }
+            float num = (float)__instance.CURRENT_PL_DATA.PLAYER_LVL + (float)__instance.CURRENT_PL_DATA.XP / 100f;
+            float mOON_MULT = __instance.GetComponent<SimpleMoon>().MOON_MULT;
+            givenXP = Mathf.RoundToInt((float)givenXP * Mathf.Lerp(1f, 2f, mOON_MULT / 10f * (__instance.CURRENT_PL_DATA.PLAYER_L / 50f)));
+            givenXP = Math.Min(100, givenXP); // place a limiter on experience gain.
+            if (num > 50f)
+            {
+                __instance.CURRENT_PL_DATA.XP += Math.Min(100, Mathf.RoundToInt(35f * Mathf.Pow((float)givenXP / num, 1.25f) / Mathf.Pow(num, 0.1f)));
+            }
+            else
+            {
+                __instance.CURRENT_PL_DATA.XP += Math.Min(100, Mathf.RoundToInt(35f * Mathf.Pow((float)givenXP / num, 1.25f)));
+            }
+            return false;
+        }
+
+        private static void StoreXP(int LEVELED_XP, bool ST, float PLAYER_L, float MOON_MULT)
+        {
+            if (ST)
+            {
+                LEVELED_XP = Mathf.RoundToInt((float)LEVELED_XP * 0.3f);
+            }
+            float num = SaveHandler.CurrentSaveData.StoredLevel + (float)SaveHandler.CurrentSaveData.StoredExperience / 100f;
+            float mOON_MULT = MOON_MULT;
+            LEVELED_XP = Mathf.RoundToInt((float)LEVELED_XP * Mathf.Lerp(1f, 2f, mOON_MULT / 10f * (PLAYER_L / 50f)));
+            if (num > 50f)
+            {
+                SaveHandler.CurrentSaveData.StoredExperience += Math.Min(100, Mathf.RoundToInt(35f * Mathf.Pow((float)LEVELED_XP / num, 1.25f) / Mathf.Pow(num, 0.1f)));
+            }
+            else
+            {
+                SaveHandler.CurrentSaveData.StoredExperience += Math.Min(100, Mathf.RoundToInt(35f * Mathf.Pow((float)LEVELED_XP / num, 1.25f)));
+            }
+        }
+
+        private static void SendLevelLocations()
+        {
+            if (SaveHandler.CurrentSaveData.StoredLevel >= 100)
+            {
+                return;
+            }
+            _popup ??= GameObject.Find("CONTROL").GetComponent<CONTROL>().PAPPY;
+            int num = Mathf.FloorToInt(SaveHandler.CurrentSaveData.StoredExperience / 100f);
+            while (num >= 1)
+            {
+                SaveHandler.CurrentSaveData.StoredLevel += 1;
+                var location = new LocationData(800 + SaveHandler.CurrentSaveData.StoredLevel, $"Reach Level {SaveHandler.CurrentSaveData.StoredLevel}");
+                var item = SaveHandler.CurrentSaveData.ScoutedLocations[location.APLocationID];
+                LocationHandler.SendLocationCoveringPatchouliCase(location);
+                if (item.SlotName != SaveHandler.CurrentSaveData.SlotName)
+                {
+                    LocationHandler.SendLevelMessageOnLevelUp(item);
+                }
+                num -= 1;
+                SaveHandler.CurrentSaveData.StoredExperience -= 100;
+            }
+
+        }
+    }
+}

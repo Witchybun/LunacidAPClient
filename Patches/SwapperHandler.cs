@@ -1,47 +1,64 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using LunacidAP.Data;
 using UnityEngine;
 using static LunacidAP.Data.LunacidLocations;
 
-namespace LunacidAP
+namespace LunacidAP.Patches
 {
     public class SwapperHandler
     {
         private static ManualLogSource _log;
+        private static readonly List<string> ModelNames = new()
+        {
+            "MDL", "Health_Vial_Model", "Ring", "Bag", "Club_Torch", "Sword_Heritage", "RUSTED SWORD", "VHS", "mdl", "Sword_Brittle1", "Candel",
+            "Bow_Elf", "KEY_MDL", "Sickle", "Axe_Anu", "Staff_Osiris"
+        };
 
         public SwapperHandler(ManualLogSource log)
         {
             _log = log;
         }
 
-        public static void ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
+        public static ArchipelagoItem ReplaceModelWithAppropriateItem(Item_Pickup_scr pickupObject, LocationData locationData)
         {
-            if (LunacidLocations.LocationsThatImmediatelyReceive.Contains(locationData.APLocationName) || locationData.APLocationName.Contains("Daedalus Knowledge"))
+            var archipelagoItem = new ArchipelagoItem();
+            if (locationData.APLocationName.Contains("FbA: Daedalus Knowledge"))
             {
-                return; // No need to swap models for locations you get dropped on top of you.
+                var actualName = LocationHandler.TheDaedalusConundrum(pickupObject);
+                var apLocation = APLocationData["ARCHIVES"].First(x => x.APLocationName == actualName);
+                archipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[apLocation.APLocationID];
+                return archipelagoItem;
             }
-            var archipelagoItem = ConnectionData.ScoutedLocations[locationData.APLocationID];
+            else
+            {
+                archipelagoItem = SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID];
+            }
             var locationItem = archipelagoItem.Name;
-            if (ConnectionData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
+            var usedClassification = archipelagoItem.Classification.HasFlag(ItemFlags.Trap) ? ItemFlags.Advancement : archipelagoItem.Classification;
+            ChangeGlowToFlagColor(pickupObject.gameObject, usedClassification);
+            if (SaveHandler.CurrentSaveData.ScoutedLocations[locationData.APLocationID].Game != "Lunacid")
             {
                 try
                 {
                     var substitutedItem = ArchipelagoGames.KeywordToItem(archipelagoItem);
                     if (substitutedItem == "NULL")
                     {
-                        HideLastChild(pickupObject);
-                        return;
+                        HideItemModel(pickupObject);
+                        return archipelagoItem;
                     }
                     locationItem = substitutedItem;
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace non-Lunacid Item at {locationData.APLocationName}");
-                    return;
+                    return archipelagoItem;
                 }
             }
-            if (locationItem.Contains("Silver (10)"))
+            if (locationItem.Contains("Silver"))
             {
                 try
                 {
@@ -51,7 +68,7 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Money Item at {locationData.APLocationName}");
                 }
-                return;
+                return archipelagoItem;
             }
             if (LunacidItems.Materials.Contains(locationItem))
             {
@@ -63,42 +80,49 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Material Item at {locationData.APLocationName}");
                 }
-                return;
+                return archipelagoItem;
             }
             if (LunacidItems.Items.Contains(locationItem))
             {
+                if (LunacidItems.Vouchers.Contains(locationItem) || locationItem == "Angel Feather")
+                {
+                    locationItem = "Cloth Bandage";
+                }
                 try
                 {
-                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Item at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Weapons.Contains(locationItem))
             {
                 try
                 {
                     locationItem = locationItem.ToUpper();
-                    ReplaceItemGeneric(pickupObject, locationItem, "WEPS/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "WEPS/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Weapon at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Spells.Contains(locationItem))
             {
                 try
                 {
                     locationItem = locationItem.ToUpper();
-                    ReplaceItemGeneric(pickupObject, locationItem, "MAGIC/");
+                    ReplaceItemGeneric(pickupObject, locationItem, "MAGIC/", archipelagoItem.Classification);
                 }
                 catch
                 {
                     _log.LogError($"Failed to replace Spell at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
             if (LunacidItems.Keys.Contains(locationItem) || LunacidItems.Switches.Contains(locationItem))
             {
@@ -110,8 +134,9 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Switch or Key at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
-            if (archipelagoItem.Classification.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Trap))
+            if (archipelagoItem.Classification.HasFlag(ItemFlags.Trap))
             {
                 try
                 {
@@ -122,11 +147,25 @@ namespace LunacidAP
                 {
                     _log.LogError($"Failed to replace Trap at {locationData.APLocationName}");
                 }
+                return archipelagoItem;
             }
-
+            if (locationItem == "Deep Knowledge")
+            {
+                locationItem = "Black Book";
+                try
+                {
+                    ReplaceItemGeneric(pickupObject, locationItem, "ITEMS/", archipelagoItem.Classification);
+                }
+                catch
+                {
+                    _log.LogError($"Failed to replace Item at {locationData.APLocationName}");
+                }
+                return archipelagoItem;
+            }
+            return archipelagoItem;
         }
 
-        private static void ReplaceItemGeneric(Item_Pickup_scr pickupObject, string locationItem, string resourceInfo)
+        private static void ReplaceItemGeneric(Item_Pickup_scr pickupObject, string locationItem, string resourceInfo, ItemFlags classification)
         {
             GameObject resourceReference;
             Transform modelReference;
@@ -151,7 +190,7 @@ namespace LunacidAP
                 }
                 else
                 {
-                    HideLastChild(pickupObject);
+                    HideItemModel(pickupObject);
                     GameObject.Destroy(resourceReference);
                     return;
                 }
@@ -180,105 +219,63 @@ namespace LunacidAP
             modelReference = GameObject.Instantiate(modelReference);
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             modelReference.gameObject.SetActive(true);
             GameObject.Destroy(resourceReference);
         }
 
+        private static void ChangeGlowToFlagColor(GameObject pickupObject, ItemFlags classification)
+        {
+            var itemEff = pickupObject.transform.Find("ITEM_EFF");
+            if (itemEff is null)
+            {
+                _log.LogWarning($"There's no ITEM_EFF for {pickupObject.name}");
+                return;
+            }
+            var glow = itemEff.transform.Find("ITEM_FLARE");
+            if (glow is null)
+            {
+                _log.LogWarning($"There's no ITEM_FLARE for {pickupObject.name}");
+                var ashes = Resources.Load("ITEMS/ASHES") as GameObject;
+                var ashesGlow = ashes.transform.GetChild(0).GetChild(1);
+                glow = GameObject.Instantiate(ashesGlow);
+                glow.parent = itemEff.transform.parent;
+                glow.position = itemEff.transform.position;
+            }
+            var hexColor = Colors.GetClassificationHex(classification);
+            var color = Colors.HexToColorConverter(hexColor);
+            var material = glow.GetComponent<ParticleSystemRenderer>().material;
+            material.color = color;
+        }
+
         private static bool CanHandleSpecialCase(Item_Pickup_scr pickupObject, string locationItem, GameObject foundObject)
         {
-            switch (locationItem)
+            if (locationItem == "MARAUDER BLACK FLAIL")
             {
-                case "BROKEN HILT":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "ELFEN SWORD":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "DARK RAPIER":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "RAPIER":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "SHADOW BLADE":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "REPLICA SWORD":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "TORCH":
-                    {
-                        GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
-                        GameObject.Destroy(foundObject.GetComponent<AudioSource>());
-                        foundObject.transform.SetParent(pickupObject.transform);
-                        foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        foundObject.SetActive(true);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
-                case "MARAUDER BLACK FLAIL":
-                    {
-                        var realFoundObject = GameObject.Instantiate(foundObject.transform.GetChild(2));
-                        realFoundObject.transform.SetParent(pickupObject.transform);
-                        realFoundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
-                        HideLastChild(pickupObject);
-                        realFoundObject.gameObject.SetActive(true);
-                        GameObject.Destroy(foundObject);
-                        HideTheFuckingHandBro(foundObject);
-                        return true;
-                    }
+                var realFoundObject = GameObject.Instantiate(foundObject.transform.GetChild(2));
+                realFoundObject.transform.SetParent(pickupObject.transform);
+                realFoundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                HideItemModel(pickupObject);
+                realFoundObject.gameObject.SetActive(true);
+                GameObject.Destroy(foundObject);
+                HideTheFuckingHandBro(foundObject);
+                return true;
             }
-            return false;
+            try
+            {
+                GameObject.Destroy(foundObject.GetComponent<Weapon_scr>());
+                GameObject.Destroy(foundObject.GetComponent<AudioSource>());
+                foundObject.transform.SetParent(pickupObject.transform);
+                foundObject.transform.SetPositionAndRotation(pickupObject.transform.position, pickupObject.transform.rotation);
+                HideItemModel(pickupObject);
+                foundObject.SetActive(true);
+                HideTheFuckingHandBro(foundObject);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static void HideTheFuckingHandBro(GameObject weapon)
@@ -302,7 +299,7 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
@@ -313,7 +310,7 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
@@ -324,14 +321,14 @@ namespace LunacidAP
             modelReference.transform.position = pickupObject.transform.position;
             modelReference.transform.SetParent(pickupObject.transform);
             modelReference.gameObject.SetActive(true);
-            HideLastChild(pickupObject);
+            HideItemModel(pickupObject);
             GameObject.Destroy(resourceReference);
         }
 
         private static void ReplaceModelWithTrickyThing(Item_Pickup_scr pickupObject)
         {
-            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare" };
-            var random = ArchipelagoClient.AP.RandomStatic.Next(0, 3);
+            var trickyThings = new List<string>() { "Lucid Blade", "Enchanted Key", "Water Talisman", "Flame Flare", "Shining Blade", "Bomb", "Moonlight" };
+            var random = new System.Random(SaveHandler.CurrentSaveData.Seed + DateTime.Today.Day + pickupObject.gameObject.GetInstanceID()).Next(0, 6);
             var chosenTrick = trickyThings[random];
             var type = "";
             switch (chosenTrick)
@@ -354,18 +351,54 @@ namespace LunacidAP
                 case "Flame Flare":
                     {
                         type = "MAGIC/";
-                        return;
+                        break;
+                    }
+                case "Shining Blade":
+                    {
+                        type = "WEPS/";
+                        break;
+                    }
+                case "Bomb":
+                    {
+                        type = "ITEMS/";
+                        break;
+                    }
+                case "Moonlight":
+                    {
+                        type = "WEPS/";
+                        break;
                     }
             }
-            ReplaceItemGeneric(pickupObject, chosenTrick, type);
+            ReplaceItemGeneric(pickupObject, chosenTrick, type, ItemFlags.Advancement);
         }
 
-        private static void HideLastChild(Item_Pickup_scr pickupObject)
+        private static Transform FindModelCandidate(Item_Pickup_scr pickupObject)
         {
-            if (pickupObject.transform.childCount > 1)
+            var childNames = "";
+            foreach (Transform child in pickupObject.transform)
             {
-                pickupObject.transform.GetChild(pickupObject.transform.childCount - 2).gameObject.SetActive(false);
+                var name = child.gameObject.name;
+                childNames += name;
+                foreach (var matchString in ModelNames)
+                {
+                    if (matchString.Contains(name))
+                    {
+                        return child;
+                    }
+                }
             }
+            _log.LogWarning($"The object {pickupObject.name} didn't have a model to hide.  Children: {childNames}");
+            return pickupObject.transform;
+        }
+
+        private static void HideItemModel(Item_Pickup_scr pickupObject)
+        {
+            var model = FindModelCandidate(pickupObject);
+            if (model.name == pickupObject.name)
+            {
+                return;
+            }
+            model.gameObject.SetActive(false);
         }
     }
 }
