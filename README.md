@@ -8,6 +8,23 @@ You will need:
 
 ## Installation
 
+### Automatic
+
+Use the following install scripts to automatically install the Mod
+
+#### Windows
+
+```ps1
+irm https://raw.githubusercontent.com/Witchybun/LunacidAPClient/main/lunacid-ap-install.ps1 | iex
+```
+
+#### Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Witchybun/LunacidAPClient/main/lunacid-ap-install.sh | sh
+```
+
+### Manual
 - Download and unpackage the downloaded mod into your main Lunacid install folder.  Should include LUNACID.exe.
 - **LINUX ONLY**: Right click Lunacid in Steam, go to Properties, and in Launch Options put `WINEDLLOVERRIDES="winhttp.dll=n,b" %command%`.
 - Launch the game at least once, close.
