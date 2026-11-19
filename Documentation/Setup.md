@@ -26,7 +26,7 @@ Hosting a game locally is simply taking the Lunacid.yaml file, editing it to sui
 ## Troubleshooting
 
 * Q: My server's port changed and I can't connect.  How do I fix this?*
-**A: Open the .json file for your related save, and change the port in the save directly.**
+**A: Go into the options in-game and change it, then hit "apply resolution" to save the change.**
 
 *Q: I was sent a key to open a door, but it won't open.*
 **A: This is now bug report worthy, but short-term, walk to where the item exists, then leave the same area, or reload the area.  If its the talismans, you may have to reopen the chests.**
